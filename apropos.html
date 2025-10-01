@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>À propos - GROUPE EXPRESS</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(120deg, #fff7f0, #ffe3d3);
+            color: #333;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #ff4e00;
+            margin-bottom: 20px;
+        }
+
+        .highlight {
+            color: #ff4e00;
+            font-weight: bold;
+        }
+
+        p {
+            line-height: 1.8;
+            margin-bottom: 18px;
+            font-size: 16px;
+        }
+
+        .image-section {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .image-section img {
+            width: 100%;
+            max-width: 600px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 14px;
+            color: #888;
+        }
+
+        @media screen and (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            p {
+                font-size: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>À propos de <span class="highlight">GROUPE EXPRESS</span></h1>
+
+        <p>
+            <strong>GROUPE EXPRESS</strong> est une entreprise dynamique spécialisée dans la <span class="highlight">distribution de repas universitaires</span>. Nous avons pour mission de fournir aux étudiants et au personnel académique des repas de qualité, savoureux et équilibrés, à des prix très accessibles.
+        </p>
+
+        <p>
+            Fondée avec la vision de lutter contre la malnutrition et améliorer les conditions de vie des étudiants dans les universités, notre entreprise propose une large gamme de plats traditionnels et modernes adaptés aux goûts et aux besoins des jeunes.
+        </p>
+
+        <div class="image-section">
+            <img src="image/atieke poulet.jpg">
+        </div>
+
+        <p>
+            Présente dans plusieurs établissements universitaires, <span class="highlight">GROUPE EXPRESS</span> se distingue par :
+        </p>
+
+        <ul style="margin-left: 20px; margin-bottom: 20px;">
+            <li>🍲 Une cuisine propre, locale et variée</li>
+            <li>💰 Des prix abordables pour tous les budgets étudiants</li>
+            <li>👨‍🍳 Un personnel formé et accueillant</li>
+            <li>🚚 Un service de livraison rapide sur les campus</li>
+        </ul>
+
+        <p>
+            Notre engagement est de participer activement à la réussite académique à travers une bonne alimentation. Avec <span class="highlight">GROUPE EXPRESS</span>, bien manger n'est plus un luxe mais un droit pour tous !
+        </p>
+
+        <footer>
+            © 2025 GROUPE EXPRESS - Tous droits réservés.
+        </footer>
+    </div>
+</body>
+</html>
+<style>
+  .btn-retour-bas {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(to right, #ff4e00, #ff9a56);
+    color: white;
+    padding: 14px 28px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 30px;
+    text-decoration: none;
+    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+    z-index: 1000;
+  }
+
+  .btn-retour-bas:hover {
+    background: linear-gradient(to right, #e64600, #ff8033);
+    transform: translateX(-50%) scale(1.05);
+    box-shadow: 0 7px 16px rgba(0, 0, 0, 0.4);
+  }
+
+  @media screen and (max-width: 480px) {
+    .btn-retour-bas {
+      font-size: 14px;
+      padding: 12px 24px;
+    }
+  }
+</style>
+<!-- Bouton de retour à la page principale -->
+    <div style="position: fixed; top: 20px; right: 20px; z-index: 1000;">
+        <button onclick="goToMain()" style="
+            background: #0095f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0, 149, 246, 0.3);
+        " onmouseover="this.style.background='#1877f2'" onmouseout="this.style.background='#0095f6'">
+            ← Retour
+        </button>
+    </div>
+</body>
+</html>

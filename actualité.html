@@ -1,0 +1,1936 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Express Exchange</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #000000;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            color: #ffffff;
+        }
+
+        #particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 8s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.3;
+            }
+            90% {
+                opacity: 0.3;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        #registrationOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .registration-modal {
+            background: #1a1a1a;
+            border: 1px solid #333333;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .registration-modal h2 {
+            color: #ffffff;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #ffffff;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #333333;
+            border-radius: 8px;
+            font-size: 16px;
+            background: #262626;
+            color: #ffffff;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #0095f6;
+            background: #1a1a1a;
+        }
+
+        .form-group input::placeholder {
+            color: #8e8e8e;
+        }
+
+        .submit-btn {
+            background: #0095f6;
+            color: white;
+            padding: 14px 32px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+
+        .submit-btn:hover {
+            background: #1877f2;
+        }
+
+        .submit-btn:disabled {
+            background: #1a73e8;
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        #mainApp {
+            display: none;
+            position: relative;
+            z-index: 10;
+            padding: 0;
+            max-width: 614px;
+            margin: 0 auto;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: #000000;
+            border-bottom: 1px solid #262626;
+            padding: 16px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .welcome-text {
+            font-size: 24px;
+            font-weight: 700;
+            color: #ffffff;
+            background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .status-indicator {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            border: 1px solid;
+        }
+
+        .status-connected {
+            background: rgba(0, 149, 246, 0.1);
+            color: #0095f6;
+            border-color: #0095f6;
+        }
+
+        .status-disconnected {
+            background: rgba(237, 73, 86, 0.1);
+            color: #ed4956;
+            border-color: #ed4956;
+        }
+
+        .publisher {
+            background: #000000;
+            border-bottom: 1px solid #262626;
+            padding: 16px 20px;
+        }
+
+        .publisher textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 16px;
+            border: 1px solid #262626;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+            background: #000000;
+            color: #ffffff;
+        }
+
+        .publisher textarea:focus {
+            outline: none;
+            border-color: #0095f6;
+        }
+
+        .publisher textarea::placeholder {
+            color: #8e8e8e;
+        }
+
+        .file-input-container {
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .file-input-label {
+            background: transparent;
+            color: #0095f6;
+            padding: 8px 16px;
+            border: 1px solid #262626;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            display: inline-block;
+            transition: all 0.2s ease;
+        }
+
+        .file-input-label:hover {
+            background: rgba(0, 149, 246, 0.1);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .media-preview {
+            margin: 15px 0;
+        }
+
+        .publish-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .controls-left {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .publish-btn {
+            background: #0095f6;
+            color: white;
+            padding: 8px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .publish-btn:hover:not(:disabled) {
+            background: #1877f2;
+        }
+
+        .publish-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .my-posts-btn {
+            background: transparent;
+            color: #ffffff;
+            padding: 8px 16px;
+            border: 1px solid #262626;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .my-posts-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #ffffff;
+        }
+
+        .chat-btn {
+            background: transparent;
+            color: #0095f6;
+            padding: 8px 16px;
+            border: 1px solid #0095f6;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .chat-btn:hover {
+            background: rgba(0, 149, 246, 0.1);
+            border-color: #1877f2;
+            color: #1877f2;
+        }
+
+        .feed {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .publication {
+            background: #000000;
+            border-bottom: 1px solid #262626;
+            padding: 16px 0;
+            transition: background-color 0.2s ease;
+        }
+
+        .publication:hover {
+            background: rgba(255, 255, 255, 0.01);
+        }
+
+        .pub-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            padding: 0 16px;
+        }
+
+        .pub-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            margin-right: 12px;
+        }
+
+        .pub-info {
+            flex: 1;
+        }
+
+        .pub-username {
+            font-weight: 600;
+            color: #ffffff;
+            font-size: 14px;
+        }
+
+        .pub-time {
+            color: #8e8e8e;
+            font-size: 12px;
+            margin-top: 2px;
+        }
+
+        .pub-text {
+            margin-bottom: 12px;
+            color: #ffffff;
+            line-height: 1.5;
+            font-size: 14px;
+            padding: 0 16px;
+        }
+
+        .image-link {
+            display: block;
+            margin-bottom: 12px;
+            position: relative;
+        }
+
+        .image-link img {
+            width: 100%;
+            max-height: 600px;
+            object-fit: cover;
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+        }
+
+        .image-link img:hover {
+            opacity: 0.9;
+        }
+
+        .pub-actions {
+            display: flex;
+            gap: 16px;
+            padding: 8px 16px;
+            align-items: center;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #ffffff;
+            padding: 8px;
+        }
+
+        .action-btn:hover:not(:disabled) {
+            color: #8e8e8e;
+        }
+
+        .action-btn.liked {
+            color: #ed4956;
+        }
+
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .comments-section {
+            margin-top: 8px;
+            padding: 0 16px;
+            background: rgba(255, 255, 255, 0.02);
+            border-top: 1px solid #262626;
+            padding-top: 12px;
+            padding-bottom: 12px;
+        }
+
+        .comment {
+            background: transparent;
+            padding: 8px 0;
+            margin-bottom: 8px;
+        }
+
+        .comment-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .comment-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 10px;
+            margin-right: 8px;
+        }
+
+        .comment-username {
+            font-weight: 600;
+            color: #ffffff;
+            font-size: 13px;
+        }
+
+        .comment-time {
+            color: #8e8e8e;
+            font-size: 11px;
+            margin-left: auto;
+        }
+
+        .comment-text {
+            color: #ffffff;
+            line-height: 1.4;
+            font-size: 13px;
+            margin-left: 32px;
+        }
+
+        .comment-form {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            padding-top: 8px;
+            border-top: 1px solid #262626;
+        }
+
+        .comment-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #262626;
+            border-radius: 20px;
+            font-size: 13px;
+            background: #000000;
+            color: #ffffff;
+            transition: border-color 0.3s ease;
+        }
+
+        .comment-input:focus {
+            outline: none;
+            border-color: #0095f6;
+        }
+
+        .comment-input::placeholder {
+            color: #8e8e8e;
+        }
+
+        .comment-btn {
+            background: transparent;
+            color: #0095f6;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .comment-btn:hover {
+            background: rgba(0, 149, 246, 0.1);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+        }
+
+        .modal-content {
+            background: #1a1a1a;
+            border: 1px solid #262626;
+            padding: 24px;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            color: #ffffff;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #8e8e8e;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .close-modal:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .loading-spinner {
+            border: 2px solid #262626;
+            border-top: 2px solid #0095f6;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .cloudinary-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(0, 149, 246, 0.9);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            z-index: 5;
+        }
+
+        /* Styles pour mes publications */
+        .my-post-item {
+            border-bottom: 1px solid #262626;
+            padding: 12px 0;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .my-post-item:last-child {
+            border-bottom: none;
+        }
+
+        .my-post-thumbnail {
+            flex: 0 0 60px;
+        }
+
+        .my-post-thumbnail img {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .my-post-content {
+            flex: 1;
+        }
+
+        .my-post-text {
+            font-weight: 500;
+            color: #ffffff;
+            font-size: 14px;
+            margin-bottom: 4px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .my-post-time {
+            font-size: 12px;
+            color: #8e8e8e;
+        }
+
+        .my-post-delete {
+            background: #ed4956;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .my-post-delete:hover {
+            background: #c13584;
+        }
+
+        .my-post-delete:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #8e8e8e;
+        }
+
+        .empty-state h3 {
+            color: #ffffff;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            #mainApp {
+                padding: 0;
+            }
+
+            .header {
+                padding: 12px 16px;
+            }
+
+            .welcome-text {
+                font-size: 20px;
+            }
+
+            .publisher {
+                padding: 16px;
+            }
+
+            .publication {
+                margin-bottom: 0;
+            }
+
+            .pub-avatar {
+                width: 28px;
+                height: 28px;
+                font-size: 12px;
+            }
+
+            .comment-avatar {
+                width: 20px;
+                height: 20px;
+                font-size: 9px;
+            }
+
+            .modal-content {
+                padding: 20px;
+                margin: 20px;
+            }
+
+            .my-post-thumbnail {
+                flex: 0 0 50px;
+            }
+
+            .my-post-thumbnail img {
+                width: 50px;
+                height: 50px;
+            }
+
+            .publish-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .controls-left {
+                justify-content: center;
+            }
+
+            .publish-btn {
+                width: 100%;
+            }
+        }
+
+        /* Scrollbar dark */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #000000;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #262626;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #404040;
+        }
+
+        /* Animations supplémentaires */
+        .publication {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* États de focus améliorés */
+        .form-group input:focus,
+        .publisher textarea:focus,
+        .comment-input:focus {
+            box-shadow: 0 0 0 2px rgba(0, 149, 246, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div id="particles"></div>
+
+    <div id="registrationOverlay">
+        <div class="registration-modal">
+            <h2>Rejoignez Express Exchange</h2>
+            <form id="registrationForm">
+                <div class="form-group">
+                    <label for="nom">Nom</label>
+                    <input type="text" id="nom" required>
+                </div>
+                <div class="form-group">
+                    <label for="prenom">Prénom</label>
+                    <input type="text" id="prenom" required>
+                </div>
+                <div class="form-group">
+                    <label for="contact">Contact</label>
+                    <input type="text" id="contact" required>
+                </div>
+                <button type="submit" class="submit-btn">S'inscrire</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="mainApp">
+        <div class="header">
+            <div class="welcome-text" id="welcomeMessage">Express Exchange</div>
+            <div class="status-indicator" id="statusIndicator">🔄 Connexion...</div>
+        </div>
+
+        <div class="publisher">
+            <textarea id="postText" placeholder="Partagez quelque chose..."></textarea>
+            <div class="file-input-container">
+                <label for="fileInput" class="file-input-label">📷 Ajouter une image</label>
+                <input type="file" id="fileInput" class="file-input" accept="image/*">
+                <span id="fileName"></span>
+            </div>
+            <div id="mediaPreview" class="media-preview"></div>
+            <div class="publish-controls">
+                <div class="controls-left">
+                    <button id="showMyPostsBtn" class="my-posts-btn">Mes publications</button>
+                    <a href="message.html" class="chat-btn">💬 Chater</a>
+                </div>
+                <button id="publishBtn" class="publish-btn">Publier</button>
+            </div>
+        </div>
+
+        <div id="feed" class="feed"></div>
+    </div>
+
+    <div id="modalImageView" class="modal">
+        <img id="modalImageBig" alt="Image agrandie">
+    </div>
+
+    <div id="myPostsModal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" id="closeMyPostsModal">&times;</button>
+            <h3 style="margin-bottom: 20px;">Mes Publications</h3>
+            <div id="myPostsList"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        console.log('🔰 Début du script principal Express Exchange');
+
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+        import { 
+            getFirestore, 
+            collection, 
+            doc, 
+            setDoc, 
+            addDoc, 
+            getDocs, 
+            query, 
+            orderBy, 
+            limit, 
+            onSnapshot, 
+            deleteDoc,
+            serverTimestamp,
+            where
+        } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+
+        // Configuration Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCPGgtXoDUycykLaTSee0S0yY0tkeJpqKI",
+            authDomain: "data-com-a94a8.firebaseapp.com",
+            databaseURL: "https://data-com-a94a8-default-rtdb.firebaseio.com",
+            projectId: "data-com-a94a8",
+            storageBucket: "data-com-a94a8.appspot.com",
+            messagingSenderId: "276904640935",
+            appId: "1:276904640935:web:9cd805aeba6c34c767f682",
+            measurementId: "G-FYQCWY5G4S"
+        };
+
+        // Configuration Cloudinary
+        const cloudinaryConfig = {
+            cloudName: 'djxcqczh1',
+            uploadPreset: 'database'
+        };
+
+        // Initialisation Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let userData = null;
+        let posts = [];
+        let unsubscribePosts = null;
+        let isOnline = navigator.onLine;
+        let isAppInitialized = false;
+
+        // Classe upload Cloudinary
+        class CloudinaryUploader {
+            constructor(config) {
+                this.cloudName = config.cloudName;
+                this.uploadPreset = config.uploadPreset;
+                this.apiUrl = `https://api.cloudinary.com/v1_1/${this.cloudName}/image/upload`;
+            }
+
+            async uploadImage(file, options = {}) {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('upload_preset', this.uploadPreset);
+                formData.append('quality', 'auto');
+                formData.append('fetch_format', 'auto');
+                if (options.maxWidth) {
+                    formData.append('width', options.maxWidth);
+                    formData.append('crop', 'scale');
+                }
+                try {
+                    const response = await fetch(this.apiUrl, { method: 'POST', body: formData });
+                    if (!response.ok) throw new Error(`Erreur upload: ${response.statusText}`);
+                    const result = await response.json();
+                    return {
+                        url: result.secure_url,
+                        publicId: result.public_id,
+                        width: result.width,
+                        height: result.height,
+                        format: result.format,
+                        bytes: result.bytes
+                    };
+                } catch (error) {
+                    console.error('Erreur upload Cloudinary:', error);
+                    throw error;
+                }
+            }
+
+            getOptimizedUrl(publicId, options = {}) {
+                const baseUrl = `https://res.cloudinary.com/${this.cloudName}/image/upload/`;
+                let transformations = [];
+                if (options.width) transformations.push(`w_${options.width}`);
+                if (options.height) transformations.push(`h_${options.height}`);
+                if (options.crop) transformations.push(`c_${options.crop}`);
+                if (options.quality) transformations.push(`q_${options.quality}`);
+                transformations.push('f_auto', 'q_auto');
+                const transformString = transformations.length > 0 ? transformations.join(',') + '/' : '';
+                return `${baseUrl}${transformString}${publicId}`;
+            }
+        }
+
+        const uploader = new CloudinaryUploader(cloudinaryConfig);
+
+        function validateUserData(userData) {
+            console.log('🔍 Validation userData:', userData);
+            if (!userData) {
+                console.error('❌ userData est null ou undefined');
+                return false;
+            }
+            const requiredFields = ['id', 'fullName', 'avatar'];
+            for (const field of requiredFields) {
+                if (!userData[field] || userData[field].toString().trim() === '') {
+                    console.error(`❌ Champ manquant ou vide: ${field}`, userData[field]);
+                    return false;
+                }
+            }
+            console.log('✅ userData valide');
+            return true;
+        }
+
+        function getUserData() {
+            try {
+                const sessionData = sessionStorage.getItem('expressExchangeUser');
+                const localData = localStorage.getItem('expressExchangeUser');
+                const dataToUse = sessionData || localData;
+                if (!dataToUse) {
+                    console.warn('⚠️ Aucune donnée utilisateur trouvée');
+                    return null;
+                }
+                const parsedData = JSON.parse(dataToUse);
+                if (!validateUserData(parsedData)) {
+                    console.error('❌ Données utilisateur invalides, suppression...');
+                    sessionStorage.removeItem('expressExchangeUser');
+                    localStorage.removeItem('expressExchangeUser');
+                    return null;
+                }
+                return parsedData;
+            } catch (error) {
+                console.error('❌ Erreur parsing données utilisateur:', error);
+                sessionStorage.removeItem('expressExchangeUser');
+                localStorage.removeItem('expressExchangeUser');
+                return null;
+            }
+        }
+
+        function updateConnectionStatus() {
+            const statusIndicator = document.getElementById('statusIndicator');
+            if (statusIndicator) {
+                statusIndicator.textContent = isOnline ? '🟢 Connecté' : '🔴 Hors ligne';
+                statusIndicator.className = isOnline ? 'status-indicator status-connected' : 'status-indicator status-disconnected';
+            }
+        }
+
+        function createParticles() {
+            const particles = document.getElementById('particles');
+            if (!particles) return;
+            const isMobile = window.innerWidth < 768;
+            const particleCount = isMobile ? 5 : 15;
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                particle.style.animationDuration = (Math.random() * 4 + 4) + 's';
+                particles.appendChild(particle);
+            }
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        const handleResize = debounce(function() {
+            const particles = document.getElementById('particles');
+            if (particles) {
+                particles.innerHTML = '';
+                createParticles();
+            }
+        }, 300);
+
+        window.addEventListener('resize', handleResize);
+
+        function hideRegistrationForm() {
+            const overlay = document.getElementById('registrationOverlay');
+            if (overlay) {
+                overlay.style.display = 'none';
+                console.log('🚫 Formulaire d\'inscription masqué');
+            }
+        }
+
+        function showRegistrationForm() {
+            console.log('🔰 Affichage du formulaire d\'inscription');
+            const overlay = document.getElementById('registrationOverlay');
+            const mainApp = document.getElementById('mainApp');
+            if (overlay) overlay.style.display = 'flex';
+            if (mainApp) mainApp.style.display = 'none';
+            isAppInitialized = false;
+            userData = null;
+        }
+
+        function checkUserRegistration() {
+            console.log('🔍 Vérification de l\'inscription utilisateur...');
+            userData = getUserData();
+            if (userData) {
+                console.log('✅ Utilisateur trouvé:', userData.fullName);
+                hideRegistrationForm();
+                showMainApp();
+            } else {
+                console.log('👤 Aucun utilisateur valide trouvé, affichage du formulaire');
+                showRegistrationForm();
+            }
+        }
+
+        function showMainApp() {
+            if (isAppInitialized) {
+                console.log('⚠️ App déjà initialisée, ignoré');
+                return;
+            }
+            console.log('🎯 Affichage de l\'application principale...');
+            if (!validateUserData(userData)) {
+                console.error('❌ userData invalide lors de showMainApp, retour au formulaire');
+                showRegistrationForm();
+                return;
+            }
+            const mainApp = document.getElementById('mainApp');
+            if (mainApp) {
+                mainApp.style.display = 'block';
+                console.log('✅ App principale affichée');
+            } else {
+                console.error('❌ Élément mainApp introuvable');
+                return;
+            }
+            const welcomeMessage = document.getElementById('welcomeMessage');
+            if (welcomeMessage) {
+                welcomeMessage.textContent = `Bienvenue ${userData.fullName} 👋`;
+                console.log('👋 Message de bienvenue mis à jour');
+            }
+            updateConnectionStatus();
+            loadPosts();
+            isAppInitialized = true;
+            console.log('🎉 Application initialisée avec succès pour:', userData.fullName);
+        }
+
+        // Déconnexion
+        window.logout = function() {
+            console.log('🚪 Déconnexion...');
+            sessionStorage.removeItem('expressExchangeUser');
+            localStorage.removeItem('expressExchangeUser');
+            userData = null;
+            isAppInitialized = false;
+            if (unsubscribePosts) {
+                unsubscribePosts();
+            }
+            location.reload();
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Initialisation de l\'application...');
+            createParticles();
+            updateConnectionStatus();
+            setTimeout(() => {
+                checkUserRegistration();
+            }, 100);
+        });
+
+        document.getElementById('registrationForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            console.log('📋 Soumission du formulaire d\'inscription...');
+            const submitBtn = e.target.querySelector('.submit-btn');
+            const originalText = submitBtn.textContent;
+            const nom = document.getElementById('nom').value.trim();
+            const prenom = document.getElementById('prenom').value.trim();
+            const contact = document.getElementById('contact').value.trim();
+            if (!nom || !prenom || !contact) {
+                alert('Veuillez remplir tous les champs');
+                return;
+            }
+            if (nom.length < 2 || prenom.length < 2) {
+                alert('Le nom et prénom doivent contenir au moins 2 caractères');
+                return;
+            }
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<div class="loading-spinner"></div>Inscription...';
+            try {
+                const timestamp = Date.now();
+                const randomSuffix = Math.random().toString(36).substr(2, 9);
+                const userId = `user_${timestamp}_${randomSuffix}`;
+                userData = {
+                    id: userId,
+                    nom: nom,
+                    prenom: prenom,
+                    contact: contact,
+                    fullName: `${prenom} ${nom}`,
+                    avatar: `${prenom[0].toUpperCase()}${nom[0].toUpperCase()}`,
+                    registeredAt: new Date().toISOString(),
+                    username: `${prenom.toLowerCase()}.${nom.toLowerCase()}`,
+                    email: `${contact}@placeholder.com`
+                };
+                console.log('👤 Création utilisateur:', userData);
+                if (!validateUserData(userData)) {
+                    throw new Error('Données utilisateur invalides après création');
+                }
+                try {
+                    const userDataString = JSON.stringify(userData);
+                    sessionStorage.setItem('expressExchangeUser', userDataString);
+                    localStorage.setItem('expressExchangeUser', userDataString);
+                    console.log('💾 Données sauvegardées localement');
+                } catch (storageError) {
+                    console.error('❌ Erreur sauvegarde locale:', storageError);
+                    throw new Error('Impossible de sauvegarder les données localement');
+                }
+                if (isOnline) {
+                    try {
+                        await setDoc(doc(db, 'users', userData.id), {
+                            ...userData,
+                            createdAt: serverTimestamp(),
+                            lastActive: serverTimestamp()
+                        });
+                        console.log('☁️ Utilisateur sauvegardé dans Firestore');
+                    } catch (firebaseError) {
+                        console.warn('⚠️ Erreur sauvegarde Firestore (continuera en local):', firebaseError);
+                    }
+                } else {
+                    console.log('📡 Mode hors-ligne, sauvegarde locale uniquement');
+                }
+                hideRegistrationForm();
+                showMainApp();
+            } catch (error) {
+                console.error('❌ Erreur lors de l\'inscription:', error);
+                alert(`Erreur lors de l'inscription: ${error.message}`);
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+                userData = null;
+                sessionStorage.removeItem('expressExchangeUser');
+                localStorage.removeItem('expressExchangeUser');
+            }
+        });
+
+        function loadPosts() {
+            if (unsubscribePosts) {
+                unsubscribePosts();
+            }
+            const postsQuery = query(
+                collection(db, 'posts'), 
+                orderBy('timestamp', 'desc'), 
+                limit(50)
+            );
+            unsubscribePosts = onSnapshot(postsQuery, (snapshot) => {
+                posts = [];
+                snapshot.forEach((doc) => {
+                    const post = { id: doc.id, ...doc.data() };
+                    posts.push(post);
+                });
+                renderPosts();
+            }, (error) => {
+                console.error('Erreur chargement posts:', error);
+            });
+        }
+
+        document.getElementById('publishBtn').addEventListener('click', async function() {
+            if (!validateUserData(userData)) {
+                console.error('❌ Tentative de publication avec userData invalide');
+                alert('Erreur: Données utilisateur invalides. Veuillez vous reconnecter.');
+                showRegistrationForm();
+                return;
+            }
+            const text = document.getElementById('postText').value.trim();
+            const fileInput = document.getElementById('fileInput');
+            const publishBtn = document.getElementById('publishBtn');
+            if (!text && !fileInput.files[0]) {
+                alert('Veuillez ajouter du texte ou une image');
+                return;
+            }
+            if (fileInput.files[0] && !fileInput.files[0].type.startsWith('image/')) {
+                alert("Seules les images sont autorisées.");
+                return;
+            }
+            publishBtn.disabled = true;
+            publishBtn.innerHTML = '<div class="loading-spinner"></div>Publication...';
+            try {
+                const postData = {
+                    author: userData.fullName,
+                    authorId: userData.id,
+                    avatar: userData.avatar,
+                    text: text || '',
+                    timestamp: serverTimestamp(),
+                    likesCount: 0,
+                    commentsCount: 0,
+                    imageUrl: null,
+                    imagePublicId: null,
+                    createdBy: userData.id,
+                    userValidated: true
+                };
+                console.log('📝 Données de publication:', {
+                    authorId: postData.authorId,
+                    author: postData.author,
+                    textLength: text.length,
+                    hasImage: !!fileInput.files[0]
+                });
+                if (!postData.authorId || postData.authorId.trim() === '') {
+                    throw new Error('authorId manquant ou vide');
+                }
+                if (fileInput.files[0]) {
+                    const file = fileInput.files[0];
+                    publishBtn.innerHTML = '<div class="loading-spinner"></div>Upload image...';
+                    const uploadResult = await uploader.uploadImage(file, {
+                        maxWidth: 1200
+                    });
+                    postData.imageUrl = uploadResult.url;
+                    postData.imagePublicId = uploadResult.publicId;
+                    postData.imageWidth = uploadResult.width;
+                    postData.imageHeight = uploadResult.height;
+                    postData.imageSize = uploadResult.bytes;
+                }
+                publishBtn.innerHTML = '<div class="loading-spinner"></div>Publication...';
+                try {
+                    const docRef = await addDoc(collection(db, 'posts'), postData);
+                    console.log('✅ Publication créée avec ID:', docRef.id);
+                } catch (firestoreError) {
+                    console.error('❌ Erreur Firestore détaillée:', firestoreError);
+                    throw new Error(`Erreur Firestore: ${firestoreError.message}`);
+                }
+                clearPostForm();
+            } catch (error) {
+                console.error('❌ Erreur lors de la publication:', error);
+                alert(`Erreur lors de la publication: ${error.message}`);
+            } finally {
+                resetPublishButton();
+            }
+        });
+
+        function resetPublishButton() {
+            const publishBtn = document.getElementById('publishBtn');
+            publishBtn.disabled = false;
+            publishBtn.textContent = 'Publier';
+        }
+
+        document.getElementById('fileInput').addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            const fileName = document.getElementById('fileName');
+            const preview = document.getElementById('mediaPreview');
+            if (file) {
+                fileName.textContent = file.name;
+                fileName.style.color = '#8e8e8e';
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    preview.innerHTML = `<img src="${event.target.result}" style="max-width: 150px; max-height: 150px; border-radius: 8px; object-fit: cover;">`;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                fileName.textContent = '';
+                preview.innerHTML = '';
+            }
+        });
+
+        function clearPostForm() {
+            document.getElementById('postText').value = '';
+            document.getElementById('fileInput').value = '';
+            document.getElementById('fileName').textContent = '';
+            document.getElementById('mediaPreview').innerHTML = '';
+        }
+
+        window.openImageModal = function(imgUrl) {
+            const modal = document.getElementById('modalImageView');
+            const modalImg = document.getElementById('modalImageBig');
+            modal.style.display = 'flex';
+            modalImg.src = imgUrl;
+        };
+
+        window.closeImageModal = function() {
+            document.getElementById('modalImageView').style.display = 'none';
+        };
+
+        document.getElementById('modalImageView').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeImageModal();
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeImageModal();
+                document.getElementById('myPostsModal').style.display = 'none';
+            }
+        });
+
+        window.toggleLike = async function(postId) {
+            if (!validateUserData(userData)) {
+                console.error('❌ Tentative de like avec userData invalide');
+                alert('Erreur: Veuillez vous reconnecter.');
+                return;
+            }
+            const btn = document.getElementById('like-btn-' + postId);
+            if (btn && btn.disabled) return;
+            if (btn) {
+                btn.disabled = true;
+                btn.style.opacity = '0.6';
+            }
+            try {
+                const likeRef = doc(db, 'likes', `${postId}_${userData.id}`);
+                const likeQuery = query(
+                    collection(db, 'likes'), 
+                    where('postId', '==', postId), 
+                    where('userId', '==', userData.id)
+                );
+                const likeSnapshot = await getDocs(likeQuery);
+                if (!likeSnapshot.empty) {
+                    await deleteDoc(likeRef);
+                    console.log('👎 Like supprimé');
+                } else {
+                    const likeData = {
+                        postId: postId,
+                        userId: userData.id,
+                        username: userData.fullName,
+                        timestamp: serverTimestamp()
+                    };
+                    if (!likeData.userId || !likeData.postId) {
+                        throw new Error('Données de like invalides');
+                    }
+                    await setDoc(likeRef, likeData);
+                    console.log('👍 Like ajouté');
+                }
+                await updateLikesCount(postId);
+            } catch (error) {
+                console.error('❌ Erreur toggle like:', error);
+                alert('Erreur lors du like. Veuillez réessayer.');
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                }
+            }
+        };
+
+        async function updateLikesCount(postId) {
+            try {
+                const likesQuery = query(collection(db, 'likes'), where('postId', '==', postId));
+                const likesSnapshot = await getDocs(likesQuery);
+                const postRef = doc(db, 'posts', postId);
+                await setDoc(postRef, { 
+                    likesCount: likesSnapshot.size 
+                }, { merge: true });
+            } catch (error) {
+                console.error('❌ Erreur mise à jour compteur likes:', error);
+            }
+        }
+
+        // CORRECTION 1: Fonction d'affichage des commentaires corrigée
+        window.toggleComments = function(postId) {
+            const commentsSection = document.getElementById(`comments-${postId}`);
+            if (!commentsSection) {
+                console.error('❌ Section commentaires introuvable pour postId:', postId);
+                return;
+            }
+            const isVisible = commentsSection.style.display === 'block';
+            
+            if (isVisible) {
+                commentsSection.style.display = 'none';
+                console.log('🔒 Commentaires masqués pour:', postId);
+            } else {
+                commentsSection.style.display = 'block';
+                console.log('👁️ Commentaires affichés pour:', postId);
+                loadComments(postId);
+                setTimeout(() => {
+                    const input = document.getElementById(`comment-input-${postId}`);
+                    if (input) input.focus();
+                }, 100);
+            }
+        };
+
+        // CORRECTION 2: Fonction loadComments corrigée sans index complexe
+        async function loadComments(postId) {
+            console.log('📝 Chargement commentaires pour postId:', postId);
+            const commentsContainer = document.getElementById(`comments-list-${postId}`);
+            if (!commentsContainer) {
+                console.error('❌ Container commentaires introuvable pour postId:', postId);
+                return;
+            }
+            
+            try {
+                commentsContainer.innerHTML = '<div style="text-align: center; color: #8e8e8e; padding: 10px;">Chargement des commentaires...</div>';
+                
+                // Requête simple sans orderBy pour éviter l'index composé
+                const commentsQuery = query(
+                    collection(db, 'comments'), 
+                    where('postId', '==', postId),
+                    limit(50)
+                );
+                
+                const commentsSnapshot = await getDocs(commentsQuery);
+                const comments = [];
+                
+                commentsSnapshot.forEach((doc) => {
+                    const commentData = doc.data();
+                    comments.push({ 
+                        id: doc.id, 
+                        ...commentData 
+                    });
+                });
+                
+                // Tri côté client par timestamp
+                comments.sort((a, b) => {
+                    const timeA = a.timestamp?.toDate?.() || a.timestamp || new Date(0);
+                    const timeB = b.timestamp?.toDate?.() || b.timestamp || new Date(0);
+                    return timeA - timeB;
+                });
+                
+                console.log(`💬 ${comments.length} commentaires trouvés pour postId:`, postId);
+                renderComments(postId, comments);
+                
+            } catch (error) {
+                console.error('❌ Erreur chargement commentaires:', error);
+                commentsContainer.innerHTML = '<div style="color: #ed4956; text-align: center; padding: 10px;">Erreur lors du chargement des commentaires</div>';
+            }
+        }
+
+        // CORRECTION 3: Fonction renderComments améliorée
+        function renderComments(postId, comments) {
+            const commentsContainer = document.getElementById(`comments-list-${postId}`);
+            if (!commentsContainer) {
+                console.error('❌ Container commentaires introuvable pour renderComments:', postId);
+                return;
+            }
+            
+            if (comments.length === 0) {
+                commentsContainer.innerHTML = '<div style="color: #8e8e8e; text-align: center; padding: 10px; font-size: 13px;">Aucun commentaire pour le moment</div>';
+                return;
+            }
+            
+            const commentsHTML = comments.map(comment => {
+                const timeAgo = getTimeAgo(comment.timestamp?.toDate?.() || comment.timestamp || new Date());
+                return `
+                    <div class="comment">
+                        <div class="comment-header">
+                            <div class="comment-avatar">${escapeHtml(comment.avatar || 'U')}</div>
+                            <div class="comment-username">${escapeHtml(comment.author || 'Utilisateur')}</div>
+                            <div class="comment-time">${timeAgo}</div>
+                        </div>
+                        <div class="comment-text">${escapeHtml(comment.text || '')}</div>
+                    </div>
+                `;
+            }).join('');
+            
+            commentsContainer.innerHTML = commentsHTML;
+            console.log(`✅ ${comments.length} commentaires affichés pour postId:`, postId);
+        }
+
+        window.submitComment = async function(postId) {
+            if (!validateUserData(userData)) {
+                console.error('❌ Tentative de commentaire avec userData invalide');
+                alert('Erreur: Veuillez vous reconnecter.');
+                return;
+            }
+            const input = document.getElementById(`comment-input-${postId}`);
+            if (!input) {
+                console.error('❌ Input commentaire introuvable pour postId:', postId);
+                return;
+            }
+            const commentText = input.value.trim();
+            if (!commentText) return;
+            if (commentText.length > 500) {
+                alert('Commentaire trop long (max 500 caractères)');
+                return;
+            }
+            input.disabled = true;
+            const originalPlaceholder = input.placeholder;
+            input.placeholder = 'Envoi en cours...';
+            try {
+                const commentData = {
+                    postId: postId,
+                    author: userData.fullName,
+                    authorId: userData.id,
+                    avatar: userData.avatar,
+                    text: commentText,
+                    timestamp: serverTimestamp()
+                };
+                if (!commentData.authorId || !commentData.postId) {
+                    throw new Error('Données de commentaire invalides');
+                }
+                await addDoc(collection(db, 'comments'), commentData);
+                console.log('💬 Commentaire ajouté pour postId:', postId);
+                await updateCommentsCount(postId);
+                input.value = '';
+                // Recharger les commentaires après ajout
+                setTimeout(() => loadComments(postId), 500);
+            } catch (error) {
+                console.error('❌ Erreur ajout commentaire:', error);
+                alert(`Erreur lors de l'envoi du commentaire: ${error.message}`);
+            } finally {
+                input.disabled = false;
+                input.placeholder = originalPlaceholder;
+            }
+        };
+
+        async function updateCommentsCount(postId) {
+            try {
+                const commentsQuery = query(collection(db, 'comments'), where('postId', '==', postId));
+                const commentsSnapshot = await getDocs(commentsQuery);
+                const postRef = doc(db, 'posts', postId);
+                await setDoc(postRef, { 
+                    commentsCount: commentsSnapshot.size 
+                }, { merge: true });
+            } catch (error) {
+                console.error('❌ Erreur mise à jour compteur commentaires:', error);
+            }
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.target.classList.contains('comment-input') && e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                const postId = e.target.id.replace('comment-input-', '');
+                window.submitComment(postId);
+            }
+        });
+
+        async function checkUserLikes(postIds) {
+            if (!validateUserData(userData)) {
+                return {};
+            }
+            try {
+                const userLikes = {};
+                for (const postId of postIds) {
+                    const likesQuery = query(
+                        collection(db, 'likes'), 
+                        where('postId', '==', postId),
+                        where('userId', '==', userData.id)
+                    );
+                    const likesSnapshot = await getDocs(likesQuery);
+                    userLikes[postId] = !likesSnapshot.empty;
+                }
+                return userLikes;
+            } catch (error) {
+                console.error('❌ Erreur vérification likes:', error);
+                return {};
+            }
+        }
+
+        async function renderPosts() {
+            const feed = document.getElementById('feed');
+            if (posts.length === 0) {
+                feed.innerHTML = `
+                    <div class="empty-state">
+                        <h3>Aucune publication pour le moment</h3>
+                        <p>Soyez le premier à partager quelque chose !</p>
+                    </div>
+                `;
+                return;
+            }
+            const postIds = posts.map(p => p.id);
+            const userLikes = await checkUserLikes(postIds);
+            const fragment = document.createDocumentFragment();
+            posts.forEach(post => {
+                const likesCount = post.likesCount || 0;
+                const commentsCount = post.commentsCount || 0;
+                const isLiked = userLikes[post.id] || false;
+                const timeAgo = getTimeAgo(post.timestamp?.toDate?.() || post.timestamp);
+                let imageHTML = '';
+                if (post.imageUrl) {
+                    let optimizedUrl = post.imageUrl;
+                    if (post.imagePublicId && post.imageUrl.includes('cloudinary.com')) {
+                        optimizedUrl = uploader.getOptimizedUrl(post.imagePublicId, {
+                            width: 800,
+                            crop: 'limit',
+                            quality: 'auto'
+                        });
+                    }
+                    imageHTML = `
+                        <div style="position: relative;">
+                            <a class="image-link" onclick="openImageModal('${post.imageUrl}')">
+                                <img src="${optimizedUrl}" alt="Image publication" loading="lazy">
+                                ${post.imagePublicId ? '<div class="cloudinary-badge">⚡ Optimisé</div>' : ''}
+                            </a>
+                        </div>
+                    `;
+                }
+                const postElement = document.createElement('div');
+                postElement.className = 'publication';
+                postElement.setAttribute('data-post-id', post.id);
+                postElement.innerHTML = `
+                    <div class="pub-header">
+                        <div class="pub-avatar">${post.avatar || 'U'}</div>
+                        <div class="pub-info">
+                            <div class="pub-username">${escapeHtml(post.author || 'Utilisateur anonyme')}</div>
+                            <div class="pub-time">${timeAgo}</div>
+                        </div>
+                    </div>
+                    <div class="pub-text">${escapeHtml(post.text || '')}</div>
+                    ${imageHTML}
+                    <div class="pub-actions">
+                        <button class="action-btn ${isLiked ? 'liked' : ''}" 
+                                onclick="toggleLike('${post.id}')" 
+                                id="like-btn-${post.id}">
+                            ${isLiked ? '❤️' : '🤍'} ${likesCount}
+                        </button>
+                        <button class="action-btn" 
+                                onclick="toggleComments('${post.id}')">
+                            💬 ${commentsCount}
+                        </button>
+                    </div>
+                    <div class="comments-section" id="comments-${post.id}" style="display: none;">
+                        <div id="comments-list-${post.id}"></div>
+                        <div class="comment-form">
+                            <input type="text" class="comment-input" placeholder="Écrivez un commentaire..." id="comment-input-${post.id}">
+                            <button class="comment-btn" onclick="submitComment('${post.id}')">Envoyer</button>
+                        </div>
+                    </div>
+                `;
+                fragment.appendChild(postElement);
+            });
+            feed.innerHTML = '';
+            feed.appendChild(fragment);
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function getTimeAgo(timestamp) {
+            if (!timestamp) return 'Date inconnue';
+            const now = new Date();
+            const time = timestamp instanceof Date ? timestamp : new Date(timestamp);
+            const diffInSeconds = Math.floor((now - time) / 1000);
+            if (diffInSeconds < 60) return 'À l\'instant';
+            if (diffInSeconds < 3600) {
+                const minutes = Math.floor(diffInSeconds / 60);
+                return `${minutes}min`;
+            } else if (diffInSeconds < 86400) {
+                const hours = Math.floor(diffInSeconds / 3600);
+                return `${hours}h`;
+            } else if (diffInSeconds < 604800) {
+                const days = Math.floor(diffInSeconds / 86400);
+                return `${days}j`;
+            } else {
+                return time.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+            }
+        }
+
+        document.getElementById('showMyPostsBtn').addEventListener('click', function() {
+            showMyPostsModal();
+        });
+
+        document.getElementById('closeMyPostsModal').onclick = function() {
+            document.getElementById('myPostsModal').style.display = 'none';
+        };
+
+        document.getElementById('myPostsModal').onclick = function(e) {
+            if (e.target === this) this.style.display = 'none';
+        };
+
+        // CORRECTION 4: Fonction showMyPostsModal corrigée sans index complexe
+        async function showMyPostsModal() {
+            console.log('🔰 showMyPostsModal appelée');
+            if (!validateUserData(userData)) {
+                console.error('❌ Tentative d\'affichage des posts avec userData invalide');
+                alert('Erreur: Veuillez vous reconnecter.');
+                showRegistrationForm();
+                return;
+            }
+            
+            const modal = document.getElementById('myPostsModal');
+            const listEl = document.getElementById('myPostsList');
+            
+            // Afficher la modal d'abord
+            modal.style.display = 'flex';
+            listEl.innerHTML = '<div style="text-align: center; padding: 20px; color: #8e8e8e;"><div class="loading-spinner"></div> Chargement...</div>';
+            
+            try {
+                console.log('🔍 Recherche des publications pour userId:', userData.id);
+                
+                // Requête simple sans orderBy pour éviter l'index composé
+                const myPostsQuery = query(
+                    collection(db, 'posts'), 
+                    where('authorId', '==', userData.id),
+                    limit(100)
+                );
+                
+                const myPostsSnapshot = await getDocs(myPostsQuery);
+                const myPosts = [];
+                
+                myPostsSnapshot.forEach((doc) => {
+                    const postData = doc.data();
+                    myPosts.push({ 
+                        id: doc.id, 
+                        ...postData 
+                    });
+                });
+                
+                // Tri côté client par timestamp (du plus récent au plus ancien)
+                myPosts.sort((a, b) => {
+                    const timeA = a.timestamp?.toDate?.() || a.timestamp || new Date(0);
+                    const timeB = b.timestamp?.toDate?.() || b.timestamp || new Date(0);
+                    return timeB - timeA;
+                });
+                
+                console.log(`📊 ${myPosts.length} publications trouvées pour l'utilisateur:`, userData.fullName);
+                
+                if (myPosts.length === 0) {
+                    listEl.innerHTML = `
+                        <div class="empty-state">
+                            <h3>Aucune publication trouvée</h3>
+                            <p>Vous n'avez pas encore publié de contenu.</p>
+                            <p style="font-size: 12px; margin-top: 8px; color: #8e8e8e;">Commencez par publier quelque chose !</p>
+                        </div>
+                    `;
+                } else {
+                    const fragment = document.createDocumentFragment();
+                    
+                    myPosts.forEach(post => {
+                        const timeAgo = getTimeAgo(post.timestamp?.toDate?.() || post.timestamp || new Date());
+                        let thumbnailHTML = '';
+                        
+                        if (post.imageUrl) {
+                            let thumbUrl = post.imageUrl;
+                            if (post.imagePublicId && post.imageUrl.includes('cloudinary.com')) {
+                                thumbUrl = uploader.getOptimizedUrl(post.imagePublicId, {
+                                    width: 60,
+                                    height: 60,
+                                    crop: 'fill',
+                                    quality: 'auto'
+                                });
+                            }
+                            thumbnailHTML = `
+                                <div class="my-post-thumbnail">
+                                    <img src="${thumbUrl}" alt="Aperçu">
+                                </div>
+                            `;
+                        }
+                        
+                        const postElement = document.createElement('div');
+                        postElement.className = 'my-post-item';
+                        postElement.innerHTML = `
+                            ${thumbnailHTML}
+                            <div class="my-post-content">
+                                <div class="my-post-text">${escapeHtml(post.text || 'Publication sans texte')}</div>
+                                <div class="my-post-time">${timeAgo} • ${post.likesCount || 0} likes • ${post.commentsCount || 0} commentaires</div>
+                            </div>
+                            <button class="my-post-delete" onclick="deleteMyPost('${post.id}', this)">Supprimer</button>
+                        `;
+                        fragment.appendChild(postElement);
+                    });
+                    
+                    listEl.innerHTML = '';
+                    listEl.appendChild(fragment);
+                    console.log('✅ Publications affichées dans la modal');
+                }
+                
+            } catch (error) {
+                console.error('❌ Erreur détaillée lors du chargement de mes publications:', error);
+                listEl.innerHTML = `
+                    <div style="color:#ed4956; padding:20px; text-align:center;">
+                        <h4>Erreur lors du chargement</h4>
+                        <p>Impossible de charger vos publications.</p>
+                        <p style="font-size: 12px; margin-top: 8px; color: #8e8e8e;">Détail: ${error.message}</p>
+                        <button onclick="showMyPostsModal()" style="margin-top: 10px; padding: 8px 16px; background: #0095f6; color: white; border: none; border-radius: 6px; cursor: pointer;">Réessayer</button>
+                    </div>
+                `;
+            }
+        }
+
+        window.deleteMyPost = async function(postId, btn) {
+            console.log('🗑️ Demande de suppression de la publication:', postId);
+            if (!validateUserData(userData)) {
+                console.error('❌ Tentative de suppression avec userData invalide');
+                alert('Erreur: Veuillez vous reconnecter.');
+                return;
+            }
+            
+            if (!confirm('Voulez-vous vraiment supprimer cette publication ?')) {
+                console.log('❌ Suppression annulée par l\'utilisateur');
+                return;
+            }
+            
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = 'Suppression...';
+                btn.style.opacity = '0.6';
+            }
+            
+            try {
+                // Méthode simplifiée : suppression directe du document
+                const postRef = doc(db, 'posts', postId);
+                
+                // Supprimer les likes associés (requête simple)
+                const likesQuery = query(collection(db, 'likes'), where('postId', '==', postId));
+                const likesSnapshot = await getDocs(likesQuery);
+                const deleteLikesPromises = [];
+                likesSnapshot.forEach((doc) => {
+                    deleteLikesPromises.push(deleteDoc(doc.ref));
+                });
+                
+                // Supprimer les commentaires associés (requête simple)
+                const commentsQuery = query(collection(db, 'comments'), where('postId', '==', postId));
+                const commentsSnapshot = await getDocs(commentsQuery);
+                const deleteCommentsPromises = [];
+                commentsSnapshot.forEach((doc) => {
+                    deleteCommentsPromises.push(deleteDoc(doc.ref));
+                });
+                
+                // Attendre la suppression des likes et commentaires
+                await Promise.all([...deleteLikesPromises, ...deleteCommentsPromises]);
+                
+                // Supprimer la publication
+                await deleteDoc(postRef);
+                
+                console.log('✅ Publication supprimée avec succès:', postId);
+                
+                // Recharger la liste des publications
+                setTimeout(() => showMyPostsModal(), 500);
+                
+            } catch (error) {
+                console.error('❌ Erreur suppression publication:', error);
+                alert(`Erreur lors de la suppression: ${error.message}`);
+                if (btn) {
+                    btn.disabled = false;
+                    btn.textContent = 'Supprimer';
+                    btn.style.opacity = '1';
+                }
+            }
+        };
+
+        // Gestion des événements en ligne/hors ligne
+        window.addEventListener('online', () => {
+            console.log('🌍 Passage en ligne');
+            isOnline = true;
+            updateConnectionStatus();
+        });
+
+        window.addEventListener('offline', () => {
+            console.log('📡 Passage hors-ligne');
+            isOnline = false;
+            updateConnectionStatus();
+        });
+
+        // Fonction utilitaire pour déboguer
+        window.debugApp = function() {
+            console.log('🔧 État de l\'application:', {
+                userData: userData,
+                isAppInitialized: isAppInitialized,
+                isOnline: isOnline,
+                postsCount: posts.length
+            });
+        };
+
+        console.log('✅ Script principal Express Exchange chargé et corrigé');
+    </script>
+</body>
+</html>

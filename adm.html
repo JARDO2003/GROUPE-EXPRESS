@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Julie Admin - Gestion des produits</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2d3748 0%, #4a5568 50%, #2b6cb0 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .admin-navbar {
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(20px);
+            padding: 1rem 2rem;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .nav-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .admin-logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #4fd1c7;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .nav-stats {
+            display: flex;
+            gap: 2rem;
+            color: white;
+            font-size: 0.9rem;
+        }
+        
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .stat-value {
+            font-weight: bold;
+            color: #4fd1c7;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 80px auto 0;
+            padding: 2rem;
+        }
+        
+        .admin-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .admin-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .admin-subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1rem;
+        }
+        
+        .admin-dashboard {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .main-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+        }
+        
+        .sidebar-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .form-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: #4a5568;
+        }
+        
+        .form-input,
+        .form-textarea,
+        .form-select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        .form-input:focus,
+        .form-textarea:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: #4fd1c7;
+            box-shadow: 0 0 15px rgba(79, 209, 199, 0.3);
+        }
+        
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .media-upload {
+            border: 2px dashed #cbd5e0;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            background: #f7fafc;
+        }
+        
+        .media-upload:hover {
+            border-color: #4fd1c7;
+            background: #e6fffa;
+        }
+        
+        .media-upload.dragover {
+            border-color: #4fd1c7;
+            background: #e6fffa;
+            transform: scale(1.02);
+        }
+        
+        .upload-icon {
+            font-size: 3rem;
+            color: #a0aec0;
+            margin-bottom: 1rem;
+        }
+        
+        .upload-text {
+            color: #4a5568;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .upload-hint {
+            color: #718096;
+            font-size: 0.9rem;
+        }
+        
+        .media-preview {
+            margin-top: 1rem;
+            border-radius: 12px;
+            overflow: hidden;
+            max-width: 100%;
+        }
+        
+        .preview-video,
+        .preview-image {
+            width: 100%;
+            max-height: 200px;
+            object-fit: cover;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 1rem;
+            display: none;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4fd1c7, #38b2ac);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 4px;
+        }
+        
+        .price-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        .promotion-toggle {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: #cbd5e0;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        .toggle-switch.active {
+            background: #4fd1c7;
+        }
+        
+        .toggle-knob {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .toggle-switch.active .toggle-knob {
+            transform: translateX(30px);
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, #4fd1c7, #38b2ac);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(79, 209, 199, 0.4);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(45deg, #fc8181, #f56565);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(245, 101, 101, 0.4);
+        }
+        
+        .btn-full {
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+        
+        .products-list {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        .product-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        .product-item:hover {
+            border-color: #4fd1c7;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79, 209, 199, 0.2);
+        }
+        
+        .product-thumbnail {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            flex-shrink: 0;
+        }
+        
+        .product-info {
+            flex: 1;
+        }
+        
+        .product-name {
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 0.25rem;
+        }
+        
+        .product-price {
+            color: #4fd1c7;
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+        
+        .product-status {
+            font-size: 0.8rem;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: bold;
+        }
+        
+        .status-active {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+        
+        .status-promotion {
+            background: #fbb6ce;
+            color: #702459;
+        }
+        
+        .product-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            border-radius: 8px;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            z-index: 1001;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            border-left: 4px solid #4fd1c7;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.error {
+            border-left-color: #f56565;
+        }
+        
+        .notification.success {
+            border-left-color: #48bb78;
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        
+        .loading-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            text-align: center;
+        }
+        
+        .spinner {
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid #4fd1c7;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        .conversion-status {
+            background: #fef5e7;
+            border: 2px solid #f6ad55;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            color: #744210;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .conversion-status.show {
+            display: block;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 1200px) {
+            .admin-dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar-panel {
+                order: -1;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .nav-stats {
+                display: none;
+            }
+            
+            .price-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .product-item {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .product-actions {
+                flex-direction: row;
+                justify-content: center;
+            }
+        }
+        .back-home-btn {
+    background: linear-gradient(45deg, #38b2ac, #4fd1c7);
+    color: white;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    border-radius: 50px;
+    padding: 12px 20px;
+    box-shadow: 0 4px 15px rgba(79, 209, 199, 0.4);
+}
+
+@media (max-width: 768px) {
+    .nav-stats .stat-item a {
+        display: none;
+    }
+    .back-home-btn {
+        display: inline-flex;
+    }
+}
+    </style>
+</head>
+<body>
+    <!-- Navigation Admin -->
+    <nav class="admin-navbar">
+        <div class="nav-content">
+            <div class="admin-logo">
+                <i class="fas fa-cog"></i> MEMBRE FONDATEUR
+            </div>
+            <div class="nav-stats">
+                <div class="stat-item">
+                    <i class="fas fa-box"></i>
+                    <span>Produits: <span class="stat-value" id="totalProducts">0</span></span>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-percentage"></i>
+                    <span>Promotions: <span class="stat-value" id="totalPromotions">0</span></span>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-euro-sign"></i>
+                    <span>Valeur totale: <span class="stat-value" id="totalValue">0FCFA</span></span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenu principal -->
+    <div class="container">
+        <div class="admin-header">
+            <h1 class="admin-title">🛍️ Interface d'Administration</h1>
+            <p class="admin-subtitle">Gérez vos produits et promotions en temps réel</p>
+        </div>
+
+        <div class="admin-dashboard">
+            <!-- Panneau principal - Liste des produits -->
+            <div class="main-panel">
+                <h2 class="section-title">
+                    <i class="fas fa-list"></i>
+                    Produits existants
+                </h2>
+                <div class="products-list" id="productsList">
+                    <div style="text-align: center; padding: 2rem; color: #666;">
+                        <div class="spinner"></div>
+                        Chargement des produits...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar - Formulaires -->
+            <div class="sidebar-panel">
+                <!-- Formulaire d'ajout/modification -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-plus-circle"></i>
+                        <span id="formTitle">Ajouter un produit</span>
+                    </h3>
+
+                    <form id="productForm">
+                        <div class="form-group">
+                            <label class="form-label" for="productName">
+                                <i class="fas fa-tag"></i> Nom du produit *
+                            </label>
+                            <input type="text" id="productName" class="form-input" required placeholder="Ex: iPhone 15 Pro Max">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="productDescription">
+                                <i class="fas fa-align-left"></i> Description
+                            </label>
+                            <textarea id="productDescription" class="form-textarea" placeholder="Décrivez votre produit..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="productCategory">
+                                <i class="fas fa-folder"></i> Catégorie
+                            </label>
+                            <select id="productCategory" class="form-select">
+                                <option value="">Sélectionner une catégorie</option>
+                                <option value="Électronique">Électronique</option>
+                                <option value="Vêtements">Vêtements</option>
+                                <option value="Maison">Maison & Jardin</option>
+                                <option value="Sport">Sport & Loisirs</option>
+                                <option value="Beauté">Beauté & Santé</option>
+                                <option value="Automobile">Automobile</option>
+                                <option value="Livres">Livres</option>
+                                <option value="Jouets">Jouets</option>
+                                <option value="Alimentation">Alimentation</option>
+                                <option value="Autre">Autre</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-photo-video"></i> Média (Image ou Vidéo)
+                            </label>
+                            <div class="media-upload" id="mediaUpload">
+                                <div class="upload-icon">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                </div>
+                                <div class="upload-text">Cliquez ou glissez votre fichier ici</div>
+                                <div class="upload-hint">Tous formats acceptés - Conversion automatique activée!</div>
+                                <input type="file" id="mediaInput" accept="*/*" style="display: none;">
+                                <div class="progress-bar" id="progressBar">
+                                    <div class="progress-fill" id="progressFill"></div>
+                                </div>
+                            </div>
+                            <div id="conversionStatus" class="conversion-status">
+                                <i class="fas fa-magic"></i> Conversion en cours...
+                            </div>
+                            <div id="mediaPreview" class="media-preview" style="display: none;"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="promotion-toggle">
+                                <span class="form-label">
+                                    <i class="fas fa-percentage"></i> Mode promotion
+                                </span>
+                                <div class="toggle-switch" id="promotionToggle">
+                                    <div class="toggle-knob"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="price-section" id="priceSection">
+                            <div class="form-group">
+                                <label class="form-label" for="productPrice">
+                                    <i class="fas fa-euro-sign"></i> Prix (FCFA) *
+                                </label>
+                                <input type="number" id="productPrice" class="form-input" min="0" step="0.01" required placeholder="0.00">
+                            </div>
+                            <div class="form-group" id="originalPriceGroup" style="display: none;">
+                                <label class="form-label" for="originalPrice">
+                                    <i class="fas fa-strikethrough"></i> Prix original (FCFA)
+                                </label>
+                                <input type="number" id="originalPrice" class="form-input" min="0" step="0.01" placeholder="0.00">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-full" id="submitBtn">
+                            <i class="fas fa-plus"></i>
+                            <span id="submitText">Ajouter le produit</span>
+                        </button>
+
+                        <button type="button" class="btn btn-secondary btn-full" id="cancelBtn" style="display: none;" onclick="cancelEdit()">
+                            <i class="fas fa-times"></i>
+                            Annuler
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Actions rapides -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-bolt"></i>
+                        Actions rapides
+                    </h3>
+                    
+                    <button class="btn btn-secondary btn-full" onclick="toggleAllPromotions()">
+                        <i class="fas fa-percentage"></i>
+                        Basculer toutes les promotions
+                    </button>
+                    
+                    <button class="btn btn-danger btn-full" onclick="clearAllProducts()">
+                        <i class="fas fa-trash-alt"></i>
+                        Supprimer tous les produits
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="notification"></div>
+
+    <!-- Overlay de chargement -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <div id="loadingText">Upload en cours...</div>
+        </div>
+    </div>
+    
+    <div class="stat-item">
+        <a href="index.html" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.9rem; text-decoration: none;">
+            <i class="fas fa-home"></i>
+            Retour à l'accueil
+        </a>
+    </div>
+
+    <script type="module">
+        // Configuration Firebase
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+        import { 
+            getFirestore, 
+            collection, 
+            doc, 
+            setDoc, 
+            addDoc, 
+            getDocs, 
+            getDoc,
+            query, 
+            orderBy, 
+            onSnapshot, 
+            deleteDoc,
+            updateDoc,
+            serverTimestamp
+        } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDV8s8md1kginP7nohy63XgUR9xNk_p6iE",
+            authDomain: "store-ab477.firebaseapp.com",
+            databaseURL: "https://store-ab477-default-rtdb.firebaseio.com",
+            projectId: "store-ab477",
+            storageBucket: "store-ab477.firebasestorage.app",
+            messagingSenderId: "109524191191",
+            appId: "1:109524191191:web:23f365c1a4712cc094ed92",
+            measurementId: "G-86T5K1SG1F"
+        };
+
+        // Configuration Cloudinary
+        const cloudinaryConfig = {
+            cloudName: 'djxcqczh1',
+            uploadPreset: 'database'
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const firestore = getFirestore(app);
+
+        // Variables globales
+        let products = [];
+        let editingProduct = null;
+        let uploadedMediaUrl = '';
+        let mediaType = '';
+
+        // Éléments DOM
+        const productForm = document.getElementById('productForm');
+        const productsList = document.getElementById('productsList');
+        const mediaUpload = document.getElementById('mediaUpload');
+        const mediaInput = document.getElementById('mediaInput');
+        const mediaPreview = document.getElementById('mediaPreview');
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const loadingText = document.getElementById('loadingText');
+        const conversionStatus = document.getElementById('conversionStatus');
+        const promotionToggle = document.getElementById('promotionToggle');
+        const originalPriceGroup = document.getElementById('originalPriceGroup');
+        const formTitle = document.getElementById('formTitle');
+        const submitText = document.getElementById('submitText');
+        const cancelBtn = document.getElementById('cancelBtn');
+
+        // Statistiques
+        const totalProducts = document.getElementById('totalProducts');
+        const totalPromotions = document.getElementById('totalPromotions');
+        const totalValue = document.getElementById('totalValue');
+
+        // Fonctions de conversion de médias
+        function convertImageFormat(file, targetFormat = 'jpeg', quality = 0.8) {
+            return new Promise((resolve) => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const img = new Image();
+                
+                img.onload = function() {
+                    // Optimiser la taille si trop grande
+                    let { width, height } = img;
+                    const maxSize = 1920;
+                    
+                    if (width > maxSize || height > maxSize) {
+                        if (width > height) {
+                            height = (height * maxSize) / width;
+                            width = maxSize;
+                        } else {
+                            width = (width * maxSize) / height;
+                            height = maxSize;
+                        }
+                    }
+                    
+                    canvas.width = width;
+                    canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    canvas.toBlob(resolve, `image/${targetFormat}`, quality);
+                };
+                
+                img.src = URL.createObjectURL(file);
+            });
+        }
+
+        function convertVideoFormat(file) {
+            return new Promise((resolve) => {
+                const video = document.createElement('video');
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                video.onloadedmetadata = function() {
+                    // Créer une miniature et convertir en format optimisé
+                    canvas.width = Math.min(video.videoWidth, 1280);
+                    canvas.height = Math.min(video.videoHeight, 720);
+                    
+                    video.currentTime = 1; // Prendre une frame à 1 seconde
+                };
+                
+                video.onseeked = function() {
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    canvas.toBlob((blob) => {
+                        // Pour les vidéos, on retourne le fichier original pour l'instant
+                        // Une vraie conversion vidéo nécessiterait FFmpeg.js (plus complexe)
+                        resolve(file);
+                    }, 'image/jpeg', 0.8);
+                };
+                
+                video.src = URL.createObjectURL(file);
+                video.load();
+            });
+        }
+
+        async function processAndConvertFile(file) {
+            const supportedImageTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+            const supportedVideoTypes = ['video/mp4', 'video/webm'];
+            
+            // Vérifier si le fichier est déjà dans un format supporté
+            if (supportedImageTypes.includes(file.type) || supportedVideoTypes.includes(file.type)) {
+                return { convertedFile: file, wasConverted: false };
+            }
+
+            conversionStatus.classList.add('show');
+            conversionStatus.innerHTML = '<i class="fas fa-magic"></i> Conversion du format en cours...';
+            
+            try {
+                let convertedFile;
+                let wasConverted = true;
+                
+                // Conversion d'images
+                if (file.type.startsWith('image/')) {
+                    // Formats d'image non supportés (WEBP, BMP, TIFF, etc.)
+                    convertedFile = await convertImageFormat(file, 'jpeg', 0.85);
+                    convertedFile = new File([convertedFile], file.name.split('.')[0] + '.jpg', { 
+                        type: 'image/jpeg' 
+                    });
+                    mediaType = 'image';
+                    
+                // Conversion de vidéos
+                } else if (file.type.startsWith('video/')) {
+                    // Pour les vidéos dans des formats non supportés (AVI, MOV, WMV, etc.)
+                    // Note: Une vraie conversion vidéo nécessiterait une bibliothèque comme FFmpeg.js
+                    // Pour l'instant, on accepte le fichier et on le traite comme MP4
+                    convertedFile = new File([file], file.name.split('.')[0] + '.mp4', { 
+                        type: 'video/mp4' 
+                    });
+                    mediaType = 'video';
+                    
+                // Formats non reconnus - tentative de traitement comme image
+                } else {
+                    try {
+                        // Tenter de traiter comme une image
+                        convertedFile = await convertImageFormat(file, 'jpeg', 0.85);
+                        convertedFile = new File([convertedFile], file.name.split('.')[0] + '.jpg', { 
+                            type: 'image/jpeg' 
+                        });
+                        mediaType = 'image';
+                    } catch (error) {
+                        throw new Error('Format de fichier non supporté pour la conversion');
+                    }
+                }
+                
+                conversionStatus.innerHTML = '<i class="fas fa-check-circle"></i> Conversion terminée avec succès!';
+                setTimeout(() => {
+                    conversionStatus.classList.remove('show');
+                }, 3000);
+                
+                return { convertedFile, wasConverted };
+                
+            } catch (error) {
+                conversionStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Erreur lors de la conversion';
+                setTimeout(() => {
+                    conversionStatus.classList.remove('show');
+                }, 3000);
+                throw error;
+            }
+        }
+
+        // Upload de média avec gestion des événements
+        mediaUpload.addEventListener('click', () => mediaInput.click());
+        mediaUpload.addEventListener('dragover', handleDragOver);
+        mediaUpload.addEventListener('drop', handleDrop);
+        mediaInput.addEventListener('change', handleFileSelect);
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            mediaUpload.classList.add('dragover');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            mediaUpload.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                uploadFile(files[0]);
+            }
+        }
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) {
+                uploadFile(file);
+            }
+        }
+
+        // Upload vers Cloudinary avec conversion automatique
+        async function uploadFile(file) {
+            if (!file) return;
+
+            const maxSize = 50 * 1024 * 1024; // 50MB
+            if (file.size > maxSize) {
+                showNotification('Fichier trop volumineux (max 50MB)', 'error');
+                return;
+            }
+
+            loadingOverlay.style.display = 'flex';
+            loadingText.textContent = 'Analyse du fichier...';
+            
+            try {
+                // Traitement et conversion du fichier
+                const { convertedFile, wasConverted } = await processAndConvertFile(file);
+                
+                if (wasConverted) {
+                    showNotification('Fichier converti automatiquement!', 'success');
+                    loadingText.textContent = 'Upload du fichier converti...';
+                } else {
+                    loadingText.textContent = 'Upload en cours...';
+                }
+
+                progressBar.style.display = 'block';
+
+                const formData = new FormData();
+                formData.append('file', convertedFile);
+                formData.append('upload_preset', cloudinaryConfig.uploadPreset);
+                
+                const resourceType = convertedFile.type.startsWith('video/') ? 'video' : 'image';
+                mediaType = resourceType;
+
+                const xhr = new XMLHttpRequest();
+                
+                xhr.upload.addEventListener('progress', (e) => {
+                    if (e.lengthComputable) {
+                        const percentComplete = (e.loaded / e.total) * 100;
+                        progressFill.style.width = percentComplete + '%';
+                    }
+                });
+
+                xhr.addEventListener('load', () => {
+                    if (xhr.status === 200) {
+                        const response = JSON.parse(xhr.responseText);
+                        uploadedMediaUrl = response.secure_url;
+                        showMediaPreview(uploadedMediaUrl, mediaType);
+                        showNotification('Média uploadé avec succès !', 'success');
+                    } else {
+                        showNotification('Erreur lors de l\'upload', 'error');
+                    }
+                    loadingOverlay.style.display = 'none';
+                    progressBar.style.display = 'none';
+                    progressFill.style.width = '0%';
+                });
+
+                xhr.addEventListener('error', () => {
+                    showNotification('Erreur lors de l\'upload', 'error');
+                    loadingOverlay.style.display = 'none';
+                    progressBar.style.display = 'none';
+                });
+
+                xhr.open('POST', `https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/${resourceType}/upload`);
+                xhr.send(formData);
+
+            } catch (error) {
+                console.error('Erreur upload/conversion:', error);
+                showNotification(error.message || 'Erreur lors du traitement du fichier', 'error');
+                loadingOverlay.style.display = 'none';
+                progressBar.style.display = 'none';
+                conversionStatus.classList.remove('show');
+            }
+        }
+
+        function showMediaPreview(url, type) {
+            mediaPreview.style.display = 'block';
+            if (type === 'video') {
+                mediaPreview.innerHTML = `
+                    <video class="preview-video" controls>
+                        <source src="${url}" type="video/mp4">
+                    </video>
+                `;
+            } else {
+                mediaPreview.innerHTML = `<img src="${url}" alt="Preview" class="preview-image">`;
+            }
+        }
+
+        // Toggle promotion
+        promotionToggle.addEventListener('click', function() {
+            this.classList.toggle('active');
+            const isActive = this.classList.contains('active');
+            originalPriceGroup.style.display = isActive ? 'block' : 'none';
+        });
+
+        // Soumission du formulaire
+        productForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const name = document.getElementById('productName').value.trim();
+            const description = document.getElementById('productDescription').value.trim();
+            const category = document.getElementById('productCategory').value;
+            const price = parseFloat(document.getElementById('productPrice').value);
+            const originalPrice = parseFloat(document.getElementById('originalPrice').value) || 0;
+            const isPromotion = promotionToggle.classList.contains('active');
+
+            if (!name || !price) {
+                showNotification('Nom et prix sont obligatoires', 'error');
+                return;
+            }
+
+            if (!uploadedMediaUrl && !editingProduct) {
+                showNotification('Veuillez ajouter une image ou vidéo', 'error');
+                return;
+            }
+
+            const productData = {
+                name,
+                description,
+                category,
+                price: price,
+                currentPrice: isPromotion ? price : price,
+                originalPrice: isPromotion ? originalPrice : price,
+                isPromotion,
+                mediaUrl: uploadedMediaUrl || (editingProduct ? editingProduct.mediaUrl : ''),
+                mediaType: mediaType || (editingProduct ? editingProduct.mediaType : 'image'),
+                createdAt: editingProduct ? editingProduct.createdAt : serverTimestamp(),
+                updatedAt: serverTimestamp()
+            };
+
+            try {
+                if (editingProduct) {
+                    await updateDoc(doc(firestore, 'products', editingProduct.id), productData);
+                    showNotification('Produit modifié avec succès !', 'success');
+                } else {
+                    await addDoc(collection(firestore, 'products'), productData);
+                    showNotification('Produit ajouté avec succès !', 'success');
+                }
+                
+                resetForm();
+            } catch (error) {
+                console.error('Erreur:', error);
+                showNotification('Erreur lors de la sauvegarde', 'error');
+            }
+        });
+
+        // Réinitialiser le formulaire
+        function resetForm() {
+            productForm.reset();
+            mediaPreview.style.display = 'none';
+            progressBar.style.display = 'none';
+            conversionStatus.classList.remove('show');
+            promotionToggle.classList.remove('active');
+            originalPriceGroup.style.display = 'none';
+            uploadedMediaUrl = '';
+            mediaType = '';
+            editingProduct = null;
+            formTitle.textContent = 'Ajouter un produit';
+            submitText.textContent = 'Ajouter le produit';
+            cancelBtn.style.display = 'none';
+        }
+
+        // Annuler l'édition
+        window.cancelEdit = function() {
+            resetForm();
+        };
+
+        // Charger les produits
+        function loadProducts() {
+            const q = query(collection(firestore, 'products'), orderBy('createdAt', 'desc'));
+            
+            onSnapshot(q, (querySnapshot) => {
+                products = [];
+                querySnapshot.forEach((doc) => {
+                    products.push({ id: doc.id, ...doc.data() });
+                });
+                
+                displayProducts();
+                updateStats();
+            });
+        }
+
+        // Afficher les produits
+        function displayProducts() {
+            if (products.length === 0) {
+                productsList.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: #666;">
+                        <i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 1rem; display: block;"></i>
+                        Aucun produit pour le moment
+                    </div>
+                `;
+                return;
+            }
+
+            const productsHTML = products.map(product => {
+                const hasPromotion = product.isPromotion && product.originalPrice > product.currentPrice;
+                const discount = hasPromotion ? Math.round(((product.originalPrice - product.currentPrice) / product.originalPrice) * 100) : 0;
+                
+                return `
+                    <div class="product-item">
+                        ${product.mediaType === 'video' ? 
+                            `<video class="product-thumbnail" muted>
+                                <source src="${product.mediaUrl}" type="video/mp4">
+                            </video>` :
+                            `<img src="${product.mediaUrl}" alt="${product.name}" class="product-thumbnail">`
+                        }
+                        <div class="product-info">
+                            <div class="product-name">${product.name}</div>
+                            <div class="product-price">
+                                ${product.currentPrice}FCFA
+                                ${hasPromotion ? `<span style="text-decoration: line-through; color: #999; margin-left: 0.5rem;">${product.originalPrice}FCFA</span>` : ''}
+                            </div>
+                            <div class="product-status ${hasPromotion ? 'status-promotion' : 'status-active'}">
+                                ${hasPromotion ? `🔥 -${discount}% PROMO` : '✅ Actif'}
+                            </div>
+                        </div>
+                        <div class="product-actions">
+                            <button class="btn btn-secondary btn-small" onclick="editProduct('${product.id}')">
+                                <i class="fas fa-edit"></i> Modifier
+                            </button>
+                            <button class="btn btn-${hasPromotion ? 'secondary' : 'primary'} btn-small" onclick="togglePromotion('${product.id}')">
+                                <i class="fas fa-percentage"></i> ${hasPromotion ? 'Retirer' : 'Promouvoir'}
+                            </button>
+                            <button class="btn btn-danger btn-small" onclick="deleteProduct('${product.id}')">
+                                <i class="fas fa-trash"></i> Supprimer
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            productsList.innerHTML = productsHTML;
+        }
+
+        // Fonctions de gestion des produits
+        window.editProduct = function(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            editingProduct = product;
+            
+            document.getElementById('productName').value = product.name;
+            document.getElementById('productDescription').value = product.description || '';
+            document.getElementById('productCategory').value = product.category || '';
+            document.getElementById('productPrice').value = product.currentPrice;
+            
+            if (product.isPromotion) {
+                promotionToggle.classList.add('active');
+                originalPriceGroup.style.display = 'block';
+                document.getElementById('originalPrice').value = product.originalPrice;
+            }
+
+            if (product.mediaUrl) {
+                uploadedMediaUrl = product.mediaUrl;
+                mediaType = product.mediaType;
+                showMediaPreview(product.mediaUrl, product.mediaType);
+            }
+
+            formTitle.textContent = 'Modifier le produit';
+            submitText.textContent = 'Sauvegarder';
+            cancelBtn.style.display = 'block';
+
+            document.querySelector('.form-section').scrollIntoView({ behavior: 'smooth' });
+        };
+
+        window.togglePromotion = async function(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            try {
+                if (product.isPromotion) {
+                    await updateDoc(doc(firestore, 'products', productId), {
+                        isPromotion: false,
+                        currentPrice: product.originalPrice,
+                        updatedAt: serverTimestamp()
+                    });
+                    showNotification('Promotion retirée !', 'success');
+                } else {
+                    const discountPrice = Math.round(product.price * 0.8 * 100) / 100;
+                    await updateDoc(doc(firestore, 'products', productId), {
+                        isPromotion: true,
+                        currentPrice: discountPrice,
+                        originalPrice: product.price,
+                        updatedAt: serverTimestamp()
+                    });
+                    showNotification('Promotion activée ! (-20%)', 'success');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showNotification('Erreur lors de la modification', 'error');
+            }
+        };
+
+        window.deleteProduct = async function(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            if (!confirm(`Êtes-vous sûr de vouloir supprimer "${product.name}" ?`)) {
+                return;
+            }
+
+            try {
+                await deleteDoc(doc(firestore, 'products', productId));
+                showNotification('Produit supprimé !', 'success');
+            } catch (error) {
+                console.error('Erreur:', error);
+                showNotification('Erreur lors de la suppression', 'error');
+            }
+        };
+
+        window.toggleAllPromotions = async function() {
+            if (!confirm('Basculer toutes les promotions ?')) return;
+
+            try {
+                const batch = [];
+                products.forEach(product => {
+                    const newPromotionState = !product.isPromotion;
+                    let updateData = {
+                        isPromotion: newPromotionState,
+                        updatedAt: serverTimestamp()
+                    };
+
+                    if (newPromotionState) {
+                        updateData.currentPrice = Math.round(product.price * 0.8 * 100) / 100;
+                        updateData.originalPrice = product.price;
+                    } else {
+                        updateData.currentPrice = product.originalPrice || product.price;
+                    }
+
+                    batch.push(updateDoc(doc(firestore, 'products', product.id), updateData));
+                });
+
+                await Promise.all(batch);
+                showNotification('Toutes les promotions ont été basculées !', 'success');
+            } catch (error) {
+                console.error('Erreur:', error);
+                showNotification('Erreur lors de l\'opération', 'error');
+            }
+        };
+
+        window.clearAllProducts = async function() {
+            if (!confirm('ATTENTION: Supprimer TOUS les produits ? Cette action est irréversible !')) {
+                return;
+            }
+
+            if (!confirm('Êtes-vous VRAIMENT sûr ? Tapez "SUPPRIMER" dans la prochaine boîte de dialogue.')) {
+                return;
+            }
+
+            const confirmation = prompt('Tapez "SUPPRIMER" pour confirmer:');
+            if (confirmation !== 'SUPPRIMER') {
+                showNotification('Suppression annulée', 'error');
+                return;
+            }
+
+            try {
+                const batch = products.map(product => 
+                    deleteDoc(doc(firestore, 'products', product.id))
+                );
+                
+                await Promise.all(batch);
+                showNotification('Tous les produits ont été supprimés !', 'success');
+            } catch (error) {
+                console.error('Erreur:', error);
+                showNotification('Erreur lors de la suppression', 'error');
+            }
+        };
+
+        function updateStats() {
+            const totalCount = products.length;
+            const promotionCount = products.filter(p => p.isPromotion).length;
+            const totalVal = products.reduce((sum, p) => sum + (p.currentPrice || p.price), 0);
+
+            totalProducts.textContent = totalCount;
+            totalPromotions.textContent = promotionCount;
+            totalValue.textContent = `${totalVal.toFixed(2)}FCFA`;
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Validation en temps réel
+        document.getElementById('productPrice').addEventListener('input', function() {
+            const price = parseFloat(this.value);
+            const originalPriceInput = document.getElementById('originalPrice');
+            
+            if (promotionToggle.classList.contains('active') && price) {
+                const suggestedOriginal = Math.round(price * 1.25 * 100) / 100;
+                if (!originalPriceInput.value) {
+                    originalPriceInput.value = suggestedOriginal;
+                }
+            }
+        });
+
+        document.getElementById('originalPrice').addEventListener('input', function() {
+            const original = parseFloat(this.value);
+            const current = parseFloat(document.getElementById('productPrice').value);
+            
+            if (original && current && original <= current) {
+                showNotification('Le prix original doit être supérieur au prix promotionnel', 'error');
+                this.style.borderColor = '#f56565';
+            } else {
+                this.style.borderColor = '#e2e8f0';
+            }
+        });
+
+        // Raccourcis clavier
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                if (document.getElementById('productName').value.trim()) {
+                    productForm.dispatchEvent(new Event('submit'));
+                }
+            }
+            
+            if (e.key === 'Escape' && editingProduct) {
+                cancelEdit();
+            }
+        });
+
+        // Initialisation
+        loadProducts();
+        
+        setTimeout(() => {
+            showNotification('Interface avec conversion automatique chargée ! 🚀', 'success');
+        }, 1000);
+    </script>
+</body>
+</html>

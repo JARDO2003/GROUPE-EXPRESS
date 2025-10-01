@@ -1,0 +1,2041 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOKO EXPRESS - Repas Universitaires</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #000000;
+            background-image: radial-gradient(circle at 20% 50%, #1a1a1a 0%, transparent 50%), 
+                              radial-gradient(circle at 80% 20%, #262626 0%, transparent 50%),
+                              radial-gradient(circle at 40% 80%, #1a1a1a 0%, transparent 50%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: #f5f5f5;
+            text-align: center;
+            padding: 20px;
+            padding-top: 80px;
+            min-height: 100vh;
+        }
+        
+        /* Photo de profil améliorée dans le bouton */
+        #profile-btn {
+            position: fixed;
+            top: 18px;
+            left: 18px;
+            z-index: 1001;
+            background: linear-gradient(45deg, #0d1538, #5a1a1a, #1a0529, #f40000, #e1306c, #fd1d1d);
+            color: #fff;
+            border: none;
+            border-radius: 50px;
+            padding: 8px 16px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #profile-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+        }
+
+        .profile-avatar {
+            width: 32px !important;
+            height: 32px !important;
+            border-radius: 50% !important;
+            border: 2px solid #fff !important;
+            object-fit: cover !important;
+        }
+        
+        h1 {
+            background: rgba(0, 0, 0, 0.9);
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+            border: 1px solid #262626;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .nav-btn {
+            background: linear-gradient(45deg, #405de6, #833ab4);
+            color: white;
+            border: 1px solid #405de6;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(64, 93, 230, 0.3);
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        
+        .nav-btn:hover {
+            background: linear-gradient(45deg, #3578e5, #9146ff);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(64, 93, 230, 0.4);
+        }
+        
+        /* Styles pour le profil - Design amélioré avec scroll */
+        #profile-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(15px);
+            overflow: hidden;
+        }
+
+        .profile-form-box {
+            background: linear-gradient(145deg, #1a1a1a 0%, #262626 100%);
+            border: 1px solid #405de6;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.9);
+            position: relative;
+            animation: profileSlideIn 0.4s ease-out;
+            color: #f5f5f5;
+            /* Nouvelle approche pour le dimensionnement et scroll */
+            width: min(450px, 90vw);
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @keyframes profileSlideIn {
+            from { opacity: 0; transform: translateY(-50px) scale(0.9);}
+            to   { opacity: 1; transform: translateY(0) scale(1);}
+        }
+
+        .close-profile-btn {
+            position: absolute;
+            top: 15px; right: 15px;
+            background: linear-gradient(45deg, #405de6, #833ab4);
+            color: #fff;
+            font-size: 18px;
+            border: none;
+            border-radius: 50%;
+            width: 32px; height: 32px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10001;
+        }
+        .close-profile-btn:hover { 
+            background: linear-gradient(45deg, #3578e5, #9146ff);
+            transform: scale(1.1);
+        }
+
+        .profile-content {
+            padding: 30px 25px;
+            overflow-y: auto;
+            flex: 1;
+            /* Styles de scroll personnalisés */
+            scrollbar-width: thin;
+            scrollbar-color: #405de6 #1a1a1a;
+        }
+
+        .profile-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .profile-content::-webkit-scrollbar-track {
+            background: #1a1a1a;
+            border-radius: 4px;
+        }
+
+        .profile-content::-webkit-scrollbar-thumb {
+            background: linear-gradient(45deg, #405de6, #833ab4);
+            border-radius: 4px;
+        }
+
+        .profile-content::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(45deg, #3578e5, #9146ff);
+        }
+
+        .profile-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 25px;
+            border-bottom: 1px solid #405de6;
+            background: rgba(64, 93, 230, 0.1);
+            border-radius: 10px;
+            padding: 5px;
+        }
+
+        .profile-tab {
+            background: none;
+            border: none;
+            padding: 12px 20px;
+            margin: 0 5px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #8e8e8e;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .profile-tab.active {
+            color: #fff;
+            background: linear-gradient(45deg, #405de6, #833ab4);
+            box-shadow: 0 2px 10px rgba(64, 93, 230, 0.3);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #f5f5f5;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #405de6;
+            border-radius: 12px;
+            font-size: 14px;
+            background: rgba(26, 26, 26, 0.8);
+            color: #f5f5f5;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #833ab4;
+            box-shadow: 0 0 15px rgba(131, 58, 180, 0.4);
+            background: rgba(26, 26, 26, 1);
+        }
+
+        .photo-preview, .bg-preview {
+            max-width: 120px;
+            max-height: 120px;
+            margin-top: 10px;
+            border-radius: 12px;
+            display: none;
+            border: 2px solid #405de6;
+        }
+
+        .btn-submit {
+            background: linear-gradient(45deg, #405de6, #833ab4);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 0 4px 15px rgba(64, 93, 230, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .btn-submit:hover {
+            background: linear-gradient(45deg, #3578e5, #9146ff);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(64, 93, 230, 0.4);
+        }
+
+        .contact-options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .contact-btn {
+            padding: 15px 20px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .whatsapp-btn {
+            background: linear-gradient(45deg, #25D366, #128C7E);
+            color: white;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+        }
+
+        .call-btn {
+            background: linear-gradient(45deg, #405de6, #833ab4);
+            color: white;
+            box-shadow: 0 4px 15px rgba(64, 93, 230, 0.3);
+        }
+
+        .contact-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .social-share {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .social-btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.3s ease;
+            color: white;
+            font-size: 14px;
+        }
+
+        .share-whatsapp-btn {
+            background: linear-gradient(45deg, #25D366, #128C7E);
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+        }
+
+        .facebook-btn {
+            background: linear-gradient(45deg, #1877F2, #4267B2);
+            box-shadow: 0 4px 15px rgba(24, 119, 242, 0.3);
+        }
+
+        .instagram-btn {
+            background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%);
+            box-shadow: 0 4px 15px rgba(240, 148, 51, 0.3);
+        }
+
+        .social-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .header {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, #405de6, #833ab4);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 20px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+            margin: 0 auto 20px auto;
+            border: 1px solid #405de6;
+        }
+
+        /* Image logo plus grosse */
+        .header-logo {
+            vertical-align: middle;
+            height: 160px !important;
+            width: 160px !important;
+            object-fit: contain;
+            border-radius: 20px;
+            margin-right: 20px;
+            background: #fff;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+            border: 3px solid #405de6;
+            transition: all 0.3s ease;
+        }
+
+        .header-logo:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 35px rgba(64, 93, 230, 0.3);
+        }
+        
+        .container { max-width: 1000px; margin: auto; }
+        
+        .box {
+            border: 1px solid #405de6;
+            padding: 20px;
+            margin: 25px 0;
+            background: linear-gradient(145deg, #1a1a1a 0%, #262626 100%);
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+            color: #f5f5f5;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+        }
+        
+        .box h2 {
+            color: #fff;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 24px;
+            background: linear-gradient(45deg, #405de6, #833ab4);
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(64, 93, 230, 0.3);
+        }
+        
+        .slider-container {
+            display: flex;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            width: 100%;
+            padding: 15px;
+            background: rgba(26, 26, 26, 0.8);
+            border-radius: 15px;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.5);
+            margin: 15px 0;
+            border: 1px solid #333;
+        }
+        
+        .slider-container::-webkit-scrollbar { 
+            height: 8px; 
+            background: rgba(64, 93, 230, 0.2); 
+            border-radius: 4px; 
+        }
+        
+        .slider-container::-webkit-scrollbar-thumb { 
+            background: linear-gradient(45deg, #405de6, #833ab4); 
+            border-radius: 4px; 
+        }
+        
+        .slider { 
+            display: flex; 
+            gap: 20px; 
+            transition: transform 0.5s ease-in-out; 
+            padding: 10px 0; 
+        }
+        
+        .card {
+            background: linear-gradient(145deg, #262626 0%, #1a1a1a 100%);
+            border: 1px solid #405de6;
+            border-radius: 15px;
+            width: 240px;
+            padding: 15px;
+            text-align: center;
+            flex: 0 0 auto;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s ease;
+            color: #f5f5f5;
+            position: relative;
+        }
+        
+        .card:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 15px 35px rgba(64, 93, 230, 0.3);
+            border-color: #833ab4;
+        }
+        
+        .card img { 
+            width: 100%; 
+            height: 160px; 
+            object-fit: cover; 
+            border-radius: 12px; 
+            margin-bottom: 12px;
+            border: 1px solid #333;
+        }
+        
+        .card h3 { 
+            margin: 12px 0; 
+            color: #fff; 
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .card p { 
+            color: #b3b3b3; 
+            font-size: 14px; 
+            margin-bottom: 15px; 
+            line-height: 1.4;
+        }
+        
+        .card .price { 
+            font-weight: bold; 
+            color: #405de6; 
+            font-size: 20px; 
+            margin: 10px 0;
+            background: rgba(64, 93, 230, 0.1);
+            padding: 8px;
+            border-radius: 8px;
+        }
+        
+        .card button {
+            background: linear-gradient(45deg, #405de6, #833ab4);
+            color: white;
+            padding: 12px;
+            border: none;
+            width: 100%;
+            cursor: pointer;
+            margin-top: 10px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(64, 93, 230, 0.3);
+        }
+        
+        .card button:hover { 
+            background: linear-gradient(45deg, #3578e5, #9146ff);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(64, 93, 230, 0.4);
+        }
+
+        .gbere-btn {
+            position: relative;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+            font-size: 14px;
+            animation: gbereGlow 2s infinite alternate;
+        }
+        
+        @keyframes gbereGlow {
+            0% { box-shadow: 0 0 10px rgba(255, 107, 107, 0.5), 0 0 20px rgba(255, 107, 107, 0.3); }
+            100% { box-shadow: 0 0 20px rgba(255, 107, 107, 0.8), 0 0 30px rgba(255, 107, 107, 0.5); }
+        }
+
+        #show-customer-orders-btn {
+            background: linear-gradient(45deg, #10ac84, #01a3a4);
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(16, 172, 132, 0.3);
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        #show-customer-orders-btn:hover {
+            background: linear-gradient(45deg, #0e9f79, #01939a);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 172, 132, 0.4);
+        }
+
+        /* Commandes client et commandes styles sombres */
+        .customer-orders-box, .order-box {
+            background: linear-gradient(145deg, #1a1a1a 0%, #262626 100%);
+            border: 1px solid #10ac84;
+            border-radius: 20px;
+            padding: 25px;
+            margin: 20px 0;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7);
+            color: #f5f5f5;
+        }
+
+        .customer-orders-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+            max-width: 500px;
+            width: 90%;
+            max-height: 70vh;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .customer-orders-box.show {
+            display: block !important;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .customer-orders-box h2, .customer-orders-box h3, .order-box h2 {
+            color: #10ac84;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+            border-bottom: 2px solid #10ac84;
+            padding-bottom: 15px;
+        }
+
+        .order-box h2 {
+            color: #405de6;
+            border-bottom-color: #405de6;
+        }
+
+        .customer-order-item, .order-item {
+            background: rgba(26, 26, 26, 0.8);
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            color: #f5f5f5;
+        }
+
+        .order-items {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 15px;
+            background: rgba(26, 26, 26, 0.8);
+        }
+
+        .order-total {
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            color: #405de6;
+            margin: 15px 0;
+            padding: 15px;
+            background: rgba(64, 93, 230, 0.1);
+            border-radius: 12px;
+            border: 1px solid #405de6;
+        }
+
+        .customer-orders-clear {
+            background: linear-gradient(45df, #405de6, #833ab4);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(64, 93, 230, 0.3);
+        }
+
+        .customer-orders-clear:hover {
+            background: linear-gradient(45deg, #3578e5, #9146ff);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(64, 93, 230, 0.4);
+        }
+
+        .close-orders-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: linear-gradient(45deg, #405de6, #833ab4);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .close-orders-btn:hover {
+            background: linear-gradient(45deg, #3578e5, #9146ff);
+            transform: scale(1.1);
+        }
+
+        /* Inscription obligatoire - Modal de bienvenue */
+        .welcome-modal {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 15000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(15px);
+        }
+
+        .welcome-content {
+            background: linear-gradient(145deg, #1a1a1a 0%, #262626 100%);
+            border: 2px solid #405de6;
+            border-radius: 25px;
+            padding: 40px 30px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.9);
+            animation: welcomeSlideIn 0.6s ease-out;
+        }
+
+        @keyframes welcomeSlideIn {
+            from { opacity: 0; transform: translateY(-100px) scale(0.8); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .welcome-content h1 {
+            background: linear-gradient(45deg, #405de6, #833ab4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        .welcome-content p {
+            color: #b3b3b3;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .welcome-btn {
+            background: linear-gradient(45deg, #405de6, #833ab4);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(64, 93, 230, 0.4);
+        }
+
+        .welcome-btn:hover {
+            background: linear-gradient(45deg, #3578e5, #9146ff);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(64, 93, 230, 0.5);
+        }
+
+        /* Responsive amélioré */
+        @media screen and (max-width: 768px) {
+            body { 
+                padding: 15px; 
+                padding-top: 70px;
+            }
+            .header { 
+                font-size: 20px; 
+                padding: 15px; 
+            }
+            .header-logo {
+                height: 120px !important;
+                width: 120px !important;
+                margin-right: 15px;
+            }
+            .container { 
+                max-width: 100%; 
+                padding: 0; 
+            }
+            .box { 
+                padding: 15px; 
+                margin: 15px 0; 
+            }
+            .card { 
+                width: 180px; 
+                padding: 12px; 
+            }
+            .card img { 
+                height: 120px; 
+            }
+            .nav-buttons { 
+                gap: 10px; 
+                margin-top: 10px;
+            }
+            .nav-btn { 
+                padding: 10px 18px; 
+                font-size: 13px; 
+            }
+            
+            #profile-btn {
+                top: 12px;
+                left: 12px;
+                padding: 6px 12px;
+                font-size: 13px;
+            }
+            
+            .profile-avatar {
+                width: 28px !important;
+                height: 28px !important;
+            }
+            
+            .profile-form-box {
+                width: 95%;
+                max-height: 95vh;
+            }
+
+            .profile-content {
+                padding: 25px 20px;
+            }
+
+            .customer-orders-box {
+                width: 95%;
+                max-height: 80vh;
+            }
+
+            .welcome-content {
+                padding: 30px 20px;
+                width: 95%;
+            }
+
+            .welcome-content h1 {
+                font-size: 24px;
+            }
+        }
+        
+        @media screen and (max-width: 400px) {
+            body { 
+                padding: 10px; 
+                padding-top: 65px;
+            }
+            .card { 
+                width: 150px; 
+            }
+            .card img { 
+                height: 100px; 
+            }
+            .header { 
+                font-size: 18px; 
+                padding: 12px; 
+            }
+            
+            .header-logo {
+                height: 100px !important;
+                width: 100px !important;
+                margin-right: 10px;
+            }
+            
+            #profile-btn {
+                top: 8px;
+                left: 8px;
+                padding: 5px 10px;
+                font-size: 12px;
+            }
+            
+            .profile-avatar {
+                width: 24px !important;
+                height: 24px !important;
+            }
+
+            .welcome-content {
+                padding: 25px 15px;
+            }
+
+            .welcome-content h1 {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Modal de bienvenue obligatoire -->
+    <div id="welcome-modal" class="welcome-modal">
+        <div class="welcome-content">
+            <h1>🍽️ Bienvenue chez LOKO EXPRESS</h1>
+            <p>Pour commander vos délicieux repas, vous devez d'abord créer votre profil. C'est rapide et gratuit !</p>
+            <button class="welcome-btn" onclick="startRegistration()">✨ Créer mon profil</button>
+        </div>
+    </div>
+
+    <!-- Overlay profil utilisateur avec onglets -->
+    <div id="profile-overlay">
+        <div class="profile-form-box">
+            <button class="close-profile-btn" onclick="closeProfile()">×</button>
+            
+            <div class="profile-content">
+                <div class="profile-tabs">
+                    <button class="profile-tab active" onclick="showTab('profile-tab')">Profil</button>
+                    <button class="profile-tab" onclick="showTab('contact-tab')">Contact</button>
+                    <button class="profile-tab" onclick="showTab('share-tab')">Partager</button>
+                </div>
+                
+                <!-- Onglet Profil -->
+                <div id="profile-tab" class="tab-content active">
+                    <form id="profile-form">
+                        <div class="form-group">
+                            <label>Nom *</label>
+                            <input type="text" id="profile-lastname" required placeholder="Votre nom de famille">
+                        </div>
+                        <div class="form-group">
+                            <label>Prénom *</label>
+                            <input type="text" id="profile-firstname" required placeholder="Votre prénom">
+                        </div>
+                        <div class="form-group">
+                            <label>Email ou WhatsApp *</label>
+                            <input type="text" id="profile-email" required placeholder="votre@email.com ou +225...">
+                        </div>
+                        <div class="form-group">
+                            <label>Photo de profil</label>
+                            <input type="file" id="profile-photo" accept="image/*" onchange="previewPhoto()">
+                            <img id="profile-photo-preview" class="photo-preview">
+                        </div>
+                        <div class="form-group">
+                            <label>Fond d'écran personnalisé</label>
+                            <input type="file" id="profile-bg" accept="image/*" onchange="previewBg()">
+                            <img id="profile-bg-preview" class="bg-preview">
+                        </div>
+                        <button type="submit" class="btn-submit">✅ Sauvegarder mon profil</button>
+                    </form>
+                </div>
+                
+                <!-- Onglet Contact -->
+                <div id="contact-tab" class="tab-content">
+                    <h3 style="color: #10ac84; margin-bottom: 20px; text-align: center;">📞 Contactez-nous</h3>
+                    <div class="contact-options">
+                        <a class="contact-btn whatsapp-btn" href="https://wa.me/2250719983044?text=Bonjour%20LOKO%20Express%20!" target="_blank">
+                            💬 WhatsApp
+                        </a>
+                        <a class="contact-btn call-btn" href="tel:0719983044">
+                            📞 Appeler
+                        </a>
+                    </div>
+                    <div style="text-align:center; color:#b3b3b3; font-size:14px; margin-top:15px;">
+                        Numéro WhatsApp et appel : <b style="color:#10ac84;">0719983044</b>
+                    </div>
+                </div>
+                
+                <!-- Onglet Partager -->
+                <div id="share-tab" class="tab-content">
+                    <h3 style="color: #405de6; margin-bottom: 16px; text-align: center;">🎉 Inviter un ami</h3>
+                    <div class="social-share">
+                        <a class="social-btn share-whatsapp-btn" href="https://wa.me/?text=Rejoins%20LOKO%20Express%20ici%20:%20https://loko-blush.vercel.app/" target="_blank">
+                            💚 WhatsApp
+                        </a>
+                        <a class="social-btn facebook-btn" href="https://www.facebook.com/sharer/sharer.php?u=https://loko-blush.vercel.app/" target="_blank">
+                            👍 Facebook
+                        </a>
+                        <a class="social-btn instagram-btn" href="https://www.instagram.com/?url=https://loko-blush.vercel.app/" target="_blank">
+                            📸 Instagram
+                        </a>
+                    </div>
+                    <div style="text-align:center; margin-top:15px; color:#8e8e8e; font-size:13px;">
+                        <b style="color:#405de6;">https://loko-blush.vercel.app/</b>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bouton profil -->
+    <button id="profile-btn" onclick="openProfile()">👤 Mon profil</button>
+
+    <!-- Header -->
+    <div class="header">
+        <img src="image/logo exp.jpg" alt="Logo LOKO EXPRESS" class="header-logo">
+        LOKO EXPRESS 
+    </div>
+
+    <!-- Boutons de navigation -->
+    <div class="nav-buttons">
+        <button class="nav-btn" onclick="location.href='apropos.html'">À propos</button>
+        <button class="nav-btn" onclick="location.href='actualité.html'">Actualité</button>
+        <button class="nav-btn" onclick="location.href='fournisseur.html'">Accès fournisseur</button>
+        <button class="nav-btn gbere-btn" onclick="location.href='actualité.html'">ExpressUnion</button>
+        <button id="show-customer-orders-btn" onclick="toggleCustomerOrders()">🧾 Mes commandes</button>
+    </div>
+
+    <div class="container">
+        <!-- Catégorie A - Spaghetti et Petit pois -->
+        <div class="box category-a">
+            <h2>Catégorie A - Pâtes & Petit pois</h2>
+            <div class="slider-container" id="category-a-food">
+                <div class="slider">
+                    <div class="card">
+                        <img src="image/spaghetti rognon.jpg" alt="Spaghetti rognon">
+                        <h3>Spaghetti rognon</h3>
+                        <p>Spaghetti préparé avec du rognon</p>
+                        <div class="price">500 FCFA</div>
+                        <button onclick="addToCart('Spaghetti rognon', 500, 'A')">Commander</button>
+                    </div>
+                    <div class="card">
+                        <img src="image/spaghet foi.jpg" alt="Spaghetti foi">
+                        <h3>Spaghetti foi</h3>
+                        <p>Spaghetti préparé avec du foie</p>
+                        <div class="price">500 FCFA</div>
+                        <button onclick="addToCart('Spaghetti foi', 500, 'A')">Commander</button>
+                    </div>
+                    <div class="card">
+                        <img src="image/spagheti oeuf grilll.jpg" alt="Spaghetti rognon + œuf">
+                        <h3>Spaghetti rognon + œuf</h3>
+                        <p>Spaghetti avec rognon et œuf grillé</p>
+                        <div class="price">750 FCFA</div>
+                        <button onclick="addToCart('Spaghetti rognon + œuf grillé', 750, 'A')">Commander</button>
+                    </div>
+                    <div class="card">
+                        <img src="image/spaghet foi.jpg" alt="Spaghetti foi + œuf">
+                        <h3>Spaghetti foi + œuf</h3>
+                        <p>Spaghetti avec foi et œuf grillé</p>
+                        <div class="price">750 FCFA</div>
+                        <button onclick="addToCart('Spaghetti foi + œuf grillé', 750, 'A')">Commander</button>
+                    </div>
+                    <div class="card">
+                        <img src="image/spaghetti viande.jpg" alt="Spaghetti viande">
+                        <h3>Spaghetti viande</h3>
+                        <p>Spaghetti préparé avec de la viande</p>
+                        <div class="price">500 FCFA</div>
+                        <button onclick="addToCart('Spaghetti viande', 500, 'A')">Commander</button>
+                    </div>
+                    <div class="card">
+                        <img src="image/petit poid rogno,.jpg" alt="Petit pois rognon">
+                        <h3>Petit pois rognon</h3>
+                        <p>Petit pois préparé avec du rognon</p>
+                        <div class="price">1000 FCFA</div>
+                        <button onclick="addToCart('Petit pois rognon', 1000, 'A')">Commander</button>
+                    </div>
+                    <div class="card">
+                        <img src="image/petit poid oeuf.jpg" alt="Petit pois œuf">
+                        <h3>Petit pois œuf</h3>
+                        <p>Petit pois préparé avec des œufs</p>
+                        <div class="price">1000 FCFA</div>
+                        <button onclick="addToCart('Petit pois œuf', 1000, 'A')">Commander</button>
+                    </div>
+                    <div class="card">
+                        <img src="image/petit poid viande.jpg" alt="Petit pois viande">
+                        <h3>Petit pois viande</h3>
+                        <p>Petit pois préparé avec de la viande</p>
+                        <div class="price">1500 FCFA</div>
+                        <button onclick="addToCart('Petit pois viande', 1500, 'A')">Commander</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Catégorie B - Tchèpe au poisson -->
+        <div class="box category-b">
+            <h2>Catégorie B - Tchèpe</h2>
+            <div class="slider-container" id="category-b-food">
+                <div class="slider">
+                    <div class="card">
+                        <img src="image/tchep poisson.jpg" alt="Tchèpe au poisson">
+                        <h3>Tchèpe au poisson</h3>
+                        <p>Riz sauce tomate avec poisson frais</p>
+                        <div class="price">500 FCFA</div>
+                        <button onclick="addToCart('Tchèpe au poisson', 500, 'B')">Commander</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Catégorie C - Attieke, Alloco, Igname et Panini -->
+        <div class="box category-c">
+            <h2>Catégorie C - Attieke / Alloco / Igname / Panini</h2>
+            <div class="slider-container" id="category-c-food">
+                <div class="slider">
+                    <div class="card">
+                        <img src="image/atieke poulet.jpg" alt="Attieke patte de poulet">
+                        <h3>Attieke patte de poulet</h3>
+                        <p>Attieke servi avec patte de poulet</p>
+                        <div class="price">1000 FCFA</div>
+                        <button onclick="addToCart('Attieke patte de poulet', 1000, 'C')">Commander</button>
+                    </div>
+                    <div class="card">
+                        <img src="image/atieke poulet.jpg" alt="Attieke dindon">
+                        <h3>Attieke dindon</h3>
+                        <p>Attieke servi avec du dindon</p>
+                        <div class="price">1000 FCFA</div>
+                        <button onclick="addToCart('Attieke dindon', 1000, 'C')">Commander</button>
+                    </div>
+                    <div class="card">
+                        <img src="image/atieke poulet.jpg" alt="Attieke poulet">
+                        <h3>Attieke poulet</h3>
+                        <p>Attieke servi avec du poulet</p>
+                        <div class="price">1000 FCFA</div>
+                        <button onclick="addToCart('Attieke poulet', 1000, 'C')">Commander</button>
+                    </div>
+                    <div class="card">
+                        <img src="image/atieke alloko.jpg" alt="Attieke poisson">
+                        <h3>Attieke poisson</h3>
+                        <p>Attieke servi avec du poisson</p>
+                        <div class="price">1000 FCFA</div>
+                        <button onclick="addToCart('Attieke poisson', 1000, 'C')">Commander</button>
+                    </div>
+                    <div class="card">
+                        <img src="image/panini pain rond.jpg" alt="Panini pain rond">
+                        <h3>Panini pain rond</h3>
+                        <p>Sandwich panini avec pain rond</p>
+                        <div class="price">500 FCFA</div>
+                        <button onclick="addToCart('Panini pain rond', 500, 'C')">Commander</button>
+                    </div>
+                    <div class="card">
+                        <img src="image/panini pain sucre.jpg" alt="Panini pain sucré">
+                        <h3>Panini pain sucré</h3>
+                        <p>Sandwich panini avec pain sucré</p>
+                        <div class="price">500 FCFA</div>
+                        <button onclick="addToCart('Panini pain sucré', 500, 'C')">Commander</button>
+                    </div>
+                    <div class="card">
+                        <img src="image/charwama.jpg" alt="Charwama">
+                        <h3>Charwama</h3>
+                        <p>Sandwich kebab à la viande avec légumes</p>
+                        <div class="price">1500 FCFA</div>
+                        <button onclick="addToCart('Charwama', 1500, 'C')">Commander</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Catégorie D - Tchèpe et Riz sauce -->
+        <div class="box category-d">
+            <h2>Catégorie D - Tchèpe et Riz sauce</h2>
+            <div class="slider-container" id="category-d-food">
+                <div class="slider">
+                    <div class="card">
+                        <img src="image/tchep poisson.jpg" alt="Tchèpe avec poisson">
+                        <h3>Tchèpe avec poisson</h3>
+                        <p>Tchèpe traditionnel préparé avec du poisson</p>
+                        <div class="price">800 FCFA</div>
+                        <button onclick="addToCart('Tchèpe traditionnel préparé avec poisson', 800, 'D')">Commander</button>
+                    </div>
+                    <div class="card">
+                        <img src="image/tchep poulet.jpg" alt="Tchèpe avec poulet">
+                        <h3>Tchèpe avec poulet</h3>
+                        <p>Tchèpe traditionnel préparé avec du poulet</p>
+                        <div class="price">800 FCFA</div>
+                        <button onclick="addToCart('Tchèpe avec poulet', 800, 'D')">Commander</button>
+                    </div>
+                    <div class="card">
+                        <img src="image/riz  arachide.jpg" alt="Riz sauce arachide">
+                        <h3>Riz sauce arachide</h3>
+                        <p>Riz blanc servi avec sauce arachide</p>
+                        <div class="price">800 FCFA</div>
+                        <button onclick="addToCart('Riz sauce arachide', 800, 'D')">Commander</button>
+                    </div>
+                    <div class="card">
+                        <img src="image/riz souce feuille.jpg" alt="Riz sauce feuille">
+                        <h3>Riz sauce feuille</h3>
+                        <p>Riz blanc servi avec sauce feuille</p>
+                        <div class="price">800 FCFA</div>
+                        <button onclick="addToCart('Riz sauce feuille', 800, 'D')">Commander</button>
+                    </div>
+                    <div class="card">
+                        <img src="image/riz sauc e.jpg" alt="Riz sauce tomate">
+                        <h3>Riz sauce tomate</h3>
+                        <p>Riz blanc servi avec sauce tomate</p>
+                        <div class="price">800 FCFA</div>
+                        <button onclick="addToCart('Riz sauce tomate', 800, 'D')">Commander</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Catégorie E - Coque -->
+        <div class="box category-e">
+            <h2>Catégorie E - Coque</h2>
+            <div class="slider-container" id="category-e-food">
+                <div class="slider">
+                    <div class="card">
+                        <img src="image/porc au .jpg" alt="Coque spéciale">
+                        <h3>Coque spéciale</h3>
+                        <p>Spécialité locale traditionnelle</p>
+                        <div class="price">1000 FCFA</div>
+                        <button onclick="addToCart('Coque spéciale', 1000, 'E')">Commander</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Catégorie F - Porc au four -->
+        <div class="box category-f">
+            <h2>Catégorie F - Porc au four</h2>
+            <div class="slider-container" id="category-f-food">
+                <div class="slider">
+                    <div class="card">
+                        <img src="image/porc au .jpg" alt="Porc au four + Attiéké">
+                        <h3>Porc au four + Attiéké</h3>
+                        <p>Porc au four servi avec Attiéké</p>
+                        <div class="price">1000 FCFA</div>
+                        <button onclick="addToCart('Porc au four + Attiéké', 1000, 'F')">Commander</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+     
+        <!-- Catégorie G - Plats traditionnels -->
+        <div class="box category-g">
+            <h2>Catégorie G - Plats traditionnels</h2>
+            <div class="slider-container" id="category-g-food">
+                <div class="slider">
+                    <div class="card">
+                        <img src="image/foutou poisson.jpg" alt="Foufou sauce claire poisson frais">
+                        <h3>Foufou sauce claire</h3>
+                        <p>Foufou avec sauce claire et poisson frais</p>
+                        <div class="price">1000 FCFA</div>
+                        <button onclick="addToCart('Foufou sauce claire poisson frais', 1000, 'G')">Commander</button>
+                    </div>
+                    <div class="card">
+                        <img src="image/placali kope.jpg" alt="Placali sauce kôpè">
+                        <h3>Placali sauce kôpè</h3>
+                        <p>Placali traditionnel avec sauce kôpè</p>
+                        <div class="price">500 FCFA</div>
+                        <button onclick="addToCart('Placali sauce kôpè', 500, 'G')">Commander</button>
+                    </div>
+                    <div class="card">
+                        <img src="image/riz auberg.jpg" alt="Riz sauce aubergine">
+                        <h3>Riz sauce aubergine</h3>
+                        <p>Riz blanc servi avec sauce aubergine</p>
+                        <div class="price">500 FCFA</div>
+                        <button onclick="addToCart('Riz sauce aubergine', 500, 'G')">Commander</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Catégorie H - Desserts -->
+        <div class="box category-h">
+            <h2>Catégorie H - Desserts</h2>
+            <div class="slider-container" id="category-h-food">
+                <div class="slider">
+                    <div class="card">
+                        <img src="image/pankate.jpg" alt="Pancakes">
+                        <h3>Pancakes</h3>
+                        <p>Délicieuses crêpes épaisses américaines</p>
+                        <div class="price">500 FCFA</div>
+                        <button onclick="addToCart('Pancakes', 500, 'H')">Commander</button>
+                    </div>
+                    <div class="card">
+                        <img src="image/crepes.jpg" alt="Crêpes">
+                        <h3>Crêpes</h3>
+                        <p>Fines crêpes traditionnelles</p>
+                        <div class="price">500 FCFA</div>
+                        <button onclick="addToCart('Crêpes', 500, 'H')">Commander</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Case de commandes du client -->
+        <div class="customer-orders-box" id="customer-orders-box" style="display:none;">
+            <button class="close-orders-btn" onclick="toggleCustomerOrders()">×</button>
+            <h2>Mes Commandes récentes</h2>
+            <div class="customer-orders-list" id="customer-orders-list"></div>
+            <button class="customer-orders-clear" onclick="clearCustomerOrders()">Vider la liste</button>
+        </div>
+
+        <!-- Boîte de commande -->
+        <div class="order-box" id="order-box" style="display:none;">
+            <h2>Votre Commande</h2>
+            <div class="order-items" id="order-items">
+                <div class="order-item" id="empty-cart">
+                    Votre panier est vide
+                </div>
+            </div>
+            <div class="order-total" id="order-total">
+                Total: 0 FCFA
+            </div>
+            <!-- Formulaire de commande -->
+            <form id="order-form">
+                <div class="form-group">
+                    <input type="text" id="name" readonly style="background: rgba(64, 93, 230, 0.1); border: 1px solid #405de6; color: #f5f5f5;">
+                </div>
+                <button type="submit" class="btn-submit">Confirmer la commande</button>
+            </form>
+        </div>
+    </div>
+<script>
+// =====================
+// INITIALISATION FIREBASE
+// =====================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-database.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-analytics.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyAKnGEiUTHX6rQzIN-2zi_Ui4YJFv4U_PQ",
+    authDomain: "kolo-livraison.firebaseapp.com",
+    databaseURL: "https://kolo-livraison-default-rtdb.firebaseio.com",
+    projectId: "kolo-livraison",
+    storageBucket: "kolo-livraison.firebasestorage.app",
+    messagingSenderId: "78667636312",
+    appId: "1:78667636312:web:e8d3e05ad03858b6a2342d",
+    measurementId: "G-R79LC3XQL4"
+};
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const db = getDatabase(app);
+
+// ============ VARIABLES GLOBALES ============
+let userProfile = safeGetFromStorage('userProfile', null);
+let cart = [];
+let total = 0;
+let customerOrders = safeGetFromStorage('customerOrders', []);
+let orderCountByCategory = safeGetFromStorage('orderCountByCategory', {});
+let currentCart = [];
+let isRegistered = false;
+
+// ============ GESTION SÉCURISÉE DU STORAGE ============
+
+// Fonction pour récupérer en toute sécurité depuis localStorage
+function safeGetFromStorage(key, defaultValue) {
+    try {
+        const item = localStorage.getItem(key);
+        return item ? JSON.parse(item) : defaultValue;
+    } catch (error) {
+        console.warn(`Erreur lecture localStorage pour ${key}:`, error);
+        return defaultValue;
+    }
+}
+
+// Fonction pour sauvegarder en toute sécurité dans localStorage
+function safeSetToStorage(key, value) {
+    try {
+        const jsonString = JSON.stringify(value);
+        
+        // Vérifier la taille approximative (1 caractère ≈ 2 bytes en UTF-16)
+        const sizeInBytes = new Blob([jsonString]).size;
+        const sizeInMB = sizeInBytes / (1024 * 1024);
+        
+        if (sizeInMB > 4) { // Limite à 4MB pour être sûr
+            console.warn(`Données trop volumineuses pour ${key} (${sizeInMB.toFixed(2)}MB)`);
+            if (key === 'customerOrders') {
+                // Garder seulement les 20 dernières commandes
+                const limitedOrders = Array.isArray(value) ? value.slice(0, 20) : value;
+                localStorage.setItem(key, JSON.stringify(limitedOrders));
+                console.info('Commandes limitées à 20 pour économiser l\'espace');
+                return true;
+            }
+            return false;
+        }
+        
+        localStorage.setItem(key, jsonString);
+        return true;
+    } catch (error) {
+        if (error.name === 'QuotaExceededError') {
+            console.error('Quota localStorage dépassé pour', key);
+            handleQuotaExceeded(key, value);
+            return false;
+        } else {
+            console.error(`Erreur sauvegarde localStorage pour ${key}:`, error);
+            return false;
+        }
+    }
+}
+
+// Gestion du dépassement de quota
+function handleQuotaExceeded(key, value) {
+    try {
+        if (key === 'customerOrders' && Array.isArray(value)) {
+            // Garder seulement les 10 dernières commandes
+            const reducedOrders = value.slice(0, 10);
+            localStorage.setItem(key, JSON.stringify(reducedOrders));
+            customerOrders = reducedOrders;
+            alert('⚠️ Espace de stockage limité. Seules les 10 dernières commandes sont conservées.');
+        } else if (key === 'userProfile') {
+            // Pour le profil, essayer de sauvegarder sans les images
+            const profileWithoutImages = { ...value };
+            delete profileWithoutImages.photo;
+            delete profileWithoutImages.bg;
+            localStorage.setItem(key, JSON.stringify(profileWithoutImages));
+            alert('⚠️ Profil sauvegardé sans les images pour économiser l\'espace.');
+        } else {
+            alert('⚠️ Espace de stockage insuffisant. Certaines données n\'ont pas pu être sauvegardées.');
+        }
+    } catch (retryError) {
+        console.error('Impossible de sauvegarder même avec des données réduites:', retryError);
+        alert('⚠️ Erreur de sauvegarde. Veuillez vider le cache de votre navigateur.');
+    }
+}
+
+// Nettoyer le localStorage si nécessaire
+function cleanupStorage() {
+    try {
+        // Limiter les commandes à 30 maximum
+        if (customerOrders.length > 30) {
+            customerOrders = customerOrders.slice(0, 30);
+            safeSetToStorage('customerOrders', customerOrders);
+        }
+        
+        // Calculer l'utilisation approximative
+        let totalSize = 0;
+        for (let key in localStorage) {
+            if (localStorage.hasOwnProperty(key)) {
+                totalSize += localStorage[key].length;
+            }
+        }
+        
+        // Si plus de 4MB utilisés, nettoyer
+        if (totalSize > 4 * 1024 * 1024) {
+            customerOrders = customerOrders.slice(0, 15);
+            safeSetToStorage('customerOrders', customerOrders);
+            console.info('Nettoyage automatique du stockage effectué');
+        }
+    } catch (error) {
+        console.error('Erreur lors du nettoyage:', error);
+    }
+}
+
+// ============ INSCRIPTION OBLIGATOIRE ============
+
+// Vérifie si l'utilisateur est inscrit
+function checkRegistration() {
+    if (userProfile && userProfile.lastname && userProfile.firstname && userProfile.email) {
+        isRegistered = true;
+        hideWelcomeModal();
+        applyUserProfile();
+        fillOrderFormWithProfile();
+    } else {
+        isRegistered = false;
+        showWelcomeModal();
+    }
+}
+
+// Affiche le modal de bienvenue
+function showWelcomeModal() {
+    document.getElementById('welcome-modal').style.display = 'flex';
+}
+
+// Cache le modal de bienvenue
+function hideWelcomeModal() {
+    document.getElementById('welcome-modal').style.display = 'none';
+}
+
+// Démarre l'inscription
+function startRegistration() {
+    hideWelcomeModal();
+    showProfileForm();
+}
+
+// Bloque les commandes si pas inscrit
+function requireRegistration() {
+    if (!isRegistered) {
+        alert('⚠️ Vous devez d\'abord créer votre profil pour commander !');
+        showWelcomeModal();
+        return false;
+    }
+    return true;
+}
+
+// ============ PROFIL UTILISATEUR ============
+
+// Affiche le formulaire de profil
+function showProfileForm() {
+    document.getElementById('profile-overlay').style.display = 'flex';
+    if (userProfile) {
+        document.getElementById('profile-lastname').value = userProfile.lastname || '';
+        document.getElementById('profile-firstname').value = userProfile.firstname || '';
+        document.getElementById('profile-email').value = userProfile.email || '';
+        let photoPreview = document.getElementById('profile-photo-preview');
+        if (userProfile.photo && photoPreview) {
+            photoPreview.src = userProfile.photo;
+            photoPreview.style.display = "block";
+        }
+        let bgPreview = document.getElementById('profile-bg-preview');
+        if (userProfile.bg && bgPreview) {
+            bgPreview.src = userProfile.bg;
+            bgPreview.style.display = "block";
+        }
+    }
+}
+
+// Ferme l'overlay de profil
+function hideProfileForm() {
+    // Empêche la fermeture si pas encore inscrit
+    if (!isRegistered) {
+        alert('⚠️ Vous devez terminer votre inscription avant de continuer !');
+        return;
+    }
+    document.getElementById('profile-overlay').style.display = 'none';
+}
+
+// Ouvre l'onglet/tabs
+function showTab(tabName) {
+    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+    document.querySelectorAll('.profile-tab').forEach(tab => tab.classList.remove('active'));
+    document.getElementById(tabName).classList.add('active');
+    event && event.target && event.target.classList.add('active');
+}
+
+// Applique l'image et le bg du profil à l'UI
+function applyUserProfile() {
+    if (userProfile) {
+        if (userProfile.bg) {
+            document.body.style.backgroundImage = `url('${userProfile.bg}')`;
+        }
+        let profileBtn = document.getElementById('profile-btn');
+        if (profileBtn) {
+            if (userProfile.photo) {
+                profileBtn.innerHTML = `<img src="${userProfile.photo}" class="profile-avatar"> ${userProfile.firstname || 'Mon profil'}`;
+            } else {
+                profileBtn.innerHTML = `👤 ${userProfile.firstname || 'Mon profil'}`;
+            }
+        }
+    }
+}
+
+// Prévisualisation de la photo de profil avec compression
+function previewPhoto() {
+    let fileInput = document.getElementById('profile-photo');
+    if (fileInput && fileInput.files[0]) {
+        let reader = new FileReader();
+        reader.onload = function(e) {
+            // Compression de l'image
+            compressImage(e.target.result, (compressedImage) => {
+                let preview = document.getElementById('profile-photo-preview');
+                if (preview) {
+                    preview.src = compressedImage;
+                    preview.style.display = 'block';
+                }
+            });
+        };
+        reader.readAsDataURL(fileInput.files[0]);
+    }
+}
+
+// Prévisualisation du fond avec compression
+function previewBg() {
+    let fileInput = document.getElementById('profile-bg');
+    if (fileInput && fileInput.files[0]) {
+        let reader = new FileReader();
+        reader.onload = function(e) {
+            // Compression de l'image
+            compressImage(e.target.result, (compressedImage) => {
+                let preview = document.getElementById('profile-bg-preview');
+                if (preview) {
+                    preview.src = compressedImage;
+                    preview.style.display = 'block';
+                }
+                document.body.style.backgroundImage = `url(${compressedImage})`;
+                userProfile = userProfile || {};
+                userProfile.bg = compressedImage;
+                safeSetToStorage('userProfile', userProfile);
+            });
+        };
+        reader.readAsDataURL(fileInput.files[0]);
+    }
+}
+
+// Fonction de compression d'image
+function compressImage(src, callback, quality = 0.6, maxWidth = 800) {
+    const img = new Image();
+    img.onload = function() {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Calculer les nouvelles dimensions
+        let { width, height } = img;
+        if (width > maxWidth) {
+            height = (height * maxWidth) / width;
+            width = maxWidth;
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        
+        // Dessiner l'image compressée
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        // Convertir en data URL avec compression
+        const compressedSrc = canvas.toDataURL('image/jpeg', quality);
+        callback(compressedSrc);
+    };
+    img.src = src;
+}
+
+// Remplit le champ nom sur la commande avec le profil
+function fillOrderFormWithProfile() {
+    if (userProfile) {
+        let nameField = document.getElementById('name');
+        if (nameField) {
+            nameField.value = (userProfile.firstname || "") + ' ' + (userProfile.lastname || "");
+        }
+    }
+}
+
+// Sauvegarde le profil utilisateur
+function saveProfile(e) {
+    e.preventDefault();
+    let lastname = document.getElementById('profile-lastname').value.trim();
+    let firstname = document.getElementById('profile-firstname').value.trim();
+    let email = document.getElementById('profile-email').value.trim();
+
+    if (!lastname || !firstname || !email) {
+        alert('⚠️ Tous les champs marqués d\'un * sont obligatoires !');
+        return;
+    }
+
+    let photo = document.getElementById('profile-photo-preview').src || null;
+    let bg = userProfile && userProfile.bg ? userProfile.bg : null;
+
+    userProfile = {
+        lastname, firstname, email,
+        photo: (photo && photo.startsWith('data')) ? photo : null,
+        bg: (bg && bg.startsWith('data')) ? bg : null
+    };
+    
+    if (safeSetToStorage('userProfile', userProfile)) {
+        isRegistered = true;
+        hideProfileForm();
+        applyUserProfile();
+        fillOrderFormWithProfile();
+        alert('✅ Profil sauvegardé avec succès ! Bienvenue chez LOKO EXPRESS !');
+    } else {
+        alert('⚠️ Erreur lors de la sauvegarde du profil. Les images sont peut-être trop volumineuses.');
+    }
+}
+
+// ============ PANIER ET COMMANDES ============
+
+// Génère un code de commande par catégorie
+function generateOrderCode(category) {
+    if (!orderCountByCategory[category]) orderCountByCategory[category] = 0;
+    orderCountByCategory[category]++;
+    safeSetToStorage('orderCountByCategory', orderCountByCategory);
+    let countStr = String(orderCountByCategory[category]).padStart(3, '0');
+    return `#${countStr}${category}`;
+}
+
+// Demande quantité à l'utilisateur avant ajout panier
+function promptAddToCart(name, price, category) {
+    if (!requireRegistration()) return;
+    
+    let qte = prompt("Choisir la quantité (ex: 1, 2, 3...)", "1");
+    qte = parseInt(qte, 10);
+    if (!isNaN(qte) && qte > 0) {
+        addToCart(name, price, category, qte);
+    }
+}
+
+// Ajoute un produit au panier
+function addToCart(name, price, category, qty = 1) {
+    if (!requireRegistration()) return;
+    
+    // Ajout au panier principal (ancienne logique)
+    cart.push({name, price, category, qty});
+    // Ajout au panier affiché
+    let existingItem = currentCart.find(item => item.name === name);
+    if (existingItem) {
+        existingItem.quantity += qty;
+    } else {
+        currentCart.push({name, price, category, quantity: qty});
+    }
+    updateCart();
+    updateOrderDisplay();
+    showOrderBox();
+    alert(`${qty} ${name} ajouté(s) au panier!`);
+}
+
+// Met à jour l'affichage du panier
+function updateCart() {
+    let orderItems = document.getElementById('order-items');
+    let orderTotal = document.getElementById('order-total');
+    if (!orderItems || !orderTotal) return;
+    orderItems.innerHTML = '';
+    total = 0;
+    if (cart.length === 0) {
+        orderItems.innerHTML = '<div class="order-item" id="empty-cart">Votre panier est vide</div>';
+    } else {
+        cart.forEach((item, index) => {
+            let orderItem = document.createElement('div');
+            orderItem.className = 'order-item';
+            orderItem.innerHTML = `
+                <span>${item.qty} x ${item.name}</span>
+                <span>${item.price * item.qty} FCFA</span>
+                <button class="remove-btn" onclick="removeFromCart(${index})" style="background:#e74c3c; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer;">X</button>
+            `;
+            orderItems.appendChild(orderItem);
+            total += item.price * item.qty;
+        });
+    }
+    orderTotal.textContent = `Total: ${total} FCFA`;
+}
+
+// Met à jour l'affichage du panier (nouvelle logique)
+function updateOrderDisplay() {
+    let orderItems = document.getElementById('order-items');
+    let orderTotal = document.getElementById('order-total');
+    if (!orderItems || !orderTotal) return;
+    if (currentCart.length === 0) {
+        orderItems.innerHTML = '<p style="text-align:center; color:#8e8e8e; font-style:italic;">Aucun article dans le panier</p>';
+        orderTotal.textContent = 'Total: 0 FCFA';
+        return;
+    }
+    let total = 0;
+    orderItems.innerHTML = '';
+    currentCart.forEach((item, index) => {
+        let itemTotal = item.price * item.quantity;
+        total += itemTotal;
+        let itemDiv = document.createElement('div');
+        itemDiv.className = 'order-item';
+        itemDiv.innerHTML = `
+            <div>
+                <strong style="color:#f5f5f5;">${item.name}</strong><br>
+                <small style="color:#b3b3b3;">Catégorie ${item.category} - ${item.price} FCFA/unité</small>
+            </div>
+            <div style="text-align:right;">
+                <button onclick="changeQuantity(${index}, -1)" style="background:#e74c3c; color:white; border:none; width:28px; height:28px; border-radius:50%; cursor:pointer; margin:0 5px; font-weight:bold;">-</button>
+                <span style="font-weight:bold; margin:0 10px; color:#f5f5f5;">${item.quantity}</span>
+                <button onclick="changeQuantity(${index}, 1)" style="background:#27ae60; color:white; border:none; width:28px; height:28px; border-radius:50%; cursor:pointer; margin:0 5px; font-weight:bold;">+</button>
+                <div style="font-weight:bold; color:#405de6; margin-top:8px; font-size:16px;">${itemTotal} FCFA</div>
+            </div>
+        `;
+        orderItems.appendChild(itemDiv);
+    });
+    orderTotal.textContent = `Total: ${total} FCFA`;
+}
+
+
+// Retire un article du panier
+function removeFromCart(index) {
+    cart.splice(index, 1);
+    updateCart();
+}
+
+// Change la quantité d'un produit dans le panier
+function changeQuantity(index, change) {
+    if (currentCart[index]) {
+        currentCart[index].quantity += change;
+        if (currentCart[index].quantity <= 0) {
+            currentCart.splice(index, 1);
+        }
+        updateOrderDisplay();
+        if (currentCart.length === 0) {
+            hideOrderBox();
+        }
+    }
+}
+
+function showOrderBox() {
+    let orderBox = document.getElementById('order-box');
+    if (orderBox) orderBox.style.display = 'block';
+}
+
+function hideOrderBox() {
+    let orderBox = document.getElementById('order-box');
+    if (orderBox) orderBox.style.display = 'none';
+}
+
+function clearOrder() {
+    currentCart = [];
+    cart = [];
+    updateOrderDisplay();
+    updateCart();
+    hideOrderBox();
+}
+
+// ============ COMMANDE - ENVOI ET AFFICHAGE ============
+
+// ENVOI RAPIDE DU MESSAGE DE COMMANDE
+function finalizeOrder() {
+    if (!requireRegistration()) return;
+    
+    const cartToUse = currentCart.length > 0 ? currentCart : cart;
+    if (cartToUse.length === 0) {
+        alert('⚠️ Votre panier est vide !');
+        return;
+    }
+    
+    const profile = safeGetFromStorage('userProfile', {});
+    if (!profile.lastname || !profile.firstname || !profile.email) {
+        alert('⚠️ Veuillez d\'abord remplir votre profil !');
+        showProfileForm();
+        return;
+    }
+    
+    const orderTotal = cartToUse.reduce((sum, item) => {
+        const qty = item.quantity || item.qty || 1;
+        return sum + (item.price * qty);
+    }, 0);
+    
+    const order = {
+        id: Date.now(),
+        date: new Date().toLocaleString('fr-FR'),
+        items: cartToUse.map(item => ({
+            name: item.name,
+            price: item.price,
+            category: item.category,
+            quantity: item.quantity || item.qty || 1
+        })),
+        total: orderTotal,
+        customer: {
+            lastname: profile.lastname,
+            firstname: profile.firstname,
+            email: profile.email
+            // On ne sauvegarde pas les images dans les commandes pour économiser l'espace
+        },
+        status: 'En attente'
+    };
+
+    // Nettoyage préventif avant ajout
+    cleanupStorage();
+
+    // Ajout rapide à la liste locale avec gestion d'erreur
+    customerOrders.unshift(order);
+    if (!safeSetToStorage('customerOrders', customerOrders)) {
+        // Si échec, essayer avec moins de commandes
+        customerOrders = customerOrders.slice(0, 10);
+        safeSetToStorage('customerOrders', customerOrders);
+    }
+    updateCustomerOrdersDisplay();
+
+    // Message WhatsApp
+    let message = `🍽️ *NOUVELLE COMMANDE LOKO EXPRESS*\n`;
+    message += `👤 *Client:* ${profile.firstname} ${profile.lastname}\n`;
+    message += `📧 *Contact:* ${profile.email}\n`;
+    message += `📅 *Date:* ${order.date}\n\n`;
+    message += `🛒 *Commande:*\n`;
+    order.items.forEach(item => {
+        message += `• ${item.name} x${item.quantity} = ${item.price * item.quantity} FCFA\n`;
+    });
+    message += `\n💰 *TOTAL: ${order.total} FCFA*\n\nMerci ! 😊`;
+
+    // Ajout Firebase (asynchrone, pas de blocage UI)
+    if (typeof window.submitOrder === 'function') {
+        window.submitOrder(order);
+    } else {
+        submitOrder(order);
+    }
+
+    clearOrder();
+    alert('✅ Commande envoyée avec succès ! Vous allez être redirigé vers WhatsApp.');
+}
+
+// Envoi de la commande vers Firebase
+function submitOrder(order) {
+    const orderRef = ref(db, 'orders');
+    const newOrderRef = push(orderRef);
+    order.timestamp = new Date().toISOString();
+    order.status = "nouveau";
+    set(newOrderRef, order)
+        .catch((error) => {
+            console.error('Erreur Firebase:', error);
+        });
+}
+
+// ============ COMMANDES CLIENT ============
+
+function updateCustomerOrdersDisplay() {
+    let list = document.getElementById('customer-orders-list');
+    if (!list) return;
+    if (customerOrders.length === 0) {
+        list.innerHTML = '<p style="text-align:center; color:#8e8e8e; font-style:italic;">Aucune commande pour le moment</p>';
+        return;
+    }
+    list.innerHTML = '';
+    customerOrders.forEach(order => {
+        let orderDiv = document.createElement('div');
+        orderDiv.className = 'customer-order-item';
+        let orderId = order.id ? order.id.toString().slice(-6) : 'N/A';
+        orderDiv.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <strong style="color:#f5f5f5;">Commande #${orderId}</strong>
+                <span style="color:#10ac84; font-weight:bold;">${order.status || 'En attente'}</span>
+            </div>
+            <div style="font-size:12px; color:#b3b3b3; margin-bottom:8px;">📅 ${order.date}</div>
+            <div style="margin-bottom:8px; color:#f5f5f5;">
+                ${order.items ? order.items.map(item => `• ${item.name} x${item.quantity || item.qty || 1}`).join('<br>') : ''}
+            </div>
+            <div style="font-weight:bold; color:#405de6; text-align:right; font-size:16px;">Total: ${order.total} FCFA</div>
+        `;
+        list.appendChild(orderDiv);
+    });
+}
+
+// Vider la liste commandes client
+function clearCustomerOrders() {
+    if (confirm("Vider la liste de vos commandes récentes ?")) {
+        customerOrders = [];
+        safeSetToStorage('customerOrders', customerOrders);
+        updateCustomerOrdersDisplay();
+    }
+}
+
+// Afficher/masquer la box commandes client
+function toggleCustomerOrders() {
+    if (!requireRegistration()) return;
+    
+    let box = document.getElementById('customer-orders-box');
+    if (box) {
+        if (box.classList.contains('show') || box.style.display === 'block') {
+            box.classList.remove('show');
+            box.style.display = 'none';
+        } else {
+            box.classList.add('show');
+            box.style.display = 'block';
+            updateCustomerOrdersDisplay();
+        }
+    }
+}
+
+// ============ FONCTIONS GLOBALES ============
+
+function closeProfile() {
+    hideProfileForm();
+}
+
+function openProfile() {
+    showProfileForm();
+}
+
+// ============ ÉVÉNEMENTS INIT ============
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Nettoyage initial
+    cleanupStorage();
+    
+    // Vérification inscription obligatoire
+    checkRegistration();
+    
+    // Bouton profil
+    let profileBtn = document.getElementById('profile-btn');
+    if (profileBtn) profileBtn.onclick = openProfile;
+    
+    // Overlay click dehors (seulement si inscrit)
+    let profileOverlay = document.getElementById('profile-overlay');
+    if (profileOverlay) {
+        profileOverlay.addEventListener('click', function(e) {
+            if (e.target === this && isRegistered) hideProfileForm();
+        });
+    }
+    
+    // Formulaire profil
+    let profileForm = document.getElementById('profile-form');
+    if (profileForm) {
+        profileForm.addEventListener('submit', saveProfile);
+    }
+    
+    // Changement photo/background
+    let photoInput = document.getElementById('profile-photo');
+    if (photoInput) photoInput.addEventListener('change', previewPhoto);
+    let bgInput = document.getElementById('profile-bg');
+    if (bgInput) bgInput.addEventListener('change', previewBg);
+
+    // Bouton commandes client
+    let customerOrdersBtn = document.getElementById("show-customer-orders-btn");
+    if (customerOrdersBtn) {
+        customerOrdersBtn.onclick = toggleCustomerOrders;
+        document.addEventListener("click", function(e) {
+            let customerOrdersBox = document.getElementById('customer-orders-box');
+            if (
+                customerOrdersBox &&
+                customerOrdersBox.style.display === "block" &&
+                !customerOrdersBox.contains(e.target) &&
+                e.target !== customerOrdersBtn
+            ) {
+                customerOrdersBox.style.display = "none";
+            }
+        });
+    }
+
+    // Boutons ajouter panier (interception pour demander qte)
+    document.querySelectorAll('.card button').forEach(btn => {
+        let oldClick = btn.getAttribute('onclick');
+        if (oldClick && oldClick.startsWith("addToCart")) {
+            let args = oldClick.substring(10, oldClick.length - 1);
+            btn.setAttribute('onclick', `promptAddToCart(${args})`);
+        }
+    });
+    
+    // Formulaire commande
+    let orderForm = document.getElementById('order-form');
+    if (orderForm) {
+        orderForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            finalizeOrder();
+        });
+    }
+
+    // Init affichages
+    updateCart();
+    updateOrderDisplay();
+    updateCustomerOrdersDisplay();
+
+    // Rechargement commandes
+    customerOrders = safeGetFromStorage('customerOrders', []);
+    orderCountByCategory = safeGetFromStorage('orderCountByCategory', {});
+});
+
+// ============ FONCTIONS GLOBALES POUR HTML ============
+window.startRegistration = startRegistration;
+window.checkRegistration = checkRegistration;
+window.showWelcomeModal = showWelcomeModal;
+window.hideWelcomeModal = hideWelcomeModal;
+window.requireRegistration = requireRegistration;
+window.showProfileForm = showProfileForm;
+window.hideProfileForm = hideProfileForm;
+window.openProfile = openProfile;
+window.closeProfile = closeProfile;
+window.showTab = showTab;
+window.previewPhoto = previewPhoto;
+window.previewBg = previewBg;
+window.applyUserProfile = applyUserProfile;
+window.fillOrderFormWithProfile = fillOrderFormWithProfile;
+window.promptAddToCart = promptAddToCart;
+window.addToCart = addToCart;
+window.updateCart = updateCart;
+window.updateOrderDisplay = updateOrderDisplay;
+window.removeFromCart = removeFromCart;
+window.changeQuantity = changeQuantity;
+window.showOrderBox = showOrderBox;
+window.hideOrderBox = hideOrderBox;
+window.clearOrder = clearOrder;
+window.finalizeOrder = finalizeOrder;
+window.updateCustomerOrdersDisplay = updateCustomerOrdersDisplay;
+window.clearCustomerOrders = clearCustomerOrders;
+window.toggleCustomerOrders = toggleCustomerOrders;
+window.submitOrder = submitOrder;
+window.cleanupStorage = cleanupStorage;
+window.userProfile = userProfile;
+window.cart = cart;
+window.total = total;
+window.customerOrders = customerOrders;
+window.orderCountByCategory = orderCountByCategory;
+window.currentCart = currentCart;
+</script>
+</html>
+<a href="index.html" class="btn-retour-bas">⬅ Retour à l'accueil</a>
+
+<style>
+  .btn-retour-bas {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(to right, #ff4e00, #ff9a56);
+    color: white;
+    padding: 14px 28px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 30px;
+    text-decoration: none;
+    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+    z-index: 1000;
+  }
+
+  .btn-retour-bas:hover {
+    background: linear-gradient(to right, #e64600, #ff8033);
+    transform: translateX(-50%) scale(1.05);
+    box-shadow: 0 7px 16px rgba(0, 0, 0, 0.4);
+  }
+
+  @media screen and (max-width: 480px) {
+    .btn-retour-bas {
+      font-size: 14px;
+      padding: 12px 24px;
+    }
+  }
+</style>

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://loko-blush.vercel.app/sitemap.xml

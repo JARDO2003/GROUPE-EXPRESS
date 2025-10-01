@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Publier - Gberè Universitaire</title>
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      font-family: 'Segoe UI', Arial, sans-serif;
+      min-height: 100vh;
+      color: #222;
+      margin: 0;
+    }
+    .container {
+      max-width: 500px;
+      margin: 40px auto 0 auto;
+      padding: 18px 12px 40px 12px;
+      background: rgba(255,255,255,0.99);
+      border-radius: 20px;
+      box-shadow: 0 2px 14px #2222;
+      min-height: 400px;
+    }
+    h1 { text-align: center; color: #764ba2; margin-bottom: 12px;}
+    .form-group { margin-bottom: 16px; }
+    .post-text {
+      width: 100%;
+      min-height: 55px;
+      border-radius: 12px;
+      border: 2px solid #eee;
+      padding: 12px;
+      font-size: 1.1em;
+      background: #f8f9fa;
+      outline: none;
+      resize: vertical;
+      margin-bottom: 6px;
+    }
+    .post-text:focus { border-color: #764ba2; background: #fff; }
+    .photo-input { display: block; margin-bottom: 10px; font-size: 1em; }
+    #photoPreview {
+      max-width: 130px; max-height: 90px;
+      display:none; border-radius:8px; margin-top:5px;
+      border:1px solid #eee; box-shadow: 0 1px 7px #764ba211;
+    }
+    .post-btn {
+      padding: 10px 32px;
+      border: none;
+      border-radius: 20px;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      color: #fff;
+      font-weight: bold;
+      font-size: 1.1em;
+      cursor: pointer;
+      box-shadow: 0 2px 10px #764ba222;
+      transition: background 0.18s, transform 0.16s;
+      display: block;
+      margin: 0 auto;
+    }
+    .post-btn:hover { background: linear-gradient(90deg, #764ba2, #667eea); transform: scale(1.04);}
+    .success-msg {
+      color: #4caf50;
+      text-align: center;
+      margin-top: 18px;
+      font-weight: bold;
+      font-size: 1.1em;
+      letter-spacing: 0.01em;
+    }
+    @media (max-width: 600px) {
+      .container { min-width: 95vw; }
+      #photoPreview { max-width: 99vw; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Publier sur le mur 📢</h1>
+    <form id="publicationForm">
+      <div class="form-group">
+        <textarea class="post-text" id="postText" placeholder="Quoi de neuf ?" maxlength="900"></textarea>
+      </div>
+      <div class="form-group">
+        <input type="file" class="photo-input" id="postPhoto" accept="image/*">
+        <img id="photoPreview"/>
+      </div>
+      <button type="submit" class="post-btn">Publier</button>
+    </form>
+    <div id="successMsg" class="success-msg" style="display:none;">Publication envoyée !</div>
+  </div>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    // Firebase config pour data-gbre
+    const firebaseConfig = {
+      apiKey: "AIzaSyAocBTsHd-A9OJ7RAagxwxtZd0pdW6TX3I",
+      authDomain: "data-gbre.firebaseapp.com",
+      databaseURL: "https://data-gbre-default-rtdb.firebaseio.com",
+      projectId: "data-gbre",
+      storageBucket: "data-gbre.appspot.com",
+      messagingSenderId: "293732235454",
+      appId: "1:293732235454:web:c0b0f4a7b6c9b5d12f46ef",
+      measurementId: "G-XD01FS1SPG"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // Pseudo anonyme session
+    let sessionUsername = sessionStorage.getItem('pubUser');
+    if (!sessionUsername) {
+      sessionUsername = 'usersExpress' + Math.floor(Math.random()*100000);
+      sessionStorage.setItem('pubUser', sessionUsername);
+    }
+
+    // Prévisualisation de la photo
+    let photoDataUrl = "";
+    const postPhoto = document.getElementById("postPhoto");
+    const photoPreview = document.getElementById("photoPreview");
+    postPhoto.addEventListener('change', function(e){
+      if (postPhoto.files && postPhoto.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          photoPreview.src = e.target.result;
+          photoPreview.style.display = "block";
+          photoDataUrl = e.target.result;
+        };
+        reader.readAsDataURL(postPhoto.files[0]);
+      } else {
+        photoPreview.style.display = "none";
+        photoDataUrl = "";
+      }
+    });
+
+    // Poster la publication
+    document.getElementById('publicationForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const text = document.getElementById('postText').value.trim();
+      if (!text && !photoDataUrl) return alert("Ajoute un texte ou une photo !");
+      const pub = {
+        username: sessionUsername,
+        text: text,
+        photo: photoDataUrl || "",
+        timestamp: Date.now()
+      };
+      const newRef = push(ref(db, "publications"));
+      await set(newRef, pub);
+      document.getElementById('postText').value = "";
+      postPhoto.value = "";
+      photoPreview.style.display = "none";
+      photoDataUrl = "";
+      document.getElementById('successMsg').style.display = "block";
+      setTimeout(()=>{document.getElementById('successMsg').style.display = "none";},1800);
+    };
+  </script>
+</body>
+</html>

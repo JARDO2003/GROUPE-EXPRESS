@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Réseau Social Étudiant - Supabase</title>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f2f2f2; margin: 0; padding: 0; }
+    .container { max-width: 600px; margin: 40px auto; background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);}
+    h1 { text-align: center; color: #333; }
+    .post-form { display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; }
+    .post-form textarea { resize: vertical; min-height: 60px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-family: inherit; }
+    .post-form input[type="file"] { padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+    .post { background: #fafafa; border-radius: 6px; margin-bottom: 20px; padding: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); border-left: 4px solid #007bff; }
+    .post img, .post video { max-width: 100%; margin-top: 10px; border-radius: 4px; }
+    .timestamp { color: #888; font-size: 0.9em; margin-top: 6px; }
+    button { padding: 8px 16px; border-radius: 4px; border: 0; background: #007bff; color: white; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+    button:hover:not(:disabled) { background: #0056b3; }
+    button:disabled { background: #aaa; cursor: not-allowed; }
+    .error { color: #dc3545; margin: 10px 0; padding: 10px; background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; }
+    .success { color: #155724; margin: 10px 0; padding: 10px; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px; }
+    .loading { text-align: center; margin: 20px 0; color: #666; }
+    .spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid #f3f3f3; border-top: 3px solid #007bff; border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .empty-state { text-align: center; padding: 40px; color: #666; }
+    .media-preview img, .media-preview video { max-width: 200px; max-height: 200px; object-fit: cover; border-radius: 4px; }
+    .remove-media { background: #dc3545; color: white; border: none; padding: 2px 8px; border-radius: 3px; font-size: 12px; margin-left: 10px; cursor: pointer; }
+    .char-count { text-align: right; font-size: 0.8em; color: #666; margin-top: 5px; }
+    .char-count.warning { color: #ffc107; }
+    .char-count.error { color: #dc3545; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎓 Réseau Social Étudiant</h1>
+    <div id="messageContainer"></div>
+    <form class="post-form" id="postForm">
+      <textarea id="postContent" placeholder="Partage tes pensées, tes découvertes ou pose une question..." maxlength="500" required></textarea>
+      <div class="char-count" id="charCount">0/500</div>
+      <input type="file" id="mediaInput" accept="image/*,video/*">
+      <div id="mediaPreview" class="media-preview"></div>
+      <button type="submit">📝 Publier</button>
+    </form>
+    <div id="postsContainer" class="loading"><div class="spinner"></div> Chargement des posts...</div>
+  </div>
+  
+  <script>
+    const supabase = window.supabase;
+    const supabaseClient = supabase.createClient(
+      'https://zjqomykffkikeybnsfco.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqcW9teWtmZmtpa2V5Ym5zZmNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUzMTUwNjcsImV4cCI6MjA2MDg5MTA2N30.LPFg1YqgLj-eXfPSStZZwPMM-7hu31z8g-W0s6dTLLs'
+    );
+
+    let currentMediaFile = null;
+
+    function showMessage(msg, type = 'error') {
+      const container = document.getElementById('messageContainer');
+      const div = document.createElement('div');
+      div.className = type;
+      div.innerText = msg;
+      container.appendChild(div);
+      setTimeout(() => div.remove(), 5000);
+    }
+
+    function updateCharCount() {
+      const content = document.getElementById('postContent');
+      const count = document.getElementById('charCount');
+      const len = content.value.length;
+      count.innerText = `${len}/500`;
+      count.className = 'char-count';
+      if (len > 450) count.classList.add('warning');
+      if (len > 490) count.classList.add('error');
+    }
+
+    function previewFile(file) {
+      const preview = document.getElementById('mediaPreview');
+      preview.innerHTML = '';
+      const reader = new FileReader();
+      reader.onload = e => {
+        const el = file.type.startsWith('video') ? document.createElement('video') : document.createElement('img');
+        el.src = e.target.result;
+        if (el.tagName === 'VIDEO') el.controls = true;
+        preview.appendChild(el);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function uploadMedia(file) {
+      const path = `posts/${Date.now()}_${file.name}`;
+      const { error } = await supabaseClient.storage.from('media').upload(path, file);
+      if (error) {
+        console.error('Erreur upload:', error);
+        throw new Error('Erreur d’upload');
+      }
+      const { data } = supabaseClient.storage.from('media').getPublicUrl(path);
+      return data.publicUrl;
+    }
+
+    async function publishPost(content, file) {
+      let media_url = null;
+      let media_type = null;
+      if (file) {
+        media_url = await uploadMedia(file);
+        media_type = file.type.startsWith('video') ? 'video' : 'image';
+      }
+      const { error } = await supabaseClient.from('posts').insert({ content, media_url, media_type });
+      if (error) showMessage('Erreur publication');
+      else {
+        showMessage('Post publié !', 'success');
+        document.getElementById('postForm').reset();
+        document.getElementById('mediaPreview').innerHTML = '';
+        currentMediaFile = null;
+        loadPosts();
+      }
+    }
+
+    async function loadPosts() {
+      const container = document.getElementById('postsContainer');
+      container.innerHTML = '<div class="spinner"></div> Chargement...';
+      const { data, error } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
+      if (error || !data) {
+        container.innerHTML = '<div class="error">Erreur chargement posts</div>';
+        return;
+      }
+      container.innerHTML = '';
+      if (!data.length) {
+        container.innerHTML = '<div class="empty-state">Aucun post pour le moment</div>';
+        return;
+      }
+      data.forEach(post => {
+        const div = document.createElement('div');
+        div.className = 'post';
+        const media = post.media_type === 'video' ? `<video src="${post.media_url}" controls></video>` : `<img src="${post.media_url}" loading="lazy">`;
+        div.innerHTML = `
+          <div>${post.content?.replace(/\n/g, '<br>') || ''}</div>
+          ${post.media_url ? media : ''}
+          <div class="timestamp">${new Date(post.created_at).toLocaleString('fr-FR')}</div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadPosts();
+      document.getElementById('postForm').addEventListener('submit', async e => {
+        e.preventDefault();
+        const content = document.getElementById('postContent').value.trim();
+        if (!content && !currentMediaFile) return showMessage('Ajoutez un contenu ou un média');
+        await publishPost(content, currentMediaFile);
+      });
+      document.getElementById('postContent').addEventListener('input', updateCharCount);
+      document.getElementById('mediaInput').addEventListener('change', e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        currentMediaFile = file;
+        previewFile(file);
+      });
+      updateCharCount();
+    });
+  </script>
+</body>
+</html>

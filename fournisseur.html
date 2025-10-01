@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KoLo Livraison - Repas Universitaires</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --main-bg: linear-gradient(120deg, #485563 0%, #29323c 100%);
+            --accent1: #667eea;
+            --accent2: #764ba2;
+            --accent3: #f093fb;
+            --card-bg: rgba(255,255,255,0.10);
+            --glass: blur(30px) saturate(1.6);
+            --border-glow: 0 0 0 3px #fff3, 0 2px 16px #764ba245;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; }
+        body {
+            font-family: 'Montserrat', sans-serif;
+            min-height: 100vh;
+            background: var(--main-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+        /* Animated, blurred, colored bokeh blobs as background */
+        .bokeh-bg {
+            position: fixed;
+            width: 100vw;
+            height: 100vh;
+            top: 0; left: 0; z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .bokeh {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.5;
+            animation: bokehMove 22s infinite alternate cubic-bezier(.5,.1,.1,1.0);
+            mix-blend-mode: lighten;
+        }
+        .bokeh1 { background: #667eea; width: 420px; height: 420px; left: -5vw; top: -7vh; animation-delay: 0s;}
+        .bokeh2 { background: #f093fb; width: 320px; height: 320px; right: -5vw; top: 5vh; animation-delay: 5s;}
+        .bokeh3 { background: #ff9a56; width: 350px; height: 350px; left: 40vw; bottom: -12vh; animation-delay: 10s;}
+        @keyframes bokehMove {
+            0% { transform: scale(1) translateY(0);}
+            100% { transform: scale(1.12) translateY(-40px);}
+        }
+        .container {
+            position: relative;
+            z-index: 1;
+            background: var(--card-bg);
+            -webkit-backdrop-filter: var(--glass);
+            backdrop-filter: var(--glass);
+            border-radius: 32px;
+            box-shadow: var(--border-glow);
+            padding: 54px 40px 44px 40px;
+            text-align: center;
+            max-width: 420px;
+            width: 100%;
+            border: 2px solid rgba(255,255,255,0.13);
+            overflow: hidden;
+            transition: box-shadow 0.4s;
+            margin: 18px 10px;
+            animation: popIn 1.2s cubic-bezier(.5,0,.1,1.0) 0.15s both;
+        }
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(.95) translateY(30px);}
+            to { opacity: 1; transform: scale(1) translateY(0);}
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 34px;
+            gap: 22px;
+        }
+        .header-logo {
+            width: 75px;
+            height: 75px;
+            border-radius: 21px;
+            object-fit: cover;
+            border: 4px solid #fff9;
+            box-shadow: 0 0px 32px #764ba2aa, 0 3px 18px #0002;
+            background: #fff;
+            transition: box-shadow 0.3s, transform 0.2s;
+        }
+        .header-logo:hover {
+            box-shadow: 0 0 0 7px #f093fb66, 0 10px 30px #764ba2aa;
+            transform: scale(1.075) rotate(4deg);
+        }
+        .header-title {
+            font-size: 2.3rem;
+            font-weight: 900;
+            background: linear-gradient(120deg, #fff 0%, #f093fb 70%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 4px 20px #764ba242, 0 2px 8px #fff7;
+            letter-spacing: -1px;
+        }
+        .subtitle {
+            color: #fff;
+            font-size: 1.18rem;
+            font-weight: 400;
+            margin-bottom: 42px;
+            line-height: 1.6;
+            text-shadow: 0 1px 3px #2224;
+            opacity: 0.89;
+        }
+        .establishment-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+            margin-bottom: 24px;
+        }
+        .btn {
+            padding: 22px 35px;
+            font-size: 1.18rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 17px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.7px;
+            position: relative;
+            overflow: hidden;
+            background: #fff;
+            color: #222;
+            box-shadow: 0 7px 28px #764ba238;
+            transition: all .35s cubic-bezier(.5,0,.1,1.0);
+            border: 2.5px solid #fff7;
+            outline: none;
+        }
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.38), transparent);
+            transition: left 0.65s cubic-bezier(.5,0,.1,1.0);
+            z-index: 1;
+        }
+        .btn:hover::before { left: 100%; }
+        .btn:active { transform: scale(.97) translateY(2px);}
+        .btn-heges {
+            background: linear-gradient(90deg, #ff8e53 0%, #ff6b6b 90%);
+            color: #fff;
+            border: 2.5px solid #ffb0b0;
+            box-shadow: 0 7px 16px #ff8e532e;
+        }
+        .btn-heges:hover {
+            transform: scale(1.045) translateY(-6px);
+            box-shadow: 0 13px 38px #ff6b9d56;
+            filter: brightness(1.06);
+        }
+        .btn-ifsm {
+            background: linear-gradient(90deg, #4ecdc4 0%, #36d1dc 90%);
+            color: #fff;
+            border: 2.5px solid #a3fff7;
+            box-shadow: 0 7px 16px #4ecdc44d;
+        }
+        .btn-ifsm:hover {
+            transform: scale(1.045) translateY(-6px);
+            box-shadow: 0 13px 38px #36d1dc56;
+            filter: brightness(1.06);
+        }
+        .btn-utt {
+            background: linear-gradient(90deg, #667eea 0%, #8e44ad 90%);
+            color: #fff;
+            border: 2.5px solid #d2d0ff;
+            box-shadow: 0 7px 16px #667eea3d;
+        }
+        .btn-utt:hover {
+            transform: scale(1.045) translateY(-6px);
+            box-shadow: 0 13px 38px #667eea56;
+            filter: brightness(1.06);
+        }
+        .footer {
+            color: #c1c2e2;
+            font-size: 1.02rem;
+            font-weight: 400;
+            margin-top: 12px;
+            text-shadow: 0 1px 2px #2223;
+            position: relative;
+        }
+        .footer::before {
+            content: '✨';
+            margin-right: 8px;
+            animation: twinkle 2s ease-in-out infinite alternate;
+        }
+        @keyframes twinkle {
+            0% { opacity: 0.5; transform: scale(1);}
+            100% { opacity: 1; transform: scale(1.13);}
+        }
+        /* Responsive */
+        @media (max-width: 600px) {
+            .container { padding: 32px 6vw 28px 6vw; }
+            .header-title { font-size: 1.35rem; }
+            .header { flex-direction: column; gap: 9px;}
+            .btn { padding: 15px 10px; font-size: 1rem;}
+            .header-logo { width: 48px; height: 48px; }
+        }
+        @media (max-width: 400px) {
+            .container { padding: 10px 2vw; }
+            .header-title { font-size: 1.03rem; }
+        }
+        /* Retour accueil bouton */
+        .btn-retour-bas {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(to right, #ff4e00, #ff9a56);
+            color: white;
+            padding: 14px 28px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 30px;
+            text-decoration: none;
+            box-shadow: 0 5px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        .btn-retour-bas:hover {
+            background: linear-gradient(to right, #e64600, #ff8033);
+            transform: translateX(-50%) scale(1.05);
+            box-shadow: 0 7px 16px rgba(0, 0, 0, 0.4);
+        }
+        @media screen and (max-width: 480px) {
+            .btn-retour-bas {
+              font-size: 14px;
+              padding: 12px 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Bokeh blobs -->
+    <div class="bokeh-bg">
+        <div class="bokeh bokeh1"></div>
+        <div class="bokeh bokeh2"></div>
+        <div class="bokeh bokeh3"></div>
+    </div>
+    <div class="container">
+        <div class="header">
+            <img src="image/groupe ex.jpg" alt="Logo KoLo Express" class="header-logo">
+            <div class="header-title">GROUPE EXPRESS</div>
+        </div>
+        <p class="subtitle">
+            GROUPE Express, accès reservé aux fournisseurs veillez vous retourner a la page d'acceil
+        </p>
+        <div class="establishment-buttons">
+            
+            <button class="btn btn-utt" onclick="accessSupplier('uttfournisseur.html')">
+                🏛️ UTT LOKO
+            </button>
+             <button class="btn btn-utt" onclick="accessSupplier('admin.html')">
+                @shopping-Admin
+            </button>
+        </div>
+        <div class="footer">
+            Sélectionnez un établissement pour continuer
+        </div>
+    </div>
+    <a href="index.html" class="btn-retour-bas">⬅ Retour à l'accueil</a>
+    <script>
+        function accessSupplier(destination) {
+            const code = prompt("Veuillez entrer le code d'accès fournisseur :");
+            if (code === "express200@") {
+                // Effet de fondu de sortie
+                document.querySelector('.container').style.opacity = '0';
+                document.querySelector('.container').style.transform = 'translateY(-20px) scale(0.95)';
+                setTimeout(() => {
+                    window.location.href = destination;
+                }, 350);
+            } else if (code !== null) {
+                alert("Code incorrect !");
+            }
+        }
+        // Parallaxe subtil
+        document.addEventListener('mousemove', (e) => {
+            const container = document.querySelector('.container');
+            const x = (e.clientX / window.innerWidth) * 2 - 1;
+            const y = (e.clientY / window.innerHeight) * 2 - 1;
+            container.style.transform = `translate(${x * 3}px, ${y * 3}px)`;
+        });
+    </script>
+</body>
+</html>

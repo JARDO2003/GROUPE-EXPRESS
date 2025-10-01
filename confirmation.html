@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Promotion Express - KoLo Livraison</title>
+    <style>
+        /* RESET & BASE */
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+
+        body {
+          min-height: 100vh;
+          background: #f6f7fb;
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          color: #2d2d2d;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          padding: 24px 8px;
+        }
+
+        /* HEADER */
+        .header {
+          font-size: 2rem;
+          font-weight: 700;
+          color: #fff;
+          background: linear-gradient(90deg, #4f8cff 0%, #38d39f 100%);
+          padding: 20px 12px;
+          border-radius: 15px;
+          margin-bottom: 28px;
+          width: 100%;
+          max-width: 700px;
+          letter-spacing: 1px;
+          box-shadow: 0 4px 18px 0 rgba(79,140,255,.09);
+        }
+
+        /* MAIN CONTAINER */
+        .promotion-container {
+          background: #fff;
+          border-radius: 18px;
+          box-shadow: 0 8px 32px rgba(60,72,109,0.14);
+          max-width: 440px;
+          width: 100%;
+          margin: 0 auto;
+          padding: 32px 20px 28px 20px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          transition: box-shadow 0.2s;
+        }
+
+        .promotion-container:hover {
+          box-shadow: 0 12px 40px rgba(60,72,109,0.19);
+        }
+
+        /* BADGES & ICONS */
+        .promotion-icon {
+          font-size: 2.8rem;
+          margin-bottom: 10px;
+        }
+
+        .good-news {
+          display: inline-block;
+          background: #38d39f;
+          color: #fff;
+          font-weight: bold;
+          font-size: 1rem;
+          padding: 7px 20px;
+          border-radius: 30px;
+          margin-bottom: 18px;
+          letter-spacing: 1px;
+        }
+
+        /* TITLES */
+        h1 {
+          font-size: 1.45rem;
+          color: #284eec;
+          margin-bottom: 18px;
+          font-weight: 700;
+          letter-spacing: 0.5px;
+        }
+
+        /* PROMO DETAILS */
+        .promotion-details {
+          background: #f8f9fd;
+          color: #2d2d2d;
+          border-radius: 13px;
+          padding: 20px 12px;
+          margin-bottom: 18px;
+          width: 100%;
+          box-shadow: 0 2px 12px rgba(40,78,236,0.03);
+        }
+
+        .offer-text {
+          font-size: 1.1rem;
+          font-weight: 600;
+          color: #2d2d2d;
+          margin-bottom: 7px;
+        }
+
+        .price {
+          color: #ff9900;
+          font-size: 2.2rem;
+          font-weight: 700;
+          margin: 8px 0 10px 0;
+          letter-spacing: 1px;
+        }
+
+        .description {
+          font-size: 1rem;
+          color: #4a4a4a;
+          line-height: 1.6;
+          padding: 10px 0 0 0;
+        }
+
+        /* TIMER */
+        .timer {
+          background: #ffe3d0;
+          color: #d35400;
+          font-weight: 600;
+          padding: 10px 14px;
+          border-radius: 11px;
+          margin: 12px 0 18px 0;
+          font-size: 0.97rem;
+          width: 100%;
+          text-align: center;
+        }
+
+        /* FEATURES */
+        .features {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: space-between;
+          gap: 12px;
+          width: 100%;
+          margin-bottom: 18px;
+        }
+
+        .feature {
+          flex: 1 1 110px;
+          background: #f2f7fa;
+          color: #1b4063;
+          border-radius: 9px;
+          padding: 13px 6px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          min-width: 100px;
+        }
+
+        .feature-icon {
+          font-size: 1.3rem;
+          margin-bottom: 4px;
+        }
+
+        .feature h3 {
+          font-size: 1rem;
+          margin-bottom: 3px;
+          font-weight: bold;
+        }
+
+        .feature p {
+          font-size: 0.95rem;
+          color: #497b80;
+        }
+
+        /* BUTTONS */
+        .btn {
+          background: linear-gradient(90deg, #4f8cff 0%, #38d39f 100%);
+          color: #fff;
+          border: none;
+          padding: 13px 28px;
+          font-size: 1.07rem;
+          border-radius: 28px;
+          cursor: pointer;
+          margin-top: 11px;
+          margin-bottom: 0;
+          box-shadow: 0 2px 10px rgba(79,140,255,0.11);
+          font-weight: 700;
+          text-decoration: none;
+          transition: background 0.18s, box-shadow 0.17s;
+          display: block;
+          width: 100%;
+          text-align: center;
+        }
+
+        .btn + .btn {
+          margin-top: 8px;
+          background: linear-gradient(90deg, #555 0%, #bbb 100%) !important;
+        }
+
+        /* BUTTON HOVER */
+        .btn:hover {
+          background: linear-gradient(90deg, #38d39f 0%, #4f8cff 100%);
+          box-shadow: 0 4px 16px rgba(56,211,159,0.13);
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 540px) {
+          .header {
+            font-size: 1.15rem;
+            padding: 14px 6px;
+            border-radius: 9px;
+            max-width: 95vw;
+          }
+          .promotion-container {
+            padding: 14px 3px 18px 3px;
+            max-width: 99vw;
+            border-radius: 10px;
+          }
+          .promotion-details {
+            padding: 9px 4px;
+            border-radius: 7px;
+          }
+          .features {
+            flex-direction: column;
+            gap: 8px;
+          }
+          .feature {
+            padding: 10px 2px;
+            min-width: 0;
+          }
+          .btn, .btn + .btn {
+            padding: 10px 2px;
+            font-size: 0.98rem;
+            border-radius: 20px;
+            width: 100%;
+          }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">🍔 Groupe Express - Repas Universitaires 🍕</div>
+
+    <div class="promotion-container">
+        <div class="promotion-icon">🚀</div>
+        
+        <div class="good-news">📢 BONNE NOUVELLE!</div>
+        
+        <h1>Groupe Express en Promotion!</h1>
+        
+        <div class="promotion-details">
+            <div class="offer-text">3 Plats pour seulement</div>
+            <div class="price">1500 FCFA</div>
+            <div class="description">
+                Profitez de notre offre exceptionnelle! Le groupe Express propose maintenant 
+                3 délicieux plats universitaires pour seulement 1500 FCFA au lieu du prix habituel.
+            </div>
+        </div>
+
+        <div class="timer">
+            ⏰ Offre limitée dans le temps - Ne ratez pas cette opportunité!
+        </div>
+
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">⚡</div>
+                <h3>Livraison Rapide</h3>
+                <p>30-45 minutes maximum</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🍽️</div>
+                <h3>3 Plats Variés</h3>
+                <p>Menu étudiant complet</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">💰</div>
+                <h3>Prix Imbattable</h3>
+                <p>Seulement 1500 FCFA</p>
+            </div>
+        </div>
+        
+        
+        <a href="index.html" class="btn">Retour à l'accueil</a>
+    </div>
+
+    <script>
+        // Animation d'entrée
+        window.onload = function() {
+            const container = document.querySelector('.promotion-container');
+            container.style.opacity = '0';
+            container.style.transform = 'translateY(50px)';
+            
+            setTimeout(() => {
+                container.style.transition = 'all 1s ease-out';
+                container.style.opacity = '1';
+                container.style.transform = 'translateY(0)';
+            }, 100);
+        };
+
+        // Effet de clic sur les boutons
+        document.querySelectorAll('.btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                let ripple = document.createElement('span');
+                ripple.style.position = 'absolute';
+                ripple.style.borderRadius = '50%';
+                ripple.style.background = 'rgba(255,255,255,0.6)';
+                ripple.style.transform = 'scale(0)';
+                ripple.style.animation = 'ripple 0.6s linear';
+                ripple.style.left = (e.offsetX - 25) + 'px';
+                ripple.style.top = (e.offsetY - 25) + 'px';
+                ripple.style.width = ripple.style.height = '50px';
+                
+                this.appendChild(ripple);
+                setTimeout(() => ripple.remove(), 600);
+            });
+        });
+    </script>
+</body>
+</html>

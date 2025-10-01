@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Fournisseur - Commandes HEGES & Recette du jour</title>
+  <style>
+    body {
+      font-family: 'Segoe UI',Arial,sans-serif;
+      background: linear-gradient(135deg, #ffe5d0 0%, #ff9a56 100%);
+      color: #222;
+      margin: 0;
+      min-height: 100vh;
+    }
+    .header {
+      text-align: center;
+      font-size: 2em;
+      color: #fff;
+      background: linear-gradient(90deg,#ff4e00,#ff9a56);
+      padding: 24px 0 16px 0;
+      letter-spacing: 0.04em;
+      box-shadow: 0 4px 15px #ff4e002a;
+      margin-bottom: 10px;
+    }
+    .orders-section {
+      max-width: 900px;
+      margin: 0 auto 30px auto;
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 6px 20px #ff4e0030;
+      padding: 22px 12px 18px 12px;
+      margin-top: 18px;
+    }
+    .orders-title {
+      color: #ff4e00;
+      font-size: 1.3em;
+      margin-bottom: 14px;
+      font-weight: bold;
+    }
+    .order-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 8px;
+    }
+    .order-table th, .order-table td {
+      padding: 9px 5px;
+      border-bottom: 1px solid #eee;
+      text-align: left;
+      font-size: 1.02em;
+    }
+    .order-table th {
+      background: #ffe5d0;
+      color: #ff4e00;
+    }
+    .order-table tr:hover {
+      background: #fff7f0;
+    }
+    .order-details {
+      background: #f8f8fa;
+      border-radius: 9px;
+      margin: 7px 0 15px 0;
+      padding: 10px 13px 7px 13px;
+      border: 1px solid #ff9a56;
+      font-size: 1em;
+    }
+    .order-status {
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-weight: bold;
+      font-size: 0.97em;
+      display: inline-block;
+    }
+    .order-status.nouveau { background: #ffebc5; color: #ff4e00;}
+    .order-status.livre { background: #e5ffd0; color: #388e3c;}
+    .order-status.annule { background: #ffd0d0; color: #e74c3c;}
+    .recette-section {
+      max-width: 900px;
+      margin: 18px auto 0 auto;
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 6px 20px #ff4e0030;
+      padding: 18px 16px 25px 16px;
+      text-align: center;
+      font-size: 1.2em;
+    }
+    .recette-label {
+      color: #4CAF50;
+      font-weight: bold;
+      font-size: 1.18em;
+      margin-bottom: 8px;
+      display:block;
+    }
+    .livre-btn {
+      background: linear-gradient(90deg,#4CAF50,#6dffb3);
+      color: #fff;
+      border: none;
+      border-radius: 15px;
+      padding: 6px 18px;
+      font-weight: bold;
+      font-size: 1em;
+      cursor: pointer;
+      margin-left: 8px;
+      margin-top: 3px;
+      box-shadow: 0 2px 8px #4CAF5022;
+      transition: background 0.19s;
+    }
+    .livre-btn:hover {
+      background: linear-gradient(90deg,#388e3c,#4CAF50);
+    }
+    .annule-btn {
+      background: linear-gradient(90deg,#e74c3c,#ff9a56);
+      color: #fff;
+      border: none;
+      border-radius: 15px;
+      padding: 6px 13px;
+      font-weight: bold;
+      font-size: 1em;
+      cursor: pointer;
+      margin-left: 8px;
+      margin-top: 3px;
+      box-shadow: 0 2px 8px #e74c3c22;
+      transition: background 0.19s;
+    }
+    .annule-btn:hover {
+      background: linear-gradient(90deg,#c0392b,#e74c3c);
+    }
+    @media (max-width:650px) {
+      .header { font-size: 1.2em; padding: 17px 0;}
+      .orders-section, .recette-section { padding: 9px 2vw 13px 2vw;}
+      .order-table th, .order-table td { font-size:0.95em; padding: 7px 2px;}
+    }
+  </style>
+</head>
+<body>
+  <div class="header">Espace Fournisseur - Commandes HEGES & Recette du jour</div>
+  <div class="orders-section">
+    <div class="orders-title">Commandes du jour - <span style="color:#388e3c;">HEGES</span> uniquement</div>
+    <table class="order-table" id="ordersTable">
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Client</th>
+          <th>Total</th>
+          <th>Heure</th>
+          <th>Statut</th>
+          <th>Détails</th>
+        </tr>
+      </thead>
+      <tbody id="ordersBody"></tbody>
+    </table>
+    <div id="noOrders" style="color:#888;text-align:center;margin:8px;">Chargement des commandes...</div>
+    <div id="orderDetails"></div>
+  </div>
+  <div class="recette-section">
+    <span class="recette-label">Recette du jour HEGES (commandes livrées) :</span>
+    <span id="recetteJour" style="font-size:1.3em;">0 FCFA</span>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+    import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-database.js";
+
+    // Utilise la base de données des commandes
+    const firebaseConfig = {
+      apiKey: "AIzaSyAKnGEiUTHX6rQzIN-2zi_Ui4YJFv4U_PQ",
+      authDomain: "kolo-livraison.firebaseapp.com",
+      databaseURL: "https://kolo-livraison-default-rtdb.firebaseio.com",
+      projectId: "kolo-livraison",
+      storageBucket: "kolo-livraison.firebasestorage.app",
+      messagingSenderId: "78667636312",
+      appId: "1:78667636312:web:e8d3e05ad03858b6a2342d",
+      measurementId: "G-R79LC3XQL4"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // Affichage et gestion des commandes
+    const ordersBody = document.getElementById('ordersBody');
+    const noOrdersDiv = document.getElementById('noOrders');
+    const orderDetailsDiv = document.getElementById('orderDetails');
+    const recetteSpan = document.getElementById('recetteJour');
+
+    let allOrders = {};
+
+    // Calcul de la date du jour (format YYYY-MM-DD)
+    function getTodayStr() {
+      const d = new Date();
+      return d.toISOString().substring(0,10);
+    }
+
+    function formatHour(isoStr) {
+      if (!isoStr) return '';
+      try {
+        const d = new Date(isoStr);
+        return d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+      } catch {
+        return '';
+      }
+    }
+
+    // Affiche une ligne dans le tableau commandes
+    function renderOrderRow(order, orderId) {
+      let statusClass = "nouveau";
+      if (order.status === "livre") statusClass = "livre";
+      if (order.status === "annule") statusClass = "annule";
+      return `
+        <tr>
+          <td>${order.code || orderId}</td>
+          <td>${order.customer ? (order.customer.firstname || '') + ' ' + (order.customer.lastname || '') : ''}</td>
+          <td><b>${order.total || 0} FCFA</b></td>
+          <td>${formatHour(order.timestamp)}</td>
+          <td><span class="order-status ${statusClass}">${order.status || "nouveau"}</span></td>
+          <td>
+            <button onclick="showOrderDetails('${orderId}')" style="background:#ff4e00;color:#fff;border-radius:8px;padding:3px 12px;border:none;cursor:pointer;">Voir</button>
+            ${order.status !== 'livre' ? `<button class="livre-btn" onclick="livrerOrder('${orderId}')">Livré</button>` : ''}
+            ${order.status !== 'annule' ? `<button class="annule-btn" onclick="annuleOrder('${orderId}')">Annuler</button>` : ''}
+          </td>
+        </tr>
+      `;
+    }
+
+    // Affiche les détails d'une commande
+    window.showOrderDetails = function(orderId) {
+      const order = allOrders[orderId];
+      if (!order) return;
+      let html = `<div class="order-details"><b>Commande ${order.code || orderId}</b><br>`;
+      html += `<b>Client :</b> ${(order.customer?.firstname || '')} ${(order.customer?.lastname || '')}<br>`;
+      html += `<b>Email/WhatsApp :</b> ${(order.customer?.email || '')}<br>`;
+      html += `<b>Date :</b> ${order.timestamp ? (new Date(order.timestamp)).toLocaleString('fr-FR') : ''}<br>`;
+      html += `<b>Statut :</b> <span class="order-status ${order.status || "nouveau"}">${order.status || "nouveau"}</span><br>`;
+      html += `<b>Détail des articles :</b><ul style="margin:5px 0 0 0;">`;
+      for(const item of order.items || []) {
+        html += `<li>${item.qty || 1} x ${item.name} (${item.price} FCFA)</li>`;
+      }
+      html += `</ul>`;
+      html += `<b>Total :</b> <span style="color:#388e3c;">${order.total || 0} FCFA</span><br>`;
+      html += `<button class="annule-btn" onclick="closeOrderDetails()">Fermer</button></div>`;
+      orderDetailsDiv.innerHTML = html;
+    }
+    window.closeOrderDetails = function() {
+      orderDetailsDiv.innerHTML = "";
+    }
+
+    // Bouton livrer = change statut à "livre"
+    window.livrerOrder = function(orderId) {
+      if (confirm("Confirmer que cette commande est livrée ?")) {
+        update(ref(db, "orders/" + orderId), {status: "livre"}).catch(()=>{});
+      }
+    }
+    // Bouton annuler = change statut à "annule"
+    window.annuleOrder = function(orderId) {
+      if (confirm("Confirmer l'annulation de cette commande ?")) {
+        update(ref(db, "orders/" + orderId), {status: "annule"}).catch(()=>{});
+      }
+    }
+
+    // Calcul recette du jour = somme des totaux des commandes HEGES dont status == 'livre' et date == aujourd'hui
+    function calcRecetteDuJour() {
+      let somme = 0;
+      const jour = getTodayStr();
+      Object.values(allOrders).forEach(order => {
+        if(
+          order.status === 'livre' &&
+          order.timestamp && order.timestamp.startsWith(jour) &&
+          order.code && typeof order.code === "string" &&
+          order.code.toLowerCase().includes("heges")
+        ) {
+          somme += Number(order.total || 0);
+        }
+      });
+      recetteSpan.textContent = `${somme} FCFA`;
+    }
+
+    // Affichage des commandes HEGES uniquement
+    onValue(ref(db, "orders"), (snapshot) => {
+      allOrders = snapshot.val() || {};
+      ordersBody.innerHTML = '';
+      let today = getTodayStr();
+      let hasToday = false;
+      Object.entries(allOrders).forEach(([orderId, order]) => {
+        // Seulement HEGES, du jour (code contient "heges", insensible à la casse)
+        if (
+          order.timestamp && order.timestamp.startsWith(today) &&
+          order.code && typeof order.code === "string" &&
+          order.code.toLowerCase().includes("heges")
+        ) {
+          ordersBody.innerHTML += renderOrderRow(order, orderId);
+          hasToday = true;
+        }
+      });
+      if (!hasToday) {
+        noOrdersDiv.innerHTML = "Aucune commande HEGES aujourd'hui.";
+      } else {
+        noOrdersDiv.innerHTML = "";
+      }
+      orderDetailsDiv.innerHTML = "";
+      calcRecetteDuJour();
+    });
+  </script>
+</body>
+</html>
+<a href="index.html" class="btn-retour-bas">⬅ Retour à l'accueil</a>
+
+<style>
+  .btn-retour-bas {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(to right, #ff4e00, #ff9a56);
+    color: white;
+    padding: 14px 28px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 30px;
+    text-decoration: none;
+    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+    z-index: 1000;
+  }
+
+  .btn-retour-bas:hover {
+    background: linear-gradient(to right, #e64600, #ff8033);
+    transform: translateX(-50%) scale(1.05);
+    box-shadow: 0 7px 16px rgba(0, 0, 0, 0.4);
+  }
+
+  @media screen and (max-width: 480px) {
+    .btn-retour-bas {
+      font-size: 14px;
+      padding: 12px 24px;
+    }
+  }
+</style>

@@ -1,0 +1,3369 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>LOKO EXPRESS - Repas Universitaires</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #000000;
+            --primary-light: #100f0f;
+            --primary-dark: #280059;
+            --secondary: #131315;
+            --accent: #f10505;
+            --gradient: linear-gradient(45deg, #000000, #5851DB, #9805f9, #000000, #1408f8, #FD1D1D, #F56040, #FFDC80);
+            --surface: #FFFFFF;
+            --background: #FAFAFA;
+            --on-surface: #262626;
+            --on-surface-light: #8E8E8E;
+            --border: #DBDBDB;
+            --shadow: 0 2px 4px rgba(0,0,0,0.1);
+            --shadow-lg: 0 8px 25px rgba(0,0,0,0.15);
+            --radius: 12px;
+            --radius-xl: 24px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--background);
+            color: var(--on-surface);
+            line-height: 1.6;
+            min-height: 100vh;
+            touch-action: manipulation;
+        }
+
+        /* Image Zoom Modal */
+        .image-zoom-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .image-zoom-modal.show {
+            display: flex;
+        }
+
+        .image-zoom-content {
+            position: relative;
+            max-width: 95%;
+            max-height: 95%;
+        }
+
+        .zoomed-image {
+            width: 100%;
+            height: auto;
+            max-width: 100%;
+            max-height: 90vh;
+            object-fit: contain;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+
+        .close-zoom-btn {
+            position: absolute;
+            top: -15px;
+            right: -15px;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .image-info {
+            position: absolute;
+            bottom: -60px;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        /* Instagram-like Header */
+        .header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-content {
+            max-width: 975px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+        }
+
+        .logo-img {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 900;
+            font-size: 14px;
+        }
+
+        .logo-text {
+            font-size: 18px;
+            font-weight: 400;
+            color: var(--on-surface);
+            font-family: 'Segoe UI', sans-serif;
+            letter-spacing: -0.5px;
+        }
+
+        /* Header Actions */
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .cart-icon {
+            position: relative;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            min-width: 44px;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cart-icon:hover {
+            background: var(--background);
+            transform: scale(1.1);
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: var(--accent);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            min-width: 20px;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50px;
+            transition: all 0.2s ease;
+            min-height: 44px;
+        }
+
+        .user-profile:hover {
+            background: var(--background);
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid;
+            border-image: var(--gradient) 1;
+            background: var(--gradient);
+        }
+
+        .user-info h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--on-surface);
+            margin: 0;
+        }
+
+        .user-info p {
+            font-size: 12px;
+            color: var(--on-surface-light);
+            margin: 0;
+        }
+
+        /* Time Alert */
+        .time-alert {
+            background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+            color: white;
+            padding: 16px;
+            text-align: center;
+            font-weight: 600;
+            display: none;
+            font-size: 14px;
+        }
+
+        /* Stories-like Navigation */
+        .nav-section {
+            padding: 16px 0;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-stories {
+            max-width: 975px;
+            margin: 0 auto;
+            display: flex;
+            gap: 16px;
+            overflow-x: auto;
+            padding: 0 16px;
+            scrollbar-width: none;
+        }
+
+        .nav-stories::-webkit-scrollbar {
+            display: none;
+        }
+
+        .nav-story {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 80px;
+            text-decoration: none;
+            color: inherit;
+            padding: 8px;
+            border-radius: 12px;
+        }
+
+        .nav-story:active {
+            background: var(--background);
+        }
+
+        .nav-story-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            position: relative;
+            padding: 2px;
+        }
+
+        .nav-story-avatar::before {
+            content: '';
+            position: absolute;
+            inset: 2px;
+            border-radius: 50%;
+            background: var(--surface);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-story-text {
+            font-size: 12px;
+            font-weight: 400;
+            color: var(--on-surface);
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 975px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        .main-feed {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Instagram-like Post Cards */
+        .post-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .post-header {
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .post-category {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .category-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .category-info h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .category-info p {
+            font-size: 14px;
+            color: var(--on-surface-light);
+            margin: 0;
+        }
+
+        /* Grille alimentaire optimisée pour mobile */
+        .food-grid {
+            display: grid;
+            gap: 1px;
+            background: var(--border);
+        }
+
+        /* Responsive grid */
+        @media (max-width: 480px) {
+            .food-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 481px) and (max-width: 768px) {
+            .food-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (min-width: 769px) {
+            .food-grid {
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            }
+        }
+
+        .food-item {
+            position: relative;
+            background: var(--surface);
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .food-item:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .food-item:active {
+            transform: scale(0.98);
+        }
+
+        .food-item-image {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            transition: all 0.3s ease;
+            cursor: zoom-in;
+        }
+
+        .food-item-image:hover {
+            opacity: 0.9;
+        }
+
+        .food-item-content {
+            padding: 12px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .food-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--on-surface);
+            line-height: 1.3;
+        }
+
+        .food-description {
+            font-size: 12px;
+            color: var(--on-surface-light);
+            flex: 1;
+            line-height: 1.4;
+        }
+
+        .food-price {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 8px 0;
+        }
+
+        .add-to-cart-btn {
+            background: var(--gradient);
+            color: white;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            min-height: 44px;
+        }
+
+        .add-to-cart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .add-to-cart-btn:active {
+            transform: translateY(0);
+        }
+
+        .add-to-cart-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Responsive text sizes */
+        @media (max-width: 480px) {
+            .food-title {
+                font-size: 13px;
+            }
+            
+            .food-description {
+                font-size: 11px;
+            }
+            
+            .food-price {
+                font-size: 14px;
+            }
+            
+            .add-to-cart-btn {
+                padding: 10px 12px;
+                font-size: 13px;
+            }
+            
+            .food-item-content {
+                padding: 10px;
+            }
+        }
+
+        .post-actions {
+            padding: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 8px;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            padding: 8px;
+            min-width: 44px;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+        }
+
+        .action-btn:hover {
+            background: var(--background);
+            transform: scale(1.1);
+        }
+
+        .action-btn:active {
+            background: var(--border);
+        }
+
+        .action-btn.liked {
+            color: red;
+        }
+
+        /* Modal styles optimized for mobile */
+        .modal, .cart-modal, .degue-modal, .payment-modal, .settings-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.show, .cart-modal.show, .degue-modal.show, .payment-modal.show, .settings-modal.show {
+            display: flex;
+        }
+
+        .modal-content, .cart-modal-content, .degue-modal-content, .payment-modal-content, .settings-modal-content {
+            background: var(--surface);
+            border-radius: var(--radius-xl);
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        /* Modal Header Styles */
+        .modal-header, .cart-modal-header, .degue-modal-header, .payment-modal-header {
+            padding: 2rem;
+            border-bottom: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .modal-header h2, .payment-modal-header h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--on-surface);
+        }
+
+        .modal-header p {
+            color: var(--on-surface-light);
+            margin: 0;
+        }
+
+        /* Modal Tabs */
+        .modal-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-tab {
+            flex: 1;
+            padding: 1rem;
+            border: none;
+            background: var(--background);
+            color: var(--on-surface-light);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .modal-tab.active {
+            background: var(--surface);
+            color: var(--on-surface);
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 2rem;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Form styles */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--on-surface);
+        }
+
+        /* Touch-friendly buttons */
+        .submit-btn, .checkout-btn, .payment-btn, .danger-btn {
+            width: 100%;
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-height: 48px;
+            margin-top: 1rem;
+        }
+
+        .submit-btn, .checkout-btn, .payment-btn {
+            background: var(--gradient);
+        }
+
+        .danger-btn {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+        }
+
+        .submit-btn:hover, .checkout-btn:hover, .payment-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .submit-btn:active, .checkout-btn:active, .payment-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Form inputs optimized for mobile */
+        .form-input {
+            width: 100%;
+            padding: 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.2s ease;
+            background: var(--surface);
+            min-height: 48px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(225, 48, 108, 0.1);
+        }
+
+        /* Photo preview */
+        .photo-preview {
+            max-width: 100px;
+            max-height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            display: none;
+            margin-top: 1rem;
+            border: 3px solid var(--gradient);
+        }
+
+        /* Close buttons */
+        .close-btn, .close-cart-btn, .close-payment-btn, .close-settings-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: rgba(0, 0, 0, 0.1);
+            border: none;
+            color: var(--on-surface);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 44px;
+            min-height: 44px;
+        }
+
+        /* Payment Method Selection */
+        .payment-methods {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .payment-method {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .payment-method:hover {
+            background: var(--background);
+            border-color: var(--primary);
+        }
+
+        .payment-method.selected {
+            background: var(--background);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(225, 48, 108, 0.1);
+        }
+
+        .payment-method-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .payment-method-icon {
+            font-size: 1.5rem;
+        }
+
+        .payment-method-details h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .payment-method-details p {
+            font-size: 0.875rem;
+            color: var(--on-surface-light);
+            margin: 0;
+        }
+
+        /* Settings Modal Styles */
+        .settings-section {
+            margin-bottom: 2rem;
+        }
+
+        .settings-section h3 {
+            color: var(--on-surface);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .settings-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .settings-item:last-child {
+            border-bottom: none;
+        }
+
+        .settings-item-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .settings-item-icon {
+            font-size: 1.2rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        .settings-item-text {
+            flex: 1;
+        }
+
+        .settings-item-text h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .settings-item-text p {
+            font-size: 0.875rem;
+            color: var(--on-surface-light);
+            margin: 0;
+        }
+
+        .settings-btn {
+            background: var(--background);
+            color: var(--on-surface);
+            border: 1px solid var(--border);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .settings-btn:hover {
+            background: var(--border);
+        }
+
+        /* Cart and other modal specific styles */
+        .cart-items {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 16px;
+        }
+
+        .cart-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+
+        .cart-item-image {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .cart-item-info {
+            flex: 1;
+        }
+
+        .cart-item-name {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .cart-item-price {
+            font-size: 12px;
+            color: var(--on-surface-light);
+        }
+
+        .cart-total {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-align: center;
+            padding: 1rem 0;
+            border-top: 2px solid var(--border);
+            margin-top: 1rem;
+        }
+
+        .remove-btn {
+            background: none;
+            border: none;
+            color: var(--on-surface-light);
+            cursor: pointer;
+            padding: 8px;
+            font-size: 20px;
+            min-width: 44px;
+            min-height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .remove-btn:hover {
+            background: var(--background);
+            color: var(--accent);
+        }
+
+        /* Empty states */
+        .empty-state {
+            text-align: center;
+            padding: 48px 16px;
+            color: var(--on-surface-light);
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        /* Degue Options */
+        .degue-option {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .degue-option:hover {
+            background: var(--background);
+            border-color: var(--primary);
+        }
+
+        .degue-option-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .degue-option-icon {
+            font-size: 1.5rem;
+        }
+
+        .degue-option-details h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .degue-option-details p {
+            font-size: 0.875rem;
+            color: var(--on-surface-light);
+            margin: 0;
+        }
+
+        .degue-option-price {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        /* Animations */
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .post-card {
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .cart-badge {
+            animation: pulse 0.6s ease-out;
+        }
+
+        /* Payment Status */
+        .payment-status {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .payment-status.loading {
+            background: linear-gradient(135deg, #ffc107, #fd7e14);
+            color: white;
+            border-radius: 12px;
+        }
+
+        .payment-status.success {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border-radius: 12px;
+        }
+
+        .payment-status.error {
+            background: linear-gradient(135deg, #dc3545, #e83e8c);
+            color: white;
+            border-radius: 12px;
+        }
+
+        /* Improve touch targets */
+        @media (max-width: 768px) {
+            .nav-story {
+                min-width: 90px;
+            }
+            
+            .header-content {
+                padding: 0 12px;
+            }
+            
+            .container {
+                padding: 12px;
+            }
+            
+            .logo-text {
+                font-size: 16px;
+            }
+        }
+
+        /* Additional mobile optimizations */
+        @media (max-width: 480px) {
+            .modal-content, .cart-modal-content, .degue-modal-content, .payment-modal-content, .settings-modal-content {
+                max-height: 95vh;
+                margin: 10px;
+                border-radius: 16px;
+            }
+            
+            .header {
+                padding: 8px 0;
+            }
+            
+            .nav-section {
+                padding: 12px 0;
+            }
+            
+            .post-header {
+                padding: 12px;
+            }
+            
+            .post-actions {
+                padding: 12px;
+            }
+        }
+
+        /* Prevent zoom on input focus on iOS */
+        @media (max-width: 768px) {
+            input[type="text"], 
+            input[type="email"], 
+            input[type="tel"], 
+            textarea {
+                font-size: 16px !important;
+            }
+        }
+
+        /* Responsive design improvements */
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 18px;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 80%;
+            margin: auto;
+        }
+
+        img, video {
+            max-width: 100%;
+            height: auto;
+        }
+
+        @media screen and (max-width: 768px) {
+            body {
+                font-size: 16px;
+            }
+            .container {
+                width: 95%;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            body {
+                font-size: 14px;
+            }
+            .container {
+                width: 100%;
+                padding: 10px;
+            }
+        }
+         /* Styles pour le mode hors ligne */
+        .offline {
+            filter: grayscale(0.5);
+        }
+        
+        .offline::before {
+            content: '📶 Mode hors ligne - Fonctionnalités limitées';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #ff6b6b;
+            color: white;
+            padding: 8px;
+            text-align: center;
+            z-index: 2000;
+            font-size: 14px;
+        }
+        
+        /* Styles pour le contraste élevé */
+        .high-contrast {
+            filter: contrast(1.5) brightness(1.2);
+        }
+        
+        .high-contrast .post-card {
+            border: 2px solid #000;
+        }
+        
+        .high-contrast .food-item {
+            border: 1px solid #666;
+        }
+        
+        /* Animation pour les images chargées */
+        .food-item-image {
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+        }
+        
+        .food-item-image.loaded {
+            opacity: 1;
+        }
+        
+        /* Styles pour les boutons favoris */
+        .favorite-btn {
+            transition: transform 0.2s ease;
+        }
+        
+        .favorite-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        .favorite-btn:active {
+            transform: scale(0.95);
+        }
+        
+        /* Amélioration des zones tactiles */
+        @media (max-width: 768px) {
+            .action-btn, .cart-icon, .nav-story {
+                min-width: 48px;
+                min-height: 48px;
+            }
+            
+            /* Espacement pour le bouton de contraste */
+            .main-feed {
+                padding-bottom: 100px;
+            }
+        }
+        
+        /* Animation de pulsation pour les notifications */
+        @keyframes notification-pulse {
+            0% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.7; }
+        }
+        
+        .notification-badge {
+            animation: notification-pulse 2s infinite;
+        }
+        
+        /* Styles pour la recherche sticky */
+        .search-input-container {
+            position: sticky;
+            top: 140px;
+            z-index: 10;
+            margin: 16px 0;
+        }
+        
+        /* Amélioration des transitions */
+        .food-item, .post-card, .modal-content, .cart-modal-content {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* Loading states */
+        .loading-skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+        
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        /* Scroll smooth */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* Focus states pour l'accessibilité */
+        button:focus, input:focus, .nav-story:focus {
+            outline: 2px solid #4A90E2;
+            outline-offset: 2px;
+        }
+        
+        /* Print styles */
+        @media print {
+            .header, .nav-section, .post-actions {
+                display: none;
+            }
+            
+            .post-card {
+                break-inside: avoid;
+                border: 1px solid #000;
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Time Alert -->
+    <div class="time-alert" id="time-alert">
+        ⏰ Les commandes sont fermées. Revenez entre 18h00 et 10h00 pour commander.
+    </div>
+
+    <!-- Profile Modal -->
+    <div class="modal" id="profile-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>✨ Bienvenue sur LOKO EXPRESS</h2>
+                <p>Créez votre profil pour découvrir nos délicieux repas</p>
+            </div>
+            
+            <div class="modal-tabs">
+                <button class="modal-tab active" onclick="showTab('profile-tab')">👤 Profil</button>
+                <button class="modal-tab" onclick="showTab('contact-tab')">📞 Contact</button>
+                <button class="modal-tab" onclick="showTab('share-tab')">🔗 Partager</button>
+            </div>
+
+            <!-- Onglet Profil -->
+            <div id="profile-tab" class="tab-content active">
+                <form id="profile-form">
+                    <div class="form-group">
+                        <label for="profile-lastname">Nom *</label>
+                        <input type="text" class="form-input" id="profile-lastname" required placeholder="Votre nom de famille">
+                    </div>
+                    <div class="form-group">
+                        <label for="profile-firstname">Prénom *</label>
+                        <input type="text" class="form-input" id="profile-firstname" required placeholder="Votre prénom">
+                    </div>
+                    <div class="form-group">
+                        <label for="profile-email">Email ou WhatsApp *</label>
+                        <input type="text" class="form-input" id="profile-email" required placeholder="contact@exemple.com ou +225...">
+                    </div>
+                    <div class="form-group">
+                        <label for="profile-phone">Numéro Mobile Money *</label>
+                        <input type="tel" class="form-input" id="profile-phone" required placeholder="+225 XX XX XX XX XX">
+                    </div>
+                    <div class="form-group">
+                        <label for="profile-photo">Photo de profil (optionnel)</label>
+                        <input type="file" class="form-input" id="profile-photo" accept="image/*">
+                        <img id="profile-photo-preview" class="photo-preview">
+                    </div>
+                    <button type="submit" class="submit-btn">
+                        ✅ Créer mon profil et commencer
+                    </button>
+                </form>
+            </div>
+
+            <!-- Onglet Contact -->
+            <div id="contact-tab" class="tab-content">
+                <div class="empty-state">
+                    <div class="empty-state-icon">📞</div>
+                    <h3>Contactez-nous</h3>
+                    <p>Nous sommes là pour vous aider !</p>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <a href="https://wa.me/2250719983044?text=Bonjour%20LOKO%20Express%20!" 
+                       target="_blank" 
+                       style="background: linear-gradient(135deg, #25D366, #128C7E); color: white; padding: 1rem; text-decoration: none; border-radius: 12px; text-align: center; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                        💬 WhatsApp: 07 19 98 30 44
+                    </a>
+                    <a href="tel:0719983044" 
+                       style="background: var(--gradient); color: white; padding: 1rem; text-decoration: none; border-radius: 12px; text-align: center; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                        📞 Appeler maintenant
+                    </a>
+                </div>
+            </div>
+
+            <!-- Onglet Partager -->
+            <div id="share-tab" class="tab-content">
+                <div class="empty-state">
+                    <div class="empty-state-icon">🎉</div>
+                    <h3>Invitez vos amis</h3>
+                    <p>Partagez LOKO EXPRESS avec vos proches</p>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <a href="https://wa.me/?text=Découvre%20LOKO%20Express%20pour%20tes%20repas%20:%20https://loko-express.vercel.app/" 
+                       target="_blank"
+                       style="background: linear-gradient(135deg, #25D366, #128C7E); color: white; padding: 1rem; text-decoration: none; border-radius: 12px; text-align: center; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                        💚 Partager sur WhatsApp
+                    </a>
+                    <a href="https://www.facebook.com/sharer/sharer.php?u=https://loko-express.vercel.app/" 
+                       target="_blank"
+                       style="background: linear-gradient(135deg, #1877F2, #4267B2); color: white; padding: 1rem; text-decoration: none; border-radius: 12px; text-align: center; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                        👍 Partager sur Facebook
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="settings-modal" id="settings-modal">
+        <div class="settings-modal-content">
+            <div class="modal-header">
+                <button class="close-settings-btn" onclick="closeSettings()">&times;</button>
+                <h2>⚙️ Paramètres du Compte</h2>
+                <p>Gérez votre profil et vos préférences</p>
+            </div>
+            <div style="padding: 0 2rem 2rem;">
+                <!-- Section Profil -->
+                <div class="settings-section">
+                    <h3>👤 Informations du profil</h3>
+                    <div class="settings-item">
+                        <div class="settings-item-info">
+                            <div class="settings-item-icon">✏️</div>
+                            <div class="settings-item-text">
+                                <h4>Modifier le profil</h4>
+                                <p>Changer nom, prénom, email, téléphone</p>
+                            </div>
+                        </div>
+                        <button class="settings-btn" onclick="editProfile()">Modifier</button>
+                    </div>
+                    <div class="settings-item">
+                        <div class="settings-item-info">
+                            <div class="settings-item-icon">📱</div>
+                            <div class="settings-item-text">
+                                <h4>Numéro Mobile Money</h4>
+                                <p id="current-phone">Non renseigné</p>
+                            </div>
+                        </div>
+                        <button class="settings-btn" onclick="changePhone()">Changer</button>
+                    </div>
+                </div>
+
+                <!-- Section Données -->
+                <div class="settings-section">
+                    <h3>📊 Mes données</h3>
+                    <div class="settings-item">
+                        <div class="settings-item-info">
+                            <div class="settings-item-icon">🧾</div>
+                            <div class="settings-item-text">
+                                <h4>Historique des commandes</h4>
+                                <p id="orders-count">0 commande(s)</p>
+                            </div>
+                        </div>
+                        <button class="settings-btn" onclick="exportOrders()">Exporter</button>
+                    </div>
+                </div>
+
+                <!-- Section Danger -->
+                <div class="settings-section">
+                    <h3 style="color: #dc3545;">⚠️ Zone de danger</h3>
+                    <div class="settings-item">
+                        <div class="settings-item-info">
+                            <div class="settings-item-icon">🗑️</div>
+                            <div class="settings-item-text">
+                                <h4>Supprimer le compte</h4>
+                                <p>Suppression définitive de toutes vos données</p>
+                            </div>
+                        </div>
+                        <button class="danger-btn" onclick="deleteAccount()" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
+                            Supprimer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div class="payment-modal" id="payment-modal">
+        <div class="payment-modal-content">
+            <div class="payment-modal-header">
+                <button class="close-payment-btn" onclick="closePayment()">&times;</button>
+                <h3>💳 Choisir le mode de paiement</h3>
+                <p>Sélectionnez votre méthode de paiement préférée</p>
+            </div>
+            <div style="padding: 2rem;">
+                <div class="payment-methods" id="payment-methods">
+                    <div class="payment-method" onclick="selectPaymentMethod('mtn')" data-method="mtn">
+                        <div class="payment-method-info">
+                            <div class="payment-method-icon">📱</div>
+                            <div class="payment-method-details">
+                                <h4>MTN Mobile Money</h4>
+                                <p>Paiement sécurisé avec votre compte MTN</p>
+                            </div>
+                        </div>
+                        <div class="payment-method-radio">
+                            <input type="radio" name="payment" value="mtn">
+                        </div>
+                    </div>
+                    <div class="payment-method" onclick="selectPaymentMethod('cash')" data-method="cash">
+                        <div class="payment-method-info">
+                            <div class="payment-method-icon">💵</div>
+                            <div class="payment-method-details">
+                                <h4>Paiement à la livraison</h4>
+                                <p>Payez en espèces lors de la réception</p>
+                            </div>
+                        </div>
+                        <div class="payment-method-radio">
+                            <input type="radio" name="payment" value="cash">
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="payment-details" style="display: none; margin-top: 1rem;">
+                    <div class="form-group">
+                        <label for="mtn-number">Numéro MTN Mobile Money</label>
+                        <input type="tel" class="form-input" id="mtn-number" placeholder="+225 XX XX XX XX XX">
+                    </div>
+                </div>
+                
+                <button class="payment-btn" onclick="processPayment()" id="process-payment-btn" disabled>
+                    🔒 Confirmer et Payer
+                </button>
+                
+                <div id="payment-status" class="payment-status" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Orders Modal -->
+    <div class="modal" id="orders-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button class="close-btn" onclick="toggleOrders()">&times;</button>
+                <h2>🧾 Mes Commandes</h2>
+                <p>Historique de vos commandes récentes</p>
+            </div>
+            <div style="padding: 2rem;">
+                <div id="orders-list">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🛒</div>
+                        <h3>Aucune commande</h3>
+                        <p>Vos commandes apparaîtront ici</p>
+                    </div>
+                </div>
+                <button onclick="clearOrders()" class="danger-btn" style="margin-top: 1rem;">
+                    🗑️ Vider l'historique
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Deguè Selection Modal -->
+    <div class="degue-modal" id="degue-modal">
+        <div class="degue-modal-content">
+            <div class="degue-modal-header">
+                <h3 id="degue-modal-title">🥛 Choisir votre format de Dêguê</h3>
+                <p>Sélectionnez la taille qui vous convient</p>
+            </div>
+            <div class="degue-options" id="degue-options">
+                <!-- Les options seront générées dynamiquement -->
+            </div>
+            <div style="padding: 0 2rem 2rem;">
+                <button onclick="closeDegueModal()" style="width: 100%; background: var(--border); color: var(--on-surface); border: none; padding: 1rem; border-radius: 8px; cursor: pointer;">
+                    Annuler
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cart Modal -->
+    <div class="cart-modal" id="cart-modal">
+        <div class="cart-modal-content">
+            <div class="cart-modal-header">
+                <h3 class="cart-modal-title">🛒 Mon Panier</h3>
+                <button class="close-cart-btn" onclick="toggleCart()">&times;</button>
+            </div>
+            <div class="cart-modal-body" style="padding: 2rem;">
+                <div class="cart-items" id="cart-items">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🛒</div>
+                        <p>Votre panier est vide</p>
+                    </div>
+                </div>
+                
+                <div class="cart-total" id="cart-total">
+                    Total: 0 FCFA
+                </div>
+                
+                <form id="order-form">
+                    <button type="submit" class="checkout-btn">
+                        🎯 Commander maintenant
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header Instagram-style -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo-img">GE</div>
+                <div class="logo-text">GROUPE EXPRESS</div>
+            </div>
+            
+            <div class="header-actions">
+                <button class="cart-icon" onclick="toggleCart()" id="cart-button">
+                    🛒
+                    <span class="cart-badge" id="cart-badge" style="display: none;">0</span>
+                </button>
+                
+                <div class="user-profile" onclick="openSettings()" id="user-profile" style="display: none;">
+                    <img src="https://via.placeholder.com/32x32/E1306C/white?text=U" alt="Avatar" class="user-avatar" id="user-avatar">
+                    <div class="user-info">
+                        <h4 id="user-name">Utilisateur</h4>
+                        <p>Paramètres</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Stories-like Navigation -->
+    <section class="nav-section">
+        <div class="nav-stories">
+            <div class="nav-story" onclick="showAbout()">
+                <div class="nav-story-avatar">ℹ️</div>
+                <div class="nav-story-text">À propos</div>
+            </div>
+            <a href="fournisseur.html" class="nav-story">
+                <div class="nav-story-avatar">⚡</div>
+                <div class="nav-story-text">Fournisseur</div>
+            </a>
+            <div class="nav-story" onclick="toggleOrders()">
+                <div class="nav-story-avatar">🧾</div>
+                <div class="nav-story-text">Commandes</div>
+            </div>
+            <a href="actualité.html" class="nav-story">
+                <div class="nav-story-avatar">⚡</div>
+                <div class="nav-story-text">Express Union</div>
+            </a>
+        </div>
+    </section>
+
+    <div class="container">
+        <!-- Main Feed -->
+        <div class="main-feed">
+           <!-- Catégorie A - Pâtes & Petit pois -->
+<div class="post-card">
+    <div class="post-header">
+        <div class="post-category">
+            <div class="category-avatar">🍝</div>
+            <div class="category-info">
+                <h3>Pâtes & Petit pois</h3>
+                <p>Les classiques revisités</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="food-grid">
+        <div class="food-item">
+            <img src="image/spaghetti rognon.jpg" alt="Spaghetti rognon" class="food-item-image">
+            <div class="food-item-content">
+                <div class="food-title">Spaghetti rognon</div>
+                <div class="food-description">Spaghetti préparé avec du rognon</div>
+                <div class="food-price">500 FCFA</div>
+                <button class="add-to-cart-btn" onclick="promptAddToCart('Spaghetti rognon', 500, 'A')">
+                    🛒 Ajouter au panier
+                </button>
+            </div>
+        </div>
+        
+        <div class="food-item">
+            <img src="image/spaghet foi.jpg" alt="Spaghetti foi" class="food-item-image">
+            <div class="food-item-content">
+                <div class="food-title">Spaghetti foi</div>
+                <div class="food-description">Spaghetti préparé avec du foie</div>
+                <div class="food-price">500 FCFA</div>
+                <button class="add-to-cart-btn" onclick="promptAddToCart('Spaghetti foi', 500, 'A')">
+                    🛒 Ajouter au panier
+                </button>
+            </div>
+        </div>
+
+        <div class="food-item">
+            <img src="image/spaghetti viande.jpg" alt="Spaghetti à la viande" class="food-item-image">
+            <div class="food-item-content">
+                <div class="food-title">Spaghetti à la viande</div>
+                <div class="food-description">Spaghetti avec de la viande hachée</div>
+                <div class="food-price">500 FCFA</div>
+                <button class="add-to-cart-btn" onclick="promptAddToCart('Spaghetti à la viande', 500, 'A')">
+                    🛒 Ajouter au panier
+                </button>
+            </div>
+        </div>
+
+        <div class="food-item">
+            <img src="image/spagheti oeuf grilll.jpg" alt="Spaghetti oeuf griller" class="food-item-image">
+            <div class="food-item-content">
+                <div class="food-title">spagheti oeuf grillé</div>
+                <div class="food-description">Spaghetti + oeuf grillé</div>
+                <div class="food-price">750 FCFA</div>
+                <button class="add-to-cart-btn" onclick="promptAddToCart('Spaghetti oeuf grillé', 750, 'A')">
+                    🛒 Ajouter au panier
+                </button>
+            </div>
+        </div>
+
+        <div class="food-item">
+           <img src="image/petit poid.jpg" alt="Petit pois au rognon" class="food-item-image">
+            <div class="food-item-content">
+                <div class="food-title">Petit pois rognon</div>
+                <div class="food-description">Petit pois accompagné de rognon</div>
+                <div class="food-price">1000 fcfa </div>
+                <button class="add-to-cart-btn" onclick="promptAddToCart('Petit pois rognon', 1000, 'A')">
+                    🛒 Ajouter au panier
+                </button>
+            </div>
+        </div>
+
+        <div class="food-item">
+            <img src="image/petit poid rogno,.jpg" alt="Petit pois au rognon" class="food-item-image">
+            <div class="food-item-content">
+                <div class="food-title">Petit pois au rognon</div>
+                <div class="food-description">Petit pois avec du rognon</div>
+                <div class="food-price">1000 FCFA</div>
+                <button class="add-to-cart-btn" onclick="promptAddToCart('Petit pois au rognon', 1000, 'A')">
+                    🛒 Ajouter au panier
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="post-actions">
+    <div class="action-buttons">
+        <button class="action-btn" onclick="likePost(this, 'pasta-post')">❤️</button>
+        <button class="action-btn" onclick="commentPost('pasta-post')">💬</button>
+        <button class="action-btn" onclick="showComments('pasta-post')">👁️</button>
+    </div>
+    <p style="font-size: 0.875rem; color: var(--on-surface-light); margin: 0;" id="pasta-post-likes">
+        <strong><span class="like-count">GROUPE EXPRESS</span> personnes</strong> aiment ces plats
+    </p>
+</div>
+</div>
+
+<!-- Catégorie B - Tchèpe -->
+<div class="post-card">
+    <div class="post-header">
+        <div class="post-category">
+            <div class="category-avatar">🍚</div>
+            <div class="category-info">
+                <h3>Tchèpes</h3>
+                <p>Nos plats de tchèpe savoureux</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="food-grid">
+        <div class="food-item">
+            <img src="image/tchep poisson.jpg" alt="Tchèpe au poisson" class="food-item-image">
+            <div class="food-item-content">
+                <div class="food-title">Tchèpe au poisson</div>
+                <div class="food-description">Tchèpe accompagné de poisson frais</div>
+                <div class="food-price">500 FCFA</div>
+                <button class="add-to-cart-btn" onclick="promptAddToCart('tchèpe au poisson', 500, 'B')">
+                    🛒 Ajouter au panier
+                </button>
+            </div>
+        </div>
+        
+        <div class="food-item">
+            <img src="image/tcheo.jpg" alt="Tchèpe au poulet" class="food-item-image">
+            <div class="food-item-content">
+                <div class="food-title">Tchèpe au poulet</div>
+                <div class="food-description">Tchèpe au poulet</div>
+                <div class="food-price">1000 FCFA</div>
+                <button class="add-to-cart-btn" onclick="promptAddToCart('Tchèpe au poulet', 1000, 'B')">
+                    🛒 Ajouter au panier
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="post-actions">
+        <div class="action-buttons">
+            <button class="action-btn" onclick="likePost(this, 'tchepe-post')">❤️</button>
+            <button class="action-btn" onclick="commentPost('tchepe-post')">💬</button>
+            <button class="action-btn">📤</button>
+        </div>
+        <p style="font-size: 0.875rem; color: var(--on-surface-light); margin: 0;" id="tchepe-post-likes">
+            <strong><span class="like-count">GROUPE EXPRESS</span> personnes</strong> aiment ces plats
+        </p>
+    </div>
+</div>
+
+<!-- Catégorie C - RIZ -->
+<div class="post-card">
+    <div class="post-header">
+        <div class="post-category">
+            <div class="category-avatar">🍛</div>
+            <div class="category-info">
+                <h3>RIZ</h3>
+                <p>Découvrez nos plats de riz</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="food-grid">
+        <div class="food-item">
+            <img src="image/riz sauc e.jpg" alt="Riz sauce arachide" class="food-item-image">
+            <div class="food-item-content">
+                <div class="food-title">Riz sauce arachide</div>
+                <div class="food-description">Riz sauce arachide</div>
+                <div class="food-price">800 FCFA</div>
+                <button class="add-to-cart-btn" onclick="promptAddToCart('Riz sauce Arachide', 800, 'C')">
+                    🛒 Ajouter au panier
+                </button>
+            </div>
+        </div>
+        
+        <div class="food-item">
+            <img src="image/riz souce feuille.jpg" alt="Riz sauce feuille" class="food-item-image">
+            <div class="food-item-content">
+                <div class="food-title">Riz sauce feuille</div>
+                <div class="food-description">Riz accompagné de sauce aux feuilles vertes riches en vitamines</div>
+                <div class="food-price">800 FCFA</div>
+                <button class="add-to-cart-btn" onclick="promptAddToCart('Riz sauce feuille', 800, 'C')">
+                    🛒 Ajouter au panier
+                </button>
+            </div>
+        </div>
+
+        <div class="food-item">
+            <img src="image/riz  arachide.jpg" alt="Riz sauce tomate" class="food-item-image">
+            <div class="food-item-content">
+                <div class="food-title">Riz sauce tomate</div>
+                <div class="food-description">Riz sauce tomate</div>
+                <div class="food-price">800 FCFA</div>
+                <button class="add-to-cart-btn" onclick="promptAddToCart('Riz sauce tomate', 800, 'C')">
+                    🛒 Ajouter au panier
+                </button>
+            </div>
+        </div>
+
+        <div class="food-item">
+            <img src="image/riz auberg.jpg" alt="Riz sauce aubergine" class="food-item-image">
+            <div class="food-item-content">
+                <div class="food-title">Riz sauce aubergine</div>
+                <div class="food-description">Riz sauce aubergine</div>
+                <div class="food-price">800 FCFA</div>
+                <button class="add-to-cart-btn" onclick="promptAddToCart('Riz sauce aubergine', 800, 'C')">
+                    🛒 Ajouter au panier
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="post-actions">
+        <div class="action-buttons">
+            <button class="action-btn" onclick="likePost(this, 'riz-post')">❤️</button>
+            <button class="action-btn" onclick="commentPost('riz-post')">💬</button>
+            <button class="action-btn">📤</button>
+        </div>
+        <p style="font-size: 0.875rem; color: var(--on-surface-light); margin: 0;" id="riz-post-likes">
+            <strong><span class="like-count">GROUPE EXPRESS</span> personnes</strong> aiment ces plats
+        </p>
+    </div>
+</div>
+
+<!-- Catégorie D - Spécialité Porc -->
+<div class="post-card">
+    <div class="post-header">
+        <div class="post-category">
+            <div class="category-avatar">🐷</div>
+            <div class="category-info">
+                <h3>Porc au four</h3>
+            </div>
+        </div>
+    </div>
+    
+    <div class="food-grid">
+        <div class="food-item">
+            <img src="image/porc au .jpg" alt="Porc au four + Attiékè" class="food-item-image">
+            <div class="food-item-content">
+                <div class="food-title">Porc au four</div>
+                <div class="food-description">Porc au four accompagné d'attiékè</div>
+                <div class="food-price">1000 FCFA</div>
+                <button class="add-to-cart-btn" onclick="promptAddToCart('Porc au four accompagné dattiékè', 1000, 'D')">
+                    🛒 Ajouter au panier
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="post-actions">
+        <div class="action-buttons">
+            <button class="action-btn" onclick="likePost(this, 'porc-post')">❤️</button>
+            <button class="action-btn" onclick="commentPost('porc-post')">💬</button>
+            <button class="action-btn">📤</button>
+        </div>
+        <p style="font-size: 0.875rem; color: var(--on-surface-light); margin: 0;" id="porc-post-likes">
+            <strong><span class="like-count">GROUPE EXPRESS</span> personnes</strong> aiment ce plat
+        </p>
+    </div>
+</div>
+
+<!-- Catégorie E - Attiékè -->
+<div class="post-card">
+    <div class="post-header">
+        <div class="post-category">
+            <div class="category-avatar">🌾</div>
+            <div class="category-info">
+                <h3>Attiékè spécialité</h3>
+                <p>Découvrez nos plats d'attiékè bien réussi</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="food-grid">
+        <div class="food-item">
+            <img src="image/dindon.jpg" alt="Attiékè dindon" class="food-item-image">
+            <div class="food-item-content">
+                <div class="food-title">Attiékè dindon</div>
+                <div class="food-description">Attiékè servi avec du dindon</div>
+                <div class="food-price">1000 FCFA</div>
+                <button class="add-to-cart-btn" onclick="promptAddToCart('Attiékè dindon', 1000, 'E')">
+                    🛒 Ajouter au panier
+                </button>
+            </div>
+        </div>
+        
+        <div class="food-item">
+            <img src="image/atieke poulet.jpg" alt="Attiékè poulet" class="food-item-image">
+            <div class="food-item-content">
+                <div class="food-title">Attiékè poulet</div>
+                <div class="food-description">Attiékè servi avec du poulet</div>
+                <div class="food-price">1000 FCFA</div>
+                <button class="add-to-cart-btn" onclick="promptAddToCart('Attiékè poulet', 1000, 'E')">
+                    🛒 Ajouter au panier
+                </button>
+            </div>
+        </div>
+
+        <div class="food-item">
+            <img src="image/atieke alloko.jpg" alt="Attiékè poisson" class="food-item-image">
+            <div class="food-item-content">
+                <div class="food-title">Attiékè poisson</div>
+                <div class="food-description">Attiékè servi avec du poisson</div>
+                <div class="food-price">1000 FCFA</div>
+                <button class="add-to-cart-btn" onclick="promptAddToCart('Attiékè poisson', 1000, 'E')">
+                    🛒 Ajouter au panier
+                </button>
+            </div>
+        </div>
+        
+        <div class="food-item">
+            <img src="image/garba.jpg" alt="Spécialité Garba" class="food-item-image">
+            <div class="food-item-content">
+                <div class="food-title">Spécialité Garba</div>
+                <div class="food-description">GARBA</div>
+                <div class="food-price">500 FCFA</div>
+                <button class="add-to-cart-btn" onclick="promptAddToCart('GARBA', 500, 'E')">
+                    🛒 Ajouter au panier
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="post-actions">
+        <div class="action-buttons">
+            <button class="action-btn" onclick="likePost(this, 'attieke-post')">❤️</button>
+            <button class="action-btn" onclick="commentPost('attieke-post')">💬</button>
+            <button class="action-btn">📤</button>
+        </div>
+        <p style="font-size: 0.875rem; color: var(--on-surface-light); margin: 0;" id="attieke-post-likes">
+            <strong><span class="like-count">GROUPE EXPRESS</span> personnes</strong> aiment ces plats
+        </p>
+    </div>
+</div>
+
+<!-- Catégorie F - Desserts -->
+<div class="post-card">
+    <div class="post-header">
+        <div class="post-category">
+            <div class="category-avatar">🍰</div>
+            <div class="category-info">
+                <h3>Desserts</h3>
+                <p>Pour finir en douceur</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="food-grid">
+        <div class="food-item">
+            <img src="image/deguer.jpg" alt="deguè raisin" class="food-item-image">
+            <div class="food-item-content">
+                <div class="food-title">Dêguê raisin</div>
+                <div class="food-description">Dêguê raisin - Différents formats disponibles</div>
+                <div class="food-price">À partir de 250 FCFA</div>
+                <button class="add-to-cart-btn" onclick="selectDegue('raisin')">
+                    📋 Sélectionner le format
+                </button>
+            </div>
+        </div>
+        
+        <div class="food-item">
+            <img src="image/deguer.jpg" alt="deguè coco" class="food-item-image">
+            <div class="food-item-content">
+                <div class="food-title">Dêguê coco</div>
+                <div class="food-description">Dêguê coco - Différents formats disponibles</div>
+                <div class="food-price">À partir de 300 FCFA</div>
+                <button class="add-to-cart-btn" onclick="selectDegue('coco')">
+                    📋 Sélectionner le format
+                </button>
+            </div>
+        </div>
+        
+        <div class="food-item">
+            <img src="image/deguer.jpg" alt="deguè simple" class="food-item-image">
+            <div class="food-item-content">
+                <div class="food-title">Dêguê simple</div>
+                <div class="food-description">Dêguê simple - Différents formats disponibles</div>
+                <div class="food-price">À partir de 200 FCFA</div>
+                <button class="add-to-cart-btn" onclick="selectDegue('simple')">
+                    📋 Sélectionner le format
+                </button>
+            </div>
+        </div>
+        
+        <div class="food-item">
+            <img src="image/deguer.jpg" alt="deguè raisin coco" class="food-item-image">
+            <div class="food-item-content">
+                <div class="food-title">Dêguê raisin coco</div>
+                <div class="food-description">Dêguê raisin coco - Différents formats disponibles</div>
+                <div class="food-price">À partir de 400 FCFA</div>
+                <button class="add-to-cart-btn" onclick="selectDegue('raisin-coco')">
+                    📋 Sélectionner le format
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="post-actions">
+        <div class="action-buttons">
+            <button class="action-btn" onclick="likePost(this, 'desserts-post')">❤️</button>
+            <button class="action-btn" onclick="commentPost('desserts-post')">💬</button>
+            <button class="action-btn">📤</button>
+        </div>
+        <p style="font-size: 0.875rem; color: var(--on-surface-light); margin: 0;" id="desserts-post-likes">
+            <strong><span class="like-count">GROUPE EXPRESS</span> personnes</strong> aiment ces desserts
+        </p>
+    </div>
+</div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Firebase Configuration
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+        import { getDatabase, ref, push, set, get, onValue } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-database.js";
+
+       const firebaseConfig = {
+  apiKey: "AIzaSyBsGrY-AqYMoI70kT3WMxLgW0HwYA4KyaQ",
+  authDomain: "livraison-c8498.firebaseapp.com",
+  projectId: "livraison-c8498",
+  storageBucket: "livraison-c8498.firebasestorage.app",
+  messagingSenderId: "403240604780",
+  appId: "1:403240604780:web:77d84ad03d68bdaddfb449",
+  measurementId: "G-5YF89BZ5RY"
+};
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Synchroniser les likes avec Firebase
+        window.syncLikes = function() {
+            const likesRef = ref(db, 'likes');
+            onValue(likesRef, (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    Object.keys(data).forEach(postId => {
+                        const likeCountElement = document.querySelector(`#${postId}-likes .like-count`);
+                        if (likeCountElement) {
+                            likeCountElement.textContent = data[postId].count || 0;
+                        }
+                    });
+                }
+            });
+        };
+
+        // Fonction pour liker un post
+        window.likePost = function(button, postId) {
+            if (!window.userProfile) {
+                alert("Veuillez créer votre profil pour liker !");
+                window.openProfile();
+                return;
+            }
+
+            const likesRef = ref(db, `likes/${postId}`);
+            get(likesRef).then((snapshot) => {
+                const currentData = snapshot.val() || { count: 0, users: {} };
+                const userId = window.userProfile.email;
+                
+                if (currentData.users && currentData.users[userId]) {
+                    // Retirer le like
+                    delete currentData.users[userId];
+                    currentData.count = Math.max(0, currentData.count - 1);
+                    button.classList.remove('liked');
+                } else {
+                    // Ajouter le like
+                    if (!currentData.users) currentData.users = {};
+                    currentData.users[userId] = true;
+                    currentData.count = (currentData.count || 0) + 1;
+                    button.classList.add('liked');
+                }
+                
+                set(likesRef, currentData);
+            });
+        };
+
+        // Fonction pour commenter
+        window.commentPost = function(postId) {
+            if (!window.userProfile) {
+                alert("Veuillez créer votre profil pour commenter !");
+                window.openProfile();
+                return;
+            }
+            
+            const comment = prompt("Votre commentaire :");
+            if (comment && comment.trim()) {
+                const commentsRef = ref(db, `comments/${postId}`);
+                push(commentsRef, {
+                    text: comment.trim(),
+                    author: `${window.userProfile.firstname} ${window.userProfile.lastname}`,
+                    timestamp: new Date().toISOString()
+                });
+                alert("Commentaire ajouté !");
+            }
+        };
+
+        // Fonction d'envoi de commande avec code unique
+        window.submitOrder = function(order) {
+            const orderRef = ref(db, 'orders');
+            const newOrderRef = push(orderRef);
+            
+            // Générer un code unique basé sur timestamp et catégorie
+            const timestamp = Date.now();
+            const mainCategory = order.items.length > 0 ? order.items[0].category : 'A';
+            const uniqueCode = `#LE${mainCategory}${timestamp.toString().slice(-6)}`;
+            
+            order.code = uniqueCode;
+            order.timestamp = new Date().toISOString();
+            order.status = "nouveau";
+            
+            return set(newOrderRef, order)
+                .then(() => {
+                    console.log('Commande envoyée avec succès');
+                    return uniqueCode;
+                })
+                .catch((error) => {
+                    console.error('Erreur Firebase:', error);
+                    return false;
+                });
+        };
+
+        // Initialiser la synchronisation des likes au chargement
+        window.addEventListener('DOMContentLoaded', () => {
+            window.syncLikes();
+        });
+    </script>
+
+    <script>
+     // Variables globales avec persistance localStorage
+let userProfile = JSON.parse(localStorage.getItem('userProfile')) || null;
+let cart = [];
+let total = 0;
+let customerOrders = JSON.parse(localStorage.getItem('customerOrders')) || [];
+        // Vérification des heures de commande avec fuseau horaire d'Abidjan
+function checkOrderingHours() {
+    const now = new Date();
+    const abidjanTime = new Date(now.toLocaleString("en-US", {timeZone: "Africa/Abidjan"}));
+    const hour = abidjanTime.getHours();
+    const minute = abidjanTime.getMinutes();
+    const isOrderingClosed = hour >= 10 && hour < 18;
+    
+    const timeAlert = document.getElementById('time-alert');
+    const addToCartButtons = document.querySelectorAll('.add-to-cart-btn');
+    const checkoutButton = document.querySelector('.checkout-btn');
+    
+    // Calcul du temps restant jusqu'à la réouverture
+    let timeUntilOpen = '';
+    if (isOrderingClosed) {
+        const reopenTime = new Date(abidjanTime);
+        reopenTime.setHours(18, 0, 0, 0);
+        if (reopenTime <= abidjanTime) {
+            reopenTime.setDate(reopenTime.getDate() + 1);
+        }
+        const diff = reopenTime - abidjanTime;
+        const hoursLeft = Math.floor(diff / (1000 * 60 * 60));
+        const minutesLeft = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        timeUntilOpen = ` (Réouverture dans ${hoursLeft}h ${minutesLeft}min)`;
+    }
+    
+    if (isOrderingClosed) {
+        timeAlert.innerHTML = `⏰ Les commandes sont fermées de 10h00 à 18h00 (Heure d'Abidjan)${timeUntilOpen}`;
+        timeAlert.style.display = 'block';
+        addToCartButtons.forEach(btn => {
+            btn.disabled = true;
+            btn.textContent = '⏰ Commandes fermées';
+        });
+        if (checkoutButton) {
+            checkoutButton.disabled = true;
+            checkoutButton.textContent = `⏰ Commandes fermées${timeUntilOpen}`;
+        }
+    } else {
+        // Calcul du temps restant avant fermeture
+        const closeTime = new Date(abidjanTime);
+        closeTime.setHours(10, 0, 0, 0);
+        if (closeTime <= abidjanTime) {
+            closeTime.setDate(closeTime.getDate() + 1);
+        }
+        const diff = closeTime - abidjanTime;
+        const hoursLeft = Math.floor(diff / (1000 * 60 * 60));
+        const minutesLeft = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        
+        if (hoursLeft < 2) { // Afficher l'alerte si moins de 2h restantes
+            timeAlert.innerHTML = `⚠️ Commandes ouvertes - Fermeture dans ${hoursLeft}h ${minutesLeft}min`;
+            timeAlert.style.display = 'block';
+            timeAlert.style.background = 'linear-gradient(135deg, #28a745, #34ce57)';
+        } else {
+            timeAlert.style.display = 'none';
+        }
+        
+        addToCartButtons.forEach(btn => {
+            btn.disabled = false;
+            if (btn.textContent.includes('⏰')) {
+                btn.innerHTML = '🛒 Ajouter au panier';
+            }
+        });
+        if (checkoutButton) {
+            checkoutButton.disabled = false;
+            checkoutButton.textContent = '🎯 Commander maintenant';
+        }
+    }
+}
+// Vérifier toutes les minutes
+        setInterval(checkOrderingHours, 60000);
+        
+        // Fonction pour ouvrir le modal de profil au premier chargement
+        function openProfile() {
+            document.getElementById('profile-modal').classList.add('show');
+        }
+
+        // Fonction pour ouvrir les paramètres
+        function openSettings() {
+            if (!userProfile) {
+                alert("Veuillez créer votre profil d'abord !");
+                openProfile();
+                return;
+            }
+            
+            // Mettre à jour les informations affichées
+            document.getElementById('current-phone').textContent = userProfile.phone || 'Non renseigné';
+            document.getElementById('orders-count').textContent = `${customerOrders.length} commande(s)`;
+            
+            document.getElementById('settings-modal').classList.add('show');
+        }
+
+        // Fonction pour fermer les paramètres
+        function closeSettings() {
+            document.getElementById('settings-modal').classList.remove('show');
+        }
+
+        // Fonction pour modifier le profil
+        function editProfile() {
+            const newLastname = prompt('Nouveau nom:', userProfile.lastname);
+            const newFirstname = prompt('Nouveau prénom:', userProfile.firstname);
+            const newEmail = prompt('Nouvel email/WhatsApp:', userProfile.email);
+            
+            if (newLastname && newFirstname && newEmail) {
+                userProfile.lastname = newLastname;
+                userProfile.firstname = newFirstname;
+                userProfile.email = newEmail;
+                localStorage.setItem('userProfile', JSON.stringify(userProfile));
+                updateUserDisplay();
+                alert('Profil mis à jour avec succès !');
+            }
+        }
+
+        // Fonction pour changer le numéro de téléphone
+        function changePhone() {
+            const newPhone = prompt('Nouveau numéro Mobile Money:', userProfile.phone);
+            if (newPhone) {
+                userProfile.phone = newPhone;
+                localStorage.setItem('userProfile', JSON.stringify(userProfile));
+                document.getElementById('current-phone').textContent = newPhone;
+                alert('Numéro mis à jour avec succès !');
+            }
+        }
+
+        // Fonction pour exporter les commandes
+        function exportOrders() {
+            if (customerOrders.length === 0) {
+                alert('Aucune commande à exporter');
+                return;
+            }
+            
+            const ordersText = customerOrders.map(order => 
+                `Code: ${order.code}\nDate: ${new Date(order.timestamp).toLocaleString()}\nTotal: ${order.total} FCFA\nItems: ${order.items.map(item => `${item.name} (${item.price} FCFA)`).join(', ')}\n---`
+            ).join('\n');
+            
+            const blob = new Blob([ordersText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'mes-commandes-loko-express.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Fonction pour supprimer le compte
+        function deleteAccount() {
+            if (confirm('Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.')) {
+                if (confirm('Dernière confirmation : toutes vos données seront supprimées définitivement.')) {
+                    localStorage.removeItem('userProfile');
+                    localStorage.removeItem('customerOrders');
+                    userProfile = null;
+                    customerOrders = [];
+                    cart = [];
+                    total = 0;
+                    updateCartDisplay();
+                    updateUserDisplay();
+                    closeSettings();
+                    alert('Compte supprimé avec succès. Rechargement de la page...');
+                    setTimeout(() => location.reload(), 1000);
+                }
+            }
+        }
+
+        // Fonction pour afficher les onglets
+        function showTab(tabId) {
+            // Masquer tous les onglets
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.modal-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Afficher l'onglet sélectionné
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Fonction pour mettre à jour l'affichage utilisateur
+        function updateUserDisplay() {
+            const userProfileElement = document.getElementById('user-profile');
+            const userNameElement = document.getElementById('user-name');
+            const userAvatarElement = document.getElementById('user-avatar');
+            
+            if (userProfile) {
+                userProfileElement.style.display = 'flex';
+                userNameElement.textContent = `${userProfile.firstname} ${userProfile.lastname}`;
+                
+                if (userProfile.photo) {
+                    userAvatarElement.src = userProfile.photo;
+                } else {
+                    userAvatarElement.src = `https://via.placeholder.com/32x32/E1306C/white?text=${userProfile.firstname.charAt(0).toUpperCase()}`;
+                }
+            } else {
+                userProfileElement.style.display = 'none';
+            }
+        }
+
+        // Gestion du formulaire de profil
+        document.getElementById('profile-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const lastname = document.getElementById('profile-lastname').value.trim();
+            const firstname = document.getElementById('profile-firstname').value.trim();
+            const email = document.getElementById('profile-email').value.trim();
+            const phone = document.getElementById('profile-phone').value.trim();
+            const photoFile = document.getElementById('profile-photo').files[0];
+            
+            if (!lastname || !firstname || !email || !phone) {
+                alert('Veuillez remplir tous les champs obligatoires');
+                return;
+            }
+            
+            // Validation basique du téléphone
+            const phoneRegex = /^(\+225|225)?[0-9\s\-]{8,}$/;
+            if (!phoneRegex.test(phone)) {
+                alert('Format de téléphone invalide. Utilisez le format: +225 XX XX XX XX XX');
+                return;
+            }
+            
+            userProfile = { lastname, firstname, email, phone };
+            
+            // Gestion de la photo
+            if (photoFile) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    userProfile.photo = e.target.result;
+                    localStorage.setItem('userProfile', JSON.stringify(userProfile));
+                    updateUserDisplay();
+                    document.getElementById('profile-modal').classList.remove('show');
+                    alert(`Bienvenue ${firstname} ! Votre profil a été créé avec succès.`);
+                };
+                reader.readAsDataURL(photoFile);
+            } else {
+                localStorage.setItem('userProfile', JSON.stringify(userProfile));
+                updateUserDisplay();
+                document.getElementById('profile-modal').classList.remove('show');
+                alert(`Bienvenue ${firstname} ! Votre profil a été créé avec succès.`);
+            }
+        });
+
+        // Preview de la photo de profil
+        document.getElementById('profile-photo').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const preview = document.getElementById('profile-photo-preview');
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.style.display = 'none';
+            }
+        });
+
+        // Fonction pour sélectionner Dêguê avec différents formats
+        function selectDegue(type) {
+            if (!userProfile) {
+                alert("Veuillez créer votre profil d'abord !");
+                openProfile();
+                return;
+            }
+            
+            const degueOptions = {
+                'simple': {
+                    name: 'Dêguê simple',
+                    formats: [
+                        { size: 'Petit gobelet', price: 200 },
+                        { size: 'Grand gobelet', price: 350 },
+                        { size: 'Petit bidon', price: 500 },
+                        { size: 'Grand bidon', price: 750 }
+                    ]
+                },
+                'raisin': {
+                    name: 'Dêguê raisin',
+                    formats: [
+                        { size: 'Petit gobelet', price: 250 },
+                        { size: 'Grand gobelet', price: 400 },
+                        { size: 'Petit bidon', price: 600 },
+                        { size: 'Grand bidon', price: 850 }
+                    ]
+                },
+                'coco': {
+                    name: 'Dêguê coco',
+                    formats: [
+                        { size: 'Petit gobelet', price: 300 },
+                        { size: 'Grand gobelet', price: 450 },
+                        { size: 'Petit bidon', price: 650 },
+                        { size: 'Grand bidon', price: 900 }
+                    ]
+                },
+                'raisin-coco': {
+                    name: 'Dêguê raisin coco',
+                    formats: [
+                        { size: 'Petit gobelet', price: 400 },
+                        { size: 'Grand gobelet', price: 550 },
+                        { size: 'Petit bidon', price: 750 },
+                        { size: 'Grand bidon', price: 1000 }
+                    ]
+                }
+            };
+            
+            const selectedDegue = degueOptions[type];
+            document.getElementById('degue-modal-title').textContent = `🥛 ${selectedDegue.name} - Choisir le format`;
+            
+            const optionsHtml = selectedDegue.formats.map(format => 
+                `<div class="degue-option" onclick="addDegueToCart('${selectedDegue.name}', '${format.size}', ${format.price}, 'F')">
+                    <div class="degue-option-info">
+                        <div class="degue-option-icon">🥛</div>
+                        <div class="degue-option-details">
+                            <h4>${format.size}</h4>
+                            <p>${selectedDegue.name}</p>
+                        </div>
+                    </div>
+                    <div class="degue-option-price">${format.price} FCFA</div>
+                </div>`
+            ).join('');
+            
+            document.getElementById('degue-options').innerHTML = optionsHtml;
+            document.getElementById('degue-modal').classList.add('show');
+        }
+
+        // Fonction pour ajouter Dêguê au panier
+        function addDegueToCart(name, size, price, category) {
+            const item = {
+                name: `${name} - ${size}`,
+                price: price,
+                category: category,
+                quantity: 1
+            };
+            
+            cart.push(item);
+            total += price;
+            updateCartDisplay();
+            closeDegueModal();
+            
+            // Animation du panier
+            const cartBadge = document.getElementById('cart-badge');
+            cartBadge.style.animation = 'pulse 0.6s ease-out';
+            setTimeout(() => cartBadge.style.animation = '', 600);
+            
+            alert(`${item.name} ajouté au panier !`);
+        }
+
+        // Fonction pour fermer le modal Dêguê
+        function closeDegueModal() {
+            document.getElementById('degue-modal').classList.remove('show');
+        }
+
+        // Fonction pour ajouter au panier (avec confirmation)
+        function promptAddToCart(name, price, category) {
+            if (!userProfile) {
+                alert("Veuillez créer votre profil d'abord !");
+                openProfile();
+                return;
+            }
+            
+            if (confirm(`Ajouter "${name}" au panier pour ${price} FCFA ?`)) {
+                addToCart(name, price, category);
+            }
+        }
+
+        // Fonction pour ajouter un élément au panier
+        function addToCart(name, price, category) {
+            // Vérifier si l'élément existe déjà
+            const existingItem = cart.find(item => item.name === name);
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({
+                    name: name,
+                    price: price,
+                    category: category,
+                    quantity: 1
+                });
+            }
+            
+            total += price;
+            updateCartDisplay();
+            
+            // Animation du panier
+            const cartBadge = document.getElementById('cart-badge');
+            cartBadge.style.animation = 'pulse 0.6s ease-out';
+            setTimeout(() => cartBadge.style.animation = '', 600);
+            
+            alert(`${name} ajouté au panier !`);
+        }
+
+        // Fonction pour supprimer du panier
+        function removeFromCart(index) {
+            const item = cart[index];
+            total -= item.price * item.quantity;
+            cart.splice(index, 1);
+            updateCartDisplay();
+        }
+
+        // Fonction pour mettre à jour l'affichage du panier
+        function updateCartDisplay() {
+            const cartBadge = document.getElementById('cart-badge');
+            const cartItems = document.getElementById('cart-items');
+            const cartTotal = document.getElementById('cart-total');
+            
+            if (cart.length === 0) {
+                cartBadge.style.display = 'none';
+                cartItems.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🛒</div>
+                        <p>Votre panier est vide</p>
+                    </div>
+                `;
+                cartTotal.textContent = 'Total: 0 FCFA';
+                return;
+            }
+            
+            cartBadge.style.display = 'flex';
+            cartBadge.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
+            
+            const itemsHtml = cart.map((item, index) => 
+                `<div class="cart-item">
+                    <div class="cart-item-info">
+                        <div class="cart-item-name">${item.name} ${item.quantity > 1 ? `x${item.quantity}` : ''}</div>
+                        <div class="cart-item-price">${item.price * item.quantity} FCFA</div>
+                    </div>
+                    <button class="remove-btn" onclick="removeFromCart(${index})">&times;</button>
+                </div>`
+            ).join('');
+            
+            cartItems.innerHTML = itemsHtml;
+            cartTotal.textContent = `Total: ${total} FCFA`;
+        }
+
+        // Fonction pour basculer l'affichage du panier
+        function toggleCart() {
+            const modal = document.getElementById('cart-modal');
+            modal.classList.toggle('show');
+        }
+
+        // Fonction pour basculer l'affichage des commandes
+        function toggleOrders() {
+            if (!userProfile) {
+                alert("Veuillez créer votre profil d'abord !");
+                openProfile();
+                return;
+            }
+            
+            const modal = document.getElementById('orders-modal');
+            const ordersList = document.getElementById('orders-list');
+            
+            if (customerOrders.length === 0) {
+                ordersList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🛒</div>
+                        <h3>Aucune commande</h3>
+                        <p>Vos commandes apparaîtront ici</p>
+                    </div>
+                `;
+            } else {
+                const ordersHtml = customerOrders
+                    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+                    .map(order => 
+                        `<div class="cart-item" style="flex-direction: column; align-items: flex-start; padding: 16px; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 12px;">
+                            <div style="display: flex; justify-content: space-between; width: 100%; margin-bottom: 8px;">
+                                <strong>${order.code}</strong>
+                                <span style="color: var(--on-surface-light); font-size: 12px;">${new Date(order.timestamp).toLocaleString()}</span>
+                            </div>
+                            <div style="margin-bottom: 8px; font-size: 14px; color: var(--on-surface-light);">
+                                ${order.items.map(item => `• ${item.name} (${item.price} FCFA)`).join('<br>')}
+                            </div>
+                            <div style="display: flex; justify-content: space-between; width: 100%;">
+                                <strong style="color: var(--primary);">Total: ${order.total} FCFA</strong>
+                                <span style="background: var(--gradient); color: white; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600;">
+                                    ${order.status || 'En cours'}
+                                </span>
+                            </div>
+                        </div>`
+                    ).join('');
+                ordersList.innerHTML = ordersHtml;
+            }
+            
+            modal.classList.toggle('show');
+        }
+
+        // Fonction pour vider l'historique des commandes
+        function clearOrders() {
+            if (confirm('Voulez-vous vraiment vider l\'historique des commandes ?')) {
+                customerOrders = [];
+                localStorage.setItem('customerOrders', JSON.stringify(customerOrders));
+                toggleOrders(); // Refresh display
+                alert('Historique vidé !');
+            }
+        }
+
+        // Gestion du formulaire de commande
+        document.getElementById('order-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!userProfile) {
+                alert("Veuillez créer votre profil d'abord !");
+                openProfile();
+                return;
+            }
+            
+            if (cart.length === 0) {
+                alert("Votre panier est vide !");
+                return;
+            }
+            
+            // Ouvrir le modal de paiement
+            document.getElementById('payment-modal').classList.add('show');
+        });
+
+        // Fonction pour sélectionner une méthode de paiement
+        function selectPaymentMethod(method) {
+            // Retirer la sélection précédente
+            document.querySelectorAll('.payment-method').forEach(pm => {
+                pm.classList.remove('selected');
+                pm.querySelector('input[type="radio"]').checked = false;
+            });
+            
+            // Sélectionner la nouvelle méthode
+            const selectedMethod = document.querySelector(`[data-method="${method}"]`);
+            selectedMethod.classList.add('selected');
+            selectedMethod.querySelector('input[type="radio"]').checked = true;
+            
+            // Afficher/masquer les détails MTN
+            const paymentDetails = document.getElementById('payment-details');
+            const processBtn = document.getElementById('process-payment-btn');
+            
+            if (method === 'mtn') {
+                paymentDetails.style.display = 'block';
+                // Pré-remplir avec le numéro du profil si disponible
+                if (userProfile.phone) {
+                    document.getElementById('mtn-number').value = userProfile.phone;
+                }
+            } else {
+                paymentDetails.style.display = 'none';
+            }
+            
+            processBtn.disabled = false;
+            processBtn.textContent = method === 'mtn' ? '📱 Payer avec MTN' : '💵 Confirmer la commande';
+        }
+
+        // Fonction pour traiter le paiement
+        function processPayment() {
+            const selectedMethod = document.querySelector('.payment-method.selected');
+            if (!selectedMethod) {
+                alert('Veuillez sélectionner une méthode de paiement');
+                return;
+            }
+            
+            const method = selectedMethod.getAttribute('data-method');
+            const statusDiv = document.getElementById('payment-status');
+            
+            let paymentData = {
+                method: method,
+                customer: userProfile,
+                items: cart.slice(),
+                total: total
+            };
+            
+            if (method === 'mtn') {
+                const mtnNumber = document.getElementById('mtn-number').value.trim();
+                if (!mtnNumber) {
+                    alert('Veuillez saisir votre numéro MTN Mobile Money');
+                    return;
+                }
+                paymentData.mtnNumber = mtnNumber;
+            }
+            
+            // Afficher le statut de chargement
+            statusDiv.innerHTML = `
+                <div class="loading">
+                    <h3>⏳ Traitement en cours...</h3>
+                    <p>Veuillez patienter pendant que nous traitons votre commande</p>
+                </div>
+            `;
+            statusDiv.style.display = 'block';
+            document.getElementById('process-payment-btn').disabled = true;
+            
+            // Simuler le traitement du paiement
+            setTimeout(() => {
+                // Utiliser la fonction Firebase pour envoyer la commande
+                if (window.submitOrder) {
+                    window.submitOrder(paymentData).then(orderCode => {
+                        if (orderCode) {
+                            // Succès
+                            statusDiv.innerHTML = `
+                                <div class="success">
+                                    <h3>✅ Commande confirmée !</h3>
+                                    <p><strong>Code de commande: ${orderCode}</strong></p>
+                                    <p>Merci ${userProfile.firstname} ! Votre commande a été reçue et sera préparée sous peu.</p>
+                                    ${method === 'mtn' ? '<p>Le paiement MTN Mobile Money sera traité séparément.</p>' : '<p>Préparez votre paiement en espèces pour la livraison.</p>'}
+                                </div>
+                            `;
+                            
+                            // Sauvegarder la commande localement
+                            const orderToSave = {
+                                ...paymentData,
+                                code: orderCode,
+                                timestamp: new Date().toISOString(),
+                                status: "confirmé"
+                            };
+                            customerOrders.push(orderToSave);
+                            localStorage.setItem('customerOrders', JSON.stringify(customerOrders));
+                            
+                            // Vider le panier
+                            cart = [];
+                            total = 0;
+                            updateCartDisplay();
+                            
+                            // Fermer automatiquement après 5 secondes
+                            setTimeout(() => {
+                                closePayment();
+                            }, 5000);
+                        } else {
+                            throw new Error('Erreur de soumission');
+                        }
+                    }).catch(error => {
+                        statusDiv.innerHTML = `
+                            <div class="error">
+                                <h3>❌ Erreur de traitement</h3>
+                                <p>Une erreur s'est produite lors du traitement de votre commande.</p>
+                                <p>Veuillez réessayer ou nous contacter via WhatsApp.</p>
+                            </div>
+                        `;
+                        document.getElementById('process-payment-btn').disabled = false;
+                    });
+                } else {
+                    // Fallback si Firebase n'est pas disponible
+                    const orderCode = `#LE${Date.now().toString().slice(-6)}`;
+                    statusDiv.innerHTML = `
+                        <div class="success">
+                            <h3>✅ Commande enregistrée !</h3>
+                            <p><strong>Code de commande: ${orderCode}</strong></p>
+                            <p>Votre commande a été enregistrée localement. Contactez-nous via WhatsApp pour finaliser.</p>
+                        </div>
+                    `;
+                    
+                    // Sauvegarder localement
+                    const orderToSave = {
+                        ...paymentData,
+                        code: orderCode,
+                        timestamp: new Date().toISOString(),
+                        status: "en attente"
+                    };
+                    customerOrders.push(orderToSave);
+                    localStorage.setItem('customerOrders', JSON.stringify(customerOrders));
+                    
+                    cart = [];
+                    total = 0;
+                    updateCartDisplay();
+                    
+                    setTimeout(() => closePayment(), 5000);
+                }
+            }, 2000);
+        }
+
+        // Fonction pour fermer le modal de paiement
+        function closePayment() {
+            document.getElementById('payment-modal').classList.remove('show');
+            document.getElementById('payment-status').style.display = 'none';
+            document.getElementById('process-payment-btn').disabled = true;
+            
+            // Réinitialiser le formulaire
+            document.querySelectorAll('.payment-method').forEach(pm => {
+                pm.classList.remove('selected');
+                pm.querySelector('input[type="radio"]').checked = false;
+            });
+            document.getElementById('payment-details').style.display = 'none';
+            document.getElementById('mtn-number').value = '';
+        }
+
+        // Fonction pour afficher les informations
+        function showAbout() {
+            alert(`🍽️ GROUPE EXPRESS - Livraison de repas universitaires
+
+📍 Service de livraison de repas délicieux et abordables
+⏰ Commandes ouvertes de 18h00 à 10h00
+📱 Contact: 07 19 98 30 44
+💚 WhatsApp disponible
+
+Nos spécialités:
+• Pâtes & Petit pois
+• Tchèpes
+• Plats de riz
+• Attiékè
+• Desserts (Dêguê)
+• Porc au four
+
+Livraison rapide et paiement sécurisé !`);
+        }
+
+        // Fonction pour afficher les commentaires (placeholder)
+        function showComments(postId) {
+            alert(`Fonctionnalité des commentaires en développement pour ${postId}`);
+        }
+
+        // Gestion des clics en dehors des modals pour les fermer
+        window.addEventListener('click', function(e) {
+            const modals = [
+                'profile-modal',
+                'cart-modal',
+                'payment-modal',
+                'orders-modal',
+                'settings-modal',
+                'degue-modal'
+            ];
+            
+            modals.forEach(modalId => {
+                const modal = document.getElementById(modalId);
+                if (e.target === modal) {
+                    modal.classList.remove('show');
+                }
+            });
+        });
+
+        // Gestion des touches du clavier
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                // Fermer tous les modals ouverts
+                document.querySelectorAll('.modal, .cart-modal, .payment-modal, .settings-modal, .degue-modal').forEach(modal => {
+                    modal.classList.remove('show');
+                });
+            }
+        });
+
+        // Fonction pour zoomer sur les images
+        document.addEventListener('DOMContentLoaded', function() {
+            // Créer le modal de zoom pour les images
+            const zoomModal = document.createElement('div');
+            zoomModal.className = 'image-zoom-modal';
+            zoomModal.innerHTML = `
+                <div class="image-zoom-content">
+                    <img src="" alt="" class="zoomed-image">
+                    <button class="close-zoom-btn">&times;</button>
+                    <div class="image-info">
+                        <h4></h4>
+                        <p></p>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(zoomModal);
+            
+            // Ajouter les événements de clic pour toutes les images de nourriture
+            document.querySelectorAll('.food-item-image').forEach(img => {
+                img.addEventListener('click', function() {
+                    const zoomedImg = zoomModal.querySelector('.zoomed-image');
+                    const imageInfo = zoomModal.querySelector('.image-info');
+                    const foodTitle = this.parentElement.querySelector('.food-title').textContent;
+                    const foodDesc = this.parentElement.querySelector('.food-description').textContent;
+                    
+                    zoomedImg.src = this.src;
+                    zoomedImg.alt = this.alt;
+                    imageInfo.querySelector('h4').textContent = foodTitle;
+                    imageInfo.querySelector('p').textContent = foodDesc;
+                    
+                    zoomModal.classList.add('show');
+                });
+            });
+            
+            // Fermer le modal de zoom
+            zoomModal.querySelector('.close-zoom-btn').addEventListener('click', function() {
+                zoomModal.classList.remove('show');
+            });
+            
+            zoomModal.addEventListener('click', function(e) {
+                if (e.target === zoomModal) {
+                    zoomModal.classList.remove('show');
+                }
+            });
+        });
+
+        // Initialisation au chargement de la page
+        window.addEventListener('DOMContentLoaded', function() {
+            // Vérifier les heures de commande
+            checkOrderingHours();
+            
+            // Mettre à jour l'affichage utilisateur
+            updateUserDisplay();
+            
+            // Mettre à jour l'affichage du panier
+            updateCartDisplay();
+            
+            // Ouvrir le modal de profil si l'utilisateur n'est pas enregistré
+            if (!userProfile) {
+                setTimeout(() => {
+                    openProfile();
+                }, 1000);
+            }
+            
+            // Ajouter les gestionnaires d'événements globaux
+            window.openProfile = openProfile;
+            window.openSettings = openSettings;
+            window.closeSettings = closeSettings;
+            window.editProfile = editProfile;
+            window.changePhone = changePhone;
+            window.exportOrders = exportOrders;
+            window.deleteAccount = deleteAccount;
+            window.showTab = showTab;
+            window.selectDegue = selectDegue;
+            window.addDegueToCart = addDegueToCart;
+            window.closeDegueModal = closeDegueModal;
+            window.promptAddToCart = promptAddToCart;
+            window.addToCart = addToCart;
+            window.removeFromCart = removeFromCart;
+            window.toggleCart = toggleCart;
+            window.toggleOrders = toggleOrders;
+            window.clearOrders = clearOrders;
+            window.selectPaymentMethod = selectPaymentMethod;
+            window.processPayment = processPayment;
+            window.closePayment = closePayment;
+            window.showAbout = showAbout;
+            window.showComments = showComments;
+            window.updateUserDisplay = updateUserDisplay;
+            window.updateCartDisplay = updateCartDisplay;
+            window.userProfile = userProfile;
+        });
+
+        // Fonction d'animation pour les éléments au scroll
+        function animateOnScroll() {
+            const elements = document.querySelectorAll('.post-card');
+            const windowHeight = window.innerHeight;
+            
+            elements.forEach(element => {
+                const elementTop = element.getBoundingClientRect().top;
+                
+                if (elementTop < windowHeight - 50) {
+                    element.style.opacity = '1';
+                    element.style.transform = 'translateY(0)';
+                }
+            });
+        }
+
+        // Initialiser l'animation au scroll
+        window.addEventListener('scroll', animateOnScroll);
+        
+        // Performance: throttle scroll events
+        let ticking = false;
+        function optimizedScroll() {
+            if (!ticking) {
+                requestAnimationFrame(function() {
+                    animateOnScroll();
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        }
+        window.addEventListener('scroll', optimizedScroll);
+
+        // Fonction pour gérer la connexion réseau
+        function handleNetworkStatus() {
+            if (navigator.onLine) {
+                document.body.classList.remove('offline');
+            } else {
+                document.body.classList.add('offline');
+                alert('Connexion internet perdue. Certaines fonctionnalités peuvent être limitées.');
+            }
+        }
+
+        window.addEventListener('online', handleNetworkStatus);
+        window.addEventListener('offline', handleNetworkStatus);
+
+        // Fonction de sauvegarde automatique
+        function autoSave() {
+            if (userProfile) {
+                localStorage.setItem('userProfile', JSON.stringify(userProfile));
+            }
+            localStorage.setItem('customerOrders', JSON.stringify(customerOrders));
+            localStorage.setItem('cartData', JSON.stringify({cart, total}));
+        }
+
+        // Sauvegarde automatique toutes les minutes
+        setInterval(autoSave, 60000);
+
+        // Restaurer les données du panier au chargement
+        function restoreCartData() {
+            const savedCartData = localStorage.getItem('cartData');
+            if (savedCartData) {
+                const {cart: savedCart, total: savedTotal} = JSON.parse(savedCartData);
+                if (savedCart && savedCart.length > 0) {
+                    cart = savedCart;
+                    total = savedTotal;
+                    updateCartDisplay();
+                }
+            }
+        }
+
+        // Service Worker pour le cache (PWA)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(function(registration) {
+                        console.log('ServiceWorker registration successful');
+                    })
+                    .catch(function(err) {
+                        console.log('ServiceWorker registration failed');
+                    });
+            });
+        }
+
+        // Fonction pour optimiser les images
+        function optimizeImages() {
+            const images = document.querySelectorAll('.food-item-image');
+            
+            images.forEach(img => {
+                // Lazy loading
+                if ('loading' in HTMLImageElement.prototype) {
+                    img.loading = 'lazy';
+                }
+                
+                // Optimisation responsive
+                const observer = new IntersectionObserver((entries, observer) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const img = entry.target;
+                            img.classList.add('loaded');
+                            observer.unobserve(img);
+                        }
+                    });
+                });
+                
+                observer.observe(img);
+            });
+        }
+
+        // Touch gestures pour mobile
+        function initTouchGestures() {
+            let startX, startY, distX, distY;
+            const threshold = 100;
+            
+            document.addEventListener('touchstart', function(e) {
+                const touch = e.touches[0];
+                startX = touch.clientX;
+                startY = touch.clientY;
+            });
+            
+            document.addEventListener('touchmove', function(e) {
+                if (!startX || !startY) return;
+                
+                const touch = e.touches[0];
+                distX = touch.clientX - startX;
+                distY = touch.clientY - startY;
+            });
+            
+            document.addEventListener('touchend', function(e) {
+                if (!distX || !distY) return;
+                
+                // Swipe right to open cart
+                if (distX > threshold && Math.abs(distY) < threshold) {
+                    toggleCart();
+                }
+                
+                // Reset values
+                startX = startY = distX = distY = 0;
+            });
+        }
+
+        // Notifications Push (si supporté)
+        function initPushNotifications() {
+            if ('Notification' in window && 'serviceWorker' in navigator) {
+                if (Notification.permission === 'default') {
+                    Notification.requestPermission().then(permission => {
+                        if (permission === 'granted') {
+                            console.log('Notifications autorisées');
+                        }
+                    });
+                }
+            }
+        }
+
+        // Fonction pour envoyer une notification
+        function sendNotification(title, body, icon = '🍽️') {
+            if (Notification.permission === 'granted') {
+                new Notification(title, {
+                    body: body,
+                    icon: '/icon-192x192.png',
+                    badge: '/icon-72x72.png',
+                    tag: 'loko-express'
+                });
+            }
+        }
+
+        // Analytics simples (sans cookies)
+        function trackEvent(action, category = 'user') {
+            const event = {
+                action,
+                category,
+                timestamp: new Date().toISOString(),
+                userAgent: navigator.userAgent,
+                url: window.location.href
+            };
+            
+            // Stocker localement pour analyse
+            const analytics = JSON.parse(localStorage.getItem('analytics') || '[]');
+            analytics.push(event);
+            
+            // Garder seulement les 1000 derniers événements
+            if (analytics.length > 1000) {
+                analytics.splice(0, analytics.length - 1000);
+            }
+            
+            localStorage.setItem('analytics', JSON.stringify(analytics));
+        }
+
+        // Fonction de recherche dans le menu
+        function initSearch() {
+            const searchInput = document.createElement('input');
+            searchInput.type = 'text';
+            searchInput.placeholder = 'Rechercher un plat...';
+            searchInput.className = 'form-input';
+            searchInput.style.margin = '16px';
+            searchInput.style.position = 'sticky';
+            searchInput.style.top = '80px';
+            searchInput.style.zIndex = '50';
+            searchInput.style.background = 'var(--surface)';
+            searchInput.style.boxShadow = 'var(--shadow)';
+            
+            // Insérer avant le premier post-card
+            const firstPost = document.querySelector('.post-card');
+            if (firstPost) {
+                firstPost.parentNode.insertBefore(searchInput, firstPost);
+            }
+            
+            searchInput.addEventListener('input', function(e) {
+                const query = e.target.value.toLowerCase().trim();
+                const foodItems = document.querySelectorAll('.food-item');
+                const postCards = document.querySelectorAll('.post-card');
+                
+                if (!query) {
+                    // Afficher tous les éléments
+                    foodItems.forEach(item => item.style.display = 'flex');
+                    postCards.forEach(card => card.style.display = 'block');
+                    return;
+                }
+                
+                postCards.forEach(card => {
+                    let hasVisibleItems = false;
+                    const items = card.querySelectorAll('.food-item');
+                    
+                    items.forEach(item => {
+                        const title = item.querySelector('.food-title').textContent.toLowerCase();
+                        const desc = item.querySelector('.food-description').textContent.toLowerCase();
+                        
+                        if (title.includes(query) || desc.includes(query)) {
+                            item.style.display = 'flex';
+                            hasVisibleItems = true;
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                    
+                    card.style.display = hasVisibleItems ? 'block' : 'none';
+                });
+                
+                // Track search
+                if (query.length > 2) {
+                    trackEvent('search', 'menu', query);
+                }
+            });
+        }
+
+        // Fonction pour gérer les favoris
+        function initFavorites() {
+            const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+            
+            window.toggleFavorite = function(name, price, category) {
+                const index = favorites.findIndex(fav => fav.name === name);
+                
+                if (index > -1) {
+                    favorites.splice(index, 1);
+                    alert(`${name} retiré des favoris`);
+                } else {
+                    favorites.push({name, price, category});
+                    alert(`${name} ajouté aux favoris`);
+                }
+                
+                localStorage.setItem('favorites', JSON.stringify(favorites));
+                updateFavoritesDisplay();
+            };
+            
+            function updateFavoritesDisplay() {
+                document.querySelectorAll('.food-item').forEach(item => {
+                    const title = item.querySelector('.food-title').textContent;
+                    const isFavorite = favorites.some(fav => fav.name === title);
+                    
+                    let heartBtn = item.querySelector('.favorite-btn');
+                    if (!heartBtn) {
+                        heartBtn = document.createElement('button');
+                        heartBtn.className = 'favorite-btn';
+                        heartBtn.style.cssText = `
+                            position: absolute;
+                            top: 8px;
+                            right: 8px;
+                            background: rgba(255,255,255,0.9);
+                            border: none;
+                            border-radius: 50%;
+                            width: 32px;
+                            height: 32px;
+                            cursor: pointer;
+                            font-size: 16px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            box-shadow: var(--shadow);
+                        `;
+                        item.style.position = 'relative';
+                        item.appendChild(heartBtn);
+                        
+                        heartBtn.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            const price = parseInt(item.querySelector('.food-price').textContent);
+                            const category = 'A'; // À déterminer dynamiquement
+                            toggleFavorite(title, price, category);
+                        });
+                    }
+                    
+                    heartBtn.textContent = isFavorite ? '❤️' : '🤍';
+                });
+            }
+            
+            // Ajouter un onglet favoris dans la navigation
+            const navStories = document.querySelector('.nav-stories');
+            const favStory = document.createElement('div');
+            favStory.className = 'nav-story';
+            favStory.innerHTML = `
+                <div class="nav-story-avatar">❤️</div>
+                <div class="nav-story-text">Favoris</div>
+            `;
+            favStory.addEventListener('click', showFavorites);
+            navStories.appendChild(favStory);
+            
+            function showFavorites() {
+                if (favorites.length === 0) {
+                    alert('Aucun favori pour le moment. Cliquez sur 🤍 pour ajouter un plat !');
+                    return;
+                }
+                
+                const favText = favorites.map(fav => `• ${fav.name} - ${fav.price} FCFA`).join('\n');
+                alert(`Vos plats favoris :\n\n${favText}`);
+            }
+            
+            updateFavoritesDisplay();
+        }
+
+        // Fonction pour la géolocalisation (livraison)
+        function initGeolocation() {
+            window.getLocation = function() {
+                if (!navigator.geolocation) {
+                    alert('La géolocalisation n\'est pas supportée par ce navigateur');
+                    return;
+                }
+                
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        alert(`Position détectée :\nLatitude: ${lat.toFixed(6)}\nLongitude: ${lng.toFixed(6)}\n\nCette information peut être utilisée pour optimiser la livraison.`);
+                        
+                        // Sauvegarder la position
+                        localStorage.setItem('userLocation', JSON.stringify({lat, lng, timestamp: Date.now()}));
+                    },
+                    function(error) {
+                        alert('Impossible d\'obtenir votre position. Veuillez autoriser la géolocalisation.');
+                    }
+                );
+            };
+        }
+
+        // Fonction pour l'accessibilité
+        function initAccessibility() {
+            // Ajouter des raccourcis clavier
+            document.addEventListener('keydown', function(e) {
+                if (e.altKey) {
+                    switch(e.key) {
+                        case 'c':
+                            e.preventDefault();
+                            toggleCart();
+                            break;
+                        case 'p':
+                            e.preventDefault();
+                            if (!userProfile) openProfile();
+                            break;
+                        case 's':
+                            e.preventDefault();
+                            if (userProfile) openSettings();
+                            break;
+                    }
+                }
+            });
+            
+            // Améliorer le contraste au besoin
+            const contrastBtn = document.createElement('button');
+            contrastBtn.innerHTML = '🌓';
+            contrastBtn.title = 'Basculer le contraste élevé';
+            contrastBtn.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                left: 20px;
+                z-index: 1000;
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: 50%;
+                width: 48px;
+                height: 48px;
+                cursor: pointer;
+                font-size: 20px;
+                box-shadow: var(--shadow-lg);
+            `;
+            
+            contrastBtn.addEventListener('click', function() {
+                document.body.classList.toggle('high-contrast');
+            });
+            
+            document.body.appendChild(contrastBtn);
+        }
+
+        // Fonction principale d'initialisation
+        function initApp() {
+            // Restaurer les données du panier
+            restoreCartData();
+            
+            // Initialiser les fonctionnalités
+            optimizeImages();
+            initTouchGestures();
+            initPushNotifications();
+            initSearch();
+            initFavorites();
+            initGeolocation();
+            initAccessibility();
+            
+            // Track app start
+            trackEvent('app_start', 'app');
+            
+            console.log('🍽️ LOKO EXPRESS initialisé avec succès !');
+        }
+
+        // Lancer l'initialisation complète
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            initApp();
+        }
+
+        // Fonction de nettoyage au déchargement
+        window.addEventListener('beforeunload', function() {
+            autoSave();
+            trackEvent('app_close', 'app');
+        });
+    </script>
+
+    
+    
+</body>
+</html>

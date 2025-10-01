@@ -1,0 +1,4222 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Express Exchange</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #000000;
+            min-height: 100vh;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        /* PARTICULES */
+        #particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 8s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10%, 90% {
+                opacity: 0.3;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* LOADER PROGRESSIF */
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* OVERLAY DE PROGRESSION D'UPLOAD */
+        #uploadProgressOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 5000;
+            backdrop-filter: blur(10px);
+        }
+
+        .upload-progress-modal {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            padding: 40px;
+            border-radius: 16px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            animation: slideUpIn 0.4s ease-out;
+        }
+
+        @keyframes slideUpIn {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .upload-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .upload-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #ffffff;
+        }
+
+        .upload-title.upload-success {
+            color: #4CAF50;
+        }
+
+        .upload-title.upload-error {
+            color: #f44336;
+        }
+
+        .upload-subtitle {
+            color: #8e8e8e;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .upload-preview {
+            margin: 20px 0;
+            display: none;
+        }
+
+        .upload-preview img, .upload-preview video {
+            max-width: 150px;
+            max-height: 150px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .upload-preview video {
+            background: #000;
+        }
+
+        /* PROGRESSION CIRCULAIRE */
+        .progress-circle-container {
+            position: relative;
+            margin: 20px auto;
+            width: 120px;
+            height: 120px;
+        }
+
+        .progress-circle {
+            transform: rotate(-90deg);
+            width: 120px;
+            height: 120px;
+        }
+
+        .progress-circle-bg {
+            fill: none;
+            stroke: #333;
+            stroke-width: 8;
+        }
+
+        .progress-circle-fill {
+            fill: none;
+            stroke: #0095f6;
+            stroke-width: 8;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.3s ease;
+        }
+
+        .progress-percentage {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 18px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        /* PROGRESSION LINÉAIRE */
+        .linear-progress {
+            width: 100%;
+            height: 6px;
+            background: #333;
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .linear-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #0095f6, #1877f2);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 3px;
+        }
+
+        /* INFORMATIONS D'UPLOAD */
+        .upload-info {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+            font-size: 12px;
+            color: #8e8e8e;
+        }
+
+        .upload-cancel-btn {
+            background: #ed4956;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            margin-top: 20px;
+        }
+
+        .upload-cancel-btn:hover {
+            background: #c73650;
+        }
+
+        /* CONNEXION/INSCRIPTION */
+        #authOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .auth-modal {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            padding: 40px;
+            border-radius: 12px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .auth-modal h2 {
+            color: #ffffff;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #ffffff;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #333;
+            border-radius: 8px;
+            font-size: 16px;
+            background: #262626;
+            color: #ffffff;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #0095f6;
+            background: #1a1a1a;
+        }
+
+        .submit-btn {
+            background: #0095f6;
+            color: white;
+            padding: 14px 32px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            background: #1877f2;
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .auth-toggle {
+            margin-top: 20px;
+            color: #8e8e8e;
+            font-size: 14px;
+        }
+
+        .auth-toggle a {
+            color: #0095f6;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .auth-toggle a:hover {
+            text-decoration: underline;
+        }
+
+        /* APPLICATION PRINCIPALE */
+        #mainApp {
+            display: none;
+            position: relative;
+            z-index: 10;
+            max-width: 614px;
+            margin: 0 auto;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: #000000;
+            border-bottom: 1px solid #262626;
+            padding: 16px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+.welcome-text {
+    font-size: 24px;
+    font-weight: 700;
+    /* Dégradé en fond */
+    background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+    /* Clip le fond sur le texte pour Webkit (Chrome/Safari/Edge) */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    /* Clip le fond sur le texte pour Firefox */
+    background-clip: text;
+    color: transparent;
+}
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status-indicator {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            border: 1px solid;
+        }
+
+        .status-connected {
+            background: rgba(0, 149, 246, 0.1);
+            color: #0095f6;
+            border-color: #0095f6;
+        }
+
+        .status-disconnected {
+            background: rgba(237, 73, 86, 0.1);
+            color: #ed4956;
+            border-color: #ed4956;
+        }
+
+        .logout-btn {
+            background: #ed4956;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .logout-btn:hover {
+            background: #c73650;
+        }
+
+        /* RECHERCHE */
+        .search-container {
+            background: #000000;
+            border-bottom: 1px solid #262626;
+            padding: 12px 20px;
+            position: sticky;
+            top: 58px;
+            z-index: 99;
+        }
+
+        .search-box {
+            position: relative;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px 12px 45px;
+            border: 1px solid #262626;
+            border-radius: 25px;
+            font-size: 14px;
+            background: #1a1a1a;
+            color: #ffffff;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #0095f6;
+            box-shadow: 0 0 0 2px rgba(0, 149, 246, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #8e8e8e;
+            font-size: 16px;
+        }
+
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #1a1a1a;
+            border: 1px solid #262626;
+            border-radius: 12px;
+            margin-top: 4px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+
+        .search-result-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid #262626;
+            transition: background-color 0.2s ease;
+        }
+
+        .search-result-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .search-result-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .search-result-info h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 2px;
+        }
+
+        .search-result-info p {
+            font-size: 12px;
+            color: #8e8e8e;
+        }
+
+        .no-search-results {
+            padding: 20px;
+            text-align: center;
+            color: #8e8e8e;
+            font-size: 14px;
+        }
+
+        /* ÉDITEUR DE PUBLICATION */
+        .publisher {
+            background: #000000;
+            border-bottom: 1px solid #262626;
+            padding: 16px 20px;
+        }
+
+        .publisher textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 16px;
+            border: 1px solid #262626;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+            background: #000000;
+            color: #ffffff;
+            transition: border-color 0.3s ease;
+        }
+
+        .publisher textarea:focus {
+            outline: none;
+            border-color: #0095f6;
+        }
+
+        .media-input-container {
+            margin: 15px 0;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .media-input-label {
+            background: transparent;
+            color: #0095f6;
+            padding: 8px 16px;
+            border: 1px solid #262626;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .media-input-label:hover {
+            background: rgba(0, 149, 246, 0.1);
+        }
+
+        .media-input {
+            display: none;
+        }
+
+        .media-preview {
+            margin: 15px 0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .media-preview img, .media-preview video {
+            width: 100%;
+            max-height: 400px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .media-preview video {
+            background: #000;
+        }
+
+        .publish-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .publish-btn, .nav-btn, .profile-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .publish-btn {
+            background: #0095f6;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .publish-btn:hover:not(:disabled) {
+            background: #1877f2;
+        }
+
+        .publish-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .nav-btn, .profile-btn {
+            background: #262626;
+            color: #ffffff;
+            border: 1px solid #262626;
+        }
+
+        .nav-btn:hover, .profile-btn:hover {
+            background: #404040;
+        }
+
+        /* FEED */
+        .feed {
+            padding: 0;
+        }
+
+        .publication {
+            background: #000000;
+            border-bottom: 1px solid #262626;
+            padding: 16px 0;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .pub-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            padding: 0 16px;
+        }
+
+        .pub-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            margin-right: 12px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .pub-avatar:hover {
+            transform: scale(1.1);
+        }
+
+        .pub-info {
+            flex: 1;
+        }
+
+        .pub-username {
+            font-weight: 600;
+            color: #ffffff;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .pub-username:hover {
+            color: #0095f6;
+        }
+
+        .pub-time {
+            color: #8e8e8e;
+            font-size: 12px;
+            margin-top: 2px;
+        }
+
+        .pub-text {
+            margin-bottom: 12px;
+            color: #ffffff;
+            line-height: 1.5;
+            font-size: 15px;
+            padding: 0 16px;
+            white-space: pre-wrap;
+        }
+
+        /* BOUTON SUIVRE */
+        .follow-btn {
+            background: #0095f6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .follow-btn:hover {
+            background: #1877f2;
+        }
+
+        .follow-btn.following {
+            background: #262626;
+            color: #ffffff;
+        }
+
+        .follow-btn.following:hover {
+            background: #ed4956;
+        }
+
+        /* CONTAINERS VIDÉO STYLE TIKTOK AMÉLIORÉ */
+        .video-container {
+            position: relative;
+            margin-bottom: 12px;
+            border-radius: 12px;
+            overflow: hidden;
+            max-height: 600px;
+            background: #000;
+        }
+
+        .video-player {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            cursor: pointer;
+        }
+
+        /* LOADER VIDÉO */
+        .video-loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            color: white;
+            z-index: 10;
+        }
+
+        .video-loading .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #333;
+            border-top: 3px solid #0095f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 12px;
+        }
+
+        .video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .video-play-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 50%;
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            transition: all 0.3s ease;
+            pointer-events: auto;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+        }
+
+        .video-play-overlay:hover {
+            transform: translate(-50%, -50%) scale(1.1);
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        .video-container:not(.paused) .video-play-overlay {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .video-duration-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+        }
+
+        .video-auto-play-indicator {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: rgba(0, 149, 246, 0.9);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .video-auto-play-indicator.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* INDICATEUR AUDIO */
+        .video-audio-indicator {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .video-audio-indicator.muted {
+            color: #ed4956;
+        }
+
+        .video-controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+            padding: 20px 12px 12px;
+            pointer-events: auto;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .video-container:hover .video-controls,
+        .video-container.show-controls .video-controls {
+            opacity: 1;
+        }
+
+        .video-progress {
+            height: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+            margin-bottom: 12px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .video-progress-bar {
+            height: 100%;
+            background: #0095f6;
+            width: 0%;
+            transition: width 0.1s ease;
+            border-radius: 2px;
+        }
+
+        .video-controls-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .video-play-btn, .video-volume-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .video-play-btn:hover, .video-volume-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .video-time {
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 4px 8px;
+            border-radius: 4px;
+            backdrop-filter: blur(5px);
+        }
+
+        .image-link img {
+            width: 100%;
+            max-height: 600px;
+            object-fit: cover;
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+            border-radius: 8px;
+        }
+
+        .image-link img:hover {
+            opacity: 0.95;
+        }
+
+        .pub-actions {
+            display: flex;
+            gap: 24px;
+            padding: 12px 16px;
+            align-items: center;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #ffffff;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .action-btn:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .action-btn.liked {
+            color: #ed4956;
+        }
+
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* COMMENTAIRES */
+        .comments-section {
+            margin-top: 8px;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.02);
+            border-top: 1px solid #262626;
+            display: none;
+        }
+
+        .comment {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .comment:last-child {
+            border-bottom: none;
+        }
+
+        .comment-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .comment-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 10px;
+            margin-right: 8px;
+        }
+
+        .comment-username {
+            font-weight: 600;
+            color: #ffffff;
+            font-size: 13px;
+        }
+
+        .comment-time {
+            color: #8e8e8e;
+            font-size: 11px;
+            margin-left: auto;
+        }
+
+        .comment-text {
+            color: #ffffff;
+            line-height: 1.4;
+            font-size: 13px;
+            margin-left: 32px;
+        }
+
+        .comment-form {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #262626;
+        }
+
+        .comment-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #262626;
+            border-radius: 20px;
+            font-size: 13px;
+            background: #000000;
+            color: #ffffff;
+        }
+
+        .comment-input:focus {
+            outline: none;
+            border-color: #0095f6;
+        }
+
+        .comment-btn {
+            background: #0095f6;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* PROFIL MODAL PLEIN ÉCRAN */
+        .profile-modal-fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000000;
+            z-index: 3000;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .profile-header-fullscreen {
+            position: sticky;
+            top: 0;
+            background: #000000;
+            border-bottom: 1px solid #262626;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            z-index: 100;
+        }
+
+        .profile-back-btn {
+            background: none;
+            border: none;
+            color: #ffffff;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background 0.2s ease;
+        }
+
+        .profile-back-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .profile-header-info h2 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #ffffff;
+            margin: 0;
+        }
+
+        .profile-header-info p {
+            font-size: 12px;
+            color: #8e8e8e;
+            margin: 2px 0 0 0;
+        }
+
+        .profile-content-fullscreen {
+            padding: 0;
+        }
+
+        .profile-info-section {
+            padding: 24px 20px;
+            border-bottom: 1px solid #262626;
+        }
+
+        .profile-main-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .profile-avatar-large {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 28px;
+        }
+
+        .profile-details {
+            flex: 1;
+        }
+
+        .profile-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 4px;
+        }
+
+        .profile-username {
+            color: #8e8e8e;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .profile-follow-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .profile-stats {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 20px;
+        }
+
+        .profile-stat {
+            text-align: center;
+        }
+
+        .profile-stat-number {
+            font-size: 18px;
+            font-weight: 700;
+            color: #ffffff;
+            display: block;
+        }
+
+        .profile-stat-label {
+            font-size: 11px;
+            color: #8e8e8e;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .profile-bio {
+            background: #1a1a1a;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        .profile-bio h4 {
+            color: #ffffff;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .profile-bio p {
+            color: #8e8e8e;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .profile-posts-section {
+            padding: 0;
+        }
+
+        .profile-posts-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #262626;
+            background: #000000;
+            position: sticky;
+            top: 74px;
+            z-index: 90;
+        }
+
+        .profile-posts-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        /* PROFIL MODAL CLASSIQUE POUR MON PROFIL */
+        .profile-modal {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            padding: 30px;
+            border-radius: 16px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            animation: slideUpIn 0.4s ease-out;
+        }
+
+        .profile-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #262626;
+        }
+
+        /* MODALS */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: #1a1a1a;
+            border: 1px solid #262626;
+            padding: 24px;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal img, .modal video {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #8e8e8e;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .close-modal:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* LOADING */
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            min-height: 300px;
+        }
+
+        .stylish-loader {
+            width: 60px;
+            height: 60px;
+            border: 3px solid #262626;
+            border-top: 3px solid #0095f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        .loading-text {
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .loading-subtext {
+            color: #8e8e8e;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #8e8e8e;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 8px;
+            color: #ffffff;
+        }
+
+        /* TOAST */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #262626;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            z-index: 4000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        .toast.success {
+            background: #0095f6;
+        }
+
+        .toast.error {
+            background: #ed4956;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .header {
+                padding: 12px 16px;
+            }
+            
+            .welcome-text {
+                font-size: 20px;
+            }
+            
+            .publisher {
+                padding: 16px;
+            }
+            
+            .media-input-container {
+                flex-direction: column;
+            }
+            
+            .publish-controls {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .header-actions {
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            .profile-stats {
+                gap: 20px;
+            }
+
+            .profile-main-info {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .profile-follow-section {
+                justify-content: center;
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #000000;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #262626;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div id="particles"></div>
+
+    <!-- OVERLAY DE PROGRESSION D'UPLOAD -->
+    <div id="uploadProgressOverlay">
+        <div class="upload-progress-modal">
+            <div class="upload-icon" id="uploadIcon">📤</div>
+            <div class="upload-title" id="uploadTitle">Upload en cours...</div>
+            <div class="upload-subtitle" id="uploadSubtitle">Préparation du fichier</div>
+            
+            <div class="upload-preview" id="uploadPreview"></div>
+            
+            <div class="progress-circle-container">
+                <svg class="progress-circle">
+                    <circle class="progress-circle-bg" cx="60" cy="60" r="54"></circle>
+                    <circle class="progress-circle-fill" id="progressCircle" cx="60" cy="60" r="54"></circle>
+                </svg>
+                <div class="progress-percentage" id="progressPercentage">0%</div>
+            </div>
+            
+            <div class="linear-progress">
+                <div class="linear-progress-bar" id="linearProgressBar"></div>
+            </div>
+            
+            <div class="upload-info">
+                <div>
+                    <div id="uploadSpeed">0 KB/s</div>
+                    <div id="uploadEta">Calcul...</div>
+                </div>
+                <div id="uploadSize">0 MB / 0 MB</div>
+            </div>
+            
+            <button class="upload-cancel-btn" id="uploadCancelBtn">Annuler</button>
+        </div>
+    </div>
+
+    <!-- CONNEXION/INSCRIPTION -->
+    <div id="authOverlay">
+        <div class="auth-modal">
+            <!-- INSCRIPTION -->
+            <div id="registrationForm">
+                <h2>Rejoignez Express Exchange</h2>
+                <form id="regForm">
+                    <div class="form-group">
+                        <label for="nom">Nom</label>
+                        <input type="text" id="nom" required placeholder="Votre nom" autocomplete="family-name">
+                    </div>
+                    <div class="form-group">
+                        <label for="prenom">Prénom</label>
+                        <input type="text" id="prenom" required placeholder="Votre prénom" autocomplete="given-name">
+                    </div>
+                    <div class="form-group">
+                        <label for="contact">Contact (Email ou Téléphone)</label>
+                        <input type="text" id="contact" required placeholder="Email ou téléphone" autocomplete="email">
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Mot de passe</label>
+                        <input type="password" id="password" required placeholder="Votre mot de passe" autocomplete="new-password">
+                    </div>
+                    <button type="submit" class="submit-btn">
+                        <span>S'inscrire</span>
+                    </button>
+                </form>
+                <div class="auth-toggle">
+                    Déjà un compte ? <a id="switchToLogin">Se connecter</a>
+                </div>
+            </div>
+
+            <!-- CONNEXION -->
+            <div id="loginForm" style="display: none;">
+                <h2>Connexion</h2>
+                <form id="logForm">
+                    <div class="form-group">
+                        <label for="loginContact">Contact</label>
+                        <input type="text" id="loginContact" required placeholder="Email ou téléphone" autocomplete="email">
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Mot de passe</label>
+                        <input type="password" id="loginPassword" required placeholder="Votre mot de passe" autocomplete="current-password">
+                    </div>
+                    <button type="submit" class="submit-btn">
+                        <span>Se connecter</span>
+                    </button>
+                </form>
+                <div class="auth-toggle">
+                    Pas de compte ? <a id="switchToRegister">S'inscrire</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- APPLICATION PRINCIPALE -->
+    <div id="mainApp">
+        <div class="header">
+            <div class="welcome-text" id="welcomeMessage">Express Exchange</div>
+            <div class="header-actions">
+                <div class="status-indicator status-connected" id="statusIndicator">🟢 En ligne</div>
+                <button class="logout-btn" id="logoutBtn">Déconnexion</button>
+            </div>
+        </div>
+
+        <!-- RECHERCHE -->
+        <div class="search-container">
+            <div class="search-box">
+                <div class="search-icon">🔍</div>
+                <input type="text" class="search-input" id="searchInput" placeholder="Rechercher...">
+                <div class="search-results" id="searchResults"></div>
+            </div>
+        </div>
+
+        <!-- ÉDITEUR -->
+        <div class="publisher">
+            <textarea id="postText" placeholder="Que voulez-vous partager ?"></textarea>
+            
+            <div class="media-input-container">
+                <label for="imageInput" class="media-input-label">📷 Photo</label>
+                <input type="file" id="imageInput" class="media-input" accept="image/*">
+                
+                <label for="videoInput" class="media-input-label">🎥 Vidéo</label>
+                <input type="file" id="videoInput" class="media-input" accept="video/*">
+                
+                <span id="fileName" style="color: #8e8e8e; font-size: 14px;"></span>
+            </div>
+            
+            <div id="mediaPreview" class="media-preview"></div>
+            
+            <div class="publish-controls">
+                <div style="display: flex; gap: 8px;">
+                    <button id="showMyProfileBtn" class="profile-btn">Mon profil</button>
+                    <button class="nav-btn" onclick="location.href='message.html'">Retrouvez vos amis</button>
+                    <button id="showMyPostsBtn" class="profile-btn">Mes posts</button>
+                </div>
+                <button id="publishBtn" class="publish-btn">Publier</button>
+            </div>
+        </div>
+
+        <!-- FEED -->
+        <div id="feed" class="feed">
+            <div class="loading-container" id="loadingContainer">
+                <div class="stylish-loader"></div>
+                
+                <div class="loading-subtext">Récupération des publications</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PROFIL PLEIN ÉCRAN -->
+    <div id="profileFullscreen" class="profile-modal-fullscreen">
+        <div class="profile-header-fullscreen">
+            <button class="profile-back-btn" id="profileBackBtn">←</button>
+            <div class="profile-header-info">
+                <h2 id="profileHeaderName">Profil</h2>
+                <p id="profileHeaderStats">0 publications</p>
+            </div>
+        </div>
+        
+        <div class="profile-content-fullscreen">
+            <div class="profile-info-section">
+                <div class="profile-main-info">
+                    <div class="profile-avatar-large" id="profileAvatarLarge"></div>
+                    <div class="profile-details">
+                        <div class="profile-name" id="profileName"></div>
+                        <div class="profile-username" id="profileUsername"></div>
+                        <div class="profile-follow-section" id="profileFollowSection"></div>
+                    </div>
+                </div>
+                
+                <div class="profile-stats">
+                    <div class="profile-stat">
+                        <span class="profile-stat-number" id="profilePostsCount">0</span>
+                        <span class="profile-stat-label">Posts</span>
+                    </div>
+                    <div class="profile-stat">
+                        <span class="profile-stat-number" id="profileFollowersCount">0</span>
+                        <span class="profile-stat-label">Abonnés</span>
+                    </div>
+                    <div class="profile-stat">
+                        <span class="profile-stat-number" id="profileFollowingCount">0</span>
+                        <span class="profile-stat-label">Abonnements</span>
+                    </div>
+                    <div class="profile-stat">
+                        <span class="profile-stat-number" id="profileLikesCount">0</span>
+                        <span class="profile-stat-label">Likes</span>
+                    </div>
+                </div>
+                
+                <div class="profile-bio">
+                    <h4>📧 Contact</h4>
+                    <p id="profileContact"></p>
+                </div>
+                <div class="profile-bio">
+                    <h4>📅 Membre depuis</h4>
+                    <p id="profileRegisteredAt"></p>
+                </div>
+            </div>
+            
+            <div class="profile-posts-section">
+                <div class="profile-posts-header">
+                    <div class="profile-posts-title">Publications</div>
+                </div>
+                <div id="profilePostsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALS -->
+    <div id="imageModal" class="modal">
+        <div id="imageModalContent" style="text-align: center;">
+            <button class="close-modal" onclick="closeImageModal()">×</button>
+            <img id="modalImage" style="max-width: 90vw; max-height: 90vh; object-fit: contain; border-radius: 8px;">
+        </div>
+    </div>
+
+    <div id="myPostsModal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" id="closeMyPostsModal">×</button>
+            <h3 style="margin-bottom: 20px; color: #ffffff;">Mes Publications</h3>
+            <div id="myPostsList"></div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script type="module">
+        console.log('🔰 Express Exchange - Version Corrigée Complète');
+
+        import { initializeApp as initFirebase } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+        import { 
+            getFirestore, 
+            collection, 
+            doc, 
+            setDoc, 
+            addDoc, 
+            getDocs, 
+            query, 
+            orderBy, 
+            limit, 
+            onSnapshot, 
+            deleteDoc,
+            updateDoc,
+            increment,
+            serverTimestamp,
+            where
+        } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+        
+        import { 
+            getDatabase, 
+            ref, 
+            set, 
+            get, 
+            push, 
+            child, 
+            onValue,
+            update,
+            remove
+        } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js';
+
+        // Configuration Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCPGgtXoDUycykLaTSee0S0yY0tkeJpqKI",
+            authDomain: "data-com-a94a8.firebaseapp.com",
+            databaseURL: "https://data-com-a94a8-default-rtdb.firebaseio.com",
+            projectId: "data-com-a94a8",
+            storageBucket: "data-com-a94a8.appspot.com",
+            messagingSenderId: "276904640935",
+            appId: "1:276904640935:web:9cd805aeba6c34c767f682",
+            measurementId: "G-FYQCWY5G4S"
+        };
+
+        // Configuration Cloudinary
+        const cloudinaryConfig = {
+            cloudName: 'djxcqczh1',
+            uploadPreset: 'database'
+        };
+
+        // Initialisation Firebase
+        const app = initFirebase(firebaseConfig);
+        const db = getFirestore(app);
+        const realtimeDb = getDatabase(app);
+
+        // Variables globales
+        let userData = null;
+        let posts = [];
+        let allUsers = [];
+        let unsubscribePosts = null;
+        let unsubscribeComments = null;
+        let isOnline = navigator.onLine;
+        let isAppInitialized = false;
+        let isLoadingPosts = false;
+        let searchTimeout = null;
+        let currentSelectedFile = null;
+        let videoAutoPlayObserver = null;
+        let currentPlayingVideo = null;
+        let commentsData = {};
+        let currentUploadController = null;
+        let followData = {};
+
+        // CLASSE DE GESTION DE LA PROGRESSION D'UPLOAD
+        class UploadProgressManager {
+            constructor() {
+                this.overlay = document.getElementById('uploadProgressOverlay');
+                this.icon = document.getElementById('uploadIcon');
+                this.title = document.getElementById('uploadTitle');
+                this.subtitle = document.getElementById('uploadSubtitle');
+                this.preview = document.getElementById('uploadPreview');
+                this.progressCircle = document.getElementById('progressCircle');
+                this.progressPercentage = document.getElementById('progressPercentage');
+                this.linearProgressBar = document.getElementById('linearProgressBar');
+                this.uploadSpeed = document.getElementById('uploadSpeed');
+                this.uploadEta = document.getElementById('uploadEta');
+                this.uploadSize = document.getElementById('uploadSize');
+                this.cancelBtn = document.getElementById('uploadCancelBtn');
+                
+                this.startTime = null;
+                this.lastLoaded = 0;
+                this.lastTime = 0;
+                this.speeds = [];
+                this.totalSize = 0;
+                
+                this.setupCancelButton();
+            }
+            
+            setupCancelButton() {
+                if (this.cancelBtn) {
+                    this.cancelBtn.addEventListener('click', () => {
+                        if (currentUploadController) {
+                            currentUploadController.abort();
+                            this.showError('Upload annulé par l\'utilisateur');
+                            setTimeout(() => this.hide(), 2000);
+                        }
+                    });
+                }
+            }
+            
+            show(file, type) {
+                if (!this.overlay) return;
+                
+                this.overlay.style.display = 'flex';
+                this.startTime = Date.now();
+                this.lastLoaded = 0;
+                this.lastTime = Date.now();
+                this.speeds = [];
+                this.totalSize = file.size;
+                
+                // Configuration selon le type
+                if (type === 'video') {
+                    if (this.icon) this.icon.textContent = '🎥';
+                    if (this.title) this.title.textContent = 'Upload de la vidéo...';
+                    if (this.subtitle) this.subtitle.textContent = 'Compression et téléchargement en cours';
+                } else {
+                    if (this.icon) this.icon.textContent = '📷';
+                    if (this.title) this.title.textContent = 'Upload de l\'image...';
+                    if (this.subtitle) this.subtitle.textContent = 'Optimisation et téléchargement en cours';
+                }
+                
+                // Prévisualisation
+                this.showPreview(file, type);
+                
+                // Reset des valeurs
+                this.updateProgress(0);
+                this.updateSize(0, this.totalSize);
+                this.updateSpeed(0);
+                this.updateEta(0);
+            }
+            
+            showPreview(file, type) {
+                if (!this.preview) return;
+                
+                const url = URL.createObjectURL(file);
+                if (type === 'video') {
+                    this.preview.innerHTML = `<video src="${url}" muted></video>`;
+                } else {
+                    this.preview.innerHTML = `<img src="${url}" alt="Preview">`;
+                }
+                this.preview.style.display = 'block';
+            }
+            
+            updateProgress(percent) {
+                // Progression circulaire
+                if (this.progressCircle) {
+                    const circumference = 2 * Math.PI * 54;
+                    const offset = circumference - (percent / 100) * circumference;
+                    this.progressCircle.style.strokeDasharray = `${circumference} ${circumference}`;
+                    this.progressCircle.style.strokeDashoffset = offset;
+                }
+                
+                // Progression linéaire
+                if (this.linearProgressBar) {
+                    this.linearProgressBar.style.width = percent + '%';
+                }
+                
+                // Pourcentage
+                if (this.progressPercentage) {
+                    this.progressPercentage.textContent = Math.round(percent) + '%';
+                }
+            }
+            
+            updateSize(loaded, total) {
+                if (!this.uploadSize) return;
+                const loadedMB = (loaded / (1024 * 1024)).toFixed(1);
+                const totalMB = (total / (1024 * 1024)).toFixed(1);
+                this.uploadSize.textContent = `${loadedMB} MB / ${totalMB} MB`;
+            }
+            
+            updateSpeed(bytesPerSecond) {
+                if (!this.uploadSpeed) return;
+                
+                this.speeds.push(bytesPerSecond);
+                if (this.speeds.length > 5) {
+                    this.speeds.shift();
+                }
+                
+                const avgSpeed = this.speeds.reduce((a, b) => a + b, 0) / this.speeds.length;
+                
+                if (avgSpeed > 1024 * 1024) {
+                    this.uploadSpeed.textContent = `${(avgSpeed / (1024 * 1024)).toFixed(1)} MB/s`;
+                } else if (avgSpeed > 1024) {
+                    this.uploadSpeed.textContent = `${(avgSpeed / 1024).toFixed(1)} KB/s`;
+                } else {
+                    this.uploadSpeed.textContent = `${avgSpeed.toFixed(0)} B/s`;
+                }
+            }
+            
+            updateEta(loaded) {
+                if (!this.uploadEta || this.speeds.length === 0) {
+                    if (this.uploadEta) this.uploadEta.textContent = 'Calcul...';
+                    return;
+                }
+                
+                const avgSpeed = this.speeds.reduce((a, b) => a + b, 0) / this.speeds.length;
+                const remaining = this.totalSize - loaded;
+                const eta = remaining / avgSpeed;
+                
+                if (eta > 60) {
+                    const minutes = Math.floor(eta / 60);
+                    const seconds = Math.floor(eta % 60);
+                    this.uploadEta.textContent = `${minutes}m ${seconds}s restantes`;
+                } else {
+                    this.uploadEta.textContent = `${Math.floor(eta)}s restantes`;
+                }
+            }
+            
+            onProgress(event) {
+                if (event.lengthComputable) {
+                    const percent = (event.loaded / event.total) * 100;
+                    const currentTime = Date.now();
+                    const timeDiff = (currentTime - this.lastTime) / 1000;
+                    const bytesDiff = event.loaded - this.lastLoaded;
+                    
+                    if (timeDiff > 0.5) {
+                        const speed = bytesDiff / timeDiff;
+                        this.updateSpeed(speed);
+                        this.updateEta(event.loaded);
+                        this.lastTime = currentTime;
+                        this.lastLoaded = event.loaded;
+                    }
+                    
+                    this.updateProgress(percent);
+                    this.updateSize(event.loaded, event.total);
+                }
+            }
+            
+            showSuccess(message = 'Upload terminé avec succès !') {
+                if (this.icon) this.icon.textContent = '✅';
+                if (this.title) {
+                    this.title.textContent = 'Succès !';
+                    this.title.className = 'upload-title upload-success';
+                }
+                if (this.subtitle) this.subtitle.textContent = message;
+                this.updateProgress(100);
+                if (this.cancelBtn) this.cancelBtn.style.display = 'none';
+                
+                setTimeout(() => this.hide(), 2000);
+            }
+            
+            showError(message = 'Erreur lors de l\'upload') {
+                if (this.icon) this.icon.textContent = '❌';
+                if (this.title) {
+                    this.title.textContent = 'Erreur';
+                    this.title.className = 'upload-title upload-error';
+                }
+                if (this.subtitle) this.subtitle.textContent = message;
+                if (this.cancelBtn) this.cancelBtn.textContent = 'Fermer';
+            }
+            
+            hide() {
+                if (this.overlay) this.overlay.style.display = 'none';
+                if (this.preview) {
+                    this.preview.style.display = 'none';
+                    this.preview.innerHTML = '';
+                }
+                if (this.title) this.title.className = 'upload-title';
+                if (this.cancelBtn) {
+                    this.cancelBtn.style.display = 'block';
+                    this.cancelBtn.textContent = 'Annuler';
+                }
+            }
+        }
+
+        const uploadProgress = new UploadProgressManager();
+
+        // CLASSE VIDÉO CORRIGÉE AVEC AUDIO ET OPTIMISATIONS
+        class VideoProcessor {
+            static async trimVideo(file, maxDuration = 300) {
+                return new Promise((resolve, reject) => {
+                    const video = document.createElement('video');
+                    
+                    video.onloadedmetadata = () => {
+                        const duration = video.duration;
+                        console.log(`📹 Durée vidéo: ${duration.toFixed(2)}s`);
+                        
+                        if (duration <= maxDuration) {
+                            console.log('✅ Vidéo acceptée (≤ 5 minutes)');
+                            resolve(file);
+                            return;
+                        }
+                        
+                        console.log(`❌ Vidéo trop longue: ${VideoProcessor.formatDuration(duration)}`);
+                        reject(new Error(`Vidéo trop longue (${VideoProcessor.formatDuration(duration)}). Limite: 5 minutes.`));
+                    };
+                    
+                    video.onerror = () => reject(new Error('Erreur lors du chargement de la vidéo'));
+                    video.src = URL.createObjectURL(file);
+                });
+            }
+            
+            static formatDuration(seconds) {
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = Math.floor(seconds % 60);
+                return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+            }
+            
+            static async getVideoDuration(file) {
+                return new Promise((resolve) => {
+                    const video = document.createElement('video');
+                    video.onloadedmetadata = () => {
+                        resolve(video.duration);
+                        URL.revokeObjectURL(video.src);
+                    };
+                    video.src = URL.createObjectURL(file);
+                });
+            }
+
+            static async checkVideoHasAudio(file) {
+                return new Promise((resolve) => {
+                    const video = document.createElement('video');
+                    video.onloadedmetadata = () => {
+                        const hasAudio = video.audioTracks && video.audioTracks.length > 0;
+                        resolve(hasAudio);
+                        URL.revokeObjectURL(video.src);
+                    };
+                    video.src = URL.createObjectURL(file);
+                });
+            }
+        }
+
+        // Upload Cloudinary avec progression
+        class CloudinaryUploader {
+            constructor(config) {
+                this.cloudName = config.cloudName;
+                this.uploadPreset = config.uploadPreset;
+                this.imageApiUrl = `https://api.cloudinary.com/v1_1/${this.cloudName}/image/upload`;
+                this.videoApiUrl = `https://api.cloudinary.com/v1_1/${this.cloudName}/video/upload`;
+            }
+
+            async uploadImage(file, options = {}) {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('upload_preset', this.uploadPreset);
+                formData.append('quality', 'auto');
+                formData.append('fetch_format', 'auto');
+                
+                if (options.maxWidth) {
+                    formData.append('width', options.maxWidth);
+                    formData.append('crop', 'scale');
+                }
+                
+                return this.uploadWithProgress(this.imageApiUrl, formData, 'image');
+            }
+
+            async uploadVideo(file, options = {}) {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('upload_preset', this.uploadPreset);
+                formData.append('resource_type', 'video');
+                formData.append('quality', 'auto');
+                formData.append('video_codec', 'h264');
+                formData.append('audio_codec', 'aac');
+                
+                return this.uploadWithProgress(this.videoApiUrl, formData, 'video');
+            }
+            
+            async uploadWithProgress(url, formData, type) {
+                return new Promise((resolve, reject) => {
+                    currentUploadController = new AbortController();
+                    
+                    const xhr = new XMLHttpRequest();
+                    
+                    xhr.upload.addEventListener('progress', (event) => {
+                        uploadProgress.onProgress(event);
+                    });
+                    
+                    xhr.onload = function() {
+                        if (xhr.status === 200) {
+                            try {
+                                const result = JSON.parse(xhr.responseText);
+                                const uploadResult = {
+                                    url: result.secure_url,
+                                    publicId: result.public_id,
+                                    width: result.width,
+                                    height: result.height,
+                                    format: result.format,
+                                    bytes: result.bytes
+                                };
+                                
+                                if (type === 'video') {
+                                    uploadResult.duration = result.duration;
+                                    uploadResult.hasAudio = result.audio || false;
+                                }
+                                
+                                uploadProgress.showSuccess();
+                                resolve(uploadResult);
+                            } catch (error) {
+                                uploadProgress.showError('Erreur lors du traitement du fichier');
+                                reject(error);
+                            }
+                        } else {
+                            uploadProgress.showError(`Erreur serveur: ${xhr.statusText}`);
+                            reject(new Error(`Erreur upload: ${xhr.statusText}`));
+                        }
+                    };
+                    
+                    xhr.onerror = function() {
+                        uploadProgress.showError('Erreur de connexion');
+                        reject(new Error('Erreur de connexion'));
+                    };
+                    
+                    xhr.onabort = function() {
+                        uploadProgress.showError('Upload annulé');
+                        reject(new Error('Upload annulé'));
+                    };
+                    
+                    currentUploadController.signal.addEventListener('abort', () => {
+                        xhr.abort();
+                    });
+                    
+                    xhr.open('POST', url);
+                    xhr.send(formData);
+                });
+            }
+        }
+
+        const uploader = new CloudinaryUploader(cloudinaryConfig);
+
+        // FONCTIONS UTILITAIRES
+        function validateUserData(userData) {
+            if (!userData) return false;
+            const requiredFields = ['id', 'fullName', 'avatar'];
+            return requiredFields.every(field => userData[field] && userData[field].toString().trim() !== '');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function getTimeAgo(date) {
+            if (!date) return 'Il y a un moment';
+            
+            const now = new Date();
+            const diff = now - date;
+            const seconds = Math.floor(diff / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+
+            if (days > 0) return `Il y a ${days} jour${days > 1 ? 's' : ''}`;
+            if (hours > 0) return `Il y a ${hours} heure${hours > 1 ? 's' : ''}`;
+            if (minutes > 0) return `Il y a ${minutes} minute${minutes > 1 ? 's' : ''}`;
+            return 'À l\'instant';
+        }
+
+        function updateConnectionStatus() {
+            const statusIndicator = document.getElementById('statusIndicator');
+            if (statusIndicator) {
+                statusIndicator.textContent = isOnline ? '🟢 En ligne' : '🔴 Hors ligne';
+                statusIndicator.className = isOnline ? 'status-indicator status-connected' : 'status-indicator status-disconnected';
+            }
+        }
+
+        function createParticles() {
+            const particles = document.getElementById('particles');
+            if (!particles) return;
+            
+            const isMobile = window.innerWidth < 768;
+            const particleCount = isMobile ? 5 : 15;
+            particles.innerHTML = '';
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                particle.style.animationDuration = (Math.random() * 4 + 4) + 's';
+                particles.appendChild(particle);
+            }
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            if (!toast) return;
+            
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // GESTION REALTIME DATABASE POUR LES UTILISATEURS
+        async function saveUserToRealtimeDB(userData) {
+            try {
+                const userRef = ref(realtimeDb, `users/${userData.id}`);
+                await set(userRef, {
+                    ...userData,
+                    lastActive: new Date().toISOString(),
+                    isOnline: true,
+                    postsCount: 0,
+                    followersCount: 0,
+                    followingCount: 0,
+                    likesCount: 0
+                });
+                console.log('✅ Utilisateur sauvé dans Realtime DB');
+                return true;
+            } catch (error) {
+                console.error('❌ Erreur sauvegarde Realtime DB:', error);
+                return false;
+            }
+        }
+
+        async function getUserFromRealtimeDB(contact, password) {
+            try {
+                const usersRef = ref(realtimeDb, 'users');
+                const snapshot = await get(usersRef);
+                
+                if (snapshot.exists()) {
+                    const users = snapshot.val();
+                    const userEntry = Object.entries(users).find(([key, user]) => 
+                        user.contact === contact && user.password === password
+                    );
+                    
+                    if (userEntry) {
+                        return { id: userEntry[0], ...userEntry[1] };
+                    }
+                }
+                return null;
+            } catch (error) {
+                console.error('❌ Erreur récupération Realtime DB:', error);
+                return null;
+            }
+        }
+
+        async function checkUserExistsInRealtimeDB(contact) {
+            try {
+                const usersRef = ref(realtimeDb, 'users');
+                const snapshot = await get(usersRef);
+                
+                if (snapshot.exists()) {
+                    const users = snapshot.val();
+                    return Object.values(users).some(user => user.contact === contact);
+                }
+                return false;
+            } catch (error) {
+                console.error('❌ Erreur vérification utilisateur:', error);
+                return false;
+            }
+        }
+
+        async function updateUserStats(userId, field, increment = 1) {
+            try {
+                const userRef = ref(realtimeDb, `users/${userId}/${field}`);
+                const snapshot = await get(userRef);
+                const currentValue = snapshot.exists() ? snapshot.val() : 0;
+                await set(userRef, Math.max(0, currentValue + increment));
+                console.log(`✅ Statistique ${field} mise à jour pour ${userId}`);
+            } catch (error) {
+                console.error('❌ Erreur mise à jour statistiques:', error);
+            }
+        }
+
+        // GESTION DES ABONNEMENTS
+        async function toggleFollow(targetUserId) {
+            if (!userData || !userData.id) {
+                showToast('Vous devez être connecté pour suivre un utilisateur', 'error');
+                return;
+            }
+
+            if (targetUserId === userData.id) {
+                showToast('Vous ne pouvez pas vous suivre vous-même', 'error');
+                return;
+            }
+
+            try {
+                const followId = `${userData.id}_${targetUserId}`;
+                const isCurrentlyFollowing = followData[targetUserId]?.includes(userData.id);
+
+                if (isOnline) {
+                    if (isCurrentlyFollowing) {
+                        // Se désabonner
+                        await remove(ref(realtimeDb, `follows/${followId}`));
+                        await updateUserStats(targetUserId, 'followersCount', -1);
+                        await updateUserStats(userData.id, 'followingCount', -1);
+                    } else {
+                        // S'abonner
+                        await set(ref(realtimeDb, `follows/${followId}`), {
+                            followerId: userData.id,
+                            followingId: targetUserId,
+                            timestamp: new Date().toISOString()
+                        });
+                        await updateUserStats(targetUserId, 'followersCount', 1);
+                        await updateUserStats(userData.id, 'followingCount', 1);
+                    }
+                } else {
+                    // Mode hors ligne
+                    if (!followData[targetUserId]) {
+                        followData[targetUserId] = [];
+                    }
+                    
+                    if (isCurrentlyFollowing) {
+                        followData[targetUserId] = followData[targetUserId].filter(id => id !== userData.id);
+                    } else {
+                        followData[targetUserId].push(userData.id);
+                    }
+                }
+
+                // Recharger les données d'abonnement
+                await loadFollowData();
+                
+                // Mettre à jour l'interface
+                updateFollowButtons();
+                
+                showToast(isCurrentlyFollowing ? 'Désabonnement effectué' : 'Abonnement effectué', 'success');
+
+            } catch (error) {
+                console.error('❌ Erreur abonnement:', error);
+                showToast('Erreur lors de la mise à jour de l\'abonnement', 'error');
+            }
+        }
+
+        async function loadFollowData() {
+            try {
+                if (!isOnline) return;
+                
+                const followsRef = ref(realtimeDb, 'follows');
+                const snapshot = await get(followsRef);
+                
+                followData = {};
+                
+                if (snapshot.exists()) {
+                    const follows = snapshot.val();
+                    Object.values(follows).forEach(follow => {
+                        if (!followData[follow.followingId]) {
+                            followData[follow.followingId] = [];
+                        }
+                        followData[follow.followingId].push(follow.followerId);
+                    });
+                }
+                
+                console.log('✅ Données d\'abonnement chargées');
+            } catch (error) {
+                console.error('❌ Erreur chargement abonnements:', error);
+            }
+        }
+
+        function updateFollowButtons() {
+            document.querySelectorAll('.follow-btn').forEach(btn => {
+                const targetUserId = btn.getAttribute('data-user-id');
+                if (targetUserId && followData[targetUserId]) {
+                    const isFollowing = followData[targetUserId].includes(userData?.id);
+                    btn.textContent = isFollowing ? 'Ne plus suivre' : 'Suivre';
+                    btn.className = `follow-btn ${isFollowing ? 'following' : ''}`;
+                }
+            });
+        }
+
+        // GESTION DE L'AUTHENTIFICATION CORRIGÉE - REALTIME DB UNIQUEMENT
+        function hideAuthOverlay() {
+            const overlay = document.getElementById('authOverlay');
+            if (overlay) {
+                overlay.style.display = 'none';
+            }
+        }
+
+        function showAuthOverlay() {
+            const overlay = document.getElementById('authOverlay');
+            const mainApp = document.getElementById('mainApp');
+            if (overlay) overlay.style.display = 'flex';
+            if (mainApp) mainApp.style.display = 'none';
+            isAppInitialized = false;
+        }
+
+        function setupAuthToggle() {
+            const switchToLogin = document.getElementById('switchToLogin');
+            const switchToRegister = document.getElementById('switchToRegister');
+            const registrationForm = document.getElementById('registrationForm');
+            const loginForm = document.getElementById('loginForm');
+            
+            if (switchToLogin) {
+                switchToLogin.addEventListener('click', () => {
+                    registrationForm.style.display = 'none';
+                    loginForm.style.display = 'block';
+                });
+            }
+            
+            if (switchToRegister) {
+                switchToRegister.addEventListener('click', () => {
+                    loginForm.style.display = 'none';
+                    registrationForm.style.display = 'block';
+                });
+            }
+        }
+
+        async function checkUserAuth() {
+            try {
+                // Vérifier uniquement les données de session
+                const sessionData = sessionStorage.getItem('expressExchangeUser');
+                if (!sessionData) {
+                    showAuthOverlay();
+                    return;
+                }
+
+                const parsedData = JSON.parse(sessionData);
+                if (!validateUserData(parsedData)) {
+                    sessionStorage.removeItem('expressExchangeUser');
+                    showAuthOverlay();
+                    return;
+                }
+
+                // Vérifier que l'utilisateur existe toujours dans la base
+                if (isOnline) {
+                    const userRef = ref(realtimeDb, `users/${parsedData.id}`);
+                    const snapshot = await get(userRef);
+                    
+                    if (!snapshot.exists()) {
+                        sessionStorage.removeItem('expressExchangeUser');
+                        showAuthOverlay();
+                        return;
+                    }
+                    
+                    // Mettre à jour le statut en ligne
+                    await update(userRef, {
+                        isOnline: true,
+                        lastActive: new Date().toISOString()
+                    });
+                    
+                    userData = { id: parsedData.id, ...snapshot.val() };
+                } else {
+                    userData = parsedData;
+                }
+
+                console.log('✅ Utilisateur connecté:', userData.fullName);
+                hideAuthOverlay();
+                showMainApp();
+                
+            } catch (error) {
+                console.error('❌ Erreur vérification auth:', error);
+                sessionStorage.removeItem('expressExchangeUser');
+                showAuthOverlay();
+            }
+        }
+
+        function showMainApp() {
+            if (isAppInitialized) return;
+            
+            if (!validateUserData(userData)) {
+                showAuthOverlay();
+                return;
+            }
+
+            const mainApp = document.getElementById('mainApp');
+            if (mainApp) {
+                mainApp.style.display = 'block';
+            }
+
+            const welcomeMessage = document.getElementById('welcomeMessage');
+            if (welcomeMessage) {
+                welcomeMessage.textContent = `Bienvenue ${userData.fullName} 👋`;
+            }
+
+            updateConnectionStatus();
+            initializeSearch();
+            loadPosts();
+            loadUsers();
+            loadFollowData();
+            isAppInitialized = true;
+            
+            console.log('🎉 App initialisée pour:', userData.fullName);
+        }
+
+        // FORMULAIRES D'AUTHENTIFICATION - REALTIME DB UNIQUEMENT
+        function setupAuthForms() {
+            const regForm = document.getElementById('regForm');
+            const logForm = document.getElementById('logForm');
+
+            // FORMULAIRE D'INSCRIPTION
+            if (regForm) {
+                regForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    const submitBtn = this.querySelector('.submit-btn');
+                    const btnSpan = submitBtn.querySelector('span');
+                    const originalText = btnSpan.textContent;
+                    
+                    const nom = document.getElementById('nom').value.trim();
+                    const prenom = document.getElementById('prenom').value.trim();
+                    const contact = document.getElementById('contact').value.trim();
+                    const password = document.getElementById('password').value.trim();
+                    
+                    if (!nom || !prenom || !contact || !password) {
+                        showToast('Veuillez remplir tous les champs', 'error');
+                        return;
+                    }
+
+                    if (password.length < 6) {
+                        showToast('Le mot de passe doit contenir au moins 6 caractères', 'error');
+                        return;
+                    }
+
+                    if (!isOnline) {
+                        showToast('Connexion internet requise pour l\'inscription', 'error');
+                        return;
+                    }
+                    
+                    submitBtn.disabled = true;
+                    btnSpan.innerHTML = '<div class="loading-spinner"></div>Inscription...';
+                    
+                    try {
+                        // Vérifier si l'utilisateur existe déjà
+                        const userExists = await checkUserExistsInRealtimeDB(contact);
+                        if (userExists) {
+                            throw new Error('Un compte existe déjà avec ce contact');
+                        }
+
+                        const timestamp = Date.now();
+                        const randomSuffix = Math.random().toString(36).substr(2, 9);
+                        const userId = `user_${timestamp}_${randomSuffix}`;
+                        
+                        const newUser = {
+                            id: userId,
+                            nom: nom,
+                            prenom: prenom,
+                            contact: contact,
+                            password: password,
+                            fullName: `${prenom} ${nom}`,
+                            avatar: `${prenom[0].toUpperCase()}${nom[0].toUpperCase()}`,
+                            registeredAt: new Date().toISOString(),
+                            username: `${prenom.toLowerCase()}.${nom.toLowerCase()}`,
+                            postsCount: 0,
+                            followersCount: 0,
+                            followingCount: 0,
+                            likesCount: 0,
+                            isOnline: true,
+                            lastActive: new Date().toISOString()
+                        };
+                        
+                        // Sauvegarder UNIQUEMENT dans Realtime DB
+                        await saveUserToRealtimeDB(newUser);
+                        
+                        // Définir comme utilisateur actuel
+                        userData = newUser;
+                        sessionStorage.setItem('expressExchangeUser', JSON.stringify(userData));
+                        
+                        showToast('Inscription réussie ! Bienvenue !', 'success');
+                        
+                        regForm.reset();
+                        hideAuthOverlay();
+                        showMainApp();
+                        
+                    } catch (error) {
+                        console.error('❌ Erreur inscription:', error);
+                        showToast(error.message, 'error');
+                    } finally {
+                        submitBtn.disabled = false;
+                        btnSpan.textContent = originalText;
+                    }
+                });
+            }
+
+            // FORMULAIRE DE CONNEXION
+            if (logForm) {
+                logForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    const submitBtn = this.querySelector('.submit-btn');
+                    const btnSpan = submitBtn.querySelector('span');
+                    const originalText = btnSpan.textContent;
+                    
+                    const contact = document.getElementById('loginContact').value.trim();
+                    const password = document.getElementById('loginPassword').value.trim();
+                    
+                    if (!contact || !password) {
+                        showToast('Veuillez remplir tous les champs', 'error');
+                        return;
+                    }
+
+                    if (!isOnline) {
+                        showToast('Connexion internet requise pour se connecter', 'error');
+                        return;
+                    }
+                    
+                    submitBtn.disabled = true;
+                    btnSpan.innerHTML = '<div class="loading-spinner"></div>Connexion...';
+                    
+                    try {
+                        // Chercher UNIQUEMENT dans Realtime DB
+                        const user = await getUserFromRealtimeDB(contact, password);
+                        
+                        if (!user) {
+                            throw new Error('Contact ou mot de passe incorrect');
+                        }
+                        
+                        // Mettre à jour le statut en ligne
+                        const userRef = ref(realtimeDb, `users/${user.id}`);
+                        await update(userRef, {
+                            isOnline: true,
+                            lastActive: new Date().toISOString()
+                        });
+                        
+                        // Connecter l'utilisateur
+                        userData = user;
+                        sessionStorage.setItem('expressExchangeUser', JSON.stringify(userData));
+                        
+                        showToast('Connexion réussie !', 'success');
+                        
+                        logForm.reset();
+                        hideAuthOverlay();
+                        showMainApp();
+                        
+                    } catch (error) {
+                        console.error('❌ Erreur connexion:', error);
+                        showToast(error.message, 'error');
+                    } finally {
+                        submitBtn.disabled = false;
+                        btnSpan.textContent = originalText;
+                    }
+                });
+            }
+        }
+
+        (function() {
+    // Nom de la clé utilisée pour la session
+    const USER_KEY = 'expressExchangeUser';
+
+    // Si la session existe en sessionStorage mais pas en localStorage, on la copie
+    if (sessionStorage.getItem(USER_KEY) && !localStorage.getItem(USER_KEY)) {
+        localStorage.setItem(USER_KEY, sessionStorage.getItem(USER_KEY));
+    }
+
+    // Override les méthodes natives pour utiliser localStorage à la place de sessionStorage
+    window.sessionStorage.setItem = function(key, value) {
+        if (key === USER_KEY) {
+            localStorage.setItem(key, value);
+        } else {
+            Storage.prototype.setItem.call(sessionStorage, key, value);
+        }
+    };
+    window.sessionStorage.getItem = function(key) {
+        if (key === USER_KEY) {
+            return localStorage.getItem(key);
+        }
+        return Storage.prototype.getItem.call(sessionStorage, key);
+    };
+    window.sessionStorage.removeItem = function(key) {
+        if (key === USER_KEY) {
+            localStorage.removeItem(key);
+        } else {
+            Storage.prototype.removeItem.call(sessionStorage, key);
+        }
+    };
+})();
+
+        // DÉCONNEXION CORRIGÉE
+        function setupLogout() {
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', async function() {
+                    if (confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
+                        try {
+                            // Mettre à jour le statut hors ligne dans Realtime DB
+                            if (isOnline && userData) {
+                                const userRef = ref(realtimeDb, `users/${userData.id}`);
+                                await update(userRef, {
+                                    isOnline: false,
+                                    lastActive: new Date().toISOString()
+                                });
+                            }
+                        } catch (error) {
+                            console.warn('⚠️ Erreur mise à jour statut hors ligne:', error);
+                        }
+                        
+                        // Nettoyer UNIQUEMENT les données de session
+                        sessionStorage.removeItem('expressExchangeUser');
+                        
+                        // Nettoyer les variables globales
+                        userData = null;
+                        posts = [];
+                        commentsData = {};
+                        followData = {};
+                        isAppInitialized = false;
+                        
+                        // Nettoyer les abonnements Firebase
+                        if (unsubscribePosts) {
+                            unsubscribePosts();
+                            unsubscribePosts = null;
+                        }
+                        if (unsubscribeComments) {
+                            unsubscribeComments();
+                            unsubscribeComments = null;
+                        }
+                        
+                        // Nettoyer l'observateur vidéo
+                        if (videoAutoPlayObserver) {
+                            videoAutoPlayObserver.disconnect();
+                            videoAutoPlayObserver = null;
+                        }
+                        
+                        showToast('Déconnexion réussie', 'success');
+                        showAuthOverlay();
+                        
+                        console.log('👋 Utilisateur déconnecté');
+                    }
+                });
+            }
+        }
+
+        // AUTO-PLAY VIDÉO STYLE TIKTOK AVEC SON
+        function initVideoAutoPlay() {
+            if (videoAutoPlayObserver) {
+                videoAutoPlayObserver.disconnect();
+            }
+
+            videoAutoPlayObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    const videoContainer = entry.target;
+                    const video = videoContainer.querySelector('video');
+                    const autoPlayIndicator = videoContainer.querySelector('.video-auto-play-indicator');
+                    const audioIndicator = videoContainer.querySelector('.video-audio-indicator');
+                    
+                    if (entry.isIntersecting && entry.intersectionRatio > 0.6) {
+                        videoContainer.classList.add('in-viewport');
+                        videoContainer.classList.remove('out-of-viewport');
+                        
+                        if (video && video.paused) {
+                            pauseAllVideos();
+                            
+                            video.muted = false;
+                            video.currentTime = 0;
+                            
+                            video.play().then(() => {
+                                currentPlayingVideo = video;
+                                videoContainer.classList.remove('paused');
+                                
+                                if (autoPlayIndicator) {
+                                    autoPlayIndicator.textContent = '🔥 Lecture auto';
+                                    autoPlayIndicator.classList.add('show');
+                                    setTimeout(() => {
+                                        autoPlayIndicator.classList.remove('show');
+                                    }, 3000);
+                                }
+                                
+                                if (audioIndicator) {
+                                    audioIndicator.textContent = video.muted ? '🔇 Muet' : '🔊 Son';
+                                    audioIndicator.className = `video-audio-indicator ${video.muted ? 'muted' : ''}`;
+                                }
+                                
+                                console.log('▶️ Auto-play avec son démarré');
+                            }).catch(error => {
+                                console.log('⚠️ Auto-play avec son bloqué, essai sans son:', error);
+                                video.muted = true;
+                                video.play().then(() => {
+                                    currentPlayingVideo = video;
+                                    videoContainer.classList.remove('paused');
+                                    
+                                    if (autoPlayIndicator) {
+                                        autoPlayIndicator.textContent = '🔇 Auto-play muet';
+                                        autoPlayIndicator.classList.add('show');
+                                        setTimeout(() => {
+                                            autoPlayIndicator.classList.remove('show');
+                                        }, 3000);
+                                    }
+                                    
+                                    if (audioIndicator) {
+                                        audioIndicator.textContent = '🔇 Muet';
+                                        audioIndicator.className = 'video-audio-indicator muted';
+                                    }
+                                }).catch(console.error);
+                            });
+                        }
+                    } else {
+                        videoContainer.classList.remove('in-viewport');
+                        videoContainer.classList.add('out-of-viewport');
+                        
+                        if (video && !video.paused) {
+                            video.pause();
+                            videoContainer.classList.add('paused');
+                            if (currentPlayingVideo === video) {
+                                currentPlayingVideo = null;
+                            }
+                            console.log('⏸️ Vidéo mise en pause (hors vue)');
+                        }
+                    }
+                });
+            }, {
+                threshold: [0.6],
+                rootMargin: '-50px'
+            });
+
+            document.querySelectorAll('.video-container').forEach(container => {
+                videoAutoPlayObserver.observe(container);
+            });
+        }
+
+        function pauseAllVideos() {
+            document.querySelectorAll('.video-player').forEach(video => {
+                if (!video.paused) {
+                    video.pause();
+                    const container = video.closest('.video-container');
+                    if (container) {
+                        container.classList.add('paused');
+                    }
+                }
+            });
+            currentPlayingVideo = null;
+        }
+
+        // GESTION DE LA PROGRESSION VIDÉO AMÉLIORÉE
+        function setupVideoControls(video, container) {
+            const progressBar = container.querySelector('.video-progress-bar');
+            const progressContainer = container.querySelector('.video-progress');
+            const timeDisplay = container.querySelector('.video-time');
+            const playBtn = container.querySelector('.video-play-btn');
+            const volumeBtn = container.querySelector('.video-volume-btn');
+            const audioIndicator = container.querySelector('.video-audio-indicator');
+            
+            // Affichage des contrôles au survol
+            let controlsTimeout;
+            container.addEventListener('mouseenter', () => {
+                clearTimeout(controlsTimeout);
+                container.classList.add('show-controls');
+            });
+            
+            container.addEventListener('mouseleave', () => {
+                controlsTimeout = setTimeout(() => {
+                    container.classList.remove('show-controls');
+                }, 2000);
+            });
+            
+            // Mise à jour de la progression
+            video.addEventListener('timeupdate', () => {
+                if (video.duration) {
+                    const progress = (video.currentTime / video.duration) * 100;
+                    if (progressBar) {
+                        progressBar.style.width = progress + '%';
+                    }
+                    if (timeDisplay) {
+                        timeDisplay.textContent = `${VideoProcessor.formatDuration(video.currentTime)} / ${VideoProcessor.formatDuration(video.duration)}`;
+                    }
+                }
+            });
+
+            // Contrôle de la barre de progression
+            if (progressContainer) {
+                progressContainer.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const rect = progressContainer.getBoundingClientRect();
+                    const clickX = e.clientX - rect.left;
+                    const width = rect.width;
+                    const percentage = clickX / width;
+                    
+                    if (video.duration) {
+                        video.currentTime = video.duration * percentage;
+                    }
+                });
+            }
+
+            // Contrôle play/pause
+            if (playBtn) {
+                playBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleVideoPlayback(container);
+                });
+            }
+
+            // Contrôle volume
+            if (volumeBtn) {
+                volumeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    video.muted = !video.muted;
+                    volumeBtn.textContent = video.muted ? '🔇' : '🔊';
+                    
+                    if (audioIndicator) {
+                        audioIndicator.textContent = video.muted ? '🔇 Muet' : '🔊 Son';
+                        audioIndicator.className = `video-audio-indicator ${video.muted ? 'muted' : ''}`;
+                    }
+                });
+            }
+
+            // Click sur la vidéo pour play/pause
+            video.addEventListener('click', () => {
+                toggleVideoPlayback(container);
+            });
+
+            // Click sur overlay de play
+            const playOverlay = container.querySelector('.video-play-overlay');
+            if (playOverlay) {
+                playOverlay.addEventListener('click', () => {
+                    toggleVideoPlayback(container);
+                });
+            }
+
+            // Mise à jour des boutons
+            video.addEventListener('play', () => {
+                if (playBtn) playBtn.textContent = '⏸️';
+                container.classList.remove('paused');
+            });
+
+            video.addEventListener('pause', () => {
+                if (playBtn) playBtn.textContent = '▶️';
+                container.classList.add('paused');
+            });
+
+            // Gestion du chargement vidéo
+            video.addEventListener('loadstart', () => {
+                showVideoLoading(container, true);
+            });
+
+            video.addEventListener('canplay', () => {
+                showVideoLoading(container, false);
+            });
+
+            video.addEventListener('waiting', () => {
+                showVideoLoading(container, true);
+            });
+
+            video.addEventListener('playing', () => {
+                showVideoLoading(container, false);
+            });
+        }
+
+        function showVideoLoading(container, show) {
+            let loader = container.querySelector('.video-loading');
+            
+            if (show) {
+                if (!loader) {
+                    loader = document.createElement('div');
+                    loader.className = 'video-loading';
+                    loader.innerHTML = `
+                        <div class="spinner"></div>
+                        <div>Chargement...</div>
+                    `;
+                    container.appendChild(loader);
+                }
+                loader.style.display = 'block';
+            } else {
+                if (loader) {
+                    loader.style.display = 'none';
+                }
+            }
+        }
+
+        function toggleVideoPlayback(container) {
+            const video = container.querySelector('video');
+            if (!video) return;
+
+            if (video.paused) {
+                pauseAllVideos();
+                video.play().then(() => {
+                    currentPlayingVideo = video;
+                    container.classList.remove('paused');
+                }).catch(console.error);
+            } else {
+                video.pause();
+                container.classList.add('paused');
+                if (currentPlayingVideo === video) {
+                    currentPlayingVideo = null;
+                }
+            }
+        }
+
+        // RECHERCHE
+        function initializeSearch() {
+            const searchInput = document.getElementById('searchInput');
+            const searchResults = document.getElementById('searchResults');
+
+            if (!searchInput) return;
+
+            searchInput.addEventListener('input', function(e) {
+                const query = e.target.value.trim();
+                
+                if (query.length > 0) {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(() => {
+                        performSearch(query);
+                    }, 300);
+                } else {
+                    if (searchResults) searchResults.style.display = 'none';
+                }
+            });
+
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.search-box') && searchResults) {
+                    searchResults.style.display = 'none';
+                }
+            });
+        }
+
+        async function performSearch(query) {
+            const searchResults = document.getElementById('searchResults');
+            if (!searchResults) return;
+
+            searchResults.innerHTML = '<div style="padding: 12px; color: #8e8e8e;">🔍 Recherche...</div>';
+            searchResults.style.display = 'block';
+
+            try {
+                // Recherche dans les publications
+                const postResults = posts.filter(post => 
+                    post.text?.toLowerCase().includes(query.toLowerCase()) ||
+                    post.author?.toLowerCase().includes(query.toLowerCase())
+                ).slice(0, 5);
+
+                // Recherche dans les utilisateurs
+                const userResults = allUsers.filter(user =>
+                    user.fullName?.toLowerCase().includes(query.toLowerCase()) ||
+                    user.nom?.toLowerCase().includes(query.toLowerCase()) ||
+                    user.prenom?.toLowerCase().includes(query.toLowerCase())
+                ).slice(0, 3);
+
+                let resultsHTML = '';
+
+                if (userResults.length > 0) {
+                    resultsHTML += userResults.map(user => `
+                        <div class="search-result-item" onclick="showUserProfileFullscreen('${user.id}')">
+                            <div class="search-result-avatar">${user.avatar || 'U'}</div>
+                            <div class="search-result-info">
+                                <h4>${escapeHtml(user.fullName || 'Utilisateur')}</h4>
+                                <p>Utilisateur • ${user.contact || ''}</p>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+
+                if (postResults.length > 0) {
+                    if (userResults.length > 0) {
+                        resultsHTML += '<div style="border-top: 1px solid #262626; margin: 8px 0;"></div>';
+                    }
+                    resultsHTML += postResults.map(post => `
+                        <div class="search-result-item" onclick="scrollToPost('${post.id}')">
+                            <div class="search-result-avatar">${post.avatar || 'U'}</div>
+                            <div class="search-result-info">
+                                <h4>${escapeHtml(post.author || 'Utilisateur')}</h4>
+                                <p>${post.videoUrl ? '🎥 Vidéo' : '📝 Publication'} • ${escapeHtml((post.text || '').substring(0, 50))}${post.text?.length > 50 ? '...' : ''}</p>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+
+                if (resultsHTML === '') {
+                    resultsHTML = `<div class="no-search-results">Aucun résultat pour "${escapeHtml(query)}"</div>`;
+                }
+
+                searchResults.innerHTML = resultsHTML;
+
+            } catch (error) {
+                console.error('❌ Erreur recherche:', error);
+                searchResults.innerHTML = '<div style="padding: 12px; color: #ed4956;">Erreur lors de la recherche</div>';
+            }
+        }
+
+        window.scrollToPost = function(postId) {
+            closeSearchResults();
+            const postElement = document.querySelector(`[data-post-id="${postId}"]`);
+            if (postElement) {
+                postElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                postElement.style.background = 'rgba(0, 149, 246, 0.1)';
+                setTimeout(() => {
+                    postElement.style.background = '';
+                }, 2000);
+            }
+        };
+
+        window.showUserProfileFullscreen = function(userId) {
+            closeSearchResults();
+            const user = allUsers.find(u => u.id === userId);
+            if (user) {
+                displayUserProfileFullscreen(user);
+            }
+        };
+
+        function closeSearchResults() {
+            const searchResults = document.getElementById('searchResults');
+            const searchInput = document.getElementById('searchInput');
+            
+            if (searchResults) searchResults.style.display = 'none';
+            if (searchInput) searchInput.value = '';
+        }
+
+        // AFFICHAGE DU PROFIL UTILISATEUR PLEIN ÉCRAN
+        async function displayUserProfileFullscreen(user) {
+            const profileFullscreen = document.getElementById('profileFullscreen');
+            if (!profileFullscreen) return;
+
+            // Charger les données utilisateur les plus récentes
+            let currentUser = user;
+            if (isOnline) {
+                try {
+                    const userRef = ref(realtimeDb, `users/${user.id}`);
+                    const snapshot = await get(userRef);
+                    if (snapshot.exists()) {
+                        currentUser = { id: user.id, ...snapshot.val() };
+                    }
+                } catch (error) {
+                    console.warn('⚠️ Erreur chargement données utilisateur:', error);
+                }
+            }
+
+            // Calculer les statistiques
+            const userPosts = posts.filter(p => p.authorId === currentUser.id);
+            const totalLikes = userPosts.reduce((sum, post) => sum + (post.likesCount || 0), 0);
+            const registeredDate = new Date(currentUser.registeredAt);
+            const followersCount = currentUser.followersCount || 0;
+            const followingCount = currentUser.followingCount || 0;
+            const isFollowing = followData[currentUser.id]?.includes(userData?.id);
+            const isOwnProfile = currentUser.id === userData?.id;
+
+            // Remplir les informations du header
+            document.getElementById('profileHeaderName').textContent = currentUser.fullName || 'Utilisateur';
+            document.getElementById('profileHeaderStats').textContent = `${userPosts.length} publication${userPosts.length > 1 ? 's' : ''}`;
+
+            // Remplir les informations principales
+            document.getElementById('profileAvatarLarge').textContent = currentUser.avatar || 'U';
+            document.getElementById('profileName').textContent = currentUser.fullName || 'Utilisateur';
+            document.getElementById('profileUsername').textContent = `@${currentUser.username || currentUser.contact}`;
+            document.getElementById('profilePostsCount').textContent = userPosts.length;
+            document.getElementById('profileFollowersCount').textContent = followersCount;
+            document.getElementById('profileFollowingCount').textContent = followingCount;
+            document.getElementById('profileLikesCount').textContent = totalLikes;
+            document.getElementById('profileContact').textContent = currentUser.contact || 'Non renseigné';
+            document.getElementById('profileRegisteredAt').textContent = registeredDate.toLocaleDateString('fr-FR', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+
+            // Section bouton suivre
+            const followSection = document.getElementById('profileFollowSection');
+            if (followSection) {
+                if (isOwnProfile) {
+                    followSection.innerHTML = '<button class="follow-btn" onclick="editProfile()" style="background: #262626;">✏️ Modifier le profil</button>';
+                } else {
+                    followSection.innerHTML = `
+                        <button class="follow-btn ${isFollowing ? 'following' : ''}" 
+                                onclick="toggleFollow('${currentUser.id}')" 
+                                data-user-id="${currentUser.id}">
+                            ${isFollowing ? 'Ne plus suivre' : 'Suivre'}
+                        </button>
+                    `;
+                }
+            }
+
+            // Afficher les publications de l'utilisateur
+            const profilePostsList = document.getElementById('profilePostsList');
+            if (profilePostsList) {
+                if (userPosts.length === 0) {
+                    profilePostsList.innerHTML = `
+                        <div class="empty-state">
+                            <div style="font-size: 48px; margin-bottom: 16px;">📝</div>
+                            <h3>Aucune publication</h3>
+                            <p>${isOwnProfile ? 'Vous n\'avez' : 'Cet utilisateur n\'a'} pas encore publié de contenu</p>
+                        </div>
+                    `;
+                } else {
+                    // Trier les posts par date décroissante
+                    const sortedPosts = userPosts.sort((a, b) => {
+                        const dateA = a.timestamp?.toDate ? a.timestamp.toDate() : new Date(a.timestamp);
+                        const dateB = b.timestamp?.toDate ? b.timestamp.toDate() : new Date(b.timestamp);
+                        return dateB - dateA;
+                    });
+
+                    const postsHTML = sortedPosts.map(post => {
+                        const commentsForPost = commentsData[post.id] || [];
+                        return createPostHTML(post, commentsForPost);
+                    }).join('');
+
+                    profilePostsList.innerHTML = postsHTML;
+                    
+                    // Réattacher les événements pour les vidéos
+                    setTimeout(() => {
+                        attachPostEvents();
+                    }, 100);
+                }
+            }
+
+            profileFullscreen.style.display = 'block';
+        }
+
+        // CHARGEMENT DES DONNÉES
+        async function loadPostLikes() {
+            try {
+                if (!isOnline) return;
+                
+                const likesSnapshot = await getDocs(collection(db, 'likes'));
+                const likesData = {};
+                
+                likesSnapshot.forEach((doc) => {
+                    const like = doc.data();
+                    if (!likesData[like.postId]) {
+                        likesData[like.postId] = {
+                            count: 0,
+                            users: []
+                        };
+                    }
+                    likesData[like.postId].count++;
+                    likesData[like.postId].users.push(like.userId);
+                });
+                
+                // Mettre à jour les posts avec les likes
+                posts.forEach(post => {
+                    const postLikes = likesData[post.id] || { count: 0, users: [] };
+                    post.likesCount = postLikes.count;
+                    post.likedByCurrentUser = postLikes.users.includes(userData?.id);
+                });
+                
+                console.log('✅ Likes synchronisés');
+            } catch (error) {
+                console.error('❌ Erreur chargement likes:', error);
+            }
+        }
+
+        async function loadPostComments() {
+            try {
+                if (!isOnline) return;
+                
+                if (unsubscribeComments) {
+                    unsubscribeComments();
+                }
+
+                const commentsQuery = query(
+                    collection(db, 'comments'),
+                    orderBy('timestamp', 'asc')
+                );
+
+                unsubscribeComments = onSnapshot(commentsQuery, (snapshot) => {
+                    commentsData = {};
+                    
+                    snapshot.forEach((doc) => {
+                        const comment = { id: doc.id, ...doc.data() };
+                        if (!commentsData[comment.postId]) {
+                            commentsData[comment.postId] = [];
+                        }
+                        commentsData[comment.postId].push(comment);
+                    });
+
+                    // Mettre à jour les compteurs
+                    posts.forEach(post => {
+                        const postComments = commentsData[post.id] || [];
+                        post.commentsCount = postComments.length;
+                    });
+
+                    console.log('✅ Commentaires synchronisés');
+                    renderPosts();
+                });
+
+            } catch (error) {
+                console.error('❌ Erreur chargement commentaires:', error);
+            }
+        }
+
+        function loadPosts() {
+            if (isLoadingPosts || !isOnline) {
+                if (!isOnline) {
+                    createDemoPosts();
+                }
+                return;
+            }
+            
+            isLoadingPosts = true;
+            console.log('📊 Chargement des publications...');
+
+            if (unsubscribePosts) {
+                unsubscribePosts();
+            }
+
+            const postsQuery = query(
+                collection(db, 'posts'), 
+                orderBy('timestamp', 'desc'), 
+                limit(50)
+            );
+
+            unsubscribePosts = onSnapshot(postsQuery, async (snapshot) => {
+                console.log('📝 Publications mises à jour');
+                posts = [];
+                snapshot.forEach((doc) => {
+                    const post = { id: doc.id, ...doc.data() };
+                    posts.push(post);
+                });
+
+                console.log(`✅ ${posts.length} publications chargées`);
+                
+                await Promise.all([
+                    loadPostLikes(),
+                    loadPostComments()
+                ]);
+                
+                setTimeout(() => {
+                    renderPosts();
+                    isLoadingPosts = false;
+                    
+                    setTimeout(() => {
+                        initVideoAutoPlay();
+                    }, 300);
+                }, 500);
+
+            }, (error) => {
+                console.error('❌ Erreur chargement posts:', error);
+                createDemoPosts();
+                isLoadingPosts = false;
+            });
+        }
+
+        function createDemoPosts() {
+            console.log('📝 Création de posts de démonstration');
+            posts = [
+                {
+                    id: 'demo1',
+                    text: 'Bienvenue sur Express Exchange ! 🎉\n\nPartagez vos moments, connectez-vous avec vos amis et découvrez de nouveaux contenus.',
+                    author: 'Express Exchange',
+                    authorId: 'system',
+                    avatar: 'EE',
+                    timestamp: new Date(),
+                    likesCount: 42,
+                    commentsCount: 8,
+                    likedByCurrentUser: false
+                },
+                {
+                    id: 'demo2',
+                    text: 'Nouvelles fonctionnalités :\n• Auto-play vidéo avec son 🔊\n• Profils utilisateur complets 👤\n• Système d\'abonnements 🔔\n• Sauvegarde Realtime Database ⚡\n• Profils plein écran comme TikTok 📱',
+                    author: 'Guide Express',
+                    authorId: 'guide',
+                    avatar: 'GE',
+                    timestamp: new Date(Date.now() - 300000),
+                    likesCount: 15,
+                    commentsCount: 3,
+                    likedByCurrentUser: false
+                }
+            ];
+            
+            renderPosts();
+        }
+
+        async function loadUsers() {
+            try {
+                if (!isOnline) {
+                    allUsers = [];
+                    return;
+                }
+                
+                console.log('👥 Chargement des utilisateurs...');
+                
+                const usersRef = ref(realtimeDb, 'users');
+                const snapshot = await get(usersRef);
+                
+                if (snapshot.exists()) {
+                    const usersData = snapshot.val();
+                    allUsers = Object.entries(usersData).map(([id, userData]) => ({
+                        id,
+                        ...userData
+                    }));
+                } else {
+                    allUsers = [];
+                }
+                
+                console.log(`✅ ${allUsers.length} utilisateurs chargés`);
+            } catch (error) {
+                console.error('❌ Erreur chargement utilisateurs:', error);
+                allUsers = [];
+            }
+        }
+
+        // RENDU DES PUBLICATIONS AVEC BOUTONS SUIVRE
+        function renderPosts() {
+            const feed = document.getElementById('feed');
+            if (!feed) return;
+
+            if (posts.length === 0) {
+                feed.innerHTML = `
+                    <div class="empty-state">
+                        <div style="font-size: 48px; margin-bottom: 16px;">📝</div>
+                        <h3>Aucune publication</h3>
+                        <p>Soyez le premier à partager quelque chose !</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const postsHTML = posts.map(post => {
+                const commentsForPost = commentsData[post.id] || [];
+                return createPostHTML(post, commentsForPost);
+            }).join('');
+
+            feed.innerHTML = postsHTML;
+            
+            attachPostEvents();
+            updateFollowButtons();
+            
+            console.log(`✅ ${posts.length} publications rendues`);
+        }
+
+        function createPostHTML(post, comments = []) {
+            const timeAgo = getTimeAgo(post.timestamp?.toDate ? post.timestamp.toDate() : new Date(post.timestamp));
+            const isLiked = post.likedByCurrentUser;
+            const likesCount = post.likesCount || 0;
+            const commentsCount = comments.length;
+            const isOwnPost = post.authorId === userData?.id;
+            const isFollowing = followData[post.authorId]?.includes(userData?.id);
+
+            let mediaHTML = '';
+            if (post.videoUrl) {
+                const hasAudio = post.hasAudio !== false;
+                mediaHTML = `
+                    <div class="video-container paused" data-post-id="${post.id}">
+                        <video 
+                            class="video-player" 
+                            preload="metadata"
+                            muted="false"
+                            loop
+                            playsinline
+                            data-duration="${post.videoDuration || 0}"
+                            ${hasAudio ? '' : 'muted'}
+                        >
+                            <source src="${post.videoUrl}" type="video/mp4">
+                            Votre navigateur ne supporte pas la lecture vidéo.
+                        </video>
+                        <div class="video-overlay">
+                            <div class="video-play-overlay">▶️</div>
+                            <div class="video-duration-badge">${post.videoDuration ? VideoProcessor.formatDuration(post.videoDuration) : ''}</div>
+                            <div class="video-auto-play-indicator">🔥 Lecture auto</div>
+                            <div class="video-audio-indicator">${hasAudio ? '🔊 Son' : '🔇 Muet'}</div>
+                        </div>
+                        <div class="video-controls">
+                            <div class="video-progress">
+                                <div class="video-progress-bar"></div>
+                            </div>
+                            <div class="video-controls-row">
+                                <button class="video-play-btn">▶️</button>
+                                <div class="video-time">0:00 / 0:00</div>
+                                <button class="video-volume-btn">${hasAudio ? '🔊' : '🔇'}</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (post.imageUrl) {
+                mediaHTML = `
+                    <div class="image-link">
+                        <img src="${post.imageUrl}" alt="Publication" loading="lazy" onclick="openImageModal('${post.imageUrl}')">
+                    </div>
+                `;
+            }
+
+            const commentsHTML = comments.slice(0, 3).map(comment => `
+                <div class="comment">
+                    <div class="comment-header">
+                        <div class="comment-avatar">${comment.authorAvatar || 'U'}</div>
+                        <div class="comment-username">${escapeHtml(comment.authorName || 'Utilisateur')}</div>
+                        <div class="comment-time">${getTimeAgo(comment.timestamp?.toDate ? comment.timestamp.toDate() : new Date(comment.timestamp))}</div>
+                    </div>
+                    <div class="comment-text">${escapeHtml(comment.text || '')}</div>
+                </div>
+            `).join('');
+
+            // Bouton suivre/ne plus suivre
+            let followButtonHTML = '';
+            if (!isOwnPost && userData) {
+                followButtonHTML = `
+                    <button class="follow-btn ${isFollowing ? 'following' : ''}" 
+                            onclick="toggleFollow('${post.authorId}')" 
+                            data-user-id="${post.authorId}">
+                        ${isFollowing ? 'Ne plus suivre' : 'Suivre'}
+                    </button>
+                `;
+            }
+
+            return `
+                <div class="publication" data-post-id="${post.id}">
+                    <div class="pub-header">
+                        <div class="pub-avatar" onclick="showUserProfileFullscreen('${post.authorId}')">${post.avatar || 'U'}</div>
+                        <div class="pub-info">
+                            <div class="pub-username" onclick="showUserProfileFullscreen('${post.authorId}')">${escapeHtml(post.author || 'Utilisateur')}</div>
+                            <div class="pub-time">${timeAgo}</div>
+                        </div>
+                        <div style="margin-left: auto; display: flex; gap: 8px; align-items: center;">
+                            ${followButtonHTML}
+                            <button class="action-btn" onclick="showPostMenu('${post.id}')" style="padding: 4px 8px;">⋯</button>
+                        </div>
+                    </div>
+
+                    ${post.text ? `<div class="pub-text">${escapeHtml(post.text).replace(/\n/g, '<br>')}</div>` : ''}
+                    
+                    ${mediaHTML}
+
+                    <div class="pub-actions">
+                        <button class="action-btn ${isLiked ? 'liked' : ''}" onclick="toggleLike('${post.id}')">
+                            ${isLiked ? '❤️' : '🤍'} ${likesCount}
+                        </button>
+                        <button class="action-btn" onclick="toggleComments('${post.id}')">
+                            💬 ${commentsCount}
+                        </button>
+                        <button class="action-btn" onclick="sharePost('${post.id}')">
+                            📤 Partager
+                        </button>
+                    </div>
+
+                    <div class="comments-section" id="comments-${post.id}" style="display: none;">
+                        ${commentsHTML}
+                        ${commentsCount > 3 ? `
+                            <button class="action-btn" onclick="loadMoreComments('${post.id}')" style="margin: 8px 0;">
+                                Voir les ${commentsCount - 3} autres commentaires...
+                            </button>
+                        ` : ''}
+                        <div class="comment-form">
+                            <input type="text" class="comment-input" placeholder="Écrivez un commentaire..." onkeypress="handleCommentKeyPress(event, '${post.id}')">
+                            <button class="comment-btn" onclick="submitComment('${post.id}')">Publier</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function attachPostEvents() {
+            // Configurer les contrôles vidéo pour chaque vidéo
+            document.querySelectorAll('.video-container').forEach(container => {
+                const video = container.querySelector('video');
+                if (video) {
+                    setupVideoControls(video, container);
+                    
+                    video.addEventListener('loadedmetadata', () => {
+                        console.log('📹 Métadonnées vidéo chargées');
+                    });
+                    
+                    video.addEventListener('loadeddata', () => {
+                        console.log('📹 Données vidéo chargées');
+                    });
+                }
+                
+                if (videoAutoPlayObserver) {
+                    videoAutoPlayObserver.observe(container);
+                }
+            });
+        }
+// GESTION DES LIKES AVEC FIRESTORE ET STATS
+// ==============================
+window.toggleLike = async function(postId) {
+    if (!userData || !userData.id) {
+        showToast('Vous devez être connecté pour aimer une publication', 'error');
+        return;
+    }
+
+    try {
+        const post = posts.find(p => p.id === postId);
+        if (!post) return;
+
+        const isLiked = post.likedByCurrentUser;
+        const likeDocId = `${postId}_${userData.id}`;
+
+        if (isOnline) {
+            if (isLiked) {
+                // Unliker
+                await deleteDoc(doc(db, 'likes', likeDocId));
+                post.likesCount = Math.max(0, (post.likesCount || 0) - 1);
+                post.likedByCurrentUser = false;
+                await updateUserStats(post.authorId, 'likesCount', -1);
+            } else {
+                // Liker
+                await setDoc(doc(db, 'likes', likeDocId), {
+                    postId: postId,
+                    userId: userData.id,
+                    userName: userData.fullName,
+                    timestamp: serverTimestamp()
+                });
+                post.likesCount = (post.likesCount || 0) + 1;
+                post.likedByCurrentUser = true;
+                await updateUserStats(post.authorId, 'likesCount', 1);
+            }
+        } else {
+            // Mode hors-ligne
+            post.likesCount = Math.max(0, (post.likesCount || 0) + (isLiked ? -1 : 1));
+            post.likedByCurrentUser = !isLiked;
+        }
+
+        updateLikeButton(postId, post.likedByCurrentUser, post.likesCount);
+
+    } catch (error) {
+        console.error('❌ Erreur like:', error);
+        showToast('Erreur lors de la mise à jour du like', 'error');
+    }
+};
+
+function updateLikeButton(postId, isLiked, count) {
+    const likeBtn = document.querySelector(`[data-post-id="${postId}"] .pub-actions .action-btn`);
+    if (likeBtn) {
+        likeBtn.className = `action-btn ${isLiked ? 'liked' : ''}`;
+        likeBtn.innerHTML = `${isLiked ? '❤️' : '🤍'} ${count}`;
+    }
+}
+
+// ==============================
+// GESTION DES COMMENTAIRES
+// ==============================
+window.toggleComments = function(postId) {
+    const commentsSection = document.getElementById(`comments-${postId}`);
+    if (commentsSection) {
+        const isVisible = commentsSection.style.display !== 'none';
+        commentsSection.style.display = isVisible ? 'none' : 'block';
+        if (!isVisible) {
+            const input = commentsSection.querySelector('.comment-input');
+            if (input) input.focus();
+        }
+    }
+};
+
+window.handleCommentKeyPress = function(event, postId) {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        submitComment(postId);
+    }
+};
+
+window.submitComment = async function(postId) {
+    if (!userData || !userData.id) {
+        showToast('Vous devez être connecté pour commenter', 'error');
+        return;
+    }
+
+    const commentsSection = document.getElementById(`comments-${postId}`);
+    if (!commentsSection) return;
+
+    const input = commentsSection.querySelector('.comment-input');
+    const text = input.value.trim();
+    if (!text) return;
+
+    const btn = commentsSection.querySelector('.comment-btn');
+    const originalText = btn.textContent;
+
+    try {
+        btn.disabled = true;
+        btn.textContent = '...';
+
+        if (isOnline) {
+            await addDoc(collection(db, 'comments'), {
+                postId: postId,
+                text: text,
+                authorId: userData.id,
+                authorName: userData.fullName,
+                authorAvatar: userData.avatar,
+                timestamp: serverTimestamp()
+            });
+        } else {
+            // Hors-ligne : stockage local
+            if (!commentsData[postId]) commentsData[postId] = [];
+            commentsData[postId].push({
+                id: 'local_' + Date.now(),
+                postId: postId,
+                text: text,
+                authorId: userData.id,
+                authorName: userData.fullName,
+                authorAvatar: userData.avatar,
+                timestamp: new Date()
+            });
+            const post = posts.find(p => p.id === postId);
+            if (post) post.commentsCount = (post.commentsCount || 0) + 1;
+            renderPosts();
+        }
+
+        input.value = '';
+        showToast('Commentaire ajouté !', 'success');
+        console.log('✅ Commentaire ajouté');
+
+    } catch (error) {
+        console.error('❌ Erreur commentaire:', error);
+        showToast('Erreur lors de l\'ajout du commentaire', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
+    }
+};
+
+window.loadMoreComments = function(postId) {
+    const commentsSection = document.getElementById(`comments-${postId}`);
+    if (!commentsSection) return;
+
+    const allComments = commentsData[postId] || [];
+    const commentsHTML = allComments.map(comment => `
+        <div class="comment">
+            <div class="comment-header">
+                <div class="comment-avatar">${comment.authorAvatar || 'U'}</div>
+                <div class="comment-username">${escapeHtml(comment.authorName || 'Utilisateur')}</div>
+                <div class="comment-time">${getTimeAgo(comment.timestamp?.toDate ? comment.timestamp.toDate() : new Date(comment.timestamp))}</div>
+            </div>
+            <div class="comment-text">${escapeHtml(comment.text || '')}</div>
+        </div>
+    `).join('');
+
+    const commentForm = commentsSection.querySelector('.comment-form');
+    commentsSection.innerHTML = commentsHTML + (commentForm ? commentForm.outerHTML : '');
+};
+
+// ==============================
+// GESTION DES PUBLICATIONS (menu, suppression, partage)
+// ==============================
+window.showPostMenu = function(postId) {
+    const post = posts.find(p => p.id === postId);
+    if (!post) return;
+
+    const isOwner = post.authorId === userData?.id;
+    let menu = 'Options:\n';
+    if (isOwner) menu += '1. Supprimer\n';
+    menu += '2. Signaler\n3. Copier le lien';
+
+    const choice = prompt(menu);
+
+    if (choice === '1' && isOwner) {
+        deletePost(postId);
+    } else if (choice === '2') {
+        showToast('Publication signalée', 'success');
+    } else if (choice === '3') {
+        navigator.clipboard.writeText(`${window.location.origin}#post-${postId}`)
+            .then(() => showToast('Lien copié', 'success'))
+            .catch(() => showToast('Impossible de copier le lien', 'error'));
+    }
+};
+
+async function deletePost(postId) {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cette publication ?')) return;
+
+    try {
+        if (isOnline) {
+            // Supprimer le post
+            await deleteDoc(doc(db, 'posts', postId));
+            // Supprimer likes associés
+            const likesSnapshot = await getDocs(query(collection(db, 'likes'), where('postId', '==', postId)));
+            const deletePromises = likesSnapshot.docs.map(doc => deleteDoc(doc.ref));
+            // Supprimer commentaires associés
+            const commentsSnapshot = await getDocs(query(collection(db, 'comments'), where('postId', '==', postId)));
+            deletePromises.push(...commentsSnapshot.docs.map(doc => deleteDoc(doc.ref)));
+            await Promise.all(deletePromises);
+            // Décrémenter le compteur de posts
+            await updateUserStats(userData.id, 'postsCount', -1);
+        } else {
+            posts = posts.filter(p => p.id !== postId);
+            delete commentsData[postId];
+            renderPosts();
+        }
+        showToast('Publication supprimée avec succès', 'success');
+        console.log('✅ Publication supprimée');
+    } catch (error) {
+        console.error('❌ Erreur suppression:', error);
+        showToast('Erreur lors de la suppression', 'error');
+    }
+}
+
+window.sharePost = function(postId) {
+    const post = posts.find(p => p.id === postId);
+    if (!post) return;
+
+    const text = `Découvrez cette publication sur Express Exchange:\n\n"${post.text || 'Contenu multimédia'}"`;
+    const url = `${window.location.origin}#post-${postId}`;
+
+    if (navigator.share) {
+        navigator.share({
+            title: 'Express Exchange',
+            text: text,
+            url: url
+        }).catch(console.error);
+    } else {
+        navigator.clipboard.writeText(`${text}\n\n${url}`)
+            .then(() => showToast('Lien copié dans le presse-papiers', 'success'))
+            .catch(() => {
+                prompt('Copiez ce lien:', url);
+            });
+    }
+};
+        // GESTION DES MODALES
+        window.openImageModal = function(imageUrl) {
+            const modal = document.getElementById('imageModal');
+            const img = document.getElementById('modalImage');
+            if (modal && img) {
+                img.src = imageUrl;
+                modal.style.display = 'flex';
+            }
+        };
+
+        window.closeImageModal = function() {
+            const modal = document.getElementById('imageModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        };
+
+        window.toggleFollow = function(targetUserId) {
+            toggleFollow(targetUserId);
+        };
+
+        window.editProfile = function() {
+            showToast('Fonctionnalité en développement', 'info');
+        };
+
+       // GESTION DES FICHIERS
+function setupFileInputs() {
+    const imageInput = document.getElementById('imageInput');
+    const videoInput = document.getElementById('videoInput');
+
+    if (imageInput) {
+        imageInput.addEventListener('change', handleFileSelect);
+    }
+
+    if (videoInput) {
+        videoInput.addEventListener('change', handleVideoSelect);
+    }
+}
+
+async function handleFileSelect(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+        showToast('Le fichier est trop volumineux (max 10MB)', 'error');
+        event.target.value = '';
+        return;
+    }
+
+    currentSelectedFile = { file, type: 'image' };
+    showMediaPreview(file, 'image');
+}
+
+async function handleVideoSelect(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Augmentation de la limite de 50MB à 200MB
+    if (file.size > 200 * 1024 * 1024) {
+        showToast('La vidéo est trop volumineuse (max 200MB)', 'error');
+        event.target.value = '';
+        return;
+    }
+
+    try {
+        await VideoProcessor.trimVideo(file, 300);
+        
+        const duration = await VideoProcessor.getVideoDuration(file);
+        const hasAudio = await VideoProcessor.checkVideoHasAudio(file);
+        
+        currentSelectedFile = { file, type: 'video', duration, hasAudio };
+        showMediaPreview(file, 'video', duration, hasAudio);
+        
+    } catch (error) {
+        showToast(error.message, 'error');
+        event.target.value = '';
+        currentSelectedFile = null;
+    }
+}
+
+function showMediaPreview(file, type, duration = null, hasAudio = false) {
+    const mediaPreview = document.getElementById('mediaPreview');
+    const fileName = document.getElementById('fileName');
+    
+    if (!mediaPreview || !fileName) return;
+
+    const url = URL.createObjectURL(file);
+    fileName.textContent = `📎 ${file.name}`;
+
+    if (type === 'video') {
+        const durationText = duration ? VideoProcessor.formatDuration(duration) : '';
+        const audioText = hasAudio ? '🔊 Avec son' : '🔇 Sans son';
+        
+        mediaPreview.innerHTML = `
+            <div class="video-preview">
+                <video controls muted style="max-width: 250px; border-radius: 8px;">
+                    <source src="${url}" type="video/mp4">
+                </video>
+                <div style="margin-top: 8px; color: #0095f6; font-size: 14px;">
+                    ${durationText} • ${audioText}
+                </div>
+            </div>
+            <button onclick="clearMediaPreview()" style="margin-top: 10px; padding: 6px 12px; background: #ed4956; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                ❌ Supprimer
+            </button>
+        `;
+    } else {
+        mediaPreview.innerHTML = `
+            <div style="max-width: 250px;">
+                <img src="${url}" style="width: 100%; height: auto; border-radius: 8px;" alt="Aperçu">
+            </div>
+            <button onclick="clearMediaPreview()" style="margin-top: 10px; padding: 6px 12px; background: #ed4956; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                ❌ Supprimer
+            </button>
+        `;
+    }
+}
+
+window.clearMediaPreview = function() {
+    const mediaPreview = document.getElementById('mediaPreview');
+    const fileName = document.getElementById('fileName');
+    const imageInput = document.getElementById('imageInput');
+    const videoInput = document.getElementById('videoInput');
+    
+    if (mediaPreview) mediaPreview.innerHTML = '';
+    if (fileName) fileName.textContent = '';
+    if (imageInput) imageInput.value = '';
+    if (videoInput) videoInput.value = '';
+    currentSelectedFile = null;
+};
+
+// PUBLICATION DE CONTENU AVEC MISE À JOUR DES STATISTIQUES
+function setupPublisher() {
+    const publishBtn = document.getElementById('publishBtn');
+    
+    if (publishBtn) {
+        publishBtn.addEventListener('click', async function() {
+            const postText = document.getElementById('postText');
+            const text = postText?.value?.trim();
+            
+            if (!text && !currentSelectedFile) {
+                showToast('Veuillez saisir du texte ou sélectionner un fichier', 'error');
+                return;
+            }
+
+            if (!userData) {
+                showToast('Vous devez être connecté pour publier', 'error');
+                return;
+            }
+
+            const originalText = publishBtn.textContent;
+            publishBtn.disabled = true;
+            publishBtn.innerHTML = '<div class="loading-spinner"></div>Publication...';
+
+            try {
+                let mediaUrl = null;
+                let videoDuration = null;
+                let hasAudio = false;
+
+                if (currentSelectedFile && isOnline) {
+                    console.log(`📤 Upload ${currentSelectedFile.type}...`);
+                    
+                    uploadProgress.show(currentSelectedFile.file, currentSelectedFile.type);
+
+                    if (currentSelectedFile.type === 'video') {
+                        const result = await uploader.uploadVideo(currentSelectedFile.file);
+                        mediaUrl = result.url;
+                        videoDuration = result.duration || currentSelectedFile.duration;
+                        hasAudio = currentSelectedFile.hasAudio;
+                    } else {
+                        const result = await uploader.uploadImage(currentSelectedFile.file, { maxWidth: 1080 });
+                        mediaUrl = result.url;
+                    }
+
+                    console.log('✅ Upload terminé:', mediaUrl);
+                }
+
+                // Créer la publication
+                const timestamp = new Date();
+                const postId = `post_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                
+                const postData = {
+                    id: postId,
+                    text: text || '',
+                    author: userData.fullName,
+                    authorId: userData.id,
+                    avatar: userData.avatar,
+                    timestamp: timestamp,
+                    likesCount: 0,
+                    commentsCount: 0,
+                    likedByCurrentUser: false
+                };
+
+                if (currentSelectedFile?.type === 'video' && mediaUrl) {
+                    postData.videoUrl = mediaUrl;
+                    postData.videoDuration = videoDuration;
+                    postData.hasAudio = hasAudio;
+                } else if (currentSelectedFile?.type === 'image' && mediaUrl) {
+                    postData.imageUrl = mediaUrl;
+                }
+
+                if (isOnline) {
+                    try {
+                        await addDoc(collection(db, 'posts'), {
+                            ...postData,
+                            timestamp: serverTimestamp()
+                        });
+                        
+                        // Incrémenter le compteur de posts de l'utilisateur
+                        await updateUserStats(userData.id, 'postsCount', 1);
+                    } catch (firebaseError) {
+                        console.warn('⚠️ Erreur Firebase, sauvegarde locale:', firebaseError);
+                        posts.unshift(postData);
+                        renderPosts();
+                    }
+                } else {
+                    posts.unshift(postData);
+                    renderPosts();
+                }
+
+                if (postText) postText.value = '';
+                clearMediaPreview();
+                
+                showToast('Publication créée avec succès !', 'success');
+                console.log('✅ Publication créée');
+
+            } catch (error) {
+                console.error('❌ Erreur publication:', error);
+                showToast(`Erreur: ${error.message}`, 'error');
+                if (uploadProgress.overlay && uploadProgress.overlay.style.display !== 'none') {
+                    uploadProgress.showError(error.message);
+                    setTimeout(() => uploadProgress.hide(), 3000);
+                }
+            } finally {
+                publishBtn.disabled = false;
+                publishBtn.textContent = originalText;
+            }
+        });
+    }
+}
+        // MON PROFIL CORRIGÉ - MODAL SIMPLE
+        function setupMyProfile() {
+            const showMyProfileBtn = document.getElementById('showMyProfileBtn');
+
+            if (showMyProfileBtn) {
+                showMyProfileBtn.addEventListener('click', () => {
+                    if (userData) {
+                        displayUserProfileFullscreen(userData);
+                    }
+                });
+            }
+        }
+
+        // PROFIL PLEIN ÉCRAN
+        function setupProfileFullscreen() {
+            const profileBackBtn = document.getElementById('profileBackBtn');
+            const profileFullscreen = document.getElementById('profileFullscreen');
+
+            if (profileBackBtn) {
+                profileBackBtn.addEventListener('click', () => {
+                    if (profileFullscreen) {
+                        profileFullscreen.style.display = 'none';
+                    }
+                });
+            }
+        }
+
+        // MES PUBLICATIONS
+        function setupMyPosts() {
+            const showMyPostsBtn = document.getElementById('showMyPostsBtn');
+            const myPostsModal = document.getElementById('myPostsModal');
+            const closeMyPostsModal = document.getElementById('closeMyPostsModal');
+
+            if (showMyPostsBtn) {
+                showMyPostsBtn.addEventListener('click', showMyPosts);
+            }
+
+            if (closeMyPostsModal) {
+                closeMyPostsModal.addEventListener('click', () => {
+                    if (myPostsModal) myPostsModal.style.display = 'none';
+                });
+            }
+        }
+
+        async function showMyPosts() {
+            if (!userData) return;
+            
+            const myPostsModal = document.getElementById('myPostsModal');
+            if (!myPostsModal) return;
+
+            myPostsModal.style.display = 'flex';
+            const myPostsList = document.getElementById('myPostsList');
+            
+            if (myPostsList) {
+                myPostsList.innerHTML = '<div style="text-align: center; padding: 20px;">Chargement...</div>';
+
+                try {
+                    const myPosts = posts.filter(post => post.authorId === userData.id);
+                    
+                    if (myPosts.length === 0) {
+                        myPostsList.innerHTML = `
+                            <div class="empty-state">
+                                <div style="font-size: 48px; margin-bottom: 16px;">📝</div>
+                                <h3>Aucune publication</h3>
+                                <p>Vous n'avez pas encore publié de contenu</p>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    const postsHTML = myPosts.map(post => {
+                        const timeAgo = getTimeAgo(post.timestamp?.toDate ? post.timestamp.toDate() : new Date(post.timestamp));
+                        
+                        return `
+                            <div style="background: #262626; border-radius: 8px; padding: 16px; margin-bottom: 12px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <span style="color: #8e8e8e; font-size: 12px;">${timeAgo}</span>
+                                    <button onclick="deletePost('${post.id}')" style="background: #ed4956; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 12px; cursor: pointer;">
+                                        🗑️ Supprimer
+                                    </button>
+                                </div>
+                                ${post.text ? `<p style="color: #ffffff; margin-bottom: 8px; line-height: 1.4;">${escapeHtml(post.text)}</p>` : ''}
+                                ${post.videoUrl ? `<p style="color: #0095f6; font-size: 14px;">🎥 Vidéo (${post.videoDuration ? VideoProcessor.formatDuration(post.videoDuration) : 'Durée inconnue'}) ${post.hasAudio ? '🔊' : '🔇'}</p>` : ''}
+                                ${post.imageUrl ? `<p style="color: #0095f6; font-size: 14px;">📷 Image</p>` : ''}
+                                <div style="display: flex; gap: 16px; margin-top: 8px;">
+                                    <span style="color: #8e8e8e; font-size: 13px;">❤️ ${post.likesCount || 0}</span>
+                                    <span style="color: #8e8e8e; font-size: 13px;">💬 ${post.commentsCount || 0}</span>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+
+                    myPostsList.innerHTML = postsHTML;
+
+                } catch (error) {
+                    console.error('❌ Erreur mes publications:', error);
+                    myPostsList.innerHTML = '<div style="text-align: center; color: #ed4956; padding: 20px;">Erreur de chargement</div>';
+                }
+            }
+        }
+
+        // GESTION DES ÉVÉNEMENTS GLOBAUX
+        function setupEventListeners() {
+            // Connexion/déconnexion réseau
+            window.addEventListener('online', () => {
+                isOnline = true;
+                updateConnectionStatus();
+                showToast('Connexion rétablie', 'success');
+                console.log('🟢 Connexion rétablie');
+                
+                if (isAppInitialized) {
+                    loadPosts();
+                    loadUsers();
+                    loadFollowData();
+                }
+            });
+
+            window.addEventListener('offline', () => {
+                isOnline = false;
+                updateConnectionStatus();
+                showToast('Mode hors ligne activé', 'info');
+                console.log('🔴 Connexion perdue');
+            });
+
+            // Fermeture des modales avec Escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeImageModal();
+                    const myPostsModal = document.getElementById('myPostsModal');
+                    const profileFullscreen = document.getElementById('profileFullscreen');
+                    if (myPostsModal) myPostsModal.style.display = 'none';
+                    if (profileFullscreen) profileFullscreen.style.display = 'none';
+                }
+            });
+
+            // Pause vidéos quand on change d'onglet
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    pauseAllVideos();
+                }
+            });
+
+            // Click sur modales pour fermer
+            const imageModal = document.getElementById('imageModal');
+            const myPostsModal = document.getElementById('myPostsModal');
+            const profileFullscreen = document.getElementById('profileFullscreen');
+            
+            if (imageModal) {
+                imageModal.addEventListener('click', (e) => {
+                    if (e.target === imageModal) {
+                        closeImageModal();
+                    }
+                });
+            }
+            
+            if (myPostsModal) {
+                myPostsModal.addEventListener('click', (e) => {
+                    if (e.target === myPostsModal) {
+                        myPostsModal.style.display = 'none';
+                    }
+                });
+            }
+            
+            if (profileFullscreen) {
+                profileFullscreen.addEventListener('click', (e) => {
+                    if (e.target === profileFullscreen) {
+                        profileFullscreen.style.display = 'none';
+                    }
+                });
+            }
+        }
+
+        // NETTOYAGE
+        function cleanup() {
+            if (unsubscribePosts) {
+                unsubscribePosts();
+                unsubscribePosts = null;
+            }
+            if (unsubscribeComments) {
+                unsubscribeComments();
+                unsubscribeComments = null;
+            }
+            if (videoAutoPlayObserver) {
+                videoAutoPlayObserver.disconnect();
+                videoAutoPlayObserver = null;
+            }
+        }
+
+        window.addEventListener('beforeunload', cleanup);
+
+        // INITIALISATION PRINCIPALE
+        function initializeExpressApp() {
+            console.log('🚀 Express Exchange - Initialisation Complète');
+            
+            // Charger les particules
+            createParticles();
+            
+            // Configurer les basculements d'authentification
+            setupAuthToggle();
+            
+            // Configurer les formulaires d'authentification
+            setupAuthForms();
+            
+            // Configurer les inputs de fichiers
+            setupFileInputs();
+            
+            // Configurer l'éditeur de publication
+            setupPublisher();
+            
+            // Configurer mon profil
+            setupMyProfile();
+
+            // Configurer le profil plein écran
+            setupProfileFullscreen();
+            
+            // Configurer mes publications
+            setupMyPosts();
+            
+            // Configurer la déconnexion
+            setupLogout();
+            
+            // Configurer les événements globaux
+            setupEventListeners();
+            
+            // Vérifier l'authentification
+            checkUserAuth();
+            
+            // Auto-créer des particules périodiquement
+            setInterval(createParticles, 10000);
+            
+            console.log('✅ Express Exchange - Complètement initialisé');
+        }
+
+        // DÉMARRAGE DE L'APPLICATION
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeExpressApp);
+        } else {
+            initializeExpressApp();
+        }
+
+        console.log('✅ Express Exchange - Script chargé et prêt');
+    </script>
+</body>
+</html>
