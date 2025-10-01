@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://loko-blush.vercel.app/sitemap.xml
+
+Sitemap: https://groupe-express.vercel.app/sitemap.xml
