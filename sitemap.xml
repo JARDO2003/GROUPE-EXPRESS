@@ -3,7 +3,7 @@
   
   <!-- Page d'accueil -->
   <url>
-    <loc>https://loko-blush.vercel.app/index.html</loc>
+    <loc>https://groupe-express.vercel.app/index.html</loc>
     <lastmod>2025-10-01</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
@@ -11,7 +11,7 @@
   
   <!-- Page Shopping/Commandes -->
   <url>
-    <loc>https://loko-blush.vercel.app/shopping.html</loc>
+    <loc>https://groupe-express.vercel.app/shopping.html</loc>
     <lastmod>2025-10-01</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
@@ -19,7 +19,7 @@
   
   <!-- Page Actualités -->
   <url>
-    <loc>https://loko-blush.vercel.app/actualité.html</loc>
+    <loc>https://groupe-express.vercel.app/actualité.html</loc>
     <lastmod>2025-10-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -27,7 +27,7 @@
   
   <!-- Page À propos -->
   <url>
-    <loc>https://loko-blush.vercel.app/apropos.html</loc>
+    <loc>https://groupe-express.vercel.app/apropos.html</loc>
     <lastmod>2025-10-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -35,7 +35,7 @@
   
   <!-- Page Annonces -->
   <url>
-    <loc>https://loko-blush.vercel.app/annonce.html</loc>
+    <loc>https://groupe-express.vercel.app/annonce.html</loc>
     <lastmod>2025-10-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -43,7 +43,7 @@
   
   <!-- Page Mel -->
   <url>
-    <loc>https://loko-blush.vercel.app/mel.html</loc>
+    <loc>https://groupe-express.vercel.app/mel.html</loc>
     <lastmod>2025-10-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -51,7 +51,7 @@
   
   <!-- Page Publicité -->
   <url>
-    <loc>https://loko-blush.vercel.app/publi.html</loc>
+    <loc>https://groupe-express.vercel.app/publi.html</loc>
     <lastmod>2025-10-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -59,7 +59,7 @@
   
   <!-- Page Gbere -->
   <url>
-    <loc>https://loko-blush.vercel.app/gbere.html</loc>
+    <loc>https://groupe-express.vercel.app/gbere.html</loc>
     <lastmod>2025-10-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
