@@ -4,7 +4,7 @@
   <!-- Page d'accueil -->
   <url>
     <loc>https://groupe-express.vercel.app/index.html</loc>
-    <lastmod>2025-10-01</lastmod>
+    <lastmod>2025-10-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
@@ -12,15 +12,15 @@
   <!-- Page Shopping/Commandes -->
   <url>
     <loc>https://groupe-express.vercel.app/shopping.html</loc>
-    <lastmod>2025-10-01</lastmod>
+    <lastmod>2025-10-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   
   <!-- Page Actualités -->
   <url>
-    <loc>https://groupe-express.vercel.app/actualité.html</loc>
-    <lastmod>2025-10-01</lastmod>
+    <loc>https://groupe-express.vercel.app/actualit%C3%A9.html</loc>
+    <lastmod>2025-10-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -28,7 +28,7 @@
   <!-- Page À propos -->
   <url>
     <loc>https://groupe-express.vercel.app/apropos.html</loc>
-    <lastmod>2025-10-01</lastmod>
+    <lastmod>2025-10-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -36,7 +36,7 @@
   <!-- Page Annonces -->
   <url>
     <loc>https://groupe-express.vercel.app/annonce.html</loc>
-    <lastmod>2025-10-01</lastmod>
+    <lastmod>2025-10-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -44,7 +44,7 @@
   <!-- Page Mel -->
   <url>
     <loc>https://groupe-express.vercel.app/mel.html</loc>
-    <lastmod>2025-10-01</lastmod>
+    <lastmod>2025-10-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -52,7 +52,7 @@
   <!-- Page Publicité -->
   <url>
     <loc>https://groupe-express.vercel.app/publi.html</loc>
-    <lastmod>2025-10-01</lastmod>
+    <lastmod>2025-10-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -60,9 +60,8 @@
   <!-- Page Gbere -->
   <url>
     <loc>https://groupe-express.vercel.app/gbere.html</loc>
-    <lastmod>2025-10-01</lastmod>
+    <lastmod>2025-10-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
-
 </urlset>
