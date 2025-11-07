@@ -1,4 +1,5 @@
-
+// suitereseau.js
+console.log('🔰 Express Exchange - Version Corrigée Complète');
         import { initializeApp as initFirebase } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
         import { 
             getFirestore, 
