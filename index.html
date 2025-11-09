@@ -20,6 +20,9 @@
     <meta name="apple-mobile-web-app-title" content="GROUPE EXPRESS">
     <link rel="apple-touch-icon" href="image/u.png">
     
+    <!-- FCM Configuration -->
+<script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-messaging-compat.js"></script>
     <style>
         * {
             margin: 0;
@@ -1444,6 +1447,37 @@
             }
         }
 
+        @keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+}
+
+#notification-button button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+#notification-button button:active {
+    transform: scale(0.95);
+}
+
     </style>
 </head>
 <body>
@@ -1580,6 +1614,15 @@
             <div class="scroll-dot"></div>
         </div>
     </section>
+
+    <!-- BOUTON NOTIFICATION -->
+<div id="notification-button" style="position: fixed; bottom: 80px; right: 20px; z-index: 999;">
+    <button onclick="requestNotificationPermission()" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 1rem; border-radius: 50%; width: 60px; height: 60px; cursor: pointer; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); font-size: 1.5rem; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">
+        🔔
+    </button>
+    <div id="notification-status" style="position: absolute; top: -5px; right: -5px; background: #dc3545; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 10px; display: none; align-items: center; justify-content: center; font-weight: bold;">OFF</div>
+</div>
+
 
     <!-- MODAL HISTORIQUE COMMANDES -->
     <div class="modal" id="orders-modal">
@@ -2444,11 +2487,8 @@
                     </div>
                 </div>
 
-   <!-- Toutes vos sections HTML ... -->
-    
-    </div> <!-- Fermeture du dernier div -->
-
-    <!-- IMPORTANT : Script à placer ICI, juste avant </body> -->
+  
+    </div> 
      <script type="module" src="suite.js"></script>
 </body>
 </html>
