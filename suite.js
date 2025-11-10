@@ -655,12 +655,12 @@ window.addEventListener('load', () => {
         let alertClass = '';
         
         if (hour >= 0 && hour < 9) {
-            alertMessage = `⚡ URGENT : Commandez AVANT 9H pour un retrait IMMÉDIAT au rez-de-chaussée ! Il vous reste ${8 - hour}h${60 - minutes < 10 ? '0' : ''}${60 - minutes}min`;
+            alertMessage = `⚡ URGENT : Commandez AVANT 10H pour un retrait IMMÉDIAT au stand du groupe Express ! Il vous reste ${8 - hour}h${60 - minutes < 10 ? '0' : ''}${60 - minutes}min`;
             alertClass = 'urgent';
             timeAlert.style.display = 'block';
         } 
         else if (hour >= 9) {
-            alertMessage = `⚠️ ATTENTION : Les commandes après 9H sont traitées pour DEMAIN - Retrait au rez-de-chaussée`;
+            alertMessage = `⚠️ ATTENTION : Les commandes après 10H sont traitées pour DEMAIN - Retrait au stand du groupe Express`;
             alertClass = 'warning';
             timeAlert.style.display = 'block';
         }
@@ -1210,9 +1210,9 @@ window.addEventListener('load', () => {
                 deliveryInfo = `
                     <div style="background: linear-gradient(135deg, #28a745, #34ce57); color: white; padding: 1.5rem; border-radius: 12px; text-align: center; margin-bottom: 1rem;">
                         ✅ <strong>RETRAIT IMMÉDIAT</strong><br><br>
-                        Veuillez passer au rez-de-chaussée A 12H00<br>
+                        Veuillez passer au stand du groupe Express à 12H00<br>
                         pour le retrait de votre commande !<br><br>
-                        📍 <strong>RETRAIT AU REZ-DE-CHAUSSÉE A 12H 00</strong>
+                        📍 <strong>RETRAIT AU STAND DU GROUPE EXPRESS À 12H 00</strong>
                     </div>
                 `;
             } else {
@@ -1220,8 +1220,8 @@ window.addEventListener('load', () => {
                     <div style="background: linear-gradient(135deg, #ff9800, #f57c00); color: white; padding: 1.5rem; border-radius: 12px; text-align: center; margin-bottom: 1rem;">
                         ⏳ <strong>EN COURS DE TRAITEMENT</strong><br><br>
                         Votre commande sera prête demain<br>
-                        Retrait au rez-de-chaussée à 12H00<br><br>
-                        📍 <strong>RETRAIT AU REZ-DE-CHAUSSÉE A 12H OO</strong>
+                        Retrait au stand du groupe Express à 12H00<br><br>
+                        📍 <strong>RETRAIT AU STAND DU GROUPE EXPRESS À 12H 00</strong>
                     </div>
                 `;
             }
