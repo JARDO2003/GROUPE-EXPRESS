@@ -1,4 +1,3 @@
-
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
     import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
@@ -13,6 +12,345 @@
     };
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+
+    // ===== CONFIGURATION FCM =====
+    const firebaseConfigCompat = {
+        apiKey: "AIzaSyBsGrY-AqYMoI70kT3WMxLgW0HwYA4KyaQ",
+        authDomain: "livraison-c8498.firebaseapp.com",
+        projectId: "livraison-c8498",
+        storageBucket: "livraison-c8498.firebasestorage.app",
+        messagingSenderId: "403240604780",
+        appId: "1:403240604780:web:77d84ad03d68bdaddfb449"
+    };
+
+    firebase.initializeApp(firebaseConfigCompat);
+    const messaging = firebase.messaging();
+
+    // VAPID Key
+    const VAPID_KEY = "BGL6IVuJSbQjI69fot6FvfGEBmq1t4_hPP1Dhx_KYiIEFCrOLjtYFWjID_MlteNgJtm7FFbdIfBygdRi_IF-qng";
+
+    let notificationInterval = null;
+// Fonction pour demander la permission de notification
+window.requestNotificationPermission = async function() {
+    try {
+        // Vérifier d'abord l'état actuel de la permission
+        const currentPermission = Notification.permission;
+        
+        if (currentPermission === 'denied') {
+            // Permission bloquée - montrer les instructions
+            showPermissionBlockedInstructions();
+            return;
+        }
+        
+        if (currentPermission === 'granted') {
+            // Permission déjà accordée - obtenir le token directement
+            try {
+                const token = await messaging.getToken({ vapidKey: VAPID_KEY });
+                console.log('FCM Token:', token);
+                
+                localStorage.setItem('fcmToken', token);
+                localStorage.setItem('notificationsEnabled', 'true');
+                updateNotificationButton(true);
+                startPeriodicNotifications();
+                showNotificationStatus('✅ Notifications activées!', '#28a745');
+            } catch (tokenError) {
+                console.error('Erreur token:', tokenError);
+                showNotificationStatus('❌ Erreur d\'activation', '#dc3545');
+            }
+            return;
+        }
+        
+        // Demander la permission (seulement si 'default')
+        const permission = await Notification.requestPermission();
+        
+        if (permission === 'granted') {
+            console.log('Permission accordée');
+            
+            try {
+                // Obtenir le token FCM
+                const token = await messaging.getToken({ vapidKey: VAPID_KEY });
+                console.log('FCM Token:', token);
+                
+                // Sauvegarder le token localement
+                localStorage.setItem('fcmToken', token);
+                localStorage.setItem('notificationsEnabled', 'true');
+                
+                // Mettre à jour l'interface
+                updateNotificationButton(true);
+                
+                // Démarrer les notifications périodiques
+                startPeriodicNotifications();
+                
+                // Message de confirmation
+                showNotificationStatus('✅ Notifications activées!', '#28a745');
+            } catch (tokenError) {
+                console.error('Erreur token:', tokenError);
+                showNotificationStatus('❌ Erreur d\'activation', '#dc3545');
+            }
+            
+        } else if (permission === 'denied') {
+            console.log('Permission refusée');
+            showPermissionBlockedInstructions();
+            localStorage.setItem('notificationsEnabled', 'false');
+            updateNotificationButton(false);
+            stopPeriodicNotifications();
+        } else {
+            // Permission ignorée (dismissed)
+            console.log('Permission ignorée');
+            showNotificationStatus('⚠️ Permission non accordée', '#ff9800');
+            localStorage.setItem('notificationsEnabled', 'false');
+            updateNotificationButton(false);
+        }
+    } catch (error) {
+        console.error('Erreur permission:', error);
+        
+        if (error.code === 'messaging/permission-blocked') {
+            showPermissionBlockedInstructions();
+        } else {
+            showNotificationStatus('❌ Erreur: ' + error.message, '#dc3545');
+        }
+    }
+};
+
+// Fonction pour afficher les instructions quand la permission est bloquée
+function showPermissionBlockedInstructions() {
+    const modal = document.createElement('div');
+    modal.innerHTML = `
+        <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10001; display: flex; align-items: center; justify-content: center; padding: 20px;">
+            <div style="background: white; border-radius: 20px; padding: 2rem; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto;">
+                <div style="text-align: center; margin-bottom: 1.5rem;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🔔🚫</div>
+                    <h2 style="color: #dc3545; margin-bottom: 0.5rem;">Notifications bloquées</h2>
+                    <p style="color: #666; font-size: 0.9rem;">Les notifications ont été bloquées par votre navigateur</p>
+                </div>
+                
+                <div style="background: #f8f9fa; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem;">
+                    <h3 style="font-size: 1rem; margin-bottom: 1rem; color: #333;">📱 Comment débloquer :</h3>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <strong style="color: #667eea;">Chrome / Edge :</strong>
+                        <ol style="margin: 0.5rem 0 0 1.5rem; line-height: 1.8; font-size: 0.9rem;">
+                            <li>Cliquez sur l'icône 🔒 ou ⓘ à gauche de l'URL</li>
+                            <li>Trouvez "Notifications"</li>
+                            <li>Changez de "Bloquer" à "Autoriser"</li>
+                            <li>Rafraîchissez la page (F5)</li>
+                        </ol>
+                    </div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <strong style="color: #667eea;">Firefox :</strong>
+                        <ol style="margin: 0.5rem 0 0 1.5rem; line-height: 1.8; font-size: 0.9rem;">
+                            <li>Cliquez sur l'icône 🔒 à gauche de l'URL</li>
+                            <li>Cliquez sur "Paramètres de connexion" > "Plus d'informations"</li>
+                            <li>Allez dans l'onglet "Permissions"</li>
+                            <li>Décochez "Utiliser par défaut" pour "Afficher des notifications"</li>
+                            <li>Sélectionnez "Autoriser"</li>
+                        </ol>
+                    </div>
+                    
+                    <div>
+                        <strong style="color: #667eea;">Safari (Mac) :</strong>
+                        <ol style="margin: 0.5rem 0 0 1.5rem; line-height: 1.8; font-size: 0.9rem;">
+                            <li>Safari > Préférences > Sites web</li>
+                            <li>Cliquez sur "Notifications"</li>
+                            <li>Trouvez ce site et changez en "Autoriser"</li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <button onclick="this.parentElement.parentElement.remove()" style="width: 100%; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 1rem; border-radius: 12px; font-size: 1rem; font-weight: 600; cursor: pointer;">
+                    J'ai compris
+                </button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
+// Vérifier l'état des permissions au chargement et afficher le statut
+function checkNotificationPermissionStatus() {
+    const permission = Notification.permission;
+    const notifEnabled = localStorage.getItem('notificationsEnabled') === 'true';
+    
+    if (permission === 'denied') {
+        // Permission bloquée
+        updateNotificationButton(false);
+        localStorage.setItem('notificationsEnabled', 'false');
+        stopPeriodicNotifications();
+    } else if (permission === 'granted' && notifEnabled) {
+        // Permission accordée et notifications activées
+        updateNotificationButton(true);
+        startPeriodicNotifications();
+    } else {
+        // Permission pas encore demandée ou refusée
+        updateNotificationButton(false);
+    }
+}
+
+    // Fonction pour démarrer les notifications périodiques (toutes les 2 secondes)
+    function startPeriodicNotifications() {
+        // Arrêter l'intervalle existant s'il y en a un
+        if (notificationInterval) {
+            clearInterval(notificationInterval);
+        }
+
+        // Messages de remerciement variés
+        const thankYouMessages = [
+            "Merci de votre confiance! 🙏",
+            "Groupe Express vous remercie! ❤️",
+            "Merci pour votre fidélité! 🌟",
+            "Nous apprécions votre soutien! 🎉",
+            "Un grand merci à vous! 💖",
+            "Merci d'être avec nous! 🤝",
+            "Votre satisfaction est notre priorité! 😊",
+            "Merci pour votre commande! 🍽️"
+        ];
+
+        let messageIndex = 0;
+
+        notificationInterval = setInterval(() => {
+            // Vérifier que les notifications sont toujours activées
+            const notifEnabled = localStorage.getItem('notificationsEnabled') === 'true';
+            
+            // Vérifier que le document n'est pas visible (utilisateur pas sur la page)
+            if (notifEnabled && document.hidden) {
+                const message = thankYouMessages[messageIndex % thankYouMessages.length];
+                
+                // Envoyer la notification
+                sendThankYouNotification(message);
+                
+                messageIndex++;
+            }
+        }, 2000); // Toutes les 2 secondes
+    }
+
+    // Fonction pour arrêter les notifications périodiques
+    function stopPeriodicNotifications() {
+        if (notificationInterval) {
+            clearInterval(notificationInterval);
+            notificationInterval = null;
+        }
+    }
+
+    // Fonction pour envoyer une notification de remerciement
+    function sendThankYouNotification(message) {
+        if ('serviceWorker' in navigator && 'PushManager' in window) {
+            navigator.serviceWorker.ready.then(registration => {
+                registration.showNotification('GROUPE EXPRESS 🍽️', {
+                    body: message,
+                    icon: 'image/GE.jpg',
+                    badge: 'image/u.png',
+                    tag: 'thank-you-notification',
+                    requireInteraction: false,
+                    vibrate: [200, 100, 200],
+                    data: {
+                        url: window.location.origin
+                    }
+                });
+            });
+        }
+    }
+
+    // Mettre à jour le bouton de notification
+    function updateNotificationButton(enabled) {
+        const status = document.getElementById('notification-status');
+        const button = document.querySelector('#notification-button button');
+        
+        if (enabled) {
+            status.style.display = 'none';
+            button.style.background = 'linear-gradient(135deg, #28a745, #34ce57)';
+            button.innerHTML = '🔔';
+        } else {
+            status.style.display = 'flex';
+            status.textContent = 'OFF';
+            button.style.background = 'linear-gradient(135deg, #dc3545, #c82333)';
+            button.innerHTML = '🔕';
+        }
+    }
+
+    // Afficher le statut de notification
+    function showNotificationStatus(message, color) {
+        const statusDiv = document.createElement('div');
+        statusDiv.innerHTML = message;
+        statusDiv.style.cssText = `
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: ${color};
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            z-index: 10000;
+            font-weight: 600;
+            animation: slideInRight 0.3s ease-out;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        `;
+        document.body.appendChild(statusDiv);
+        
+        setTimeout(() => {
+            statusDiv.style.animation = 'slideOutRight 0.3s ease-out';
+            setTimeout(() => statusDiv.remove(), 300);
+        }, 3000);
+    }
+
+    // Gérer les messages reçus quand l'app est au premier plan
+    messaging.onMessage((payload) => {
+        console.log('Message reçu:', payload);
+        
+        if (payload.notification) {
+            const notificationTitle = payload.notification.title || 'GROUPE EXPRESS';
+            const notificationOptions = {
+                body: payload.notification.body,
+                icon: payload.notification.icon || 'image/GE.jpg',
+                badge: 'image/u.png',
+                tag: 'fcm-notification',
+                requireInteraction: false
+            };
+            
+            if (Notification.permission === 'granted') {
+                new Notification(notificationTitle, notificationOptions);
+            }
+        }
+    });
+
+   // Vérifier l'état des notifications au chargement
+window.addEventListener('load', () => {
+    checkNotificationPermissionStatus();
+});
+    // Gérer la visibilité de la page
+    document.addEventListener('visibilitychange', () => {
+        const notifEnabled = localStorage.getItem('notificationsEnabled') === 'true';
+        
+        if (document.hidden && notifEnabled) {
+            // Page cachée - les notifications vont s'envoyer
+            console.log('Page cachée - notifications actives');
+        } else {
+            // Page visible - les notifications ne s'envoient pas
+            console.log('Page visible - notifications en pause');
+        }
+    });
+
+    // Basculer les notifications au clic sur le bouton
+    document.addEventListener('DOMContentLoaded', () => {
+        const notificationButton = document.querySelector('#notification-button button');
+        
+        notificationButton.addEventListener('click', async () => {
+            const notifEnabled = localStorage.getItem('notificationsEnabled') === 'true';
+            
+            if (notifEnabled) {
+                // Désactiver les notifications
+                localStorage.setItem('notificationsEnabled', 'false');
+                updateNotificationButton(false);
+                stopPeriodicNotifications();
+                showNotificationStatus('🔕 Notifications désactivées', '#dc3545');
+            } else {
+                // Demander la permission
+                await window.requestNotificationPermission();
+            }
+        });
+    });
+
+    // Exposition des fonctions
+    window.db = db;
 
     window.submitOrder = function(order) {
         const timestamp = Date.now();
@@ -36,7 +374,6 @@
     };
 
     window.db = db;
-
 
     // DÉCLARATIONS GLOBALES
     let cart = [];
@@ -318,12 +655,12 @@
         let alertClass = '';
         
         if (hour >= 0 && hour < 9) {
-            alertMessage = `⚡ URGENT : Commandez AVANT 9H pour un retrait IMMÉDIAT au rez-de-chaussée ! Il vous reste ${8 - hour}h${60 - minutes < 10 ? '0' : ''}${60 - minutes}min`;
+            alertMessage = `⚡ URGENT : Commandez AVANT 10H pour un retrait IMMÉDIAT au stand du groupe Express ! Il vous reste ${8 - hour}h${60 - minutes < 10 ? '0' : ''}${60 - minutes}min`;
             alertClass = 'urgent';
             timeAlert.style.display = 'block';
         } 
         else if (hour >= 9) {
-            alertMessage = `⚠️ ATTENTION : Les commandes après 9H sont traitées pour DEMAIN - Retrait au rez-de-chaussée`;
+            alertMessage = `⚠️ ATTENTION : Les commandes après 10H sont traitées pour DEMAIN - Retrait au stand du groupe Express`;
             alertClass = 'warning';
             timeAlert.style.display = 'block';
         }
@@ -873,9 +1210,9 @@
                 deliveryInfo = `
                     <div style="background: linear-gradient(135deg, #28a745, #34ce57); color: white; padding: 1.5rem; border-radius: 12px; text-align: center; margin-bottom: 1rem;">
                         ✅ <strong>RETRAIT IMMÉDIAT</strong><br><br>
-                        Veuillez passer au rez-de-chaussée A 12H00<br>
+                        Veuillez passer au stand du groupe Express à 12H00<br>
                         pour le retrait de votre commande !<br><br>
-                        📍 <strong>RETRAIT AU REZ-DE-CHAUSSÉE A 12H 00</strong>
+                        📍 <strong>RETRAIT AU STAND DU GROUPE EXPRESS À 12H 00</strong>
                     </div>
                 `;
             } else {
@@ -883,8 +1220,8 @@
                     <div style="background: linear-gradient(135deg, #ff9800, #f57c00); color: white; padding: 1.5rem; border-radius: 12px; text-align: center; margin-bottom: 1rem;">
                         ⏳ <strong>EN COURS DE TRAITEMENT</strong><br><br>
                         Votre commande sera prête demain<br>
-                        Retrait au rez-de-chaussée à 12H00<br><br>
-                        📍 <strong>RETRAIT AU REZ-DE-CHAUSSÉE A 12H OO</strong>
+                        Retrait au stand du groupe Express à 12H00<br><br>
+                        📍 <strong>RETRAIT AU STAND DU GROUPE EXPRESS À 12H 00</strong>
                     </div>
                 `;
             }
@@ -1133,4 +1470,3 @@ window.addEventListener('appinstalled', () => {
     console.log('PWA installée avec succès!');
     deferredPrompt = null;
 });
-
