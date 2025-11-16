@@ -2666,12 +2666,16 @@
 </script>
 
 <script>
+    // ========================================
     // DÉCLARATIONS GLOBALES
+    // ========================================
     let cart = [];
     let total = 0;
     let customerOrders = JSON.parse(localStorage.getItem('customerOrders')) || [];
 
-    // Données pour les plats de riz
+    // ========================================
+    // DONNÉES DES MENUS
+    // ========================================
     const riceOptions = [
         { format: 'Petit', price: 500, icon: '🍚', desc: 'Format individuel' },
         { format: 'Moyen', price: 1000, icon: '🥘', desc: 'Pour 1-2 personnes' },
@@ -2679,14 +2683,12 @@
         { format: 'XXL', price: 2000, icon: '🥣', desc: 'Pour la famille' }
     ];
 
-    // Données pour les préparations de porc
     const porcPreparations = [
         { type: 'Sauté', icon: '🔥', desc: 'Porc sauté revenu à la perfection' },
         { type: 'Grillé', icon: '🍖', desc: 'Porc grillé croustillant' },
         { type: 'Soupe', icon: '🍜', desc: 'Porc en soupe savoureuse' }
     ];
 
-    // Données pour les types de tchèpe
     const tchepTypes = [
         { type: 'Rouge', icon: '🔴', desc: 'Tchèpe sauce rouge traditionnelle' },
         { type: 'Jaune', icon: '🟡', desc: 'Tchèpe sauce jaune délicate' }
@@ -2743,7 +2745,110 @@
     let adsAutoPlay = true;
     let adsInterval;
 
+    // ========================================
+    // FONCTION VÉRIFICATION BLOCAGE UTILISATEUR
+    // ========================================
+    async function checkIfUserBlocked(phoneNumber) {
+        try {
+            const cleanPhone = phoneNumber.replace(/\s+/g, '').replace(/^\+225/, '');
+            
+            const { collection, query, where, getDocs } = await import('https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js');
+            
+            const marcioRef = collection(window.db, 'marcio');
+            const q = query(marcioRef, where('numero', '==', cleanPhone));
+            const querySnapshot = await getDocs(q);
+            
+            if (querySnapshot.empty) {
+                return { blocked: false };
+            }
+            
+            const blockedData = querySnapshot.docs[0].data();
+            const blockedTime = blockedData.timestamp?.toDate() || new Date(blockedData.createdAt);
+            const now = new Date();
+            const hoursSinceBlock = (now - blockedTime) / (1000 * 60 * 60);
+            
+            if (hoursSinceBlock >= 24) {
+                await querySnapshot.docs[0].ref.delete();
+                console.log('Utilisateur débloqué automatiquement');
+                return { blocked: false, wasBlocked: true };
+            }
+            
+            const remainingHours = Math.ceil(24 - hoursSinceBlock);
+            return { 
+                blocked: true, 
+                name: blockedData.nom || blockedData.name,
+                phone: cleanPhone,
+                remainingHours: remainingHours
+            };
+            
+        } catch (error) {
+            console.error('Erreur lors de la vérification du blocage:', error);
+            return { blocked: false, error: true };
+        }
+    }
+
+    // ========================================
+    // AFFICHAGE ÉCRAN DE BLOCAGE
+    // ========================================
+    function showBlockedScreen(blockInfo) {
+        const blockedScreen = document.createElement('div');
+        blockedScreen.id = 'blocked-screen';
+        blockedScreen.innerHTML = `
+            <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: white; z-index: 99999; display: flex; align-items: center; justify-content: center; padding: 2rem;">
+                <div style="text-align: center; max-width: 400px;">
+                    <div style="font-size: 6rem; color: #dc3545; margin-bottom: 2rem; animation: shake 0.5s;">
+                        ❌
+                    </div>
+                    
+                    <h2 style="color: #dc3545; margin-bottom: 1rem; font-size: 1.5rem;">
+                        COMMANDE BLOQUÉE
+                    </h2>
+                    
+                    <div style="background: #f8d7da; border: 2px solid #dc3545; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; text-align: left;">
+                        <p style="color: #721c24; line-height: 1.6; margin-bottom: 1rem;">
+                            <strong>Raison du blocage :</strong><br>
+                            Vous avez effectué une commande précédente que vous n'êtes pas venu chercher.
+                        </p>
+                        
+                        <p style="color: #721c24; line-height: 1.6; margin-bottom: 1rem;">
+                            <strong>Numéro bloqué :</strong><br>
+                            ${blockInfo.phone}
+                        </p>
+                        
+                        <p style="color: #dc3545; font-weight: 600; font-size: 1.1rem;">
+                            ⏰ Temps restant : ${blockInfo.remainingHours}h
+                        </p>
+                    </div>
+                    
+                    <div style="background: #fff3cd; border: 2px solid #ffc107; border-radius: 12px; padding: 1rem; margin-bottom: 1.5rem;">
+                        <p style="color: #856404; line-height: 1.5; font-size: 0.95rem;">
+                            <strong>📋 Que faire ?</strong><br>
+                            • Revenez dans <strong>${blockInfo.remainingHours}h</strong><br>
+                            • Ou contactez-nous : <strong>07 19 98 30 44</strong>
+                        </p>
+                    </div>
+                    
+                    <button onclick="document.getElementById('blocked-screen').remove()" style="background: linear-gradient(135deg, #dc3545, #c82333); color: white; border: none; padding: 1rem 2rem; border-radius: 50px; font-size: 1rem; font-weight: 600; cursor: pointer; width: 100%; box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);">
+                        J'ai compris
+                    </button>
+                </div>
+            </div>
+            
+            <style>
+                @keyframes shake {
+                    0%, 100% { transform: translateX(0); }
+                    10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+                    20%, 40%, 60%, 80% { transform: translateX(10px); }
+                }
+            </style>
+        `;
+        
+        document.body.appendChild(blockedScreen);
+    }
+
+    // ========================================
     // FONCTIONS DE SÉLECTION
+    // ========================================
     function selectRice(riceName) {
         currentSelection = {
             type: 'rice',
@@ -2930,6 +3035,170 @@
         }
     }
 
+    function selectAttiekePoisson() {
+        document.getElementById('selection-modal-title').textContent = '🐟 Attiékè Poisson Alloko';
+        document.getElementById('selection-modal-subtitle').textContent = 'Choisissez votre format';
+        
+        const optionsContainer = document.getElementById('selection-options');
+        optionsContainer.innerHTML = '';
+        
+        const formats = [
+            { name: 'Petit', price: 1000, icon: '🍽️', desc: 'Format individuel' },
+            { name: 'Moyen', price: 1500, icon: '🥘', desc: 'Pour 1-2 personnes' },
+            { name: 'Grand', price: 2000, icon: '🍲', desc: 'Format généreux' }
+        ];
+        
+        formats.forEach(format => {
+            const optionDiv = document.createElement('div');
+            optionDiv.className = 'selection-option';
+            optionDiv.onclick = () => {
+                const qty = prompt(`Quantité d'Attiékè Poisson Alloko (${format.name}) :`, "1");
+                const quantity = parseInt(qty, 10);
+                if (!isNaN(quantity) && quantity > 0) {
+                    addToCart(`Attiékè Poisson Alloko (${format.name})`, format.price, 'E', quantity);
+                    closeSelectionModal();
+                }
+            };
+            optionDiv.innerHTML = `
+                <div class="selection-option-info">
+                    <div class="selection-option-icon">${format.icon}</div>
+                    <div class="selection-option-details">
+                        <h4>${format.name}</h4>
+                        <p>${format.desc}</p>
+                    </div>
+                </div>
+                <div class="selection-option-price">${format.price} FCFA</div>
+            `;
+            optionsContainer.appendChild(optionDiv);
+        });
+        
+        document.getElementById('selection-modal').classList.add('show');
+    }
+
+    function selectGarba() {
+        document.getElementById('selection-modal-title').textContent = '🥘 Spécialité Garba';
+        document.getElementById('selection-modal-subtitle').textContent = 'Choisissez votre format';
+        
+        const optionsContainer = document.getElementById('selection-options');
+        optionsContainer.innerHTML = '';
+        
+        const formats = [
+            { name: 'Petit', price: 500, icon: '🍽️', desc: 'Format individuel' },
+            { name: 'Moyen', price: 1000, icon: '🥘', desc: 'Pour 1-2 personnes' },
+            { name: 'Grand', price: 1500, icon: '🍲', desc: 'Pour 2-3 personnes' },
+            { name: 'XXL', price: 2000, icon: '🥣', desc: 'Format familial' }
+        ];
+        
+        formats.forEach(format => {
+            const optionDiv = document.createElement('div');
+            optionDiv.className = 'selection-option';
+            optionDiv.onclick = () => {
+                const qty = prompt(`Quantité de Garba (${format.name}) :`, "1");
+                const quantity = parseInt(qty, 10);
+                if (!isNaN(quantity) && quantity > 0) {
+                    addToCart(`Garba (${format.name})`, format.price, 'E', quantity);
+                    closeSelectionModal();
+                }
+            };
+            optionDiv.innerHTML = `
+                <div class="selection-option-info">
+                    <div class="selection-option-icon">${format.icon}</div>
+                    <div class="selection-option-details">
+                        <h4>${format.name}</h4>
+                        <p>${format.desc}</p>
+                    </div>
+                </div>
+                <div class="selection-option-price">${format.price} FCFA</div>
+            `;
+            optionsContainer.appendChild(optionDiv);
+        });
+        
+        document.getElementById('selection-modal').classList.add('show');
+    }
+
+    function selectAttiekePoulet() {
+        document.getElementById('selection-modal-title').textContent = '🍗 Attiékè Poulet + Condiment';
+        document.getElementById('selection-modal-subtitle').textContent = 'Choisissez votre format';
+        
+        const optionsContainer = document.getElementById('selection-options');
+        optionsContainer.innerHTML = '';
+        
+        const formats = [
+            { name: 'Petit', price: 1000, icon: '🍽️', desc: 'Format individuel' },
+            { name: 'Moyen', price: 1500, icon: '🥘', desc: 'Pour 1-2 personnes' },
+            { name: 'Grand', price: 2000, icon: '🍲', desc: 'Format généreux' }
+        ];
+        
+        formats.forEach(format => {
+            const optionDiv = document.createElement('div');
+            optionDiv.className = 'selection-option';
+            optionDiv.onclick = () => {
+                const qty = prompt(`Quantité d'Attiékè Poulet + Condiment (${format.name}) :`, "1");
+                const quantity = parseInt(qty, 10);
+                if (!isNaN(quantity) && quantity > 0) {
+                    addToCart(`Attiékè Poulet + Condiment (${format.name})`, format.price, 'E', quantity);
+                    closeSelectionModal();
+                }
+            };
+            optionDiv.innerHTML = `
+                <div class="selection-option-info">
+                    <div class="selection-option-icon">${format.icon}</div>
+                    <div class="selection-option-details">
+                        <h4>${format.name}</h4>
+                        <p>${format.desc}</p>
+                    </div>
+                </div>
+                <div class="selection-option-price">${format.price} FCFA</div>
+            `;
+            optionsContainer.appendChild(optionDiv);
+        });
+        
+        document.getElementById('selection-modal').classList.add('show');
+    }
+
+    function selectAttiekePouletAlloko() {
+        document.getElementById('selection-modal-title').textContent = '🍗🍌 Attiékè Poulet Alloko + Condiment';
+        document.getElementById('selection-modal-subtitle').textContent = 'Choisissez votre format';
+        
+        const optionsContainer = document.getElementById('selection-options');
+        optionsContainer.innerHTML = '';
+        
+        const formats = [
+            { name: 'Petit', price: 1500, icon: '🍽️', desc: 'Format individuel' },
+            { name: 'Moyen', price: 2000, icon: '🥘', desc: 'Pour 1-2 personnes' },
+            { name: 'Grand', price: 2500, icon: '🍲', desc: 'Format généreux' }
+        ];
+        
+        formats.forEach(format => {
+            const optionDiv = document.createElement('div');
+            optionDiv.className = 'selection-option';
+            optionDiv.onclick = () => {
+                const qty = prompt(`Quantité d'Attiékè Poulet Alloko + Condiment (${format.name}) :`, "1");
+                const quantity = parseInt(qty, 10);
+                if (!isNaN(quantity) && quantity > 0) {
+                    addToCart(`Attiékè Poulet Alloko + Condiment (${format.name})`, format.price, 'E', quantity);
+                    closeSelectionModal();
+                }
+            };
+            optionDiv.innerHTML = `
+                <div class="selection-option-info">
+                    <div class="selection-option-icon">${format.icon}</div>
+                    <div class="selection-option-details">
+                        <h4>${format.name}</h4>
+                        <p>${format.desc}</p>
+                    </div>
+                </div>
+                <div class="selection-option-price">${format.price} FCFA</div>
+            `;
+            optionsContainer.appendChild(optionDiv);
+        });
+        
+        document.getElementById('selection-modal').classList.add('show');
+    }
+
+    // ========================================
+    // FONCTIONS DE GESTION DU PANIER
+    // ========================================
     function checkOrderingHours() {
         const now = new Date();
         const abidjanTime = new Date(now.toLocaleString("en-US", {timeZone: "Africa/Abidjan"}));
@@ -3164,346 +3433,8 @@
         }
     }
 
-    function selectAttiekeDindon() {
-        document.getElementById('selection-modal-title').textContent = '🦃 Attiékè Dindon';
-        document.getElementById('selection-modal-subtitle').textContent = 'Choisissez votre format';
-        
-        const optionsContainer = document.getElementById('selection-options');
-        optionsContainer.innerHTML = '';
-        
-        const formats = [
-            { name: 'Petit', price: 700, icon: '🍽️', desc: 'Format individuel' },
-            { name: 'Moyen', price: 1000, icon: '🥘', desc: 'Pour 1-2 personnes' },
-            { name: 'Grand', price: 1500, icon: '🍲', desc: 'Pour 2-3 personnes' },
-            { name: 'XXL', price: 2000, icon: '🥣', desc: 'Format familial' }
-        ];
-        
-        formats.forEach(format => {
-            const optionDiv = document.createElement('div');
-            optionDiv.className = 'selection-option';
-            optionDiv.onclick = () => {
-                const qty = prompt(`Quantité d'Attiékè Dindon (${format.name}) :`, "1");
-                const quantity = parseInt(qty, 10);
-                if (!isNaN(quantity) && quantity > 0) {
-                    addToCart(`Attiékè Dindon (${format.name})`, format.price, 'E', quantity);
-                    closeSelectionModal();
-                }
-            };
-            optionDiv.innerHTML = `
-                <div class="selection-option-info">
-                    <div class="selection-option-icon">${format.icon}</div>
-                    <div class="selection-option-details">
-                        <h4>${format.name}</h4>
-                        <p>${format.desc}</p>
-                    </div>
-                </div>
-                <div class="selection-option-price">${format.price} FCFA</div>
-            `;
-            optionsContainer.appendChild(optionDiv);
-        });
-        
-        document.getElementById('selection-modal').classList.add('show');
-    }
-
-    function selectAttiekePoisson() {
-        document.getElementById('selection-modal-title').textContent = '🐟 Attiékè Poisson Alloko';
-        document.getElementById('selection-modal-subtitle').textContent = 'Choisissez votre format';
-        
-        const optionsContainer = document.getElementById('selection-options');
-        optionsContainer.innerHTML = '';
-        
-        const formats = [
-            { name: 'Petit', price: 1000, icon: '🍽️', desc: 'Format individuel' },
-            { name: 'Moyen', price: 1500, icon: '🥘', desc: 'Pour 1-2 personnes' },
-            { name: 'Grand', price: 2000, icon: '🍲', desc: 'Format généreux' }
-        ];
-        
-        formats.forEach(format => {
-            const optionDiv = document.createElement('div');
-            optionDiv.className = 'selection-option';
-            optionDiv.onclick = () => {
-                const qty = prompt(`Quantité d'Attiékè Poisson Alloko (${format.name}) :`, "1");
-                const quantity = parseInt(qty, 10);
-                if (!isNaN(quantity) && quantity > 0) {
-                    addToCart(`Attiékè Poisson Alloko (${format.name})`, format.price, 'E', quantity);
-                    closeSelectionModal();
-                }
-            };
-            optionDiv.innerHTML = `
-                <div class="selection-option-info">
-                    <div class="selection-option-icon">${format.icon}</div>
-                    <div class="selection-option-details">
-                        <h4>${format.name}</h4>
-                        <p>${format.desc}</p>
-                    </div>
-                </div>
-                <div class="selection-option-price">${format.price} FCFA</div>
-            `;
-            optionsContainer.appendChild(optionDiv);
-        });
-        
-        document.getElementById('selection-modal').classList.add('show');
-    }
-
-    function selectGarba() {
-        document.getElementById('selection-modal-title').textContent = '🥘 Spécialité Garba';
-        document.getElementById('selection-modal-subtitle').textContent = 'Choisissez votre format';
-        
-        const optionsContainer = document.getElementById('selection-options');
-        optionsContainer.innerHTML = '';
-        
-        const formats = [
-            { name: 'Petit', price: 500, icon: '🍽️', desc: 'Format individuel' },
-            { name: 'Moyen', price: 1000, icon: '🥘', desc: 'Pour 1-2 personnes' },
-            { name: 'Grand', price: 1500, icon: '🍲', desc: 'Pour 2-3 personnes' },
-            { name: 'XXL', price: 2000, icon: '🥣', desc: 'Format familial' }
-        ];
-        
-        formats.forEach(format => {
-            const optionDiv = document.createElement('div');
-            optionDiv.className = 'selection-option';
-            optionDiv.onclick = () => {
-                const qty = prompt(`Quantité de Garba (${format.name}) :`, "1");
-                const quantity = parseInt(qty, 10);
-                if (!isNaN(quantity) && quantity > 0) {
-                    addToCart(`Garba (${format.name})`, format.price, 'E', quantity);
-                    closeSelectionModal();
-                }
-            };
-            optionDiv.innerHTML = `
-                <div class="selection-option-info">
-                    <div class="selection-option-icon">${format.icon}</div>
-                    <div class="selection-option-details">
-                        <h4>${format.name}</h4>
-                        <p>${format.desc}</p>
-                    </div>
-                </div>
-                <div class="selection-option-price">${format.price} FCFA</div>
-            `;
-            optionsContainer.appendChild(optionDiv);
-        });
-        
-        document.getElementById('selection-modal').classList.add('show');
-    }
-
-    function selectAttiekePoulet() {
-        document.getElementById('selection-modal-title').textContent = '🍗 Attiékè Poulet + Condiment';
-        document.getElementById('selection-modal-subtitle').textContent = 'Choisissez votre format';
-        
-        const optionsContainer = document.getElementById('selection-options');
-        optionsContainer.innerHTML = '';
-        
-        const formats = [
-            { name: 'Petit', price: 1000, icon: '🍽️', desc: 'Format individuel' },
-            { name: 'Moyen', price: 1500, icon: '🥘', desc: 'Pour 1-2 personnes' },
-            { name: 'Grand', price: 2000, icon: '🍲', desc: 'Format généreux' }
-        ];
-        
-        formats.forEach(format => {
-            const optionDiv = document.createElement('div');
-            optionDiv.className = 'selection-option';
-            optionDiv.onclick = () => {
-                const qty = prompt(`Quantité d'Attiékè Poulet + Condiment (${format.name}) :`, "1");
-                const quantity = parseInt(qty, 10);
-                if (!isNaN(quantity) && quantity > 0) {
-                    addToCart(`Attiékè Poulet + Condiment (${format.name})`, format.price, 'E', quantity);
-                    closeSelectionModal();
-                }
-            };
-            optionDiv.innerHTML = `
-                <div class="selection-option-info">
-                    <div class="selection-option-icon">${format.icon}</div>
-                    <div class="selection-option-details">
-                        <h4>${format.name}</h4>
-                        <p>${format.desc}</p>
-                    </div>
-                </div>
-                <div class="selection-option-price">${format.price} FCFA</div>
-            `;
-            optionsContainer.appendChild(optionDiv);
-        });
-        
-        document.getElementById('selection-modal').classList.add('show');
-    }
-
-    function selectAttiekePouletAlloko() {
-        document.getElementById('selection-modal-title').textContent = '🍗🍌 Attiékè Poulet Alloko + Condiment';
-        document.getElementById('selection-modal-subtitle').textContent = 'Choisissez votre format';
-        
-        const optionsContainer = document.getElementById('selection-options');
-        optionsContainer.innerHTML = '';
-        
-        const formats = [
-            { name: 'Petit', price: 1500, icon: '🍽️', desc: 'Format individuel' },
-            { name: 'Moyen', price: 2000, icon: '🥘', desc: 'Pour 1-2 personnes' },
-            { name: 'Grand', price: 2500, icon: '🍲', desc: 'Format généreux' }
-        ];
-        
-        formats.forEach(format => {
-            const optionDiv = document.createElement('div');
-            optionDiv.className = 'selection-option';
-            optionDiv.onclick = () => {
-                const qty = prompt(`Quantité d'Attiékè Poulet Alloko + Condiment (${format.name}) :`, "1");
-                const quantity = parseInt(qty, 10);
-                if (!isNaN(quantity) && quantity > 0) {
-                    addToCart(`Attiékè Poulet Alloko + Condiment (${format.name})`, format.price, 'E', quantity);
-                    closeSelectionModal();
-                }
-            };
-            optionDiv.innerHTML = `
-                <div class="selection-option-info">
-                    <div class="selection-option-icon">${format.icon}</div>
-                    <div class="selection-option-details">
-                        <h4>${format.name}</h4>
-                        <p>${format.desc}</p>
-                    </div>
-                </div>
-                <div class="selection-option-price">${format.price} FCFA</div>
-            `;
-            optionsContainer.appendChild(optionDiv);
-        });
-        
-        document.getElementById('selection-modal').classList.add('show');
-    }
-
-    // EXPOSITION DES FONCTIONS AU SCOPE GLOBAL
-    window.selectRice = selectRice;
-    window.selectPorc = selectPorc;
-    window.selectTchep = selectTchep;
-    window.closeSelectionModal = closeSelectionModal;
-    window.selectDegue = selectDegue;
-    window.closeDegueModal = closeDegueModal;
-    window.addDegueToCart = addDegueToCart;
-    window.slideAds = slideAds;
-    window.promptAddToCart = promptAddToCart;
-    window.removeFromCart = removeFromCart;
-    window.toggleOrders = toggleOrders;
-    window.clearOrders = clearOrders;
-    window.toggleCart = toggleCart;
-    window.selectAttiekeDindon = selectAttiekeDindon;
-    window.selectAttiekePoisson = selectAttiekePoisson;
-    window.selectGarba = selectGarba;
-    window.selectAttiekePoulet = selectAttiekePoulet;
-    window.selectAttiekePouletAlloko = selectAttiekePouletAlloko;
-
-    // INITIALISATION AU CHARGEMENT
-    document.addEventListener('DOMContentLoaded', function() {
-        checkOrderingHours();
-        setInterval(checkOrderingHours, 60000);
-        startAdsAutoPlay();
-        updateOrdersList();
-    });
-
     // ========================================
-    // FONCTION POUR VÉRIFIER SI L'UTILISATEUR EST BLOQUÉ
-    // ========================================
-    async function checkIfUserBlocked(phoneNumber) {
-        try {
-            const cleanPhone = phoneNumber.replace(/\s+/g, '').replace(/^\+225/, '');
-            
-            // Importer getDocs et query depuis Firestore
-            const { collection, query, where, getDocs } = await import('https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js');
-            
-            // Vérifier dans la collection "marcio"
-            const marcioRef = collection(window.db, 'marcio');
-            const q = query(marcioRef, where('numero', '==', cleanPhone));
-            const querySnapshot = await getDocs(q);
-            
-            if (querySnapshot.empty) {
-                return { blocked: false };
-            }
-            
-            // L'utilisateur est dans la liste de blocage
-            const blockedData = querySnapshot.docs[0].data();
-            const blockedTime = blockedData.timestamp?.toDate() || new Date(blockedData.createdAt);
-            const now = new Date();
-            const hoursSinceBlock = (now - blockedTime) / (1000 * 60 * 60);
-            
-            // Vérifier si 24h sont passées
-            if (hoursSinceBlock >= 24) {
-                // Débloquer l'utilisateur en supprimant de la collection
-                await querySnapshot.docs[0].ref.delete();
-                console.log('Utilisateur débloqué automatiquement');
-                return { blocked: false, wasBlocked: true };
-            }
-            
-            // Toujours bloqué
-            const remainingHours = Math.ceil(24 - hoursSinceBlock);
-            return { 
-                blocked: true, 
-                name: blockedData.nom || blockedData.name,
-                phone: cleanPhone,
-                remainingHours: remainingHours
-            };
-            
-        } catch (error) {
-            console.error('Erreur lors de la vérification du blocage:', error);
-            // En cas d'erreur, on laisse passer (ne pas bloquer par erreur)
-            return { blocked: false, error: true };
-        }
-    }
-
-    // ========================================
-    // FONCTION POUR AFFICHER L'ÉCRAN DE BLOCAGE
-    // ========================================
-    function showBlockedScreen(blockInfo) {
-        const blockedScreen = document.createElement('div');
-        blockedScreen.id = 'blocked-screen';
-        blockedScreen.innerHTML = `
-            <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: white; z-index: 99999; display: flex; align-items: center; justify-content: center; padding: 2rem;">
-                <div style="text-align: center; max-width: 400px;">
-                    <div style="font-size: 6rem; color: #dc3545; margin-bottom: 2rem; animation: shake 0.5s;">
-                        ❌
-                    </div>
-                    
-                    <h2 style="color: #dc3545; margin-bottom: 1rem; font-size: 1.5rem;">
-                        COMMANDE BLOQUÉE
-                    </h2>
-                    
-                    <div style="background: #f8d7da; border: 2px solid #dc3545; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; text-align: left;">
-                        <p style="color: #721c24; line-height: 1.6; margin-bottom: 1rem;">
-                            <strong>Raison du blocage :</strong><br>
-                            Vous avez effectué une commande précédente que vous n'êtes pas venu chercher.
-                        </p>
-                        
-                        <p style="color: #721c24; line-height: 1.6; margin-bottom: 1rem;">
-                            <strong>Numéro bloqué :</strong><br>
-                            ${blockInfo.phone}
-                        </p>
-                        
-                        <p style="color: #dc3545; font-weight: 600; font-size: 1.1rem;">
-                            ⏰ Temps restant : ${blockInfo.remainingHours}h
-                        </p>
-                    </div>
-                    
-                    <div style="background: #fff3cd; border: 2px solid #ffc107; border-radius: 12px; padding: 1rem; margin-bottom: 1.5rem;">
-                        <p style="color: #856404; line-height: 1.5; font-size: 0.95rem;">
-                            <strong>📋 Que faire ?</strong><br>
-                            • Revenez dans <strong>${blockInfo.remainingHours}h</strong><br>
-                            • Ou contactez-nous : <strong>07 19 98 30 44</strong>
-                        </p>
-                    </div>
-                    
-                    <button onclick="document.getElementById('blocked-screen').remove()" style="background: linear-gradient(135deg, #dc3545, #c82333); color: white; border: none; padding: 1rem 2rem; border-radius: 50px; font-size: 1rem; font-weight: 600; cursor: pointer; width: 100%; box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);">
-                        J'ai compris
-                    </button>
-                </div>
-            </div>
-            
-            <style>
-                @keyframes shake {
-                    0%, 100% { transform: translateX(0); }
-                    10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
-                    20%, 40%, 60%, 80% { transform: translateX(10px); }
-                }
-            </style>
-        `;
-        
-        document.body.appendChild(blockedScreen);
-    }
-
-    // ========================================
-    // GESTION FORMULAIRE DE COMMANDE AVEC VÉRIFICATION BLOCAGE
+    // GESTION FORMULAIRE COMMANDE AVEC BLOCAGE
     // ========================================
     document.getElementById('order-form').addEventListener('submit', async function(e) {
         e.preventDefault();
@@ -3513,21 +3444,18 @@
             return;
         }
         
-        // Demander le nom
         const customerName = prompt("Entrez votre nom complet :", "");
         if (!customerName || customerName.trim() === "") {
             alert("❌ Veuillez entrer votre nom pour continuer");
             return;
         }
         
-        // Demander le WhatsApp
         const whatsappNumber = prompt("Entrez votre numéro WhatsApp :\n(ex: 0712345678 ou +2250712345678)", "");
         if (!whatsappNumber || whatsappNumber.trim() === "") {
             alert("❌ Veuillez entrer votre numéro WhatsApp pour continuer");
             return;
         }
         
-        // Validation simple du numéro
         const cleanNumber = whatsappNumber.replace(/\s+/g, '');
         if (cleanNumber.length < 8) {
             alert("❌ Numéro WhatsApp invalide. Veuillez réessayer.");
@@ -3538,13 +3466,11 @@
         const blockStatus = await checkIfUserBlocked(cleanNumber);
         
         if (blockStatus.blocked) {
-            // Afficher l'écran de blocage
             showBlockedScreen(blockStatus);
-            return; // Arrêter la soumission de la commande
+            return;
         }
         
         if (blockStatus.wasBlocked) {
-            // Informer que l'utilisateur était bloqué mais peut maintenant commander
             const welcomeBack = document.createElement('div');
             welcomeBack.innerHTML = `
                 <div style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #28a745, #34ce57); color: white; padding: 1rem 1.5rem; border-radius: 12px; z-index: 10001; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4); animation: slideDown 0.5s ease-out; max-width: 90vw; text-align: center;">
@@ -3556,7 +3482,6 @@
             setTimeout(() => welcomeBack.remove(), 3000);
         }
         
-        // Vérifier la connexion
         if (!navigator.onLine) {
             alert("❌ Pas de connexion internet\n\nVeuillez vérifier votre connexion et réessayer.");
             return;
@@ -3608,7 +3533,6 @@
                 throw new Error("Code de commande non reçu");
             }
             
-            // Sauvegarder localement
             const localOrder = {
                 code: orderCode,
                 order: order,
@@ -3616,17 +3540,13 @@
             };
             localStorage.setItem('lastSuccessfulOrder', JSON.stringify(localOrder));
             
-            // Sauvegarder dans l'historique
             addCustomerOrderToList(orderCode, order);
             
-            // Vider le panier
             cart = [];
             updateCart();
             updateCartBadge();
             toggleCart();
             
-            // Message de succès avec info de retrait
-            const pickupMessage = document.createElement('div');
             let deliveryInfo = '';
             
             if (hour >= 0 && hour < 9) {
@@ -3644,11 +3564,12 @@
                         ⏳ <strong>EN COURS DE TRAITEMENT</strong><br><br>
                         Votre commande sera prête demain<br>
                         Retrait au rez-de-chaussée à 12H00<br><br>
-                        📍 <strong>RETRAIT AU REZ-DE-CHAUSSÉE A 12H OO</strong>
+                        📍 <strong>RETRAIT AU REZ-DE-CHAUSSÉE A 12H 00</strong>
                     </div>
                 `;
             }
             
+            const pickupMessage = document.createElement('div');
             pickupMessage.innerHTML = `
                 <button onclick="this.parentElement.remove()" style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.1); border: none; color: #333; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center;">×</button>
                 <div style="text-align: center; margin-bottom: 1rem;">
@@ -3741,7 +3662,40 @@
         }
     });
 
-    // Fermer les modals en cliquant à l'extérieur
+    // ========================================
+    // EXPOSITION DES FONCTIONS AU SCOPE GLOBAL
+    // ========================================
+    window.selectRice = selectRice;
+    window.selectPorc = selectPorc;
+    window.selectTchep = selectTchep;
+    window.closeSelectionModal = closeSelectionModal;
+    window.selectDegue = selectDegue;
+    window.closeDegueModal = closeDegueModal;
+    window.addDegueToCart = addDegueToCart;
+    window.slideAds = slideAds;
+    window.promptAddToCart = promptAddToCart;
+    window.removeFromCart = removeFromCart;
+    window.toggleOrders = toggleOrders;
+    window.clearOrders = clearOrders;
+    window.toggleCart = toggleCart;
+    window.selectAttiekePoisson = selectAttiekePoisson;
+    window.selectGarba = selectGarba;
+    window.selectAttiekePoulet = selectAttiekePoulet;
+    window.selectAttiekePouletAlloko = selectAttiekePouletAlloko;
+
+    // ========================================
+    // INITIALISATION AU CHARGEMENT
+    // ========================================
+    document.addEventListener('DOMContentLoaded', function() {
+        checkOrderingHours();
+        setInterval(checkOrderingHours, 60000);
+        startAdsAutoPlay();
+        updateOrdersList();
+    });
+
+    // ========================================
+    // FERMETURE MODALS EN CLIQUANT À L'EXTÉRIEUR
+    // ========================================
     document.addEventListener('click', function(e) {
         if (e.target.classList.contains('modal') || 
             e.target.classList.contains('cart-modal') || 
@@ -3751,7 +3705,9 @@
         }
     });
 
+    // ========================================
     // GESTION DU SWIPE POUR LES PUBLICITÉS
+    // ========================================
     let touchStartX = 0;
     let touchEndX = 0;
     let isTouching = false;
@@ -3797,7 +3753,9 @@
         }
     }
 
-    // Gestion de l'indicateur de scroll
+    // ========================================
+    // GESTION INDICATEUR DE SCROLL
+    // ========================================
     const navStories = document.querySelector('.nav-stories');
     const scrollHint = document.getElementById('scroll-hint');
     const scrollDots = document.querySelectorAll('.scroll-dot');
@@ -3846,7 +3804,6 @@
 // GESTION DE LA PWA ET BANNIÈRE D'INSTALLATION
 // ========================================
 
-// Enregistrement du Service Worker pour PWA
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('/sw.js')
@@ -3859,39 +3816,32 @@ if ('serviceWorker' in navigator) {
     });
 }
 
-// Fonction pour vérifier si l'app est installée
 function isAppInstalled() {
-    // Vérifier si l'app est lancée en mode standalone (installée)
     return window.matchMedia('(display-mode: standalone)').matches || 
            window.navigator.standalone === true;
 }
 
-// Fonction pour vérifier si l'utilisateur a fermé la bannière récemment
 function hasRecentlyClosedBanner() {
     const lastClosed = localStorage.getItem('installBannerClosed');
     if (!lastClosed) return false;
     
     const timeSinceClosed = Date.now() - parseInt(lastClosed);
-    const fourHours = 4 * 60 * 60 * 1000; // 4 heures en millisecondes
+    const fourHours = 4 * 60 * 60 * 1000;
     
     return timeSinceClosed < fourHours;
 }
 
-// Fonction pour afficher la bannière d'installation
 function showInstallBanner() {
-    // Ne pas afficher si l'app est déjà installée
     if (isAppInstalled()) {
         console.log('App déjà installée');
         return;
     }
     
-    // Ne pas afficher si l'utilisateur a fermé récemment
     if (hasRecentlyClosedBanner()) {
         console.log('Bannière fermée récemment');
         return;
     }
     
-    // Vérifier si une bannière existe déjà
     if (document.getElementById('pwa-install-banner')) {
         return;
     }
@@ -3913,7 +3863,6 @@ function showInstallBanner() {
     `;
     document.body.appendChild(installBanner);
     
-    // Gestion du bouton installer
     document.getElementById('install-btn').addEventListener('click', async () => {
         if (window.deferredPrompt) {
             installBanner.remove();
@@ -3922,19 +3871,16 @@ function showInstallBanner() {
             console.log(`Installation: ${outcome}`);
             window.deferredPrompt = null;
         } else {
-            // Instructions manuelles si le prompt n'est pas disponible
             alert('Pour installer l\'application :\n\n1. Appuyez sur le menu de votre navigateur (⋮)\n2. Sélectionnez "Ajouter à l\'écran d\'accueil"\n3. Suivez les instructions');
         }
     });
     
-    // Gestion du bouton fermer
     document.getElementById('close-install').addEventListener('click', () => {
         localStorage.setItem('installBannerClosed', Date.now().toString());
         installBanner.remove();
     });
 }
 
-// Gestion de l'événement beforeinstallprompt
 let deferredPrompt;
 
 window.addEventListener('beforeinstallprompt', (e) => {
@@ -3942,7 +3888,6 @@ window.addEventListener('beforeinstallprompt', (e) => {
     deferredPrompt = e;
     window.deferredPrompt = deferredPrompt;
     
-    // Afficher la bannière immédiatement
     showInstallBanner();
 });
 
@@ -3951,21 +3896,17 @@ window.addEventListener('appinstalled', () => {
     deferredPrompt = null;
     window.deferredPrompt = null;
     
-    // Supprimer la bannière si elle existe
     const banner = document.getElementById('pwa-install-banner');
     if (banner) {
         banner.remove();
     }
 });
 
-// Afficher la bannière au chargement de la page
 document.addEventListener('DOMContentLoaded', () => {
-    // Attendre 2 secondes avant d'afficher la bannière
     setTimeout(() => {
         showInstallBanner();
     }, 2000);
     
-    // Vérifier et afficher la bannière toutes les 30 minutes
     setInterval(() => {
         showInstallBanner();
     }, 30 * 60 * 1000);
