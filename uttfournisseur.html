@@ -598,6 +598,12 @@
             opacity: 0.6;
         }
 
+        .btn-delete {
+            background: linear-gradient(135deg, #6c757d, #5a6268);
+            color: white;
+            min-width: 120px;
+        }
+
         .empty-state {
             text-align: center;
             padding: 4rem 2rem;
@@ -940,6 +946,35 @@
         </div>
     </div>
 
+    <!-- Modal de suppression d'une commande -->
+    <div class="modal" id="delete-order-modal">
+        <div class="modal-content">
+            <div class="modal-header">🗑️ Supprimer cette commande</div>
+            <div class="modal-body">
+                <p style="margin-bottom: 1rem; color: var(--danger); font-weight: 600;">
+                    ⚠️ Attention : Cette action supprimera définitivement cette commande !
+                </p>
+                <label for="delete-password-input" style="font-weight: 600; color: var(--dark);">
+                    Entrez le mot de passe pour confirmer :
+                </label>
+                <input 
+                    type="password" 
+                    class="modal-input" 
+                    id="delete-password-input" 
+                    placeholder="Mot de passe requis"
+                >
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-cancel" onclick="closeDeleteModal()">
+                    Annuler
+                </button>
+                <button class="modal-btn modal-btn-confirm" onclick="confirmDeleteOrder()">
+                    Supprimer
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
         import { getFirestore, collection, query, orderBy, onSnapshot, doc, updateDoc, addDoc, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
@@ -959,6 +994,7 @@
         let allOrders = [];
         let isConnected = false;
         let highlightedOrderId = null;
+        let orderToDelete = null;
 
         // Initialiser Firebase
         try {
@@ -1032,7 +1068,6 @@
             }
 
             try {
-                // Récupérer toutes les commandes
                 const ordersSnapshot = await getDocs(collection(db, 'orders'));
                 
                 if (ordersSnapshot.empty) {
@@ -1041,21 +1076,17 @@
                     return;
                 }
 
-                // Supprimer toutes les commandes
                 const deletePromises = [];
                 ordersSnapshot.forEach((docSnapshot) => {
                     deletePromises.push(deleteDoc(doc(db, 'orders', docSnapshot.id)));
                 });
 
                 await Promise.all(deletePromises);
-
-                // Réinitialiser le revenu
                 localStorage.removeItem('dailyRevenue');
 
                 closeResetModal();
                 showToast('✅ Toutes les commandes ont été supprimées !', 'success');
                 
-                // Recharger la page après 1 seconde
                 setTimeout(() => {
                     location.reload();
                 }, 1000);
@@ -1063,6 +1094,46 @@
             } catch (error) {
                 console.error('Erreur lors de la suppression:', error);
                 showToast('❌ Erreur lors de la suppression des commandes', 'error');
+            }
+        };
+
+        // Ouvrir le modal de suppression d'une commande
+        window.openDeleteModal = function(orderId) {
+            orderToDelete = orderId;
+            document.getElementById('delete-order-modal').classList.add('active');
+            document.getElementById('delete-password-input').value = '';
+        };
+
+        // Fermer le modal de suppression
+        window.closeDeleteModal = function() {
+            document.getElementById('delete-order-modal').classList.remove('active');
+            document.getElementById('delete-password-input').value = '';
+            orderToDelete = null;
+        };
+
+        // Confirmer la suppression d'une commande
+        window.confirmDeleteOrder = async function() {
+            const password = document.getElementById('delete-password-input').value;
+            
+            if (password !== 'marcio@') {
+                showToast('❌ Mot de passe incorrect !', 'error');
+                return;
+            }
+
+            if (!db || !orderToDelete) {
+                showToast('❌ Erreur: Commande non trouvée', 'error');
+                return;
+            }
+
+            try {
+                await deleteDoc(doc(db, 'orders', orderToDelete));
+                
+                closeDeleteModal();
+                showToast('✅ Commande supprimée avec succès !', 'success');
+                
+            } catch (error) {
+                console.error('Erreur lors de la suppression:', error);
+                showToast('❌ Erreur lors de la suppression de la commande', 'error');
             }
         };
 
@@ -1371,6 +1442,10 @@
                             <button class="btn btn-block" 
                                     onclick="blockClient('${order.id}', '${order.customer?.name || 'N/A'}', '${order.customer?.whatsapp || 'N/A'}')">
                                 🚫 Bloquer
+                            </button>
+                            <button class="btn btn-delete" 
+                                    onclick="openDeleteModal('${order.id}')">
+                                🗑️ Supprimer
                             </button>
                         </div>
                     </div>
