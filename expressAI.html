@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ExpressAI - Analyse Intelligente des Ventes</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --dark: #1f2937;
+            --light: #f9fafb;
+            --border: #e5e7eb;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .ai-logo {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .header-title h1 {
+            font-size: 2.2rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .sync-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: #10b981;
+            color: white;
+            border-radius: 25px;
+            font-weight: 600;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .kpi-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.15);
+        }
+
+        .kpi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .kpi-icon {
+            font-size: 2.5rem;
+            opacity: 0.8;
+        }
+
+        .kpi-trend {
+            font-size: 1.2rem;
+        }
+
+        .kpi-label {
+            font-size: 0.95rem;
+            color: #6b7280;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .kpi-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .chart-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+        }
+
+        .ai-insights {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+            color: white;
+        }
+
+        .insight-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+
+        .insight-item {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            padding: 1.25rem;
+            border-radius: 15px;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .insight-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .insight-label {
+            font-size: 0.85rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .insight-text {
+            font-size: 1.05rem;
+            line-height: 1.6;
+        }
+
+        .daily-analysis {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+            margin-bottom: 2rem;
+        }
+
+        .analysis-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .analysis-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .day-card {
+            background: linear-gradient(135deg, #f9fafb 0%, #e5e7eb 100%);
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-bottom: 1rem;
+            border-left: 5px solid var(--primary);
+        }
+
+        .day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .day-date {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .day-revenue {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .day-stats {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .day-stat {
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+
+        .day-stat strong {
+            color: var(--dark);
+        }
+
+        .day-analysis {
+            background: white;
+            padding: 1rem;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: var(--dark);
+        }
+
+        .suggestions-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+        }
+
+        .suggestions-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .suggestion-card {
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-bottom: 1rem;
+            border-left: 5px solid var(--success);
+        }
+
+        .suggestion-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .suggestion-text {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #374151;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 6px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-title">
+                <div class="ai-logo">🤖</div>
+                <div>
+                    <h1>ExpressAI</h1>
+                    <p style="color: #6b7280; margin-top: 0.25rem;">Analyse Intelligente des Ventes</p>
+                </div>
+            </div>
+            <div class="sync-status" id="sync-status">
+                <span>🔄</span>
+                <span>Synchronisation...</span>
+            </div>
+        </div>
+
+        <div id="loading" class="loading">
+            <div class="loading-spinner"></div>
+            <p style="color: white; font-size: 1.2rem; font-weight: 600;">Analyse des données en cours...</p>
+        </div>
+
+        <div id="dashboard" style="display: none;">
+            <div class="kpi-grid" id="kpi-grid"></div>
+
+            <div class="main-grid">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h2 class="chart-title">📈 Évolution des Ventes (7 derniers jours)</h2>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="salesChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="ai-insights">
+                    <div class="insight-header">
+                        <span>🎯</span>
+                        <span>Observations Clés</span>
+                    </div>
+                    <div id="insights-container"></div>
+                </div>
+            </div>
+
+            <div class="chart-card" style="margin-bottom: 2rem;">
+                <div class="chart-header">
+                    <h2 class="chart-title">📊 Ventes par Catégorie</h2>
+                </div>
+                <div class="chart-container">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+
+            <div class="daily-analysis">
+                <div class="analysis-header">
+                    <span style="font-size: 2rem;">📅</span>
+                    <h2 class="analysis-title">Analyse Quotidienne des Ventes</h2>
+                </div>
+                <div id="daily-analysis-container"></div>
+            </div>
+
+            <div class="suggestions-section">
+                <div class="suggestions-header">
+                    <span style="font-size: 2rem;">💡</span>
+                    <h2 class="analysis-title">Suggestions Intelligentes</h2>
+                </div>
+                <div id="suggestions-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+        import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBsGrY-AqYMoI70kT3WMxLgW0HwYA4KyaQ",
+            authDomain: "livraison-c8498.firebaseapp.com",
+            projectId: "livraison-c8498",
+            storageBucket: "livraison-c8498.firebasestorage.app",
+            messagingSenderId: "403240604780",
+            appId: "1:403240604780:web:77d84ad03d68bdaddfb449",
+            measurementId: "G-5YF89BZ5RY"
+        };
+
+        let app, db;
+        let allOrders = [];
+        let salesChart, categoryChart;
+
+        // Initialiser Firebase
+        try {
+            app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            updateSyncStatus(true);
+        } catch (error) {
+            console.error('Erreur Firebase:', error);
+            updateSyncStatus(false);
+        }
+
+        function updateSyncStatus(connected) {
+            const statusEl = document.getElementById('sync-status');
+            if (connected) {
+                statusEl.style.background = '#10b981';
+                statusEl.innerHTML = '<span>✅</span><span>Synchronisé</span>';
+            } else {
+                statusEl.style.background = '#ef4444';
+                statusEl.innerHTML = '<span>❌</span><span>Erreur</span>';
+            }
+        }
+
+        // Charger les données
+        function loadData() {
+            if (!db) return;
+
+            const ordersQuery = query(collection(db, 'orders'), orderBy('createdAt', 'desc'));
+            
+            onSnapshot(ordersQuery, (snapshot) => {
+                allOrders = [];
+                snapshot.forEach((doc) => {
+                    allOrders.push({ id: doc.id, ...doc.data() });
+                });
+                
+                analyzeData();
+            });
+        }
+
+        function analyzeData() {
+            if (allOrders.length === 0) {
+                document.getElementById('loading').innerHTML = `
+                    <div style="text-align: center; color: white;">
+                        <h2>📦 Aucune donnée disponible</h2>
+                        <p>Les commandes apparaîtront ici une fois créées.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Calculer les KPIs
+            const kpis = calculateKPIs();
+            displayKPIs(kpis);
+
+            // Analyser les ventes quotidiennes
+            const dailyData = analyzeDailySales();
+            displayDailyAnalysis(dailyData);
+
+            // Créer les graphiques
+            createCharts(dailyData);
+
+            // Générer les insights
+            generateInsights(kpis, dailyData);
+
+            // Générer les suggestions
+            generateSuggestions(kpis, dailyData);
+
+            // Afficher le dashboard
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+        }
+
+        function calculateKPIs() {
+            const today = new Date().toISOString().split('T')[0];
+            const now = new Date();
+            const last7Days = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            const last30Days = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+            const totalRevenue = allOrders
+                .filter(o => o.status === 'livre')
+                .reduce((sum, o) => sum + o.total, 0);
+
+            const todayOrders = allOrders.filter(o => {
+                const orderDate = o.createdAt 
+                    ? new Date(o.createdAt.seconds * 1000).toISOString().split('T')[0]
+                    : new Date(o.timestamp).toISOString().split('T')[0];
+                return orderDate === today;
+            });
+
+            const todayRevenue = todayOrders
+                .filter(o => o.status === 'livre')
+                .reduce((sum, o) => sum + o.total, 0);
+
+            const last7DaysOrders = allOrders.filter(o => {
+                const orderDate = o.createdAt 
+                    ? new Date(o.createdAt.seconds * 1000)
+                    : new Date(o.timestamp);
+                return orderDate >= last7Days;
+            });
+
+            const avgOrderValue = totalRevenue / allOrders.filter(o => o.status === 'livre').length || 0;
+
+            const deliveredOrders = allOrders.filter(o => o.status === 'livre').length;
+            const totalOrders = allOrders.length;
+            const deliveryRate = (deliveredOrders / totalOrders * 100) || 0;
+
+            return {
+                totalRevenue,
+                todayRevenue,
+                todayOrders: todayOrders.length,
+                totalOrders,
+                avgOrderValue,
+                deliveryRate,
+                last7DaysOrders: last7DaysOrders.length
+            };
+        }
+
+        function displayKPIs(kpis) {
+            const kpiGrid = document.getElementById('kpi-grid');
+            kpiGrid.innerHTML = `
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span class="kpi-icon">💰</span>
+                        <span class="kpi-trend">📈</span>
+                    </div>
+                    <div class="kpi-label">Revenu Total</div>
+                    <div class="kpi-value">${kpis.totalRevenue.toLocaleString()} FCFA</div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span class="kpi-icon">📅</span>
+                        <span class="kpi-trend">🔥</span>
+                    </div>
+                    <div class="kpi-label">Revenu Aujourd'hui</div>
+                    <div class="kpi-value">${kpis.todayRevenue.toLocaleString()} FCFA</div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span class="kpi-icon">📦</span>
+                        <span class="kpi-trend">✨</span>
+                    </div>
+                    <div class="kpi-label">Commandes Aujourd'hui</div>
+                    <div class="kpi-value">${kpis.todayOrders}</div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span class="kpi-icon">💳</span>
+                        <span class="kpi-trend">💎</span>
+                    </div>
+                    <div class="kpi-label">Panier Moyen</div>
+                    <div class="kpi-value">${Math.round(kpis.avgOrderValue).toLocaleString()} FCFA</div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span class="kpi-icon">✅</span>
+                        <span class="kpi-trend">🎯</span>
+                    </div>
+                    <div class="kpi-label">Taux de Livraison</div>
+                    <div class="kpi-value">${kpis.deliveryRate.toFixed(1)}%</div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span class="kpi-icon">📊</span>
+                        <span class="kpi-trend">🚀</span>
+                    </div>
+                    <div class="kpi-label">Total Commandes</div>
+                    <div class="kpi-value">${kpis.totalOrders}</div>
+                </div>
+            `;
+        }
+
+        function analyzeDailySales() {
+            const salesByDay = {};
+            
+            allOrders.forEach(order => {
+                const orderDate = order.createdAt 
+                    ? new Date(order.createdAt.seconds * 1000)
+                    : new Date(order.timestamp);
+                const dateStr = orderDate.toISOString().split('T')[0];
+                
+                if (!salesByDay[dateStr]) {
+                    salesByDay[dateStr] = {
+                        date: dateStr,
+                        orders: [],
+                        revenue: 0,
+                        delivered: 0,
+                        pending: 0
+                    };
+                }
+                
+                salesByDay[dateStr].orders.push(order);
+                if (order.status === 'livre') {
+                    salesByDay[dateStr].revenue += order.total;
+                    salesByDay[dateStr].delivered++;
+                } else {
+                    salesByDay[dateStr].pending++;
+                }
+            });
+
+            return Object.values(salesByDay).sort((a, b) => 
+                new Date(b.date) - new Date(a.date)
+            );
+        }
+
+        function displayDailyAnalysis(dailyData) {
+            const container = document.getElementById('daily-analysis-container');
+            const last7Days = dailyData.slice(0, 7);
+
+            container.innerHTML = last7Days.map(day => {
+                const date = new Date(day.date);
+                const formattedDate = date.toLocaleDateString('fr-FR', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+
+                const analysis = analyzeDay(day, dailyData);
+
+                return `
+                    <div class="day-card">
+                        <div class="day-header">
+                            <div class="day-date">${formattedDate}</div>
+                            <div class="day-revenue">${day.revenue.toLocaleString()} FCFA</div>
+                        </div>
+                        <div class="day-stats">
+                            <div class="day-stat">
+                                📦 Total: <strong>${day.orders.length} commandes</strong>
+                            </div>
+                            <div class="day-stat">
+                                ✅ Livrées: <strong>${day.delivered}</strong>
+                            </div>
+                            <div class="day-stat">
+                                ⏳ En attente: <strong>${day.pending}</strong>
+                            </div>
+                        </div>
+                        <div class="day-analysis">
+                            ${analysis}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function analyzeDay(day, allDays) {
+            const avgRevenue = allDays.reduce((sum, d) => sum + d.revenue, 0) / allDays.length;
+            const avgOrders = allDays.reduce((sum, d) => sum + d.orders.length, 0) / allDays.length;
+
+            let analysis = [];
+
+            if (day.revenue > avgRevenue * 1.2) {
+                analysis.push(`🎉 <strong>Excellente journée !</strong> Les ventes sont ${((day.revenue / avgRevenue - 1) * 100).toFixed(0)}% au-dessus de la moyenne.`);
+            } else if (day.revenue < avgRevenue * 0.8) {
+                analysis.push(`⚠️ Journée en dessous de la moyenne (${((1 - day.revenue / avgRevenue) * 100).toFixed(0)}% de moins).`);
+            } else {
+                analysis.push(`✅ Journée stable, ventes proches de la moyenne.`);
+            }
+
+            if (day.orders.length > avgOrders * 1.2) {
+                analysis.push(`Le nombre de commandes (${day.orders.length}) est significativement élevé.`);
+            }
+
+            const deliveryRate = (day.delivered / day.orders.length * 100);
+            if (deliveryRate === 100) {
+                analysis.push(`✨ Taux de livraison parfait : 100% des commandes livrées !`);
+            } else if (deliveryRate < 80) {
+                analysis.push(`⚠️ ${day.pending} commandes en attente de livraison.`);
+            }
+
+            // Analyse par catégorie
+            const categories = {};
+            day.orders.forEach(order => {
+                order.items.forEach(item => {
+                    categories[item.category] = (categories[item.category] || 0) + item.qty;
+                });
+            });
+
+            const topCategory = Object.entries(categories).sort((a, b) => b[1] - a[1])[0];
+            if (topCategory) {
+                analysis.push(`📊 Catégorie la plus vendue : <strong>Catégorie ${topCategory[0]}</strong> (${topCategory[1]} articles).`);
+            }
+
+            return analysis.join(' ');
+        }
+
+        function createCharts(dailyData) {
+            const last7Days = dailyData.slice(0, 7).reverse();
+
+            // Graphique des ventes
+            const ctxSales = document.getElementById('salesChart').getContext('2d');
+            if (salesChart) salesChart.destroy();
+            
+            salesChart = new Chart(ctxSales, {
+                type: 'line',
+                data: {
+                    labels: last7Days.map(d => new Date(d.date).toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric' })),
+                    datasets: [{
+                        label: 'Revenu (FCFA)',
+                        data: last7Days.map(d => d.revenue),
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 6,
+                        pointHoverRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString() + ' FCFA';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Graphique par catégorie
+            const categories = {};
+            allOrders.forEach(order => {
+                order.items.forEach(item => {
+                    if (!categories[item.category]) {
+                        categories[item.category] = { qty: 0, revenue: 0 };
+                    }
+                    categories[item.category].qty += item.qty;
+                    if (order.status === 'livre') {
+                        categories[item.category].revenue += item.price * item.qty;
+                    }
+                });
+            });
+
+            const ctxCategory = document.getElementById('categoryChart').getContext('2d');
+            if (categoryChart) categoryChart.destroy();
+
+            categoryChart = new Chart(ctxCategory, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(categories).map(cat => `Catégorie ${cat}`),
+                    datasets: [{
+                        data: Object.values(categories).map(c => c.revenue),
+                        backgroundColor: [
+                            '#667eea', '#764ba2', '#f59e0b', '#10b981', 
+                            '#ef4444', '#3b82f6', '#8b5cf6', '#ec4899', '#06b6d4'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': ' + context.parsed.toLocaleString() + ' FCFA';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function generateInsights(kpis, dailyData) {
+            const container = document.getElementById('insights-container');
+            const insights = [];
+
+            // Insight sur le revenu
+            const avgDailyRevenue = dailyData.reduce((sum, d) => sum + d.revenue, 0) / dailyData.length;
+            if (kpis.todayRevenue > avgDailyRevenue * 1.3) {
+                insights.push({
+                    label: 'Performance du jour',
+                    text: `🚀 Excellente performance ! Le revenu d'aujourd'hui dépasse la moyenne de ${((kpis.todayRevenue / avgDailyRevenue - 1) * 100).toFixed(0)}%.`
+                });
+            } else if (kpis.todayRevenue < avgDailyRevenue * 0.7) {
+                insights.push({
+                    label: 'Alerte Performance',
+                    text: `⚠️ Le revenu d'aujourd'hui est ${((1 - kpis.todayRevenue / avgDailyRevenue) * 100).toFixed(0)}% en dessous de la moyenne. Action recommandée.`
+                });
+            }
+
+            // Insight sur le panier moyen
+            if (kpis.avgOrderValue > 3000) {
+                insights.push({
+                    label: 'Panier Moyen',
+                    text: `💎 Excellent panier moyen de ${Math.round(kpis.avgOrderValue).toLocaleString()} FCFA. Les clients commandent en quantité.`
+                });
+            } else if (kpis.avgOrderValue < 2000) {
+                insights.push({
+                    label: 'Opportunité',
+                    text: `💡 Panier moyen de ${Math.round(kpis.avgOrderValue).toLocaleString()} FCFA. Potentiel d'augmentation via des offres groupées.`
+                });
+            }
+
+            // Insight sur le taux de livraison
+            if (kpis.deliveryRate > 95) {
+                insights.push({
+                    label: 'Efficacité',
+                    text: `✨ Taux de livraison exceptionnel de ${kpis.deliveryRate.toFixed(1)}%. Service très fiable !`
+                });
+            } else if (kpis.deliveryRate < 80) {
+                insights.push({
+                    label: 'Amélioration',
+                    text: `⚠️ Taux de livraison à ${kpis.deliveryRate.toFixed(1)}%. ${allOrders.filter(o => o.status === 'nouveau').length} commandes en attente.`
+                });
+            }
+
+            // Tendance hebdomadaire
+            const last7Days = dailyData.slice(0, 7);
+            const prev7Days = dailyData.slice(7, 14);
+            if (prev7Days.length > 0) {
+                const last7Revenue = last7Days.reduce((sum, d) => sum + d.revenue, 0);
+                const prev7Revenue = prev7Days.reduce((sum, d) => sum + d.revenue, 0);
+                const growth = ((last7Revenue / prev7Revenue - 1) * 100);
+                
+                if (growth > 10) {
+                    insights.push({
+                        label: 'Croissance',
+                        text: `📈 Croissance de ${growth.toFixed(0)}% sur les 7 derniers jours par rapport à la semaine précédente !`
+                    });
+                } else if (growth < -10) {
+                    insights.push({
+                        label: 'Tendance',
+                        text: `📉 Baisse de ${Math.abs(growth).toFixed(0)}% cette semaine. Analyse des causes recommandée.`
+                    });
+                }
+            }
+
+            // Meilleur jour
+            const bestDay = [...dailyData].sort((a, b) => b.revenue - a.revenue)[0];
+            const bestDayDate = new Date(bestDay.date).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+            insights.push({
+                label: 'Record',
+                text: `🏆 Meilleur jour : ${bestDayDate} avec ${bestDay.revenue.toLocaleString()} FCFA (${bestDay.orders.length} commandes).`
+            });
+
+            container.innerHTML = insights.map(insight => `
+                <div class="insight-item">
+                    <div class="insight-label">${insight.label}</div>
+                    <div class="insight-text">${insight.text}</div>
+                </div>
+            `).join('');
+        }
+
+        function generateSuggestions(kpis, dailyData) {
+            const container = document.getElementById('suggestions-container');
+            const suggestions = [];
+
+            // Analyse des catégories
+            const categories = {};
+            allOrders.forEach(order => {
+                order.items.forEach(item => {
+                    if (!categories[item.category]) {
+                        categories[item.category] = { qty: 0, revenue: 0, orders: 0 };
+                    }
+                    categories[item.category].qty += item.qty;
+                    if (order.status === 'livre') {
+                        categories[item.category].revenue += item.price * item.qty;
+                        categories[item.category].orders++;
+                    }
+                });
+            });
+
+            const topCategory = Object.entries(categories).sort((a, b) => b[1].revenue - a[1].revenue)[0];
+            const weakCategory = Object.entries(categories).sort((a, b) => a[1].revenue - b[1].revenue)[0];
+
+            // Suggestion sur les catégories performantes
+            if (topCategory) {
+                suggestions.push({
+                    title: 'Capitaliser sur les best-sellers',
+                    text: `La catégorie ${topCategory[0]} génère ${topCategory[1].revenue.toLocaleString()} FCFA. Envisagez d'augmenter le stock et de créer des promotions autour de ces produits populaires.`
+                });
+            }
+
+            // Suggestion sur les catégories faibles
+            if (weakCategory && weakCategory[1].revenue < kpis.totalRevenue * 0.05) {
+                suggestions.push({
+                    title: 'Redynamiser les ventes',
+                    text: `La catégorie ${weakCategory[0]} ne représente que ${weakCategory[1].revenue.toLocaleString()} FCFA. Proposez des offres spéciales ou des combos pour stimuler les ventes.`
+                });
+            }
+
+            // Suggestion sur le panier moyen
+            if (kpis.avgOrderValue < 2500) {
+                suggestions.push({
+                    title: 'Augmenter le panier moyen',
+                    text: `Votre panier moyen est de ${Math.round(kpis.avgOrderValue).toLocaleString()} FCFA. Créez des offres "menu" ou des réductions sur les commandes groupées pour l'augmenter de 20-30%.`
+                });
+            }
+
+            // Suggestion sur les heures de pointe
+            const ordersByHour = {};
+            allOrders.forEach(order => {
+                const hour = order.createdAt 
+                    ? new Date(order.createdAt.seconds * 1000).getHours()
+                    : new Date(order.timestamp).getHours();
+                ordersByHour[hour] = (ordersByHour[hour] || 0) + 1;
+            });
+
+            const peakHour = Object.entries(ordersByHour).sort((a, b) => b[1] - a[1])[0];
+            if (peakHour) {
+                suggestions.push({
+                    title: 'Optimiser les ressources',
+                    text: `L'heure de pointe est ${peakHour[0]}h avec ${peakHour[1]} commandes. Assurez-vous d'avoir suffisamment de personnel et de stock pendant cette période.`
+                });
+            }
+
+            // Suggestion sur la fidélisation
+            const uniqueCustomers = new Set(allOrders.map(o => o.customer?.whatsapp).filter(Boolean));
+            const repeatRate = (allOrders.length - uniqueCustomers.size) / allOrders.length * 100;
+            
+            if (repeatRate < 30) {
+                suggestions.push({
+                    title: 'Programme de fidélité',
+                    text: `Seulement ${repeatRate.toFixed(0)}% de clients récurrents. Lancez un programme de fidélité : offrez la 10ème commande à -50% pour encourager les achats répétés.`
+                });
+            } else {
+                suggestions.push({
+                    title: 'Excellent taux de fidélité',
+                    text: `${repeatRate.toFixed(0)}% de clients récurrents ! Continuez à les récompenser avec des avantages exclusifs et des surprises occasionnelles.`
+                });
+            }
+
+            // Suggestion sur les jours faibles
+            const dayOfWeekSales = {};
+            dailyData.forEach(day => {
+                const dayName = new Date(day.date).toLocaleDateString('fr-FR', { weekday: 'long' });
+                if (!dayOfWeekSales[dayName]) {
+                    dayOfWeekSales[dayName] = { revenue: 0, count: 0 };
+                }
+                dayOfWeekSales[dayName].revenue += day.revenue;
+                dayOfWeekSales[dayName].count++;
+            });
+
+            const avgByDay = Object.entries(dayOfWeekSales).map(([day, data]) => ({
+                day,
+                avg: data.revenue / data.count
+            }));
+
+            const weakestDay = avgByDay.sort((a, b) => a.avg - b.avg)[0];
+            if (weakestDay && avgByDay.length > 3) {
+                suggestions.push({
+                    title: 'Booster les jours faibles',
+                    text: `Le ${weakestDay.day} génère moins de ventes (${Math.round(weakestDay.avg).toLocaleString()} FCFA en moyenne). Lancez une promotion "Happy ${weakestDay.day}" avec -15% sur certains produits.`
+                });
+            }
+
+            // Suggestion marketing
+            suggestions.push({
+                title: 'Stratégie marketing digitale',
+                text: `Avec ${kpis.totalOrders} commandes enregistrées, vous avez une base de données précieuse. Utilisez WhatsApp Business pour envoyer des offres personnalisées et des nouveautés à vos clients fidèles.`
+            });
+
+            // Suggestion opérationnelle
+            if (kpis.deliveryRate < 90) {
+                suggestions.push({
+                    title: 'Améliorer la logistique',
+                    text: `Taux de livraison à ${kpis.deliveryRate.toFixed(0)}%. Analysez les causes de non-livraison et mettez en place un système de suivi en temps réel pour rassurer les clients.`
+                });
+            }
+
+            container.innerHTML = suggestions.map(suggestion => `
+                <div class="suggestion-card">
+                    <div class="suggestion-title">
+                        <span>💡</span>
+                        ${suggestion.title}
+                    </div>
+                    <div class="suggestion-text">${suggestion.text}</div>
+                </div>
+            `).join('');
+        }
+
+        // Charger les données au démarrage
+        loadData();
+    </script>
+</body>
+</html>
