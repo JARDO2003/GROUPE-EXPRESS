@@ -1,4 +1,4 @@
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
     import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -654,12 +654,12 @@ window.addEventListener('load', () => {
         let alertMessage = '';
         let alertClass = '';
         
-        if (hour >= 0 && hour < 9) {
-            alertMessage = `⚡ URGENT : Commandez AVANT 10H pour un retrait IMMÉDIAT au stand du groupe Express ! Il vous reste ${8 - hour}h${60 - minutes < 10 ? '0' : ''}${60 - minutes}min`;
+        if (hour >= 0 && hour < 10) {
+            alertMessage = `⚡ URGENT : Commandez AVANT 10H pour un retrait IMMÉDIAT au stand du groupe Express ! Il vous reste ${9 - hour}h${60 - minutes < 10 ? '0' : ''}${60 - minutes}min`;
             alertClass = 'urgent';
             timeAlert.style.display = 'block';
         } 
-        else if (hour >= 9) {
+        else if (hour >= 10) {
             alertMessage = `⚠️ ATTENTION : Les commandes après 10H sont traitées pour DEMAIN - Retrait au stand du groupe Express`;
             alertClass = 'warning';
             timeAlert.style.display = 'block';
@@ -1174,7 +1174,7 @@ window.addEventListener('load', () => {
                 items: [...cart],
                 total,
                 timestamp: new Date().toISOString(),
-                deliveryDate: hour >= 9 ? 'lendemain' : 'aujourdhui'
+                deliveryDate: hour >= 10 ? 'lendemain' : 'aujourdhui'
             };
             
             const orderCode = await window.submitOrder(order);
@@ -1206,7 +1206,7 @@ window.addEventListener('load', () => {
             const pickupMessage = document.createElement('div');
             let deliveryInfo = '';
             
-            if (hour >= 0 && hour < 9) {
+            if (hour >= 0 && hour < 10) {
                 deliveryInfo = `
                     <div style="background: linear-gradient(135deg, #28a745, #34ce57); color: white; padding: 1.5rem; border-radius: 12px; text-align: center; margin-bottom: 1rem;">
                         ✅ <strong>RETRAIT IMMÉDIAT</strong><br><br>
