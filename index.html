@@ -1616,11 +1616,19 @@
     </section>
 
     <!-- BOUTON NOTIFICATION -->
-<div id="notification-button" style="position: fixed; bottom: 80px; right: 20px; z-index: 999;">
+<div id="notification-button" style="position: fixed; bottom: 150px; right: 20px; z-index: 999;">
     <button onclick="requestNotificationPermission()" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 1rem; border-radius: 50%; width: 60px; height: 60px; cursor: pointer; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); font-size: 1.5rem; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">
         🔔
     </button>
     <div id="notification-status" style="position: absolute; top: -5px; right: -5px; background: #dc3545; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 10px; display: none; align-items: center; justify-content: center; font-weight: bold;">OFF</div>
+</div>
+
+<!-- BOUTON TÉLÉCHARGEMENT APP -->
+<div id="download-button" style="position: fixed; bottom: 80px; right: 20px; z-index: 999;">
+    <button onclick="triggerInstallPrompt()" style="background: linear-gradient(135deg, #ff4e00, #ff6b9d); color: white; border: none; padding: 1rem; border-radius: 50%; width: 60px; height: 60px; cursor: pointer; box-shadow: 0 4px 15px rgba(255, 78, 0, 0.4); font-size: 1.5rem; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">
+        📱
+    </button>
+    <div id="install-status" style="position: absolute; top: -5px; right: -5px; background: #28a745; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 10px; display: none; align-items: center; justify-content: center; font-weight: bold;">✓</div>
 </div>
 
 
@@ -2624,10 +2632,8 @@
                         </div>
                     </div>
                 </div>
-
-  
-    </div> 
+ </div> 
      <script type="module" src="suite.js"></script>
 </body>
 </html>
-
+  
