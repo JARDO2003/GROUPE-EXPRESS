@@ -1,4 +1,4 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
     import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -1433,40 +1433,104 @@ if ('serviceWorker' in navigator) {
 // Gestion de la bannière d'installation PWA
 let deferredPrompt;
 
+// Fonction pour déclencher l'installation
+window.triggerInstallPrompt = async function() {
+    const installStatus = document.getElementById('install-status');
+    const downloadBtn = document.querySelector('#download-button button');
+    
+    if (deferredPrompt) {
+        // Prompt d'installation disponible
+        try {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            
+            if (outcome === 'accepted') {
+                console.log('Installation acceptée');
+                showNotificationStatus('✅ Application installée!', '#28a745');
+                installStatus.style.display = 'flex';
+                downloadBtn.style.background = 'linear-gradient(135deg, #28a745, #34ce57)';
+            } else {
+                console.log('Installation refusée');
+                showNotificationStatus('❌ Installation annulée', '#dc3545');
+            }
+            deferredPrompt = null;
+        } catch (error) {
+            console.error('Erreur installation:', error);
+            showNotificationStatus('❌ Erreur d\'installation', '#dc3545');
+        }
+    } else {
+        // Pas de prompt disponible - afficher les instructions
+        showInstallInstructions();
+    }
+};
+
+// Fonction pour afficher les instructions d'installation
+function showInstallInstructions() {
+    const modal = document.createElement('div');
+    modal.innerHTML = `
+        <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10001; display: flex; align-items: center; justify-content: center; padding: 20px;">
+            <div style="background: white; border-radius: 20px; padding: 2rem; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto;">
+                <div style="text-align: center; margin-bottom: 1.5rem;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">📱</div>
+                    <h2 style="color: #ff4e00; margin-bottom: 0.5rem;">Installer l'Application</h2>
+                    <p style="color: #666; font-size: 0.9rem;">Accédez rapidement à GROUPE EXPRESS</p>
+                </div>
+                
+                <div style="background: #f8f9fa; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem;">
+                    <h3 style="font-size: 1rem; margin-bottom: 1rem; color: #333;">📱 Comment installer :</h3>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <strong style="color: #ff4e00;">Chrome / Edge (Android) :</strong>
+                        <ol style="margin: 0.5rem 0 0 1.5rem; line-height: 1.8; font-size: 0.9rem;">
+                            <li>Cliquez sur le menu ⋮ (en haut à droite)</li>
+                            <li>Sélectionnez "Ajouter à l'écran d'accueil"</li>
+                            <li>Confirmez l'installation</li>
+                        </ol>
+                    </div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <strong style="color: #ff4e00;">Safari (iPhone) :</strong>
+                        <ol style="margin: 0.5rem 0 0 1.5rem; line-height: 1.8; font-size: 0.9rem;">
+                            <li>Appuyez sur le bouton Partager 📤</li>
+                            <li>Faites défiler et sélectionnez "Sur l'écran d'accueil"</li>
+                            <li>Appuyez sur "Ajouter"</li>
+                        </ol>
+                    </div>
+                    
+                    <div style="background: linear-gradient(135deg, #ff4e00, #ff6b9d); color: white; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                        <strong>✨ Avantages :</strong>
+                        <ul style="margin: 0.5rem 0 0 1.5rem; line-height: 1.6; font-size: 0.85rem;">
+                            <li>Accès rapide depuis votre écran d'accueil</li>
+                            <li>Notifications en temps réel</li>
+                            <li>Fonctionne hors ligne</li>
+                            <li>Expérience optimisée</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <button onclick="this.parentElement.parentElement.remove()" style="width: 100%; background: linear-gradient(135deg, #ff4e00, #ff6b9d); color: white; border: none; padding: 1rem; border-radius: 12px; font-size: 1rem; font-weight: 600; cursor: pointer;">
+                    J'ai compris
+                </button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
+
 window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
-    
-    const installBanner = document.createElement('div');
-    installBanner.innerHTML = `
-        <div style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #ff4e00, #ff6b9d); color: white; padding: 1rem 1.5rem; border-radius: 50px; box-shadow: 0 8px 25px rgba(255, 78, 0, 0.4); z-index: 10000; display: flex; align-items: center; gap: 1rem; animation: slideUp 0.5s ease-out; max-width: 90vw;">
-            <span style="font-size: 1.5rem;">📱</span>
-            <div style="flex: 1;">
-                <strong>Installer l'app</strong><br>
-                <small style="opacity: 0.9;">Accès rapide à vos repas</small>
-            </div>
-            <button id="install-btn" style="background: white; color: #ff4e00; border: none; padding: 0.5rem 1rem; border-radius: 25px; font-weight: 600; cursor: pointer;">
-                Installer
-            </button>
-            <button id="close-install" style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; padding: 0.5rem;">×</button>
-        </div>
-    `;
-    document.body.appendChild(installBanner);
-    
-    document.getElementById('install-btn').addEventListener('click', async () => {
-        installBanner.remove();
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        console.log(`Installation: ${outcome}`);
-        deferredPrompt = null;
-    });
-    
-    document.getElementById('close-install').addEventListener('click', () => {
-        installBanner.remove();
-    });
+    console.log('Prompt d\'installation disponible');
 });
 
 window.addEventListener('appinstalled', () => {
     console.log('PWA installée avec succès!');
+    const installStatus = document.getElementById('install-status');
+    const downloadBtn = document.querySelector('#download-button button');
+    
+    if (installStatus) installStatus.style.display = 'flex';
+    if (downloadBtn) downloadBtn.style.background = 'linear-gradient(135deg, #28a745, #34ce57)';
+    
+    showNotificationStatus('🎉 Application installée avec succès!', '#28a745');
     deferredPrompt = null;
 });
