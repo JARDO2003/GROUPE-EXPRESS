@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -42,6 +43,7 @@
             text-align: center;
             position: relative;
             z-index: 10;
+            padding: 20px;
         }
 
         /* Zone pour votre logo */
@@ -347,7 +349,8 @@
             height: 100vh;
             background: #ffffff;
             position: relative;
-            overflow: hidden;
+            overflow-x: hidden;
+            overflow-y: auto;
         }
 
         .main-content.active {
@@ -379,6 +382,7 @@
             height: 5px;
             background: linear-gradient(90deg, transparent, #dc2626, transparent);
             top: 0;
+            z-index: 1;
         }
 
         .content-wrapper {
@@ -387,8 +391,9 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100%;
-            padding: 60px;
+            min-height: 100vh;
+            padding: 60px 20px;
+            z-index: 2;
         }
 
         .main-logo {
@@ -517,6 +522,7 @@
             opacity: 0;
             animation: slideDown 1s ease 0.2s forwards;
             letter-spacing: -1px;
+            text-align: center;
         }
 
         .welcome-title span {
@@ -532,6 +538,7 @@
             margin-bottom: 20px;
             opacity: 0;
             animation: fadeIn 1s ease 0.5s forwards;
+            text-align: center;
         }
 
         .divider {
@@ -557,6 +564,7 @@
             margin-bottom: 60px;
             opacity: 0;
             animation: fadeIn 1s ease 1s forwards;
+            padding: 0 20px;
         }
 
         .features {
@@ -565,6 +573,8 @@
             margin-bottom: 60px;
             opacity: 0;
             animation: fadeIn 1s ease 1.2s forwards;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
         .feature {
@@ -587,6 +597,7 @@
             color: white;
             font-size: 24px;
             box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+            flex-shrink: 0;
         }
 
         .button-container {
@@ -594,6 +605,8 @@
             gap: 30px;
             opacity: 0;
             animation: fadeIn 1s ease 1.5s forwards;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
         .nav-button {
@@ -612,6 +625,8 @@
             overflow: hidden;
             transition: all 0.4s ease;
             box-shadow: 0 8px 25px rgba(220, 38, 38, 0.3);
+            display: inline-block;
+            text-align: center;
         }
 
         .nav-button::before {
@@ -636,6 +651,7 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            justify-content: center;
         }
 
         .nav-button:hover {
@@ -700,16 +716,207 @@
             50% { transform: translate(-80px, 120px) rotate(180deg); }
             75% { transform: translate(120px, 80px) rotate(270deg); }
         }
+
+        /* ===== RESPONSIVE MOBILE ===== */
+        @media (max-width: 768px) {
+            .welcome-word {
+                font-size: 36px;
+                margin: 5px;
+            }
+
+            .welcome-word.chez {
+                font-size: 24px;
+            }
+
+            .logo-placeholder {
+                width: 120px;
+                height: 120px;
+                margin-bottom: 40px;
+            }
+
+            .logo-fallback {
+                width: 120px;
+                height: 120px;
+                font-size: 24px;
+            }
+
+            .welcome-animation {
+                margin-bottom: 40px;
+            }
+
+            .progress-counter {
+                font-size: 18px;
+                bottom: 40px;
+            }
+
+            .content-wrapper {
+                padding: 40px 15px;
+            }
+
+            .main-logo {
+                width: 120px;
+                height: 120px;
+                margin-bottom: 30px;
+            }
+
+            .truck-body {
+                width: 100px;
+                height: 60px;
+            }
+
+            .truck-cabin {
+                width: 45px;
+                height: 50px;
+                left: -40px;
+            }
+
+            .truck-window {
+                width: 25px;
+                height: 18px;
+                top: 6px;
+                left: 8px;
+            }
+
+            .wheel {
+                width: 25px;
+                height: 25px;
+                border-width: 3px;
+                bottom: -12px;
+            }
+
+            .wheel.front {
+                left: -25px;
+            }
+
+            .wheel.back {
+                right: 10px;
+            }
+
+            .package-icon {
+                width: 22px;
+                height: 22px;
+                font-size: 11px;
+            }
+
+            .express-badge {
+                top: -15px;
+                right: -20px;
+                padding: 5px 12px;
+                font-size: 10px;
+            }
+
+            .welcome-title {
+                font-size: 36px;
+                margin-bottom: 8px;
+            }
+
+            .welcome-subtitle {
+                font-size: 14px;
+                letter-spacing: 1px;
+                margin-bottom: 15px;
+            }
+
+            .divider {
+                width: 60px;
+                height: 3px;
+                margin: 15px 0;
+            }
+
+            .description {
+                font-size: 14px;
+                line-height: 1.6;
+                margin-bottom: 40px;
+                padding: 0 10px;
+            }
+
+            .features {
+                gap: 20px;
+                margin-bottom: 40px;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .feature {
+                font-size: 14px;
+                gap: 12px;
+            }
+
+            .feature-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
+            }
+
+            .button-container {
+                gap: 15px;
+                flex-direction: column;
+                width: 100%;
+                padding: 0 15px;
+            }
+
+            .nav-button {
+                padding: 15px 30px;
+                font-size: 13px;
+                letter-spacing: 1px;
+                width: 100%;
+                max-width: 350px;
+            }
+
+            .corner-decoration {
+                width: 60px;
+                height: 60px;
+                border-width: 2px;
+            }
+
+            .corner-decoration.top-left {
+                top: 15px;
+                left: 15px;
+            }
+
+            .corner-decoration.bottom-right {
+                bottom: 15px;
+                right: 15px;
+            }
+
+            .floating-package {
+                width: 20px;
+                height: 20px;
+            }
+
+            .delivery-point {
+                width: 15px;
+                height: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .welcome-title {
+                font-size: 28px;
+            }
+
+            .welcome-subtitle {
+                font-size: 12px;
+            }
+
+            .description {
+                font-size: 13px;
+            }
+
+            .nav-button {
+                padding: 12px 25px;
+                font-size: 12px;
+            }
+        }
     </style>
 </head>
 <body>
     <!-- INTRO VIDEO -->
     <div class="intro-container" id="introContainer">
         <div class="intro-content">
-            <!-- Zone pour le logo - Remplacez l'URL par votre logo -->
+            <!-- Zone pour le logo -->
             <div class="logo-placeholder">
                 <img src="image/GE.jpg" alt="Groupe Express Logo" id="logoImage" onerror="this.style.display='none'">
-                <div class="logo-fallback">LOGO</div>
+                <div class="logo-fallback">GE</div>
             </div>
 
             <!-- Animation de bienvenue -->
@@ -781,10 +988,7 @@
             <p class="welcome-subtitle">Service de Livraison Professionnel</p>
             <div class="divider"></div>
             <p class="description">
-               Chers clients,
-Nous tenons à vous remercier sincèrement pour votre confiance et votre fidélité envers Groupe Express.
-Votre satisfaction est notre priorité, et nous mettons tout en œuvre pour vous offrir le meilleur service possible.
-Le groupe express vous reserve de nouveau supprise, soyez au rendez-vous
+               Chers clients, Nous tenons à vous remercier sincèrement pour votre confiance et votre fidélité envers Groupe Express. Votre satisfaction est notre priorité, et nous mettons tout en œuvre pour vous offrir le meilleur service possible. Le groupe express vous réserve de nouvelles surprises, soyez au rendez-vous.
             </p>
             <div class="features">
                 <div class="feature">
@@ -805,12 +1009,10 @@ Le groupe express vous reserve de nouveau supprise, soyez au rendez-vous
                     <span>Groupe loko Zone4</span>
                 </a>
                 <a href="loko.html" class="nav-button secondary">
-                    <span> Groupe loko Macory</span>
+                    <span>Groupe loko Macory</span>
                 </a>
             </div>
         </div>
-    </div>
-
 
       </div> 
      <script type="module" src="marcio.js"></script>
