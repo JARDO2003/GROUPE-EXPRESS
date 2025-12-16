@@ -857,13 +857,13 @@
         <div class="search-container">
             <div class="search-box">
                 <span class="search-icon">🔍</span>
-                <input 
-                    type="text" 
-                    class="search-input" 
-                    id="search-input" 
-                    placeholder="Rechercher une commande par code (ex: CMD-001)..."
-                    autocomplete="off"
-                >
+           <input 
+    type="text" 
+    class="search-input" 
+    id="search-input" 
+    placeholder="Rechercher par code (CMD-001) ou nom de client..."
+    autocomplete="off"
+>
                 <div class="search-suggestions" id="search-suggestions"></div>
             </div>
         </div>
@@ -1210,57 +1210,59 @@
             }
         }
 
-        // Recherche de commandes
-        const searchInput = document.getElementById('search-input');
-        const searchSuggestions = document.getElementById('search-suggestions');
+       // Recherche de commandes
+const searchInput = document.getElementById('search-input');
+const searchSuggestions = document.getElementById('search-suggestions');
 
-        searchInput.addEventListener('input', (e) => {
-            const searchTerm = e.target.value.trim().toUpperCase();
+searchInput.addEventListener('input', (e) => {
+    const searchTerm = e.target.value.trim().toUpperCase();
+    
+    if (searchTerm.length === 0) {
+        searchSuggestions.classList.remove('active');
+        highlightedOrderId = null;
+        filterOrders();
+        return;
+    }
+
+    const matches = allOrders.filter(order => {
+        const customerName = (order.customer?.name || '').toUpperCase();
+        const orderCode = order.code.toUpperCase();
+        
+        return orderCode.includes(searchTerm) || customerName.includes(searchTerm);
+    });
+
+    if (matches.length > 0) {
+        searchSuggestions.innerHTML = matches.slice(0, 5).map(order => {
+            const date = order.createdAt ? new Date(order.createdAt.seconds * 1000) : new Date(order.timestamp);
+            const formattedDate = date.toLocaleDateString('fr-FR');
+            const isDelivered = order.status === 'livre';
             
-            if (searchTerm.length === 0) {
-                searchSuggestions.classList.remove('active');
-                highlightedOrderId = null;
-                filterOrders();
-                return;
-            }
-
-            const matches = allOrders.filter(order => 
-                order.code.toUpperCase().includes(searchTerm)
-            );
-
-            if (matches.length > 0) {
-                searchSuggestions.innerHTML = matches.slice(0, 5).map(order => {
-                    const date = order.createdAt ? new Date(order.createdAt.seconds * 1000) : new Date(order.timestamp);
-                    const formattedDate = date.toLocaleDateString('fr-FR');
-                    const isDelivered = order.status === 'livre';
-                    
-                    return `
-                        <div class="suggestion-item" onclick="selectOrder('${order.id}')">
-                            <div>
-                                <div class="suggestion-code">${order.code}</div>
-                                <div class="suggestion-details">
-                                    <span>👤 ${order.customer?.name || 'N/A'}</span>
-                                    <span>📅 ${formattedDate}</span>
-                                    <span>💰 ${order.total.toLocaleString()} FCFA</span>
-                                </div>
-                            </div>
-                            <span class="suggestion-status status-${order.status}">
-                                ${isDelivered ? '✅ Livrée' : '⏳ En attente'}
-                            </span>
+            return `
+                <div class="suggestion-item" onclick="selectOrder('${order.id}')">
+                    <div>
+                        <div class="suggestion-code">${order.code}</div>
+                        <div class="suggestion-details">
+                            <span>👤 ${order.customer?.name || 'N/A'}</span>
+                            <span>📅 ${formattedDate}</span>
+                            <span>💰 ${order.total.toLocaleString()} FCFA</span>
                         </div>
-                    `;
-                }).join('');
-                searchSuggestions.classList.add('active');
-            } else {
-                searchSuggestions.innerHTML = `
-                    <div class="suggestion-item" style="pointer-events: none;">
-                        <div style="color: #6c757d;">❌ Aucune commande trouvée</div>
                     </div>
-                `;
-                searchSuggestions.classList.add('active');
-            }
-        });
-
+                    <span class="suggestion-status status-${order.status}">
+                        ${isDelivered ? '✅ Livrée' : '⏳ En attente'}
+                    </span>
+                </div>
+            `;
+        }).join('');
+        searchSuggestions.classList.add('active');
+    } else {
+        searchSuggestions.innerHTML = `
+            <div class="suggestion-item" style="pointer-events: none;">
+                <div style="color: #6c757d;">❌ Aucune commande trouvée</div>
+            </div>
+        `;
+        searchSuggestions.classList.add('active');
+    }
+});
         // Sélectionner une commande
         window.selectOrder = function(orderId) {
             highlightedOrderId = orderId;
@@ -1307,11 +1309,14 @@
 
             let filtered = [...allOrders];
 
-            if (searchTerm) {
-                filtered = filtered.filter(order => 
-                    order.code.toUpperCase().includes(searchTerm)
-                );
-            }
+     if (searchTerm) {
+    filtered = filtered.filter(order => {
+        const customerName = (order.customer?.name || '').toUpperCase();
+        const orderCode = order.code.toUpperCase();
+        
+        return orderCode.includes(searchTerm) || customerName.includes(searchTerm);
+    });
+}
 
             if (dateFilter) {
                 filtered = filtered.filter(order => {
