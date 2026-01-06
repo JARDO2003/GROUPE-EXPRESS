@@ -1,0 +1,4133 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>GROUPE EXPRESS - Repas Universitaires</title>
+    <meta name="google-site-verification" content="Dslg7SeH2D1d_eRjYSEi22ZtU86QGVdAexktPU969Gw" />
+    <meta name="google-site-verification" content="_fI5_stSft_VB3HFOMJC4Iqjovlj0LL7ycXZamAGgOU" />
+    <meta name="Repas étudiant pas cher" content="Livraison des repas aux étudiants sur le campus" />
+    <meta name="Plats locaux pour étudiants" content="Livraison de repas universitaire sur le campus" />
+    <meta name="Restauration universitaire privée" content="plateforme de repas étudiants" />
+    <meta name="Plateforme de repas étudiant" content="Groupe express" />
+    <meta name="Groupe Express" content="Repas universitaires" />
+
+    <!-- PWA Configuration -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ff4e00">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="GROUPE EXPRESS">
+    <link rel="apple-touch-icon" href="image/u.png">
+    
+    <!-- FCM Configuration -->
+<script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-messaging-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #000000;
+            --primary-light: #100f0f;
+            --primary-dark: #280059;
+            --secondary: #131315;
+            --accent: #f10505;
+            --gradient: linear-gradient(45deg, #f3ecec, #d61215, #ffffff, #ff0004, #b62a2a, #d20d0d, #e2d9da, #f0eeea);
+            --surface: #FFFFFF;
+            --background: #FAFAFA;
+            --on-surface: #262626;
+            --on-surface-light: #8E8E8E;
+            --border: #DBDBDB;
+            --shadow: 0 2px 4px rgba(0,0,0,0.1);
+            --shadow-lg: 0 8px 25px rgba(0,0,0,0.15);
+            --radius: 12px;
+            --radius-xl: 24px;
+        }
+
+        html {
+            overflow-x: hidden;
+            width: 100%;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--background);
+            color: var(--on-surface);
+            line-height: 1.6;
+            min-height: 100vh;
+            touch-action: manipulation;
+            overflow-x: hidden;
+            width: 100%;
+            max-width: 100vw;
+            position: relative;
+        }
+
+        .ads-section {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 0;
+            overflow: hidden;
+        }
+
+        .ads-container {
+            position: relative;
+            height: 200px;
+            border-radius: var(--radius);
+            overflow: hidden;
+            margin: 0 16px;
+            box-shadow: var(--shadow);
+        }
+
+        .ads-slider {
+            display: flex;
+            animation: slideAds 45s infinite linear;
+            width: 600%;
+        }
+
+        .ad-item {
+            min-width: 16.666%;
+            height: 200px;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            flex-shrink: 0;
+            display: block;
+            line-height: 0;
+        }
+
+        .ad-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 0;
+            display: block;
+            vertical-align: bottom;
+        }
+
+        .ad-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .ad-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .ad-subtitle {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        @keyframes slideAds {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        .header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-content {
+            max-width: 975px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 12px;
+            gap: 8px;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .header-logo {
+            vertical-align: middle;
+            height: 50px;
+            width: 50px;
+            object-fit: contain;
+            border-radius: 10px;
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.13);
+            border: 2px solid #ff4e00;
+        }
+
+        .logo-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--on-surface);
+            font-family: 'Segoe UI', sans-serif;
+            letter-spacing: -0.5px;
+            white-space: nowrap;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: nowrap;
+            overflow: visible;
+        }
+
+        .cart-icon {
+            position: relative;
+            background: none;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            min-width: 40px;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .cart-icon:hover {
+            background: var(--background);
+            transform: scale(1.1);
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            background: var(--accent);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            min-width: 18px;
+            border: 2px solid white;
+        }
+
+        .contact-service-btn {
+            position: relative;
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            min-width: 40px;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            box-shadow: 0 2px 8px rgba(37, 211, 102, 0.3);
+            flex-shrink: 0;
+        }
+
+        .contact-service-btn:hover {
+            background: linear-gradient(135deg, #128C7E, #075E54);
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(37, 211, 102, 0.5);
+        }
+
+        .time-alert {
+            background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+            color: white;
+            padding: 16px;
+            text-align: center;
+            font-weight: 600;
+            display: none;
+            font-size: 14px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .time-alert.urgent {
+            animation: blinkAlert 2s infinite;
+            background: linear-gradient(135deg, #ff3333, #ff6b6b);
+        }
+
+        .time-alert.warning {
+            animation: blinkAlert 2s infinite;
+            background: linear-gradient(135deg, #ff9800, #ffa726);
+        }
+
+        @keyframes blinkAlert {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.85;
+                transform: scale(1.02);
+            }
+        }
+
+        .nav-section {
+            padding: 16px 0;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            position: relative;
+        }
+
+        .scroll-indicator {
+            text-align: center;
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            font-size: 13px;
+            font-weight: 600;
+            animation: slideDown 0.5s ease-out;
+        }
+
+        .scroll-arrow {
+            display: inline-block;
+            animation: bounce 2s infinite;
+            margin-left: 8px;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+
+        .nav-stories {
+            max-width: 975px;
+            margin: 0 auto;
+            display: flex;
+            gap: 16px;
+            overflow-x: auto;
+            padding: 0 16px;
+            scrollbar-width: none;
+        }
+
+        .nav-stories::-webkit-scrollbar {
+            display: none;
+        }
+
+        .nav-story {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 80px;
+            text-decoration: none;
+            color: inherit;
+            padding: 8px;
+            border-radius: 12px;
+            position: relative;
+        }
+
+        .nav-story:active {
+            background: var(--background);
+        }
+
+        .nav-story-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 28px;
+            position: relative;
+            padding: 3px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .nav-story:hover .nav-story-avatar {
+            transform: scale(1.1);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .nav-story-image {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid white;
+        }
+
+        .nav-story-text {
+            font-size: 12px;
+            font-weight: 400;
+            color: var(--on-surface);
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        @keyframes bounceShop {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0) scale(1);
+            }
+            10% {
+                transform: translateY(-8px) scale(1.05);
+            }
+            30% {
+                transform: translateY(-4px) scale(1.02);
+            }
+            60% {
+                transform: translateY(-6px) scale(1.03);
+            }
+        }
+
+        @keyframes wiggleAnnonce {
+            0%, 50%, 100% {
+                transform: rotate(0deg) scale(1);
+            }
+            10%, 30% {
+                transform: rotate(-5deg) scale(1.05);
+            }
+            20%, 40% {
+                transform: rotate(5deg) scale(1.05);
+            }
+        }
+
+        @keyframes rainbow {
+            0% { background: linear-gradient(45deg, #ff6b6b, #4ecdc4); }
+            25% { background: linear-gradient(45deg, #4ecdc4, #45b7d1); }
+            50% { background: linear-gradient(45deg, #45b7d1, #96ceb4); }
+            75% { background: linear-gradient(45deg, #96ceb4, #ffeaa7); }
+            100% { background: linear-gradient(45deg, #ffeaa7, #ff6b6b); }
+        }
+
+        @keyframes glowPulse {
+            0%, 100% { 
+                box-shadow: 0 0 20px rgba(255, 20, 147, 0.6), 0 0 30px rgba(255, 20, 147, 0.3);
+            }
+            50% { 
+                box-shadow: 0 0 30px rgba(255, 20, 147, 0.9), 0 0 40px rgba(255, 20, 147, 0.5);
+            }
+        }
+
+        .nav-story.shopping-animate .nav-story-avatar {
+            animation: bounceShop 3s infinite ease-in-out, rainbow 4s infinite, glowPulse 2s infinite;
+            background-size: 300% 300%;
+        }
+
+        .nav-story.annonce-animate .nav-story-avatar {
+            animation: wiggleAnnonce 2.5s infinite ease-in-out, glowPulse 3s infinite;
+            background: linear-gradient(45deg, #ff9a9e, #fecfef, #ff6b9d, #c44569);
+            background-size: 300% 300%;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ff0000;
+            color: white;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            font-size: 12px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid white;
+            box-shadow: 0 2px 8px rgba(255, 0, 0, 0.4);
+            z-index: 10;
+            animation: badgePulse 2s infinite ease-in-out;
+        }
+
+        @keyframes badgePulse {
+            0%, 100% { 
+                transform: scale(1);
+                background: #ff0000;
+            }
+            50% { 
+                transform: scale(1.2);
+                background: #ff3333;
+            }
+        }
+
+        .container {
+            max-width: 975px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        .main-feed {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .post-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            margin-bottom: 16px;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .post-header {
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .post-category {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .category-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .category-info h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .category-info p {
+            font-size: 14px;
+            color: var(--on-surface-light);
+            margin: 0;
+        }
+
+        .food-grid {
+            display: grid;
+            gap: 1px;
+            background: var(--border);
+        }
+
+        @media (max-width: 480px) {
+            .food-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 481px) and (max-width: 768px) {
+            .food-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (min-width: 769px) {
+            .food-grid {
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            }
+        }
+
+        .food-item {
+            position: relative;
+            background: var(--surface);
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .food-item:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .food-item:active {
+            transform: scale(0.98);
+        }
+
+        .food-item-image {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            transition: all 0.3s ease;
+            cursor: zoom-in;
+        }
+
+        .food-item-image:hover {
+            opacity: 0.9;
+        }
+
+        .food-item-content {
+            padding: 12px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .food-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--on-surface);
+            line-height: 1.3;
+        }
+
+        .food-description {
+            font-size: 12px;
+            color: var(--on-surface-light);
+            flex: 1;
+            line-height: 1.4;
+        }
+
+        .food-price {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 8px 0;
+        }
+
+        .add-to-cart-btn {
+            background: var(--gradient);
+            color: white;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            min-height: 44px;
+        }
+
+        .add-to-cart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .add-to-cart-btn:active {
+            transform: translateY(0);
+        }
+
+        .add-to-cart-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .post-actions {
+            padding: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .modal, .cart-modal, .degue-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.show, .cart-modal.show, .degue-modal.show {
+            display: flex;
+        }
+
+        .modal-content, .cart-modal-content, .degue-modal-content {
+            background: var(--surface);
+            border-radius: var(--radius-xl);
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-header {
+            padding: 2rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-header h2 {
+            margin-bottom: 0.5rem;
+            font-size: 1.5rem;
+        }
+
+        .close-btn, .close-cart-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: rgba(0, 0, 0, 0.1);
+            border: none;
+            color: var(--on-surface);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 44px;
+            min-height: 44px;
+        }
+
+        .cart-modal-header {
+            padding: 2rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .cart-modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .cart-modal-body {
+            padding: 2rem;
+        }
+
+        .cart-items {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 16px;
+        }
+
+        .cart-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+
+        .cart-item-image {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .cart-item-info {
+            flex: 1;
+        }
+
+        .cart-item-name {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .cart-item-price {
+            font-size: 12px;
+            color: var(--on-surface-light);
+        }
+
+        .cart-total {
+            font-size: 1.25rem;
+            font-weight: 700;
+            text-align: center;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: var(--background);
+            border-radius: 8px;
+        }
+
+        .remove-btn {
+            background: none;
+            border: none;
+            color: var(--on-surface-light);
+            cursor: pointer;
+            padding: 8px;
+            font-size: 20px;
+            min-width: 44px;
+            min-height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .remove-btn:hover {
+            background: var(--background);
+            color: var(--accent);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 48px 16px;
+            color: var(--on-surface-light);
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .checkout-btn {
+            width: 100%;
+            background: var(--gradient);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-height: 48px;
+        }
+
+        .checkout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .checkout-btn:active {
+            transform: scale(0.98);
+        }
+
+        .degue-modal-header {
+            padding: 2rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .degue-modal-header h3 {
+            margin-bottom: 0.5rem;
+        }
+
+        .degue-options {
+            padding: 1rem 2rem;
+        }
+
+        .degue-option {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .degue-option:hover {
+            background: var(--background);
+            border-color: var(--primary);
+        }
+
+        .degue-option-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .degue-option-icon {
+            font-size: 1.5rem;
+        }
+
+        .degue-option-details h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .degue-option-details p {
+            font-size: 0.875rem;
+            color: var(--on-surface-light);
+            margin: 0;
+        }
+
+        .degue-option-price {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .selection-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            backdrop-filter: blur(5px);
+        }
+
+        .selection-modal.show {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .selection-modal-content {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 24px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 85vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .selection-modal-header {
+            padding: 2rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background: linear-gradient(135deg, rgba(254, 44, 85, 0.1), rgba(255, 107, 157, 0.1));
+        }
+
+        .selection-modal-header h3 {
+            margin-bottom: 0.5rem;
+            font-size: 1.5rem;
+            color: white;
+            background: linear-gradient(45deg, #FE2C55, #FF6B9D);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .selection-modal-header p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        .selection-options {
+            padding: 1.5rem 2rem;
+        }
+
+        .selection-option {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.25rem;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .selection-option::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .selection-option:hover::before {
+            left: 100%;
+        }
+
+        .selection-option:hover {
+            background: linear-gradient(135deg, rgba(254, 44, 85, 0.2), rgba(255, 107, 157, 0.2));
+            border-color: #FE2C55;
+            transform: translateX(5px);
+            box-shadow: 0 8px 25px rgba(254, 44, 85, 0.3);
+        }
+
+        .selection-option:active {
+            transform: scale(0.98);
+        }
+
+        .selection-option-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .selection-option-icon {
+            font-size: 2rem;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+
+        .selection-option-details h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0;
+            color: white;
+        }
+
+        .selection-option-details p {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin: 0.25rem 0 0 0;
+        }
+
+        .selection-option-price {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #FE2C55;
+            background: rgba(254, 44, 85, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 12px;
+            border: 1px solid rgba(254, 44, 85, 0.3);
+        }
+
+        .selection-cancel-btn {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 1rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .selection-cancel-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .close-selection-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .close-selection-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(90deg);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .ads-nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .ads-nav-btn:hover {
+            background: rgba(0, 0, 0, 0.8);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .ads-prev {
+            left: 10px;
+        }
+
+        .ads-next {
+            right: 10px;
+        }
+
+        .scroll-dots {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px 0;
+            margin-top: 8px;
+        }
+
+        .scroll-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #DBDBDB;
+            transition: all 0.3s ease;
+        }
+
+        .scroll-dot.active {
+            background: linear-gradient(45deg, #f3ecec, #d61215);
+            width: 24px;
+            border-radius: 4px;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                padding: 0 8px;
+                gap: 6px;
+            }
+            
+            .logo-section {
+                gap: 8px;
+            }
+            
+            .header-logo {
+                height: 45px;
+                width: 45px;
+                border-radius: 8px;
+            }
+            
+            .logo-text {
+                font-size: 14px;
+            }
+            
+            .header-actions {
+                gap: 6px;
+            }
+
+            .cart-icon,
+            .contact-service-btn {
+                font-size: 20px;
+                padding: 5px;
+                min-width: 38px;
+                min-height: 38px;
+            }
+            
+            .cart-badge {
+                width: 16px;
+                height: 16px;
+                font-size: 10px;
+                min-width: 16px;
+            }
+
+            .ads-container {
+                height: 180px;
+                margin: 0 12px;
+                border-radius: 8px;
+            }
+
+            .ad-item {
+                height: 180px;
+            }
+            
+            .ad-overlay {
+                padding: 15px;
+            }
+            
+            .ad-title {
+                font-size: 1.1rem;
+            }
+            
+            .ad-subtitle {
+                font-size: 0.85rem;
+            }
+
+            .nav-story {
+                min-width: 90px;
+            }
+            
+            .container {
+                padding: 12px;
+            }
+
+            .ads-nav-btn {
+                width: 35px;
+                height: 35px;
+                font-size: 20px;
+            }
+
+            .scroll-dots {
+                gap: 5px;
+                padding: 6px 0;
+            }
+            
+            .scroll-dot {
+                width: 6px;
+                height: 6px;
+            }
+            
+            .scroll-dot.active {
+                width: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-content {
+                padding: 0 6px;
+                gap: 4px;
+            }
+            
+            .logo-section {
+                gap: 6px;
+            }
+            
+            .header-logo {
+                height: 40px;
+                width: 40px;
+                border-radius: 8px;
+                border-width: 1.5px;
+            }
+            
+            .logo-text {
+                font-size: 12px;
+                max-width: 100px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            
+            .header-actions {
+                gap: 4px;
+            }
+
+            .cart-icon,
+            .contact-service-btn {
+                font-size: 18px;
+                padding: 4px;
+                min-width: 36px;
+                min-height: 36px;
+            }
+            
+            .cart-badge {
+                width: 15px;
+                height: 15px;
+                font-size: 9px;
+                min-width: 15px;
+                top: -3px;
+                right: -3px;
+            }
+
+            .ads-section {
+                padding: 12px 0;
+            }
+            
+            .ads-container {
+                height: 160px;
+                margin: 0 8px;
+                border-radius: 8px;
+            }
+
+            .ad-item {
+                height: 160px;
+                display: block;
+                line-height: 0;
+            }
+            
+            .ad-image {
+                display: block;
+                vertical-align: bottom;
+            }
+
+            .ad-overlay {
+                padding: 12px;
+            }
+            
+            .ad-title {
+                font-size: 0.95rem;
+                margin-bottom: 0.3rem;
+            }
+
+            .ad-subtitle {
+                font-size: 0.75rem;
+                line-height: 1.3;
+            }
+            
+            .ads-nav-btn {
+                width: 32px;
+                height: 32px;
+                font-size: 18px;
+            }
+            
+            .ads-prev {
+                left: 5px;
+            }
+            
+            .ads-next {
+                right: 5px;
+            }
+
+            .modal-content, .cart-modal-content, .degue-modal-content, .selection-modal-content {
+                max-height: 95vh;
+                margin: 10px;
+                border-radius: 16px;
+            }
+            
+            .header {
+                padding: 8px 0;
+            }
+            
+            .nav-section {
+                padding: 12px 0;
+            }
+            
+            .post-header {
+                padding: 12px;
+            }
+            
+            .post-actions {
+                padding: 12px;
+            }
+
+            .food-title {
+                font-size: 13px;
+            }
+            
+            .food-description {
+                font-size: 11px;
+            }
+            
+            .food-price {
+                font-size: 14px;
+            }
+            
+            .add-to-cart-btn {
+                padding: 10px 12px;
+                font-size: 13px;
+            }
+            
+            .food-item-content {
+                padding: 10px;
+            }
+        }
+
+        @media (max-width: 375px) {
+            .header-content {
+                padding: 0 4px;
+            }
+            
+            .header-logo {
+                height: 36px;
+                width: 36px;
+            }
+            
+            .logo-text {
+                font-size: 11px;
+                max-width: 80px;
+            }
+
+            .cart-icon,
+            .contact-service-btn {
+                font-size: 16px;
+                padding: 3px;
+                min-width: 32px;
+                min-height: 32px;
+            }
+            
+            .cart-badge {
+                width: 14px;
+                height: 14px;
+                font-size: 8px;
+                min-width: 14px;
+            }
+
+            .ads-container {
+                height: 140px;
+                margin: 0 8px;
+            }
+
+            .ad-item {
+                height: 140px;
+            }
+            
+            .ad-overlay {
+                padding: 10px;
+            }
+            
+            .ad-title {
+                font-size: 0.85rem;
+                margin-bottom: 0.25rem;
+            }
+
+            .ad-subtitle {
+                font-size: 0.7rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            input[type="text"], 
+            input[type="email"], 
+            input[type="tel"], 
+            textarea {
+                font-size: 16px !important;
+            }
+        }
+
+        @keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+}
+
+#notification-button button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+#notification-button button:active {
+    transform: scale(0.95);
+}
+
+    </style>
+</head>
+<body>
+    <div class="time-alert" id="time-alert">
+        Les commandes sont fermées. Revenez entre 18h00 et 10h00 pour commander.
+    </div>
+
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <img src="image/GE.jpg" alt="Logo GROUPE EXPRESS" class="header-logo">
+                <div class="logo-text">GROUPE EXPRESS</div>
+            </div>
+            <div class="header-actions">
+                <button class="cart-icon" onclick="toggleCart()" id="cart-button">
+                    🛒
+                    <span class="cart-badge" id="cart-badge" style="display: none;">0</span>
+                </button>
+                
+                <a href="tel:+2250564061004" class="contact-service-btn" title="Appeler le service client">
+                    📞 
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <section class="ads-section">
+        <div class="ads-container">
+            <div class="ads-slider" id="ads-slider">
+                <div class="ad-item" onclick="window.open('annonce.html', '_blank')">
+                    <img src="image/vi.jpg" alt="Promotion Spéciale" class="ad-image">
+                    <div class="ad-overlay">
+                        <div class="ad-title">🔥 Promotion Spéciale</div>
+                        <div class="ad-subtitle">Qu'en dites vous? 3 Plats offerts à 1500f alors commandez dès maintenant</div>
+                    </div>
+                </div>
+                
+                <div class="ad-item" onclick="window.open('annonce.html', '_blank')">
+                    <img src="image/MEG2.jpg" alt="Nouveau Menu" class="ad-image">
+                    <div class="ad-overlay">
+                        <div class="ad-title">🆕 Nouveau Menu</div>
+                        <div class="ad-subtitle">Rendez-vous au rez-de-chaussée pour le retrait de vos commandes</div>
+                    </div>
+                </div>
+                
+                <div class="ad-item" onclick="window.open('annonce.html', '_blank')">
+                    <img src="image/meg1.jpg" alt="Livraison Express" class="ad-image">
+                    <div class="ad-overlay">
+                        <div class="ad-title">⚡ Pour très bientôt</div>
+                        <div class="ad-subtitle"></div>
+                    </div>
+                </div>
+                
+                <div class="ad-item" onclick="window.open('annonce.html', '_blank')">
+                    <img src="image/vi.jpg" alt="Promotion Spéciale" class="ad-image">
+                    <div class="ad-overlay">
+                        <div class="ad-title">🔥 Promotion Spéciale</div>
+                        <div class="ad-subtitle">Qu'en dites vous? 3 Plats offerts à 1500f alors commandez dès maintenant</div>
+                    </div>
+                </div>
+                <div class="ad-item" onclick="window.open('annonce.html', '_blank')">
+                    <img src="image/MEG2.jpg" alt="Nouveau Menu" class="ad-image">
+                    <div class="ad-overlay">
+                        <div class="ad-title">🆕 Nouveau Menu</div>
+                        <div class="ad-subtitle">Rendez-vous au rez-de-chaussée pour le retrait de vos commandes</div>
+                    </div>
+                </div>
+                <div class="ad-item" onclick="window.open('annonce.html', '_blank')">
+                    <img src="image/meg1.jpg" alt="Livraison Express" class="ad-image">
+                    <div class="ad-overlay">
+                        <div class="ad-title">⚡ Pour très bientôt</div>
+                        <div class="ad-subtitle"></div>
+                    </div>
+                </div>
+            </div>
+            <button class="ads-nav-btn ads-prev" onclick="slideAds('prev')">‹</button>
+            <button class="ads-nav-btn ads-next" onclick="slideAds('next')">›</button>
+        </div>
+    </section> 
+    
+    <section class="nav-section">
+        <div class="scroll-indicator">
+            Scrollez pour découvrir tous nos menus délicieux <span class="scroll-arrow">👇</span>
+        </div>
+        <div class="nav-stories">
+            <a href="shopping.html" class="nav-story shopping-animate">
+                <div class="nav-story-avatar">
+                    🛍️
+                </div>
+                <div class="nav-story-text">Express-Shopping</div>
+            </a>
+            <div class="nav-story" onclick="toggleOrders()">
+                <div class="nav-story-avatar">
+                    📦
+                </div>
+                <div class="nav-story-text">Historique de mes commandes</div>
+            </div>
+            <a href="actualité.html" class="nav-story">
+                <div class="nav-story-avatar">
+                    <img src="image/re.jpg" alt="Gbèrè universitaire" class="nav-story-image">
+                </div>
+                <div class="nav-story-text">Réseau social</div>
+            </a>
+            <a href="merlin.html" class="nav-story">
+                <div class="nav-story-avatar">
+                    <img src="image/tp.jpg" alt="compétition" class="nav-story-image">
+                </div>
+                <div class="nav-story-text">Gagner un plat</div>
+            </a>
+            <a href="annonce.html" class="nav-story annonce-animate">
+                <div class="nav-story-avatar">
+                    📢
+                    <div class="notification-badge">7</div>
+                </div>
+                <div class="nav-story-text">Annonce</div>
+            </a>
+            <a href="apropos.html" class="nav-story">
+                <div class="nav-story-avatar">
+                    ℹ️
+                </div>
+                <div class="nav-story-text">A propos</div>
+            </a>
+            <a href="fournisseur.html" class="nav-story">
+                <div class="nav-story-avatar">
+                    👨‍🍳
+                </div>
+                <div class="nav-story-text">Fournisseur</div>
+            </a>
+        </div>
+        
+        <div class="scroll-dots" id="scroll-dots">
+            <div class="scroll-dot active"></div>
+            <div class="scroll-dot"></div>
+            <div class="scroll-dot"></div>
+        </div>
+    </section>
+
+    <!-- BOUTON NOTIFICATION -->
+<div id="notification-button" style="position: fixed; bottom: 150px; right: 20px; z-index: 999;">
+    <button onclick="requestNotificationPermission()" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 1rem; border-radius: 50%; width: 60px; height: 60px; cursor: pointer; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); font-size: 1.5rem; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">
+        🔔
+    </button>
+    <div id="notification-status" style="position: absolute; top: -5px; right: -5px; background: #dc3545; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 10px; display: none; align-items: center; justify-content: center; font-weight: bold;">OFF</div>
+</div>
+
+<!-- BOUTON TÉLÉCHARGEMENT APP -->
+<div id="download-button" style="position: fixed; bottom: 80px; right: 20px; z-index: 999;">
+    <button onclick="triggerInstallPrompt()" style="background: linear-gradient(135deg, #ff4e00, #ff6b9d); color: white; border: none; padding: 1rem; border-radius: 50%; width: 60px; height: 60px; cursor: pointer; box-shadow: 0 4px 15px rgba(255, 78, 0, 0.4); font-size: 1.5rem; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">
+        📱
+    </button>
+    <div id="install-status" style="position: absolute; top: -5px; right: -5px; background: #28a745; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 10px; display: none; align-items: center; justify-content: center; font-weight: bold;">✓</div>
+</div>
+
+
+    <!-- MODAL HISTORIQUE COMMANDES -->
+    <div class="modal" id="orders-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button class="close-btn" onclick="toggleOrders()">&times;</button>
+                <h2>🧾 Mes Commandes</h2>
+                <p>Historique de vos commandes récentes</p>
+            </div>
+            <div style="padding: 2rem;">
+                <div id="orders-list">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🛒</div>
+                        <h3>Aucune commande</h3>
+                        <p>Vos commandes apparaîtront ici</p>
+                    </div>
+                </div>
+                <button onclick="clearOrders()" class="checkout-btn" style="background: linear-gradient(135deg, #dc3545, #c82333); margin-top: 1rem;">
+                    🗑️ Vider l'historique
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL SELECTION (DEGUE) -->
+    <div class="degue-modal" id="degue-modal">
+        <div class="degue-modal-content">
+            <div class="degue-modal-header">
+                <h3 id="degue-modal-title">🥛 Choisir votre format de Dêguê</h3>
+                <p>Sélectionnez la taille qui vous convient</p>
+            </div>
+            <div class="degue-options" id="degue-options">
+            </div>
+            <div style="padding: 0 2rem 2rem;">
+                <button onclick="closeDegueModal()" style="width: 100%; background: var(--border); color: var(--on-surface); border: none; padding: 1rem; border-radius: 8px; cursor: pointer;">
+                    Annuler
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL PANIER -->
+    <div class="cart-modal" id="cart-modal">
+        <div class="cart-modal-content">
+            <div class="cart-modal-header">
+                <h3 class="cart-modal-title">🛒 Mon Panier</h3>
+                <button class="close-cart-btn" onclick="toggleCart()">&times;</button>
+            </div>
+            <div class="cart-modal-body">
+                <div class="cart-items" id="cart-items">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🛒</div>
+                        <p>Votre panier est vide</p>
+                    </div>
+                </div>
+                
+                <div class="cart-total" id="cart-total">
+                    Total: 0 FCFA
+                </div>
+                
+                <form id="order-form">
+                    <button type="submit" class="checkout-btn">
+                        🎯 Commander maintenant
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL SELECTION (RIZ, TCHEP, PORC, ATTIEKE) -->
+    <div class="selection-modal" id="selection-modal">
+        <div class="selection-modal-content">
+            <button class="close-selection-btn" onclick="closeSelectionModal()">&times;</button>
+            <div class="selection-modal-header">
+                <h3 id="selection-modal-title">Faites votre choix</h3>
+                <p id="selection-modal-subtitle">Sélectionnez votre option préférée</p>
+            </div>
+            <div class="selection-options" id="selection-options">
+            </div>
+            <div style="padding: 0 2rem 2rem;">
+                <button class="selection-cancel-btn" onclick="closeSelectionModal()">
+                    ❌ Annuler
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="main-feed">
+            <!-- PÂTES & PETIT POIS -->
+            <div class="post-card">
+                <div class="post-header">
+                    <div class="post-category">
+                        <div class="category-avatar">🍝</div>
+                        <div class="category-info">
+                            <h3>Pâtes & Petit pois</h3>
+                            <p>Les classiques revisités</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="food-grid">
+                    <div class="food-item">
+                        <img src="image/spa.jpg" alt="Spaghetti rognon" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">Spaghetti rognon</div>
+                            <div class="food-description">Spaghetti préparé avec du rognon</div>
+                            <div class="food-price">600 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Spaghetti rognon', 600, 'A')">
+                                🛒 Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="food-item">
+                        <img src="image/spaghetti nouv.jpg" alt="Spaghetti avec foi" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">Spaghetti avec foi</div>
+                            <div class="food-description">Spaghetti préparé avec du foie</div>
+                            <div class="food-price">600 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Spaghetti foi', 600, 'A')">
+                                🛒 Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="food-item">
+                        <img src="image/vi.jpg" alt="Spaghetti à la viande" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">Spaghetti à la viande</div>
+                            <div class="food-description">Spaghetti avec de la viande hachée</div>
+                            <div class="food-price">800 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Spaghetti à la viande', 800, 'A')">
+                                🛒 Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="food-item">
+                        <img src="image/SPAHRA .jpg" alt="Spaghetti rognon + oeuf grillé" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">Spaghetti ROGNON + oeuf grillé</div>
+                            <div class="food-description">Spaghetti ROGNON + oeuf grillé</div>
+                            <div class="food-price">700 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Spaghetti ROGNON + oeuf grillé', 700, 'A')">
+                                🛒 Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="food-item">
+                        <img src="image/spagh oeuf.jpg" alt="Spaghetti foi + oeuf grillé" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">Spaghetti foi + oeuf grillé</div>
+                            <div class="food-description">Spaghetti + oeuf grillé</div>
+                            <div class="food-price">700 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Spaghetti foi + oeuf grillé', 700, 'A')">
+                                🛒 Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="food-item">
+                        <img src="image/foi.jpg" alt="sauter revenir au foie" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">Sauter revenir au foie</div>
+                            <div class="food-description">Sauter revenir au foie</div>
+                            <div class="food-price">1500 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('sauter revenir au foie', 1500, 'A')">
+                                🛒 Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="food-item">
+                        <img src="image/rognon.jpg" alt="Sauter revenir au rognon" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">Sauter revenir au rognon</div>
+                            <div class="food-description">Sauter revenir au rognon</div>
+                            <div class="food-price">1500 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Sauter revenir au rognon', 1500, 'A')">
+                                🛒 Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="food-item">
+                        <img src="image/viande.jpg" alt="Sauter Revenir viande" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">Sauter revenir viande</div>
+                            <div class="food-description">Sauter revenir viande</div>
+                            <div class="food-price">1500 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Sauter revenir viande', 1500, 'A')">
+                                🛒 Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="food-item">
+                        <img src="image/petit poid.jpg" alt="Petit pois au rognon" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">Petit pois rognon</div>
+                            <div class="food-description">Petit pois accompagné de rognon</div>
+                            <div class="food-price">1000 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Petit pois rognon', 1000, 'A')">
+                                🛒 Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="food-item">
+                        <img src="image/petit poid rogno,.jpg" alt="Petit pois à la viande" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">Petit pois à la viande</div>
+                            <div class="food-description">Petit pois à la viande</div>
+                            <div class="food-price">1500 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Petit pois à la viande', 1500, 'A')">
+                                🛒 Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="post-actions">
+                    <p style="font-size: 0.9rem; color: var(--on-surface); text-align: center; font-style: italic; padding: 0.5rem; background: var(--background); border-radius: 8px;">
+                        "La vie est trop courte pour manger mal - Régalez-vous avec nos délices !" 
+                    </p>
+                </div>
+            </div>
+
+            <!-- TCHÈPES -->
+            <div class="post-card">
+                <div class="post-header">
+                    <divclass="post-category">
+                        <div class="category-avatar">🍚</div>
+                        <div class="category-info">
+                            <h3>Tchèpes</h3>
+                            <p>Nos plats de tchèpe savoureux</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="food-grid">
+                    <div class="food-item">
+                        <img src="image/tcheo poi.jpg" alt="Tchèpe au poisson" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">Tchèpe au poisson</div>
+                            <div class="food-description">Tchèpe accompagné de poisson frais</div>
+                            <div class="food-price">500 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="selectTchep('Tchèpe au poisson', 500)">
+                                📋 Choisir le type
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="food-item">
+                        <img src="image/tcheo.jpg" alt="Tchèpe au poulet" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">Tchèpe au poulet</div>
+                            <div class="food-description">Tchèpe au poulet</div>
+                            <div class="food-price">1000 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="selectTchep('Tchèpe au poulet', 1000)">
+                                📋 Choisir le type
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="food-item">
+                        <img src="image/tchep poulet.jpg" alt="Tchèpe au poulet XXL" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">Tchèpe au poulet XXL</div>
+                            <div class="food-description">Tchèpe au poulet XXL</div>
+                            <div class="food-price">2000 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="selectTchep('Tchèpe au poulet XXL', 2000)">
+                                📋 Choisir le type
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="food-item">
+                        <img src="image/tchep ara.jpg" alt="Tchèpe accompagné de la viande XXL" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">Tchèpe viande XXL</div>
+                            <div class="food-description">Tchèpe accompagné de la viande</div>
+                            <div class="food-price">2000 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="selectTchep('Tchèpe viande XXL', 2000)">
+                                📋 Choisir le type
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="post-actions">
+                    <p style="font-size: 0.9rem; color: var(--on-surface); text-align: center; font-style: italic; padding: 0.5rem; background: var(--background); border-radius: 8px;">
+                        🍚 "Chaque bouchée est une célébration - Savourez la tradition !" 🌟
+                    </p>
+                </div>
+            </div>
+
+            <!-- RIZ -->
+            <div class="post-card">
+                <div class="post-header">
+                    <div class="post-category">
+                        <div class="category-avatar">🍛</div>
+                        <div class="category-info">
+                            <h3>RIZ</h3>
+                            <p>Découvrez nos plats de riz</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="food-grid">
+                    <div class="food-item">
+                        <img src="image/sauce arrrrachide.jpg" alt="Riz sauce arachide" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">Riz sauce arachide</div>
+                            <div class="food-description">Riz sauce arachide</div>
+                            <div class="food-price">À partir de 500 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="selectRice('Riz sauce arachide')">
+                                📋 Sélectionner le format
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="food-item">
+                        <img src="image/riz nouv.jpg" alt="Riz sauce feuille" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">Riz sauce feuille</div>
+                            <div class="food-description">Riz accompagné de sauce aux feuilles vertes</div>
+                            <div class="food-price">À partir de 500 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="selectRice('Riz sauce feuille')">
+                                📋 Sélectionner le format
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="food-item">
+                        <img src="image/RIZ SA TOMA.jpg" alt="Riz sauce tomate" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">Riz sauce tomate</div>
+                            <div class="food-description">Riz sauce tomate</div>
+                            <div class="food-price">À partir de 500 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="selectRice('Riz sauce tomate')">
+                                📋 Sélectionner le format
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="post-actions">
+                    <p style="font-size: 0.9rem; color: var(--on-surface); text-align: center; font-style: italic; padding: 0.5rem; background: var(--background); border-radius: 8px;">
+                        🍛 "Le bonheur commence dans votre assiette - Commandez sans hésiter !" 
+                    </p>
+                </div>
+            </div>
+
+            <!-- PORC AU FOUR -->
+            <div class="post-card">
+                <div class="post-header">
+                    <div class="post-category">
+                        <div class="category-avatar">🐷</div>
+                        <div class="category-info">
+                            <h3>Porc au four</h3>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="food-grid">
+                    <div class="food-item">
+                        <img src="image/PORC1.jpg" alt="Porc au four + Attiékè" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">Porc au four (2 boules)</div>
+                            <div class="food-description">Porc au four avec 2 boules d'attiékè</div>
+                            <div class="food-price">1200 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="selectPorc(1200, '2 boules')">
+                                📋 Choisir la préparation
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="food-item">
+                        <img src="image/PORC2.jpg" alt="Porc au four + Attiékè XXL" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">Porc au four XXL</div>
+                            <div class="food-description">Portion généreuse de porc avec attiékè</div>
+                            <div class="food-price">2000 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="selectPorc(2000, 'XXL')">
+                                📋 Choisir la préparation
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="post-actions">
+                    <p style="font-size: 0.9rem; color: var(--on-surface); text-align: center; font-style: italic; padding: 0.5rem; background: var(--background); border-radius: 8px;">
+                        "Un délice unique qui ravira vos papilles - Laissez-vous tenter !" 
+                    </p>
+                </div>
+            </div>
+
+           <!-- ATTIÉKÈ SPÉCIALITÉ -->
+<div class="post-card">
+    <div class="post-header">
+        <div class="post-category">
+            <div class="category-avatar">🌾</div>
+            <div class="category-info">
+                <h3>Attiékè spécialité</h3>
+                <p>Découvrez nos plats d'attiékè bien réussi</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="food-grid">
+        <div class="food-item">
+            <img src="image/ChatGPT Image 21 sept. 2025, 17_49_08.png" alt="Attiékè poisson alloko" class="food-item-image">
+            <div class="food-item-content">
+                <div class="food-title">Attiékè poisson alloko + Condiment</div>
+                <div class="food-description">Attiékè servi avec du poisson</div>
+                <div class="food-price">À partir de 1000 FCFA</div>
+                <button class="add-to-cart-btn" onclick="selectAttiekePoisson()">
+                    📋 Choisir le format
+                </button>
+            </div>
+        </div>
+
+        <div class="food-item">
+            <img src="image/20250921_1803_Qualité Image Améliorée_remix_01k5pg4v3weeea02t6htn46kjd.png" alt="Attiékè poulet alloko + Condiments" class="food-item-image">
+            <div class="food-item-content">
+                <div class="food-title">Attiékè poulet alloko + Condiment</div>
+                <div class="food-description">Attiékè poulet</div>
+                <div class="food-price">À partir de 1500 FCFA</div>
+                <button class="add-to-cart-btn" onclick="selectAttiekePouletAlloko()">
+                    📋 Choisir le format
+                </button>
+            </div>
+        </div>
+        
+        <div class="food-item">
+            <img src="image/ATIEKEPOULET.jpg" alt="Attiékè poulet + Condiments" class="food-item-image">
+            <div class="food-item-content">
+                <div class="food-title">Attiékè poulet + Condiment</div>
+                <div class="food-description">Attiékè poulet</div>
+                <div class="food-price">À partir de 1000 FCFA</div>
+                <button class="add-to-cart-btn" onclick="selectAttiekePoulet()">
+                    📋 Choisir le format
+                </button>
+            </div>
+        </div>
+
+        <div class="food-item">
+            <img src="image/garba.jpg" alt="Spécialité Garba" class="food-item-image">
+            <div class="food-item-content">
+                <div class="food-title">Spécialité Garba</div>
+                <div class="food-description">GARBA</div>
+                <div class="food-price">À partir de 500 FCFA</div>
+                <button class="add-to-cart-btn" onclick="selectGarba()">
+                    📋 Choisir le format
+                </button>
+            </div>
+        </div>
+
+        <div class="food-item">
+            <img src="image/at.jpg" alt="Attiékè poisson" class="food-item-image">
+            <div class="food-item-content">
+                <div class="food-title">Attiékè poisson</div>
+                <div class="food-description">Attiékè poisson</div>
+                <div class="food-price">1000 FCFA</div>
+                <button class="add-to-cart-btn" onclick="promptAddToCart('ATTIEKE POISSON', 1000, 'E')">
+                    🛒 Ajouter au panier
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="post-actions">
+        <p class="promotional-text">
+            🌾 "L'authenticité dans chaque grain - Goûtez à notre tradition !" 
+        </p>
+    </div>
+</div>
+
+
+ <!-- PLAKALI -->
+            <div class="post-card">
+                <div class="post-header">
+                    <div class="post-category">
+                        <div class="category-avatar">@</div>
+                        <div class="category-info">
+                            <h3>NOS DELICIEUX PLAT D'AKASSA</h3>
+                            <p>Prenez plaisir à déguster nos plats d'AKASSA à l'AFRICAINE</p>
+                        </div>
+                    </div>
+                </div>    
+
+                        <div class="food-item">
+                        <img src="image/AKASSA.jpg" alt="Akassa" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">Akassa</div>
+                            <div class="food-description">Akassa</div>
+                            <div class="food-price">500 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Akassa', 500, 'L')">
+                                🛒 Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+                     <div class="food-item">
+                        <img src="image/akassa1.jpg" alt="Akassa" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">Akassa</div>
+                            <div class="food-description">Akassa</div>
+                            <div class="food-price">1000 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Akassa', 1000, 'L')">
+                                🛒 Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+                 </div>
+
+            <!-- MADELEINES -->
+            <div class="post-card">
+                <div class="post-header">
+                    <div class="post-category">
+                        <div class="category-avatar">🍰</div>
+                        <div class="category-info">
+                            <h3>Madeleines</h3>
+                            <p>Nos délicieuses madeleines</p>
+                        </div>
+                    </div>
+                </div>
+                 
+                <div class="food-grid">
+                    <div class="food-item">
+                        <img src="image/VAN2.jpg" alt="Madeleine à la vanille" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">Madeleine à la vanille</div>
+                            <div class="food-description">Madeleine à la vanille</div>
+                            <div class="food-price">100 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Madeleine à la vanille', 100, 'G')">
+                                🛒 Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="food-item">
+                        <img src="image/VA1.jpg" alt="Madeleine au chocolat" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">Madeleine au chocolat</div>
+                            <div class="food-description">Madeleine au chocolat</div>
+                            <div class="food-price">200 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Madeleine au chocolat', 200, 'G')">
+                                🛒 Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+                  
+                    <div class="food-item">
+                        <img src="image/VA1.jpg" alt="Spécial promo étudiant 2 vanille + 1 chocolat 300F" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">Spécial promo 2 vanille + 1 chocolat</div>
+                            <div class="food-description">Offre étudiante spéciale</div>
+                            <div class="food-price">300 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Spécial promo étudiant 2 vanille + 1 chocolat 300F', 300, 'G')">
+                                🛒 Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="food-item">
+                        <img src="image/VAN2.jpg" alt="Spécial promo étudiant 6 vanille 500F" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">Spécial promo 6 vanille</div>
+                            <div class="food-description">Offre étudiante spéciale</div>
+                            <div class="food-price">500 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Spécial promo étudiant 6 vanille 500F', 500, 'G')">
+                                🛒 Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="food-item">
+                        <img src="image/VAN2.jpg" alt="Spécial promo étudiant 12 vanille 1000F" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">Spécial promo 12 vanille</div>
+                            <div class="food-description">Offre étudiante spéciale</div>
+                            <div class="food-price">1000 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Spécial promo étudiant 12 vanille 1000F', 1000, 'G')">
+                                🛒 Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="food-item">
+                        <img src="image/VA1.jpg" alt="Spécial promo étudiant 6 Madeleine au chocolat 1000F" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">Spécial promo 6 chocolat</div>
+                            <div class="food-description">Offre étudiante spéciale</div>
+                            <div class="food-price">1000 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Spécial promo étudiant 6 Madeleine au chocolat 1000F', 1000, 'G')">
+                                🛒 Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="post-actions">
+                    <p style="font-size: 0.9rem; color: var(--on-surface); text-align: center; font-style: italic; padding: 0.5rem; background: var(--background); border-radius: 8px;">
+                        🍰 "Des madeleines moelleuses pour tous les moments gourmands !" 
+                    </p>
+                </div>
+            </div>
+
+            <!-- JUS D'ORANGE -->
+            <div class="post-card">
+                <div class="post-header">
+                    <div class="post-category">
+                        <div class="category-avatar">🧃</div>
+                        <div class="category-info">
+                            <h3>Jus d'orange & Bissap</h3>
+                            <p>Nos délicieux jus</p>
+                        </div>
+                    </div>
+                </div>
+                 
+                <div class="food-grid">
+                    <div class="food-item">
+                        <img src="image/jus.jpg" alt="Jus d'orange" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">Jus d'orange</div>
+                            <div class="food-description">Jus d'orange frais</div>
+                            <div class="food-price">500 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Jus d\'orange', 500, 'H')">
+                                🛒 Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="food-item">
+                        <img src="image/bissap.jpg" alt="Jus de bissap" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">Jus de bissap</div>
+                            <div class="food-description">Jus de bissap frais</div>
+                            <div class="food-price">250 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Jus de bissap', 250, 'H')">
+                                🛒 Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="post-actions">
+                    <p style="font-size: 0.9rem; color: var(--on-surface); text-align: center; font-style: italic; padding: 0.5rem; background: var(--background); border-radius: 8px;">
+                        🧃 "Des jus frais pour vous rafraîchir !" 
+                    </p>
+                </div>
+            </div>
+
+            <!-- PASTEL -->
+            <div class="post-card">
+                <div class="post-header">
+                    <div class="post-category">
+                        <div class="category-avatar">🥟</div>
+                        <div class="category-info">
+                            <h3>Pastel</h3>
+                            <p>Nos délicieux pastels en box</p>
+                        </div>
+                    </div>
+                </div>
+                 
+                <div class="food-grid">
+                    <div class="food-item">
+                        <img src="image/PA.jpg" alt="Box de 6 à 1000F" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">Box de 6 pastels</div>
+                            <div class="food-description">6 pastels délicieux</div>
+                            <div class="food-price">1000 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Box de 6 à 1000F PASTEL', 1000, 'I')">
+                                🛒 Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="food-item">
+                        <img src="image/past0.jpg" alt="Box de 8 à 1500F" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">Box de 8 pastels</div>
+                            <div class="food-description">8 pastels délicieux</div>
+                            <div class="food-price">1500 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Box de 8 à 1500F PASTEL', 1500, 'I')">
+                                🛒 Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="food-item">
+                        <img src="image/past.jpg" alt="Box de 12 à 2000F" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">Box de 12 pastels</div>
+                            <div class="food-description">12 pastels délicieux</div>
+                            <div class="food-price">2000 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Box de 12 à 2000F PASTEL', 2000, 'I')">
+                                🛒 Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+           <!-- PASTEL -->
+            <div class="post-card">
+                <div class="post-header">
+                    <div class="post-category">
+                        <div class="category-avatar">@</div>
+                        <div class="category-info">
+                            <h3>NUDS</h3>
+                            <p>Nos délicieux NUDS en box</p>
+                        </div>
+                    </div>
+                </div>
+                 
+                <div class="food-grid">
+                    <div class="food-item">
+                        <img src="image/NUDS.jpg" alt=" 5 à 500F" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">5 à 500F</div>
+                            <div class="food-description">5 à 500F</div>
+                            <div class="food-price">500 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('5 Nuds à 500F', 500, 'U')">
+                                🛒 Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="food-item">
+                        <img src="image/NUDA CHOCO.jpg" alt="Gaufres au chocolat" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">Gaufres au chocolat 4 à 1000f</div>
+                            <div class="food-description">Gaufres au chocolat 4 à 1000f</div>
+                            <div class="food-price">1000f FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Gaufres au chocolat', 1000, 'U')">
+                                🛒 Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="food-item">
+                        <img src="image/NUDA SIMPLE.jpg" alt="Gaufres simple" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">gaufres simple</div>
+                            <div class="food-description">Gaufres simple 3 à 500f</div>
+                            <div class="food-price">500 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Gaufres simple', 500, 'U')">
+                                🛒 Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- SUCRERIES -->
+            <div class="post-card">
+                <div class="post-header">
+                    <div class="post-category">
+                        <div class="category-avatar">🍹</div>
+                        <div class="category-info">
+                            <h3>NOS SUCRERIES</h3>
+                            <p>Goûtez et variez vos plaisirs</p>
+                        </div>
+                    </div>
+                </div>
+                 
+                <div class="food-grid">
+                    <div class="food-item">
+                        <img src="image/orangina.jpg" alt="Orangina" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">Orangina</div>
+                            <div class="food-description">Orangina</div>
+                            <div class="food-price">500 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Orangina', 500, 'I')">
+                                🛒 Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="food-item">
+                        <img src="image/kapa300.jpg" alt="Kapa" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">Kapa</div>
+                            <div class="food-description">Kapa</div>
+                            <div class="food-price">300 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Kapa', 300, 'I')">
+                                🛒 Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="food-item">
+                        <img src="image/codys.jpg" alt="Cody's" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">Cody's</div>
+                            <div class="food-description">Cody's</div>
+                            <div class="food-price">500 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Codys', 500, 'I')">
+                                🛒 Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="food-item">
+                        <img src="image/koka.jpg" alt="Coca-Cola" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">Coca-Cola</div>
+                            <div class="food-description">Coca-Cola 50cl</div>
+                            <div class="food-price">500 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Coca cola 50cl', 500, 'I')">
+                                🛒 Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="food-item">
+                        <img src="image/cook300.jpg" alt="Coca-Cola" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">Coca-Cola</div>
+                            <div class="food-description">Coca-Cola 33cl</div>
+                            <div class="food-price">300 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Coca cola 33cl', 300, 'I')">
+                                🛒 Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DESSERT -->
+            <div class="post-card">
+                <div class="post-header">
+                    <div class="post-category">
+                        <div class="category-avatar">🍕</div>
+                        <div class="category-info">
+                            <h3>FAST FOOD</h3>
+                            <p>La version francaise de nos Fast Food</p>
+                        </div>
+                    </div>
+                </div>
+                 
+                <div class="food-grid">
+                    <div class="food-item">
+                        <img src="image/crepechocolat.jpg" alt="Crêpe au chocolat 4 à 1000f" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">Crêpe au chocolat 4 à 1000f</div>
+                            <div class="food-description">Crêpe garnie de chocolat 4 à 1000f</div>
+                            <div class="food-price">1000 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Crêpe au chocolat 4 à 1000f', 1000, 'K')">
+                                🛒 Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="food-item">
+                        <img src="image/manaich.jpg" alt="Manaich" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">Manaich</div>
+                            <div class="food-description">Manaich</div>
+                            <div class="food-price">3000 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Manaich', 3000, 'K')">
+                                🛒 Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="food-item">
+                        <img src="image/pitzamini.jpg" alt="Pizza Pizza Mini" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">Pizza  Mini</div>
+                            <div class="food-description">Pizza Mini</div>
+                            <div class="food-price">3500 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Pizza Mini', 3500, 'K')">
+                                🛒 Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="food-item">
+                        <img src="image/crepsalé.jpg" alt="Crêpe salées au Jambon " class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">Crêpe salées au Jambon 1000f la portion</div>
+                            <div class="food-description">Crêpe salées au Jambon 1000f la portion</div>
+                            <div class="food-price">1000 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Crêpe salées au Jambon 1000f la portion', 1000, 'K')">
+                                🛒 Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="food-item">
+                        <img src="image/crepessaléviande.jpg" alt="Crêpe salées à la Viande" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">Crêpe salées à la Viande 1000f la portion</div>
+                            <div class="food-description">Crêpe salées à la Viande 1000f la portion</div>
+                            <div class="food-price">1000 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Crêpe salées à la Viande 1000f la portion', 1000, 'K')">
+                                🛒 Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="food-item">
+                        <img src="image/crepes nature.jpg" alt="Crêpe nature 5 à 1000F" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">Crêpe nature 5 à 1000F</div>
+                            <div class="food-description">Crêpe nature 5 à 1000F</div>
+                            <div class="food-price">1000 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Crêpe nature 5 à 1000F', 1000, 'K')">
+                                🛒 Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+                    <div class="food-item">
+                        <img src="image/crepes au chocola bos ec.jpg" alt="Crêpe nature BOX étudiant" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">Crêpe nature BOX étudiant</div>
+                            <div class="food-description">Crêpe nature BOX étudiant</div>
+                            <div class="food-price">5000 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Crêpe nature BOX étudiant', 5000, 'K')">
+                                🛒 Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+                      <div class="food-item">
+                        <img src="image/pitzamini.jpg" alt="Pizza Maxi" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">Pizza Maxi</div>
+                            <div class="food-description">Pizza Maxi</div>
+                            <div class="food-price">5000 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Pizza Maxi', 5000, 'K')">
+                                🛒 Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+                     <div class="food-item">
+                        <img src="image/minipizza.jpg" alt="Mini Pizza 10 à 1500f" class="food-item-image">
+                        <div class="food-item-content">
+                            <div class="food-title">Mini Pizza 10 à 1500f</div>
+                            <div class="food-description">Mini Pizza 10 à 1500f</div>
+                            <div class="food-price">1500 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Mini Pizza 10 à 1500f', 1500, 'K')">
+                                🛒 Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+                </div>
+ </div> 
+ </div> <!-- fin du dernier post-card -->
+</div>
+     <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+
+// Configuration Firebase (NOUVELLE BASE DE DONNÉES)
+const firebaseConfig = {
+    apiKey: "AIzaSyAnQmhrA1-smk_zwt3ld4D9M0dr3BRIhK4",
+    authDomain: "iturne.firebaseapp.com",
+    databaseURL: "https://iturne-default-rtdb.firebaseio.com",
+    projectId: "iturne",
+    storageBucket: "iturne.firebasestorage.app",
+    messagingSenderId: "366600143531",
+    appId: "1:366600143531:web:9ce6d9349c9fe38a81edee",
+    measurementId: "G-F121WCVZGV"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// ===== CONFIGURATION FCM =====
+const firebaseConfigCompat = {
+    apiKey: "AIzaSyAnQmhrA1-smk_zwt3ld4D9M0dr3BRIhK4",
+    authDomain: "iturne.firebaseapp.com",
+    databaseURL: "https://iturne-default-rtdb.firebaseio.com",
+    projectId: "iturne",
+    storageBucket: "iturne.firebasestorage.app",
+    messagingSenderId: "366600143531",
+    appId: "1:366600143531:web:9ce6d9349c9fe38a81edee"
+};
+
+firebase.initializeApp(firebaseConfigCompat);
+const messaging = firebase.messaging();
+
+    // VAPID Key
+    const VAPID_KEY = "BGL6IVuJSbQjI69fot6FvfGEBmq1t4_hPP1Dhx_KYiIEFCrOLjtYFWjID_MlteNgJtm7FFbdIfBygdRi_IF-qng";
+
+    let notificationInterval = null;
+// Fonction pour demander la permission de notification
+window.requestNotificationPermission = async function() {
+    try {
+        // Vérifier d'abord l'état actuel de la permission
+        const currentPermission = Notification.permission;
+        
+        if (currentPermission === 'denied') {
+            // Permission bloquée - montrer les instructions
+            showPermissionBlockedInstructions();
+            return;
+        }
+        
+        if (currentPermission === 'granted') {
+            // Permission déjà accordée - obtenir le token directement
+            try {
+                const token = await messaging.getToken({ vapidKey: VAPID_KEY });
+                console.log('FCM Token:', token);
+                
+                localStorage.setItem('fcmToken', token);
+                localStorage.setItem('notificationsEnabled', 'true');
+                updateNotificationButton(true);
+                startPeriodicNotifications();
+                showNotificationStatus('✅ Notifications activées!', '#28a745');
+            } catch (tokenError) {
+                console.error('Erreur token:', tokenError);
+                showNotificationStatus('❌ Erreur d\'activation', '#dc3545');
+            }
+            return;
+        }
+        
+        // Demander la permission (seulement si 'default')
+        const permission = await Notification.requestPermission();
+        
+        if (permission === 'granted') {
+            console.log('Permission accordée');
+            
+            try {
+                // Obtenir le token FCM
+                const token = await messaging.getToken({ vapidKey: VAPID_KEY });
+                console.log('FCM Token:', token);
+                
+                // Sauvegarder le token localement
+                localStorage.setItem('fcmToken', token);
+                localStorage.setItem('notificationsEnabled', 'true');
+                
+                // Mettre à jour l'interface
+                updateNotificationButton(true);
+                
+                // Démarrer les notifications périodiques
+                startPeriodicNotifications();
+                
+                // Message de confirmation
+                showNotificationStatus('✅ Notifications activées!', '#28a745');
+            } catch (tokenError) {
+                console.error('Erreur token:', tokenError);
+                showNotificationStatus('❌ Erreur d\'activation', '#dc3545');
+            }
+            
+        } else if (permission === 'denied') {
+            console.log('Permission refusée');
+            showPermissionBlockedInstructions();
+            localStorage.setItem('notificationsEnabled', 'false');
+            updateNotificationButton(false);
+            stopPeriodicNotifications();
+        } else {
+            // Permission ignorée (dismissed)
+            console.log('Permission ignorée');
+            showNotificationStatus('⚠️ Permission non accordée', '#ff9800');
+            localStorage.setItem('notificationsEnabled', 'false');
+            updateNotificationButton(false);
+        }
+    } catch (error) {
+        console.error('Erreur permission:', error);
+        
+        if (error.code === 'messaging/permission-blocked') {
+            showPermissionBlockedInstructions();
+        } else {
+            showNotificationStatus('❌ Erreur: ' + error.message, '#dc3545');
+        }
+    }
+};
+
+// Fonction pour afficher les instructions quand la permission est bloquée
+function showPermissionBlockedInstructions() {
+    const modal = document.createElement('div');
+    modal.innerHTML = `
+        <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10001; display: flex; align-items: center; justify-content: center; padding: 20px;">
+            <div style="background: white; border-radius: 20px; padding: 2rem; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto;">
+                <div style="text-align: center; margin-bottom: 1.5rem;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🔔🚫</div>
+                    <h2 style="color: #dc3545; margin-bottom: 0.5rem;">Notifications bloquées</h2>
+                    <p style="color: #666; font-size: 0.9rem;">Les notifications ont été bloquées par votre navigateur</p>
+                </div>
+                
+                <div style="background: #f8f9fa; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem;">
+                    <h3 style="font-size: 1rem; margin-bottom: 1rem; color: #333;">📱 Comment débloquer :</h3>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <strong style="color: #667eea;">Chrome / Edge :</strong>
+                        <ol style="margin: 0.5rem 0 0 1.5rem; line-height: 1.8; font-size: 0.9rem;">
+                            <li>Cliquez sur l'icône 🔒 ou ⓘ à gauche de l'URL</li>
+                            <li>Trouvez "Notifications"</li>
+                            <li>Changez de "Bloquer" à "Autoriser"</li>
+                            <li>Rafraîchissez la page (F5)</li>
+                        </ol>
+                    </div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <strong style="color: #667eea;">Firefox :</strong>
+                        <ol style="margin: 0.5rem 0 0 1.5rem; line-height: 1.8; font-size: 0.9rem;">
+                            <li>Cliquez sur l'icône 🔒 à gauche de l'URL</li>
+                            <li>Cliquez sur "Paramètres de connexion" > "Plus d'informations"</li>
+                            <li>Allez dans l'onglet "Permissions"</li>
+                            <li>Décochez "Utiliser par défaut" pour "Afficher des notifications"</li>
+                            <li>Sélectionnez "Autoriser"</li>
+                        </ol>
+                    </div>
+                    
+                    <div>
+                        <strong style="color: #667eea;">Safari (Mac) :</strong>
+                        <ol style="margin: 0.5rem 0 0 1.5rem; line-height: 1.8; font-size: 0.9rem;">
+                            <li>Safari > Préférences > Sites web</li>
+                            <li>Cliquez sur "Notifications"</li>
+                            <li>Trouvez ce site et changez en "Autoriser"</li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <button onclick="this.parentElement.parentElement.remove()" style="width: 100%; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 1rem; border-radius: 12px; font-size: 1rem; font-weight: 600; cursor: pointer;">
+                    J'ai compris
+                </button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
+// Vérifier l'état des permissions au chargement et afficher le statut
+function checkNotificationPermissionStatus() {
+    const permission = Notification.permission;
+    const notifEnabled = localStorage.getItem('notificationsEnabled') === 'true';
+    
+    if (permission === 'denied') {
+        // Permission bloquée
+        updateNotificationButton(false);
+        localStorage.setItem('notificationsEnabled', 'false');
+        stopPeriodicNotifications();
+    } else if (permission === 'granted' && notifEnabled) {
+        // Permission accordée et notifications activées
+        updateNotificationButton(true);
+        startPeriodicNotifications();
+    } else {
+        // Permission pas encore demandée ou refusée
+        updateNotificationButton(false);
+    }
+}
+
+    // Fonction pour démarrer les notifications périodiques (toutes les 2 secondes)
+    function startPeriodicNotifications() {
+        // Arrêter l'intervalle existant s'il y en a un
+        if (notificationInterval) {
+            clearInterval(notificationInterval);
+        }
+
+        // Messages de remerciement variés
+        const thankYouMessages = [
+            "Merci de votre confiance! 🙏",
+            "Groupe Express vous remercie! ❤️",
+            "Merci pour votre fidélité! 🌟",
+            "Nous apprécions votre soutien! 🎉",
+            "Un grand merci à vous! 💖",
+            "Merci d'être avec nous! 🤝",
+            "Votre satisfaction est notre priorité! 😊",
+            "Merci pour votre commande! 🍽️"
+        ];
+
+        let messageIndex = 0;
+
+        notificationInterval = setInterval(() => {
+            // Vérifier que les notifications sont toujours activées
+            const notifEnabled = localStorage.getItem('notificationsEnabled') === 'true';
+            
+            // Vérifier que le document n'est pas visible (utilisateur pas sur la page)
+            if (notifEnabled && document.hidden) {
+                const message = thankYouMessages[messageIndex % thankYouMessages.length];
+                
+                // Envoyer la notification
+                sendThankYouNotification(message);
+                
+                messageIndex++;
+            }
+        }, 2000); // Toutes les 2 secondes
+    }
+
+    // Fonction pour arrêter les notifications périodiques
+    function stopPeriodicNotifications() {
+        if (notificationInterval) {
+            clearInterval(notificationInterval);
+            notificationInterval = null;
+        }
+    }
+
+    // Fonction pour envoyer une notification de remerciement
+    function sendThankYouNotification(message) {
+        if ('serviceWorker' in navigator && 'PushManager' in window) {
+            navigator.serviceWorker.ready.then(registration => {
+                registration.showNotification('GROUPE EXPRESS 🍽️', {
+                    body: message,
+                    icon: 'image/GE.jpg',
+                    badge: 'image/u.png',
+                    tag: 'thank-you-notification',
+                    requireInteraction: false,
+                    vibrate: [200, 100, 200],
+                    data: {
+                        url: window.location.origin
+                    }
+                });
+            });
+        }
+    }
+
+    // Mettre à jour le bouton de notification
+    function updateNotificationButton(enabled) {
+        const status = document.getElementById('notification-status');
+        const button = document.querySelector('#notification-button button');
+        
+        if (enabled) {
+            status.style.display = 'none';
+            button.style.background = 'linear-gradient(135deg, #28a745, #34ce57)';
+            button.innerHTML = '🔔';
+        } else {
+            status.style.display = 'flex';
+            status.textContent = 'OFF';
+            button.style.background = 'linear-gradient(135deg, #dc3545, #c82333)';
+            button.innerHTML = '🔕';
+        }
+    }
+
+    // Afficher le statut de notification
+    function showNotificationStatus(message, color) {
+        const statusDiv = document.createElement('div');
+        statusDiv.innerHTML = message;
+        statusDiv.style.cssText = `
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: ${color};
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            z-index: 10000;
+            font-weight: 600;
+            animation: slideInRight 0.3s ease-out;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        `;
+        document.body.appendChild(statusDiv);
+        
+        setTimeout(() => {
+            statusDiv.style.animation = 'slideOutRight 0.3s ease-out';
+            setTimeout(() => statusDiv.remove(), 300);
+        }, 3000);
+    }
+
+    // Gérer les messages reçus quand l'app est au premier plan
+    messaging.onMessage((payload) => {
+        console.log('Message reçu:', payload);
+        
+        if (payload.notification) {
+            const notificationTitle = payload.notification.title || 'GROUPE EXPRESS';
+            const notificationOptions = {
+                body: payload.notification.body,
+                icon: payload.notification.icon || 'image/GE.jpg',
+                badge: 'image/u.png',
+                tag: 'fcm-notification',
+                requireInteraction: false
+            };
+            
+            if (Notification.permission === 'granted') {
+                new Notification(notificationTitle, notificationOptions);
+            }
+        }
+    });
+
+   // Vérifier l'état des notifications au chargement
+window.addEventListener('load', () => {
+    checkNotificationPermissionStatus();
+});
+    // Gérer la visibilité de la page
+    document.addEventListener('visibilitychange', () => {
+        const notifEnabled = localStorage.getItem('notificationsEnabled') === 'true';
+        
+        if (document.hidden && notifEnabled) {
+            // Page cachée - les notifications vont s'envoyer
+            console.log('Page cachée - notifications actives');
+        } else {
+            // Page visible - les notifications ne s'envoient pas
+            console.log('Page visible - notifications en pause');
+        }
+    });
+
+    // Basculer les notifications au clic sur le bouton
+    document.addEventListener('DOMContentLoaded', () => {
+        const notificationButton = document.querySelector('#notification-button button');
+        
+        notificationButton.addEventListener('click', async () => {
+            const notifEnabled = localStorage.getItem('notificationsEnabled') === 'true';
+            
+            if (notifEnabled) {
+                // Désactiver les notifications
+                localStorage.setItem('notificationsEnabled', 'false');
+                updateNotificationButton(false);
+                stopPeriodicNotifications();
+                showNotificationStatus('🔕 Notifications désactivées', '#dc3545');
+            } else {
+                // Demander la permission
+                await window.requestNotificationPermission();
+            }
+        });
+    });
+
+    // Exposition des fonctions
+    window.db = db;
+
+    window.submitOrder = function(order) {
+        const timestamp = Date.now();
+        const mainCategory = order.items.length > 0 ? order.items[0].category : 'A';
+        const uniqueCode = `#GE${mainCategory}${timestamp.toString().slice(-6)}`;
+        
+        order.code = uniqueCode;
+        order.timestamp = new Date().toISOString();
+        order.status = "nouveau";
+        order.createdAt = new Date();
+        
+        return addDoc(collection(db, 'orders'), order)
+            .then((docRef) => {
+                console.log('Commande envoyée avec succès, ID:', docRef.id);
+                return uniqueCode;
+            })
+            .catch((error) => {
+                console.error('Erreur Firebase:', error);
+                return false;
+            });
+    };
+
+    window.db = db;
+
+    // DÉCLARATIONS GLOBALES
+    let cart = [];
+    let total = 0;
+    let customerOrders = JSON.parse(localStorage.getItem('customerOrders')) || [];
+
+    // Données pour les plats de riz
+    const riceOptions = [
+        { format: 'Petit', price: 500, icon: '🍚', desc: 'Format individuel' },
+        { format: 'Moyen', price: 1000, icon: '🥘', desc: 'Pour 1-2 personnes' },
+        { format: 'Grand', price: 1500, icon: '🍲', desc: 'Pour 2-3 personnes' },
+        { format: 'XXL', price: 2000, icon: '🥣', desc: 'Pour la famille' }
+    ];
+
+    // Données pour les préparations de porc
+    const porcPreparations = [
+        { type: 'Sauté', icon: '🔥', desc: 'Porc sauté revenu à la perfection' },
+        { type: 'Grillé', icon: '🍖', desc: 'Porc grillé croustillant' },
+        { type: 'Soupe', icon: '🍜', desc: 'Porc en soupe savoureuse' }
+    ];
+
+    // Données pour les types de tchèpe
+    const tchepTypes = [
+        { type: 'Rouge', icon: '🔴', desc: 'Tchèpe sauce rouge traditionnelle' },
+        { type: 'Jaune', icon: '🟡', desc: 'Tchèpe sauce jaune délicate' }
+    ];
+
+    let currentSelection = {
+        type: '',
+        baseName: '',
+        basePrice: 0,
+        format: ''
+    };
+
+    const degueTypes = {
+        'raisin': {
+            name: 'Dêguê raisin',
+            prices: {
+                'Sachet': 250,
+                'Petit bidon': 500,
+                'Moyen bidon': 1500,
+                'Grand bidon': 3000
+            }
+        },
+        'coco': {
+            name: 'Dêguê coco',
+            prices: {
+                'Sachet': 300,
+                'Petit bidon': 600,
+                'Moyen bidon': 1600,
+                'Grand bidon': 3500
+            }
+        },
+        'simple': {
+            name: 'Dêguê simple',
+            prices: {
+                'Sachet': 200,
+                'Petit bidon': 500,
+                'Moyen bidon': 1500,
+                'Grand bidon': 3000
+            }
+        },
+        'raisin-coco': {
+            name: 'Dêguê raisin coco',
+            prices: {
+                'Sachet': 400,
+                'Petit bidon': 700,
+                'Moyen bidon': 1700,
+                'Grand bidon': 3600
+            }
+        }
+    };
+
+    let currentDegueType = '';
+    let currentAdIndex = 0;
+    let adsAutoPlay = true;
+    let adsInterval;
+
+    // FONCTIONS DE SÉLECTION
+    function selectRice(riceName) {
+        currentSelection = {
+            type: 'rice',
+            baseName: riceName,
+            basePrice: 0,
+            format: ''
+        };
+        
+        document.getElementById('selection-modal-title').textContent = `🍛 ${riceName}`;
+        document.getElementById('selection-modal-subtitle').textContent = 'Choisissez votre format';
+        
+        const optionsContainer = document.getElementById('selection-options');
+        optionsContainer.innerHTML = '';
+        
+        riceOptions.forEach(option => {
+            const optionDiv = document.createElement('div');
+            optionDiv.className = 'selection-option';
+            optionDiv.onclick = () => {
+                const qty = prompt(`Quantité de ${riceName} (${option.format}) :`, "1");
+                const quantity = parseInt(qty, 10);
+                if (!isNaN(quantity) && quantity > 0) {
+                    addToCart(`${riceName} (${option.format})`, option.price, 'C', quantity);
+                    closeSelectionModal();
+                }
+            };
+            optionDiv.innerHTML = `
+                <div class="selection-option-info">
+                    <div class="selection-option-icon">${option.icon}</div>
+                    <div class="selection-option-details">
+                        <h4>${option.format}</h4>
+                        <p>${option.desc}</p>
+                    </div>
+                </div>
+                <div class="selection-option-price">${option.price} FCFA</div>
+            `;
+            optionsContainer.appendChild(optionDiv);
+        });
+        
+        document.getElementById('selection-modal').classList.add('show');
+    }
+
+    function selectPorc(price, format) {
+        currentSelection = {
+            type: 'porc',
+            baseName: `Porc au four (${format})`,
+            basePrice: price,
+            format: format
+        };
+        
+        document.getElementById('selection-modal-title').textContent = `🐷 Porc au four (${format})`;
+        document.getElementById('selection-modal-subtitle').textContent = 'Choisissez votre préparation';
+        
+        const optionsContainer = document.getElementById('selection-options');
+        optionsContainer.innerHTML = '';
+        
+        porcPreparations.forEach(prep => {
+            const optionDiv = document.createElement('div');
+            optionDiv.className = 'selection-option';
+            optionDiv.onclick = () => {
+                const qty = prompt(`Quantité de Porc ${prep.type} (${format}) :`, "1");
+                const quantity = parseInt(qty, 10);
+                if (!isNaN(quantity) && quantity > 0) {
+                    addToCart(`Porc ${prep.type} (${format})`, price, 'D', quantity);
+                    closeSelectionModal();
+                }
+            };
+            optionDiv.innerHTML = `
+                <div class="selection-option-info">
+                    <div class="selection-option-icon">${prep.icon}</div>
+                    <div class="selection-option-details">
+                        <h4>${prep.type}</h4>
+                        <p>${prep.desc}</p>
+                    </div>
+                </div>
+                <div class="selection-option-price">${price} FCFA</div>
+            `;
+            optionsContainer.appendChild(optionDiv);
+        });
+        
+        document.getElementById('selection-modal').classList.add('show');
+    }
+
+    function selectTchep(tchepName, price) {
+        currentSelection = {
+            type: 'tchep',
+            baseName: tchepName,
+            basePrice: price,
+            format: ''
+        };
+        
+        document.getElementById('selection-modal-title').textContent = `🍚 ${tchepName}`;
+        document.getElementById('selection-modal-subtitle').textContent = 'Choisissez votre type';
+        
+        const optionsContainer = document.getElementById('selection-options');
+        optionsContainer.innerHTML = '';
+        
+        tchepTypes.forEach(type => {
+            const optionDiv = document.createElement('div');
+            optionDiv.className = 'selection-option';
+            optionDiv.onclick = () => {
+                const qty = prompt(`Quantité de ${tchepName} ${type.type} :`, "1");
+                const quantity = parseInt(qty, 10);
+                if (!isNaN(quantity) && quantity > 0) {
+                    addToCart(`${tchepName} ${type.type}`, price, 'B', quantity);
+                    closeSelectionModal();
+                }
+            };
+            optionDiv.innerHTML = `
+                <div class="selection-option-info">
+                    <div class="selection-option-icon">${type.icon}</div>
+                    <div class="selection-option-details">
+                        <h4>Tchèpe ${type.type}</h4>
+                        <p>${type.desc}</p>
+                    </div>
+                </div>
+                <div class="selection-option-price">${price} FCFA</div>
+            `;
+            optionsContainer.appendChild(optionDiv);
+        });
+        
+        document.getElementById('selection-modal').classList.add('show');
+    }
+
+    function closeSelectionModal() {
+        document.getElementById('selection-modal').classList.remove('show');
+        currentSelection = {
+            type: '',
+            baseName: '',
+            basePrice: 0,
+            format: ''
+        };
+    }
+
+    function selectDegue(type) {
+        currentDegueType = type;
+        const degueData = degueTypes[type];
+        
+        document.getElementById('degue-modal-title').textContent = `🥛 Choisir votre format de ${degueData.name}`;
+        
+        const optionsContainer = document.getElementById('degue-options');
+        optionsContainer.innerHTML = '';
+        
+        const formats = [
+            { key: 'Sachet', icon: '📦', desc: 'Format individuel' },
+            { key: 'Petit bidon', icon: '🥤', desc: 'Pour 1-2 personnes' },
+            { key: 'Moyen bidon', icon: '🪣', desc: 'Pour 3-4 personnes' },
+            { key: 'Grand bidon', icon: '🛢️', desc: 'Pour 5+ personnes' }
+        ];
+        
+        formats.forEach(format => {
+            const price = degueData.prices[format.key];
+            const optionDiv = document.createElement('div');
+            optionDiv.className = 'degue-option';
+            optionDiv.onclick = () => addDegueToCart(format.key, price);
+            optionDiv.innerHTML = `
+                <div class="degue-option-info">
+                    <div class="degue-option-icon">${format.icon}</div>
+                    <div class="degue-option-details">
+                        <h4>${format.key}</h4>
+                        <p>${format.desc}</p>
+                    </div>
+                </div>
+                <div class="degue-option-price">${price} FCFA</div>
+            `;
+            optionsContainer.appendChild(optionDiv);
+        });
+        
+        const modal = document.getElementById('degue-modal');
+        modal.classList.add('show');
+    }
+
+    function closeDegueModal() {
+        const modal = document.getElementById('degue-modal');
+        modal.classList.remove('show');
+    }
+
+    function addDegueToCart(format, price) {
+        const degueData = degueTypes[currentDegueType];
+        const qty = prompt(`Quantité de ${degueData.name} (${format}) :`, "1");
+        const quantity = parseInt(qty, 10);
+        if (!isNaN(quantity) && quantity > 0) {
+            addToCart(`${degueData.name} (${format})`, price, 'F', quantity);
+            closeDegueModal();
+        }
+    }
+
+    function checkOrderingHours() {
+        const now = new Date();
+        const abidjanTime = new Date(now.toLocaleString("en-US", {timeZone: "Africa/Abidjan"}));
+        const hour = abidjanTime.getHours();
+        const minutes = abidjanTime.getMinutes();
+        
+        const timeAlert = document.getElementById('time-alert');
+        const addToCartButtons = document.querySelectorAll('.add-to-cart-btn');
+        const checkoutButton = document.querySelector('.checkout-btn');
+        
+        timeAlert.classList.remove('urgent', 'warning');
+        
+        let alertMessage = '';
+        let alertClass = '';
+        
+        if (hour >= 0 && hour < 10) {
+            alertMessage = `⚡ URGENT : Commandez AVANT 10H pour un retrait IMMÉDIAT au stand du groupe Express ! Il vous reste ${9 - hour}h${60 - minutes < 10 ? '0' : ''}${60 - minutes}min`;
+            alertClass = 'urgent';
+            timeAlert.style.display = 'block';
+        } 
+        else if (hour >= 10) {
+            alertMessage = `⚠️ ATTENTION : Les commandes après 10H sont traitées pour DEMAIN - Retrait au stand du groupe Express`;
+            alertClass = 'warning';
+            timeAlert.style.display = 'block';
+        }
+        
+        timeAlert.innerHTML = alertMessage;
+        if (alertClass) {
+            timeAlert.classList.add(alertClass);
+        }
+        
+        addToCartButtons.forEach(btn => {
+            btn.disabled = false;
+            if (btn.textContent.includes('⏰')) {
+                btn.innerHTML = '🛒 Ajouter au panier';
+            }
+        });
+        
+        if (checkoutButton) {
+            checkoutButton.disabled = false;
+            checkoutButton.textContent = '🎯 Commander maintenant';
+        }
+    }
+
+    function slideAds(direction) {
+        const slider = document.getElementById('ads-slider');
+        const adsContainer = document.querySelector('.ads-container');
+        const totalAds = 3;
+        
+        slider.style.animation = 'none';
+        adsAutoPlay = false;
+        clearInterval(adsInterval);
+        
+        if (direction === 'next') {
+            currentAdIndex = (currentAdIndex + 1) % totalAds;
+        } else {
+            currentAdIndex = (currentAdIndex - 1 + totalAds) % totalAds;
+        }
+        
+        const containerWidth = adsContainer.offsetWidth;
+        const translateX = -(currentAdIndex * containerWidth);
+        
+        slider.style.transition = 'transform 0.5s ease-in-out';
+        slider.style.transform = `translateX(${translateX}px)`;
+        
+        setTimeout(() => {
+            slider.style.animation = 'slideAds 45s infinite linear';
+            adsAutoPlay = true;
+            startAdsAutoPlay();
+        }, 5000);
+    }
+
+    function startAdsAutoPlay() {
+        if (adsInterval) clearInterval(adsInterval);
+        adsInterval = setInterval(() => {
+            if (adsAutoPlay) {
+                slideAds('next');
+            }
+        }, 15000);
+    }
+
+    function toggleCart() {
+        const modal = document.getElementById('cart-modal');
+        modal.classList.toggle('show');
+    }
+
+    function updateCartBadge() {
+        const badge = document.getElementById('cart-badge');
+        const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+        
+        if (totalItems > 0) {
+            badge.textContent = totalItems;
+            badge.style.display = 'flex';
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+
+    function promptAddToCart(name, price, category) {
+        const qty = prompt("Choisir la quantité :", "1");
+        const quantity = parseInt(qty, 10);
+        if (!isNaN(quantity) && quantity > 0) {
+            addToCart(name, price, category, quantity);
+        }
+    }
+
+    function addToCart(name, price, category, qty = 1) {
+        cart.push({ name, price, category, qty });
+        updateCart();
+        updateCartBadge();
+        
+        const notification = document.createElement('div');
+        notification.innerHTML = `✅ ${qty} ${name} ajouté(s) au panier!`;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--gradient);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            z-index: 1001;
+            animation: slideInRight 0.3s ease-out;
+            font-weight: 600;
+        `;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }
+
+    function updateCart() {
+        const cartItems = document.getElementById('cart-items');
+        const cartTotal = document.getElementById('cart-total');
+        
+        cartItems.innerHTML = '';
+        total = 0;
+        
+        if (cart.length === 0) {
+            cartItems.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">🛒</div>
+                    <p>Votre panier est vide</p>
+                </div>
+            `;
+        } else {
+            cart.forEach((item, index) => {
+                const cartItem = document.createElement('div');
+                cartItem.className = 'cart-item';
+                cartItem.innerHTML = `
+                    <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(item.name)}&background=E1306C&color=fff&size=40" class="cart-item-image" alt="${item.name}">
+                    <div class="cart-item-info">
+                        <div class="cart-item-name">${item.qty}x ${item.name}</div>
+                        <div class="cart-item-price">${item.price * item.qty} FCFA</div>
+                    </div>
+                    <button class="remove-btn" onclick="removeFromCart(${index})">×</button>
+                `;
+                cartItems.appendChild(cartItem);
+                total += item.price * item.qty;
+            });
+        }
+        cartTotal.textContent = `Total: ${total.toLocaleString()} FCFA`;
+    }
+
+    function removeFromCart(index) {
+        cart.splice(index, 1);
+        updateCart();
+        updateCartBadge();
+    }
+
+    function addCustomerOrderToList(orderCode, order) {
+        const summary = order.items.map(i => `${i.qty}x ${i.name}`).join(', ');
+        const entry = {
+            code: orderCode,
+            summary,
+            total: order.total,
+            date: new Date().toLocaleString()
+        };
+        customerOrders.push(entry);
+        localStorage.setItem('customerOrders', JSON.stringify(customerOrders));
+        updateOrdersList();
+    }
+
+    function updateOrdersList() {
+        const ordersList = document.getElementById('orders-list');
+        ordersList.innerHTML = '';
+        
+        if (customerOrders.length === 0) {
+            ordersList.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">🛒</div>
+                    <h3>Aucune commande</h3>
+                    <p>Vos commandes apparaîtront ici</p>
+                </div>
+            `;
+        } else {
+            customerOrders.slice().reverse().forEach(entry => {
+                const orderDiv = document.createElement('div');
+                orderDiv.className = 'order-item-history';
+                orderDiv.style.cssText = `
+                    background: var(--surface);
+                    border: 1px solid var(--border);
+                    border-radius: 12px;
+                    padding: 1rem;
+                    margin-bottom: 1rem;
+                `;
+                orderDiv.innerHTML = `
+                    <div style="font-weight: 600; color: var(--primary); margin-bottom: 0.5rem;">${entry.code}</div>
+                    <div style="font-size: 0.875rem; margin-bottom: 0.5rem;">${entry.summary}</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-weight: 600; color: var(--primary);">${entry.total} FCFA</span>
+                        <span style="font-size: 0.75rem; color: var(--on-surface-light);">${entry.date}</span>
+                    </div>
+                `;
+                ordersList.appendChild(orderDiv);
+            });
+        }
+    }
+
+    function toggleOrders() {
+        const modal = document.getElementById('orders-modal');
+        modal.classList.toggle('show');
+        updateOrdersList();
+    }
+
+    function clearOrders() {
+        if (confirm("Vider l'historique des commandes ?")) {
+            customerOrders = [];
+            localStorage.removeItem('customerOrders');
+            updateOrdersList();
+        }
+    }
+
+    function selectAttiekeDindon() {
+        document.getElementById('selection-modal-title').textContent = '🦃 Attiékè Dindon';
+        document.getElementById('selection-modal-subtitle').textContent = 'Choisissez votre format';
+        
+        const optionsContainer = document.getElementById('selection-options');
+        optionsContainer.innerHTML = '';
+        
+        const formats = [
+            { name: 'Petit', price: 700, icon: '🍽️', desc: 'Format individuel' },
+            { name: 'Moyen', price: 1000, icon: '🥘', desc: 'Pour 1-2 personnes' },
+            { name: 'Grand', price: 1500, icon: '🍲', desc: 'Pour 2-3 personnes' },
+            { name: 'XXL', price: 2000, icon: '🥣', desc: 'Format familial' }
+        ];
+        
+        formats.forEach(format => {
+            const optionDiv = document.createElement('div');
+            optionDiv.className = 'selection-option';
+            optionDiv.onclick = () => {
+                const qty = prompt(`Quantité d'Attiékè Dindon (${format.name}) :`, "1");
+                const quantity = parseInt(qty, 10);
+                if (!isNaN(quantity) && quantity > 0) {
+                    addToCart(`Attiékè Dindon (${format.name})`, format.price, 'E', quantity);
+                    closeSelectionModal();
+                }
+            };
+            optionDiv.innerHTML = `
+                <div class="selection-option-info">
+                    <div class="selection-option-icon">${format.icon}</div>
+                    <div class="selection-option-details">
+                        <h4>${format.name}</h4>
+                        <p>${format.desc}</p>
+                    </div>
+                </div>
+                <div class="selection-option-price">${format.price} FCFA</div>
+            `;
+            optionsContainer.appendChild(optionDiv);
+        });
+        
+        document.getElementById('selection-modal').classList.add('show');
+    }
+
+    function selectAttiekePoisson() {
+        document.getElementById('selection-modal-title').textContent = '🐟 Attiékè Poisson Alloko';
+        document.getElementById('selection-modal-subtitle').textContent = 'Choisissez votre format';
+        
+        const optionsContainer = document.getElementById('selection-options');
+        optionsContainer.innerHTML = '';
+        
+        const formats = [
+            { name: 'Petit', price: 1000, icon: '🍽️', desc: 'Format individuel' },
+            { name: 'Moyen', price: 1500, icon: '🥘', desc: 'Pour 1-2 personnes' },
+            { name: 'Grand', price: 2000, icon: '🍲', desc: 'Format généreux' }
+        ];
+        
+        formats.forEach(format => {
+            const optionDiv = document.createElement('div');
+            optionDiv.className = 'selection-option';
+            optionDiv.onclick = () => {
+                const qty = prompt(`Quantité d'Attiékè Poisson Alloko (${format.name}) :`, "1");
+                const quantity = parseInt(qty, 10);
+                if (!isNaN(quantity) && quantity > 0) {
+                    addToCart(`Attiékè Poisson Alloko (${format.name})`, format.price, 'E', quantity);
+                    closeSelectionModal();
+                }
+            };
+            optionDiv.innerHTML = `
+                <div class="selection-option-info">
+                    <div class="selection-option-icon">${format.icon}</div>
+                    <div class="selection-option-details">
+                        <h4>${format.name}</h4>
+                        <p>${format.desc}</p>
+                    </div>
+                </div>
+                <div class="selection-option-price">${format.price} FCFA</div>
+            `;
+            optionsContainer.appendChild(optionDiv);
+        });
+        
+        document.getElementById('selection-modal').classList.add('show');
+    }
+
+    function selectGarba() {
+        document.getElementById('selection-modal-title').textContent = '🥘 Spécialité Garba';
+        document.getElementById('selection-modal-subtitle').textContent = 'Choisissez votre format';
+        
+        const optionsContainer = document.getElementById('selection-options');
+        optionsContainer.innerHTML = '';
+        
+        const formats = [
+            { name: 'Petit', price: 500, icon: '🍽️', desc: 'Format individuel' },
+            { name: 'Moyen', price: 1000, icon: '🥘', desc: 'Pour 1-2 personnes' },
+            { name: 'Grand', price: 1500, icon: '🍲', desc: 'Pour 2-3 personnes' },
+            { name: 'XXL', price: 2000, icon: '🥣', desc: 'Format familial' }
+        ];
+        
+        formats.forEach(format => {
+            const optionDiv = document.createElement('div');
+            optionDiv.className = 'selection-option';
+            optionDiv.onclick = () => {
+                const qty = prompt(`Quantité de Garba (${format.name}) :`, "1");
+                const quantity = parseInt(qty, 10);
+                if (!isNaN(quantity) && quantity > 0) {
+                    addToCart(`Garba (${format.name})`, format.price, 'E', quantity);
+                    closeSelectionModal();
+                }
+            };
+            optionDiv.innerHTML = `
+                <div class="selection-option-info">
+                    <div class="selection-option-icon">${format.icon}</div>
+                    <div class="selection-option-details">
+                        <h4>${format.name}</h4>
+                        <p>${format.desc}</p>
+                    </div>
+                </div>
+                <div class="selection-option-price">${format.price} FCFA</div>
+            `;
+            optionsContainer.appendChild(optionDiv);
+        });
+        
+        document.getElementById('selection-modal').classList.add('show');
+    }
+
+    function selectAttiekePoulet() {
+        document.getElementById('selection-modal-title').textContent = '🍗 Attiékè Poulet + Condiment';
+        document.getElementById('selection-modal-subtitle').textContent = 'Choisissez votre format';
+        
+        const optionsContainer = document.getElementById('selection-options');
+        optionsContainer.innerHTML = '';
+        
+        const formats = [
+            { name: 'Petit', price: 1000, icon: '🍽️', desc: 'Format individuel' },
+            { name: 'Moyen', price: 1500, icon: '🥘', desc: 'Pour 1-2 personnes' },
+            { name: 'Grand', price: 2000, icon: '🍲', desc: 'Format généreux' }
+        ];
+        
+        formats.forEach(format => {
+            const optionDiv = document.createElement('div');
+            optionDiv.className = 'selection-option';
+            optionDiv.onclick = () => {
+                const qty = prompt(`Quantité d'Attiékè Poulet + Condiment (${format.name}) :`, "1");
+                const quantity = parseInt(qty, 10);
+                if (!isNaN(quantity) && quantity > 0) {
+                    addToCart(`Attiékè Poulet + Condiment (${format.name})`, format.price, 'E', quantity);
+                    closeSelectionModal();
+                }
+            };
+            optionDiv.innerHTML = `
+                <div class="selection-option-info">
+                    <div class="selection-option-icon">${format.icon}</div>
+                    <div class="selection-option-details">
+                        <h4>${format.name}</h4>
+                        <p>${format.desc}</p>
+                    </div>
+                </div>
+                <div class="selection-option-price">${format.price} FCFA</div>
+            `;
+            optionsContainer.appendChild(optionDiv);
+        });
+        
+        document.getElementById('selection-modal').classList.add('show');
+    }
+
+    function selectAttiekePouletAlloko() {
+        document.getElementById('selection-modal-title').textContent = '🍗🍌 Attiékè Poulet Alloko + Condiment';
+        document.getElementById('selection-modal-subtitle').textContent = 'Choisissez votre format';
+        
+        const optionsContainer = document.getElementById('selection-options');
+        optionsContainer.innerHTML = '';
+        
+        const formats = [
+            { name: 'Petit', price: 1500, icon: '🍽️', desc: 'Format individuel' },
+            { name: 'Moyen', price: 2000, icon: '🥘', desc: 'Pour 1-2 personnes' },
+            { name: 'Grand', price: 2500, icon: '🍲', desc: 'Format généreux' }
+        ];
+        
+        formats.forEach(format => {
+            const optionDiv = document.createElement('div');
+            optionDiv.className = 'selection-option';
+            optionDiv.onclick = () => {
+                const qty = prompt(`Quantité d'Attiékè Poulet Alloko + Condiment (${format.name}) :`, "1");
+                const quantity = parseInt(qty, 10);
+                if (!isNaN(quantity) && quantity > 0) {
+                    addToCart(`Attiékè Poulet Alloko + Condiment (${format.name})`, format.price, 'E', quantity);
+                    closeSelectionModal();
+                }
+            };
+            optionDiv.innerHTML = `
+                <div class="selection-option-info">
+                    <div class="selection-option-icon">${format.icon}</div>
+                    <div class="selection-option-details">
+                        <h4>${format.name}</h4>
+                        <p>${format.desc}</p>
+                    </div>
+                </div>
+                <div class="selection-option-price">${format.price} FCFA</div>
+            `;
+            optionsContainer.appendChild(optionDiv);
+        });
+        
+        document.getElementById('selection-modal').classList.add('show');
+    }
+
+    // EXPOSITION DES FONCTIONS AU SCOPE GLOBAL
+    window.selectRice = selectRice;
+    window.selectPorc = selectPorc;
+    window.selectTchep = selectTchep;
+    window.closeSelectionModal = closeSelectionModal;
+    window.selectDegue = selectDegue;
+    window.closeDegueModal = closeDegueModal;
+    window.addDegueToCart = addDegueToCart;
+    window.slideAds = slideAds;
+    window.promptAddToCart = promptAddToCart;
+    window.removeFromCart = removeFromCart;
+    window.toggleOrders = toggleOrders;
+    window.clearOrders = clearOrders;
+    window.toggleCart = toggleCart;
+    window.selectAttiekeDindon = selectAttiekeDindon;
+    window.selectAttiekePoisson = selectAttiekePoisson;
+    window.selectGarba = selectGarba;
+    window.selectAttiekePoulet = selectAttiekePoulet;
+    window.selectAttiekePouletAlloko = selectAttiekePouletAlloko;
+
+    // INITIALISATION AU CHARGEMENT
+    document.addEventListener('DOMContentLoaded', function() {
+        checkOrderingHours();
+        setInterval(checkOrderingHours, 60000);
+        startAdsAutoPlay();
+        updateOrdersList();
+    });
+
+    // GESTION FORMULAIRE DE COMMANDE AVEC NOM ET WHATSAPP
+    document.getElementById('order-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        if (cart.length === 0) {
+            alert("Votre panier est vide !");
+            return;
+        }
+        
+        // Demander le nom
+        const customerName = prompt("Entrez votre nom complet :", "");
+        if (!customerName || customerName.trim() === "") {
+            alert("❌ Veuillez entrer votre nom pour continuer");
+            return;
+        }
+        
+        // Demander le WhatsApp
+        const whatsappNumber = prompt("Entrez votre numéro WhatsApp :\n(ex: 0712345678 ou +2250712345678)", "");
+        if (!whatsappNumber || whatsappNumber.trim() === "") {
+            alert("❌ Veuillez entrer votre numéro WhatsApp pour continuer");
+            return;
+        }
+        
+        // Validation simple du numéro
+        const cleanNumber = whatsappNumber.replace(/\s+/g, '');
+        if (cleanNumber.length < 8) {
+            alert("❌ Numéro WhatsApp invalide. Veuillez réessayer.");
+            return;
+        }
+        
+        // Vérifier la connexion
+        if (!navigator.onLine) {
+            alert("❌ Pas de connexion internet\n\nVeuillez vérifier votre connexion et réessayer.");
+            return;
+        }
+        
+        const now = new Date();
+        const abidjanTime = new Date(now.toLocaleString("en-US", {timeZone: "Africa/Abidjan"}));
+        const hour = abidjanTime.getHours();
+        
+        const loader = document.createElement('div');
+        loader.id = 'order-loader';
+        loader.innerHTML = `
+            <div style="text-align: center;">
+                <div style="font-size: 3rem; animation: spin 1s linear infinite;">⏳</div>
+                <h3 style="margin-top: 1rem;">Envoi en cours...</h3>
+                <p id="loader-status" style="margin-top: 0.5rem; font-size: 0.9rem; opacity: 0.7;">Préparation de votre commande...</p>
+            </div>
+        `;
+        loader.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--surface);
+            padding: 2rem 3rem;
+            border-radius: 20px;
+            z-index: 1002;
+            box-shadow: var(--shadow-lg);
+        `;
+        document.body.appendChild(loader);
+        
+        try {
+            const order = {
+                customer: {
+                    name: customerName.trim(),
+                    whatsapp: cleanNumber
+                },
+                items: [...cart],
+                total,
+                timestamp: new Date().toISOString(),
+                deliveryDate: hour >= 10 ? 'lendemain' : 'aujourdhui'
+            };
+            
+            const orderCode = await window.submitOrder(order);
+            
+            loader.remove();
+            
+            if (!orderCode) {
+                throw new Error("Code de commande non reçu");
+            }
+            
+            // Sauvegarder localement
+            const localOrder = {
+                code: orderCode,
+                order: order,
+                savedAt: new Date().toISOString()
+            };
+            localStorage.setItem('lastSuccessfulOrder', JSON.stringify(localOrder));
+            
+            // Sauvegarder dans l'historique
+            addCustomerOrderToList(orderCode, order);
+            
+            // Vider le panier
+            cart = [];
+            updateCart();
+            updateCartBadge();
+            toggleCart();
+            
+            // Message de succès avec info de retrait
+            const pickupMessage = document.createElement('div');
+            let deliveryInfo = '';
+            
+            if (hour >= 0 && hour < 10) {
+                deliveryInfo = `
+                    <div style="background: linear-gradient(135deg, #28a745, #34ce57); color: white; padding: 1.5rem; border-radius: 12px; text-align: center; margin-bottom: 1rem;">
+                        ✅ <strong>RETRAIT IMMÉDIAT</strong><br><br>
+                        Veuillez passer au stand du groupe Express à 12H00<br>
+                        pour le retrait de votre commande !<br><br>
+                        📍 <strong>RETRAIT AU STAND DU GROUPE EXPRESS À 12H 00</strong>
+                    </div>
+                `;
+            } else {
+                deliveryInfo = `
+                    <div style="background: linear-gradient(135deg, #ff9800, #f57c00); color: white; padding: 1.5rem; border-radius: 12px; text-align: center; margin-bottom: 1rem;">
+                        ⏳ <strong>EN COURS DE TRAITEMENT</strong><br><br>
+                        Votre commande sera prête demain<br>
+                        Retrait au stand du groupe Express à 12H00<br><br>
+                        📍 <strong>RETRAIT AU STAND DU GROUPE EXPRESS À 12H 00</strong>
+                    </div>
+                `;
+            }
+            
+            pickupMessage.innerHTML = `
+                <button onclick="this.parentElement.remove()" style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.1); border: none; color: #333; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center;">×</button>
+                <div style="text-align: center; margin-bottom: 1rem;">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">🎉</div>
+                    <h3>Commande ${orderCode} envoyée !</h3>
+                    <p style="margin-top: 0.5rem; font-size: 0.9rem;">Client: ${customerName}</p>
+                    <p style="font-size: 0.85rem; opacity: 0.8;">WhatsApp: ${cleanNumber}</p>
+                </div>
+                ${deliveryInfo}
+                <div style="text-align: center; font-size: 0.875rem; color: var(--on-surface-light);">
+                    Merci de votre confiance ! 🙏
+                </div>
+            `;
+            pickupMessage.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: var(--surface);
+                padding: 2rem;
+                border-radius: 20px;
+                z-index: 1002;
+                max-width: 350px;
+                box-shadow: var(--shadow-lg);
+                border: 2px solid var(--primary);
+            `;
+            document.body.appendChild(pickupMessage);
+            
+            setTimeout(() => {
+                if (pickupMessage.parentElement) {
+                    pickupMessage.remove();
+                }
+            }, 8000);
+            
+        } catch (error) {
+            const loaderEl = document.getElementById('order-loader');
+            if (loaderEl) loaderEl.remove();
+            
+            console.error('Erreur détaillée:', error);
+            
+            let errorMessage = "";
+            let errorIcon = "❌";
+            
+            if (!navigator.onLine) {
+                errorIcon = "📡";
+                errorMessage = "Connexion internet perdue\n\n";
+                errorMessage += "• Vérifiez votre connexion WiFi ou données mobiles\n";
+                errorMessage += "• Réessayez dans quelques instants\n\n";
+                errorMessage += "💡 Votre panier est sauvegardé !";
+            } else if (error.message.includes('timeout') || error.message.includes('network')) {
+                errorIcon = "⚠️";
+                errorMessage = "Connexion trop lente\n\n";
+                errorMessage += "• Votre connexion internet est très faible\n";
+                errorMessage += "• Rapprochez-vous d'une source WiFi\n";
+                errorMessage += "• Ou réessayez avec une meilleure connexion\n\n";
+                errorMessage += "💡 Votre panier est sauvegardé !";
+            } else {
+                errorIcon = "⚠️";
+                errorMessage = "Erreur inattendue\n\n";
+                errorMessage += "• Fermez et rouvrez l'application\n";
+                errorMessage += "• Ou contactez le support: 07 19 98 30 44\n\n";
+                errorMessage += "💡 Votre panier est sauvegardé !";
+            }
+            
+            const errorModal = document.createElement('div');
+            errorModal.innerHTML = `
+                <div style="text-align: center;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">${errorIcon}</div>
+                    <h3 style="margin-bottom: 1rem; color: #dc3545;">Envoi échoué</h3>
+                    <p style="white-space: pre-line; line-height: 1.6; font-size: 0.95rem;">${errorMessage}</p>
+                    <button onclick="this.parentElement.parentElement.remove()" style="margin-top: 1.5rem; background: var(--gradient); color: white; border: none; padding: 0.75rem 2rem; border-radius: 25px; cursor: pointer; font-weight: 600;">
+                        Compris
+                    </button>
+                </div>
+            `;
+            errorModal.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: var(--surface);
+                padding: 2rem;
+                border-radius: 20px;
+                z-index: 1003;
+                max-width: 90%;
+                width: 400px;
+                box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            `;
+            document.body.appendChild(errorModal);
+        }
+    });
+
+    // Fermer les modals en cliquant à l'extérieur
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('modal') || 
+            e.target.classList.contains('cart-modal') || 
+            e.target.classList.contains('degue-modal') ||
+            e.target.classList.contains('selection-modal')) {
+            e.target.classList.remove('show');
+        }
+    });
+
+    // GESTION DU SWIPE POUR LES PUBLICITÉS
+    let touchStartX = 0;
+    let touchEndX = 0;
+    let isTouching = false;
+
+    const adsContainer = document.querySelector('.ads-container');
+    if (adsContainer) {
+        adsContainer.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+            isTouching = true;
+            const slider = document.getElementById('ads-slider');
+            if (slider) {
+                slider.classList.add('paused');
+            }
+            adsAutoPlay = false;
+            clearInterval(adsInterval);
+        }, { passive: true });
+
+        adsContainer.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            isTouching = false;
+            handleSwipe();
+            
+            setTimeout(() => {
+                const slider = document.getElementById('ads-slider');
+                if (slider) {
+                    slider.classList.remove('paused');
+                }
+                adsAutoPlay = true;
+                startAdsAutoPlay();
+            }, 5000);
+        }, { passive: true });
+    }
+
+    function handleSwipe() {
+        const swipeThreshold = 50;
+        
+        if (touchEndX < touchStartX - swipeThreshold) {
+            slideAds('next');
+        }
+        
+        if (touchEndX > touchStartX + swipeThreshold) {
+            slideAds('prev');
+        }
+    }
+
+    // Gestion de l'indicateur de scroll
+    const navStories = document.querySelector('.nav-stories');
+    const scrollHint = document.getElementById('scroll-hint');
+    const scrollDots = document.querySelectorAll('.scroll-dot');
+    
+    if (navStories && scrollHint) {
+        let hasScrolled = false;
+        
+        navStories.addEventListener('scroll', function() {
+            if (!hasScrolled && navStories.scrollLeft > 20) {
+                hasScrolled = true;
+                scrollHint.style.opacity = '0';
+                setTimeout(() => {
+                    scrollHint.style.display = 'none';
+                }, 300);
+            }
+            
+            updateScrollDots();
+        });
+        
+        function updateScrollDots() {
+            const scrollPercentage = (navStories.scrollLeft / (navStories.scrollWidth - navStories.clientWidth)) * 100;
+            
+            scrollDots.forEach((dot, index) => {
+                dot.classList.remove('active');
+                if (scrollPercentage < 33 && index === 0) {
+                    dot.classList.add('active');
+                } else if (scrollPercentage >= 33 && scrollPercentage < 66 && index === 1) {
+                    dot.classList.add('active');
+                } else if (scrollPercentage >= 66 && index === 2) {
+                    dot.classList.add('active');
+                }
+            });
+        }
+        
+        setTimeout(() => {
+            if (!hasScrolled) {
+                scrollHint.style.transition = 'opacity 0.5s';
+                scrollHint.style.opacity = '0.3';
+            }
+        }, 5000);
+    }
+
+// Enregistrement du Service Worker pour PWA
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+                console.log('Service Worker enregistré:', registration.scope);
+            })
+            .catch((error) => {
+                console.log('Erreur Service Worker:', error);
+            });
+    });
+}
+
+// Gestion de la bannière d'installation PWA
+let deferredPrompt;
+
+// Fonction pour déclencher l'installation
+window.triggerInstallPrompt = async function() {
+    const installStatus = document.getElementById('install-status');
+    const downloadBtn = document.querySelector('#download-button button');
+    
+    if (deferredPrompt) {
+        // Prompt d'installation disponible
+        try {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            
+            if (outcome === 'accepted') {
+                console.log('Installation acceptée');
+                showNotificationStatus('✅ Application installée!', '#28a745');
+                installStatus.style.display = 'flex';
+                downloadBtn.style.background = 'linear-gradient(135deg, #28a745, #34ce57)';
+            } else {
+                console.log('Installation refusée');
+                showNotificationStatus('❌ Installation annulée', '#dc3545');
+            }
+            deferredPrompt = null;
+        } catch (error) {
+            console.error('Erreur installation:', error);
+            showNotificationStatus('❌ Erreur d\'installation', '#dc3545');
+        }
+    } else {
+        // Pas de prompt disponible - afficher les instructions
+        showInstallInstructions();
+    }
+};
+
+// Fonction pour afficher les instructions d'installation
+function showInstallInstructions() {
+    const modal = document.createElement('div');
+    modal.innerHTML = `
+        <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10001; display: flex; align-items: center; justify-content: center; padding: 20px;">
+            <div style="background: white; border-radius: 20px; padding: 2rem; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto;">
+                <div style="text-align: center; margin-bottom: 1.5rem;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">📱</div>
+                    <h2 style="color: #ff4e00; margin-bottom: 0.5rem;">Installer l'Application</h2>
+                    <p style="color: #666; font-size: 0.9rem;">Accédez rapidement à GROUPE EXPRESS</p>
+                </div>
+                
+                <div style="background: #f8f9fa; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem;">
+                    <h3 style="font-size: 1rem; margin-bottom: 1rem; color: #333;">📱 Comment installer :</h3>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <strong style="color: #ff4e00;">Chrome / Edge (Android) :</strong>
+                        <ol style="margin: 0.5rem 0 0 1.5rem; line-height: 1.8; font-size: 0.9rem;">
+                            <li>Cliquez sur le menu ⋮ (en haut à droite)</li>
+                            <li>Sélectionnez "Ajouter à l'écran d'accueil"</li>
+                            <li>Confirmez l'installation</li>
+                        </ol>
+                    </div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <strong style="color: #ff4e00;">Safari (iPhone) :</strong>
+                        <ol style="margin: 0.5rem 0 0 1.5rem; line-height: 1.8; font-size: 0.9rem;">
+                            <li>Appuyez sur le bouton Partager 📤</li>
+                            <li>Faites défiler et sélectionnez "Sur l'écran d'accueil"</li>
+                            <li>Appuyez sur "Ajouter"</li>
+                        </ol>
+                    </div>
+                    
+                    <div style="background: linear-gradient(135deg, #ff4e00, #ff6b9d); color: white; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                        <strong>✨ Avantages :</strong>
+                        <ul style="margin: 0.5rem 0 0 1.5rem; line-height: 1.6; font-size: 0.85rem;">
+                            <li>Accès rapide depuis votre écran d'accueil</li>
+                            <li>Notifications en temps réel</li>
+                            <li>Fonctionne hors ligne</li>
+                            <li>Expérience optimisée</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <button onclick="this.parentElement.parentElement.remove()" style="width: 100%; background: linear-gradient(135deg, #ff4e00, #ff6b9d); color: white; border: none; padding: 1rem; border-radius: 12px; font-size: 1rem; font-weight: 600; cursor: pointer;">
+                    J'ai compris
+                </button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    console.log('Prompt d\'installation disponible');
+});
+
+window.addEventListener('appinstalled', () => {
+    console.log('PWA installée avec succès!');
+    const installStatus = document.getElementById('install-status');
+    const downloadBtn = document.querySelector('#download-button button');
+    
+    if (installStatus) installStatus.style.display = 'flex';
+    if (downloadBtn) downloadBtn.style.background = 'linear-gradient(135deg, #28a745, #34ce57)';
+    
+    showNotificationStatus('🎉 Application installée avec succès!', '#28a745');
+    deferredPrompt = null;
+});
+</script>
+
+</body>
+</html>
