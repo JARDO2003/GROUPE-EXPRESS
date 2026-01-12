@@ -1534,3 +1534,71 @@ window.addEventListener('appinstalled', () => {
     showNotificationStatus('🎉 Application installée avec succès!', '#28a745');
     deferredPrompt = null;
 });
+
+// Fonction pour charger et afficher les nouveaux plats
+function loadNewDishes() {
+    try {
+        const syncedDishes = JSON.parse(localStorage.getItem('syncedDishes') || '[]');
+        
+        if (syncedDishes.length === 0) {
+            return;
+        }
+        
+        const section = document.getElementById('new-dishes-section');
+        const grid = document.getElementById('new-dishes-grid');
+        
+        if (!section || !grid) return;
+        
+        // Vider la grille
+        grid.innerHTML = '';
+        
+        // Ajouter chaque plat
+        syncedDishes.forEach((dish, index) => {
+            const dishElement = document.createElement('div');
+            dishElement.className = 'food-item';
+            dishElement.style.animation = `slideUp 0.6s ease-out ${index * 0.1}s both`;
+            
+            dishElement.innerHTML = `
+                <img src="${dish.image}" alt="${dish.name}" class="food-item-image" onerror="this.src='image/GE.jpg'">
+                <div class="food-item-content">
+                    <div class="food-title">${dish.name}</div>
+                    <div class="food-description">${dish.description}</div>
+                    <div class="food-price">${dish.price} FCFA</div>
+                    <button class="add-to-cart-btn" onclick="promptAddToCart('${dish.name.replace(/'/g, "\\'")}', ${dish.price}, '${dish.category}')">
+                        🛒 Ajouter au panier
+                    </button>
+                </div>
+            `;
+            
+            grid.appendChild(dishElement);
+        });
+        
+        // Afficher la section
+        section.style.display = 'block';
+        
+        console.log(`${syncedDishes.length} nouveaux plats chargés`);
+    } catch (error) {
+        console.error('Erreur chargement nouveaux plats:', error);
+    }
+}
+
+// Fonction pour effacer les nouveaux plats (optionnel, pour l'administration)
+function clearNewDishes() {
+    if (confirm('Effacer tous les nouveaux plats synchronisés ?')) {
+        localStorage.removeItem('syncedDishes');
+        document.getElementById('new-dishes-section').style.display = 'none';
+        showNotificationStatus('🗑️ Nouveaux plats effacés', '#dc3545');
+    }
+}
+
+// Charger les nouveaux plats au chargement de la page
+document.addEventListener('DOMContentLoaded', function() {
+    loadNewDishes();
+    
+    // Recharger toutes les 30 secondes pour détecter les nouveaux plats
+    setInterval(loadNewDishes, 30000);
+});
+
+// Exposer la fonction de nettoyage
+window.clearNewDishes = clearNewDishes;
+  
