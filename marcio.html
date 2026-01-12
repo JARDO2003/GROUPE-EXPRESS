@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marcio - Espace Fournisseur | GROUPE EXPRESS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #000000;
+            --primary-light: #100f0f;
+            --primary-dark: #280059;
+            --secondary: #131315;
+            --accent: #f10505;
+            --gradient: linear-gradient(45deg, #f3ecec, #d61215, #ffffff, #ff0004, #b62a2a, #d20d0d, #e2d9da, #f0eeea);
+            --surface: #FFFFFF;
+            --background: #FAFAFA;
+            --on-surface: #262626;
+            --on-surface-light: #8E8E8E;
+            --border: #DBDBDB;
+            --shadow: 0 2px 4px rgba(0,0,0,0.1);
+            --shadow-lg: 0 8px 25px rgba(0,0,0,0.15);
+            --radius: 12px;
+            --radius-xl: 24px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: var(--on-surface);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--surface);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+
+        .header {
+            background: var(--gradient);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            opacity: 0.95;
+            font-size: 1.1rem;
+        }
+
+        .admin-panel {
+            padding: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--on-surface);
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .image-preview {
+            margin-top: 1rem;
+            border: 2px dashed var(--border);
+            border-radius: var(--radius);
+            padding: 1rem;
+            text-align: center;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--background);
+        }
+
+        .image-preview img {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: var(--radius);
+        }
+
+        .image-preview.empty {
+            color: var(--on-surface-light);
+            font-style: italic;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-secondary {
+            background: var(--border);
+            color: var(--on-surface);
+        }
+
+        .btn-secondary:hover {
+            background: var(--on-surface-light);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4);
+        }
+
+        .dishes-list {
+            margin-top: 2rem;
+        }
+
+        .dish-card {
+            background: var(--background);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .dish-card:hover {
+            transform: translateX(5px);
+            box-shadow: var(--shadow);
+        }
+
+        .dish-card img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: var(--radius);
+        }
+
+        .dish-card-info {
+            flex: 1;
+        }
+
+        .dish-card-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .dish-card-price {
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .dish-card-desc {
+            font-size: 0.875rem;
+            color: var(--on-surface-light);
+        }
+
+        .dish-card-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            z-index: 1000;
+            animation: slideInRight 0.3s ease-out;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .notification.success {
+            border-left: 4px solid #28a745;
+        }
+
+        .notification.error {
+            border-left: 4px solid #dc3545;
+        }
+
+        .notification.warning {
+            border-left: 4px solid #ffc107;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            text-align: center;
+        }
+
+        .stat-card-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card-label {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        .category-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: #667eea;
+            color: white;
+            margin-top: 0.25rem;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .admin-panel {
+                padding: 1rem;
+            }
+
+            .dish-card {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .dish-card img {
+                width: 100%;
+                height: 200px;
+            }
+
+            .dish-card-actions {
+                width: 100%;
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>👨‍🍳 Espace Fournisseur Marcio</h1>
+            <p>Ajoutez et gérez vos plats pour GROUPE EXPRESS</p>
+        </div>
+
+        <div class="admin-panel">
+            <!-- Statistiques -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-card-value" id="total-dishes">0</div>
+                    <div class="stat-card-label">Plats ajoutés</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-value" id="synced-dishes">0</div>
+                    <div class="stat-card-label">Plats synchronisés</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-value" id="last-sync">Jamais</div>
+                    <div class="stat-card-label">Dernière sync</div>
+                </div>
+            </div>
+
+            <!-- Formulaire d'ajout -->
+            <h2 class="section-title">📋 Ajouter un nouveau plat</h2>
+            
+            <form id="dish-form">
+                <div class="form-group">
+                    <label for="dish-name">Nom du plat *</label>
+                    <input type="text" id="dish-name" required placeholder="Ex: Spaghetti Bolognaise">
+                </div>
+
+                <div class="form-group">
+                    <label for="dish-price">Prix (FCFA) *</label>
+                    <input type="number" id="dish-price" required placeholder="Ex: 1500" min="0">
+                </div>
+
+                <div class="form-group">
+                    <label for="dish-category">Catégorie *</label>
+                    <select id="dish-category" required>
+                        <option value="">Sélectionnez une catégorie</option>
+                        <option value="A">🍝 Pâtes & Petit pois</option>
+                        <option value="B">🍚 Tchèpes</option>
+                        <option value="C">🍛 Riz</option>
+                        <option value="D">🐷 Porc au four</option>
+                        <option value="E">🌾 Attiékè spécialité</option>
+                        <option value="F">🥛 Dêguê</option>
+                        <option value="G">🍰 Madeleines</option>
+                        <option value="H">🧃 Jus</option>
+                        <option value="I">🥟 Pastel</option>
+                        <option value="J">🍹 Sucreries</option>
+                        <option value="K">🍕 Fast Food</option>
+                        <option value="L">@ Akassa</option>
+                        <option value="U">@ Nuds</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="dish-description">Description *</label>
+                    <textarea id="dish-description" required placeholder="Décrivez votre plat..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="dish-image">Image du plat *</label>
+                    <input type="file" id="dish-image" accept="image/*" required style="display: none;">
+                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('dish-image').click()" style="width: 100%; margin-bottom: 1rem;">
+                        📷 Choisir une image depuis la galerie
+                    </button>
+                    <div class="image-preview empty" id="image-preview">
+                        📷 Aucune image sélectionnée
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    ✅ Ajouter le plat
+                </button>
+            </form>
+
+            <!-- Liste des plats -->
+            <div class="dishes-list">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h2 class="section-title" style="margin-bottom: 0;">🍽️ Mes plats ajoutés</h2>
+                    <button class="btn btn-danger" onclick="window.clearAllDishes()" style="padding: 0.5rem 1rem;">
+                        🗑️ Tout supprimer
+                    </button>
+                </div>
+                <div id="dishes-container">
+                    <p style="text-align: center; color: var(--on-surface-light); padding: 2rem;">
+                        Aucun plat ajouté pour le moment
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBsGrY-AqYMoI70kT3WMxLgW0HwYA4KyaQ",
+            authDomain: "livraison-c8498.firebaseapp.com",
+            projectId: "livraison-c8498",
+            storageBucket: "livraison-c8498.firebasestorage.app",
+            messagingSenderId: "403240604780",
+            appId: "1:403240604780:web:77d84ad03d68bdaddfb449",
+            measurementId: "G-5YF89BZ5RY"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Variables globales
+        let myDishes = [];
+        let selectedImageBase64 = '';
+
+        // Fonction pour gérer la sélection d'image
+        document.getElementById('dish-image').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const preview = document.getElementById('image-preview');
+            
+            if (file) {
+                // Vérifier que c'est bien une image
+                if (!file.type.startsWith('image/')) {
+                    showNotification('❌ Veuillez sélectionner une image', 'error');
+                    return;
+                }
+                
+                // Vérifier la taille (max 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    showNotification('❌ L\'image est trop volumineuse (max 5MB)', 'error');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                
+                reader.onload = function(event) {
+                    selectedImageBase64 = event.target.result;
+                    preview.innerHTML = `<img src="${selectedImageBase64}" alt="Aperçu">`;
+                    preview.classList.remove('empty');
+                    showNotification('✅ Image chargée avec succès', 'success');
+                };
+                
+                reader.onerror = function() {
+                    showNotification('❌ Erreur lors du chargement de l\'image', 'error');
+                    preview.innerHTML = '❌ Erreur de chargement';
+                };
+                
+                reader.readAsDataURL(file);
+            } else {
+                preview.innerHTML = '📷 Aucune image sélectionnée';
+                preview.classList.add('empty');
+                selectedImageBase64 = '';
+            }
+        });
+
+        // Fonction pour afficher une notification
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.animation = 'slideOutRight 0.3s ease-out';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Fonction pour synchroniser les plats avec m.html
+        function syncDishToMainPage(dishData) {
+            try {
+                let syncedDishes = JSON.parse(localStorage.getItem('syncedDishes') || '[]');
+                
+                const existingIndex = syncedDishes.findIndex(d => d.name === dishData.name);
+                if (existingIndex === -1) {
+                    dishData.syncedAt = new Date().toISOString();
+                    syncedDishes.push(dishData);
+                    localStorage.setItem('syncedDishes', JSON.stringify(syncedDishes));
+                    console.log('Plat synchronisé:', dishData.name);
+                    updateStats();
+                }
+            } catch (error) {
+                console.error('Erreur de synchronisation:', error);
+            }
+        }
+
+        // Fonction pour mettre à jour les statistiques
+        function updateStats() {
+            const syncedDishes = JSON.parse(localStorage.getItem('syncedDishes') || '[]');
+            document.getElementById('total-dishes').textContent = myDishes.length;
+            document.getElementById('synced-dishes').textContent = syncedDishes.length;
+            
+            if (syncedDishes.length > 0) {
+                const lastSync = new Date(syncedDishes[syncedDishes.length - 1].syncedAt);
+                document.getElementById('last-sync').textContent = lastSync.toLocaleTimeString('fr-FR');
+            }
+        }
+
+        // Fonction pour afficher l'aperçu de l'image
+        // (Supprimé car maintenant géré par l'input file)
+
+        // Fonction pour afficher les plats
+        function displayDishes() {
+            const container = document.getElementById('dishes-container');
+            
+            if (myDishes.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: var(--on-surface-light); padding: 2rem;">Aucun plat ajouté pour le moment</p>';
+                return;
+            }
+
+            container.innerHTML = '';
+            myDishes.forEach((dish, index) => {
+                const dishCard = document.createElement('div');
+                dishCard.className = 'dish-card';
+                dishCard.style.animation = `slideInRight 0.3s ease-out ${index * 0.1}s both`;
+                
+                const categoryNames = {
+                    'A': '🍝 Pâtes', 'B': '🍚 Tchèpes', 'C': '🍛 Riz', 'D': '🐷 Porc',
+                    'E': '🌾 Attiékè', 'F': '🥛 Dêguê', 'G': '🍰 Madeleines', 'H': '🧃 Jus',
+                    'I': '🥟 Pastel', 'J': '🍹 Sucreries', 'K': '🍕 Fast Food', 'L': '@ Akassa', 'U': '@ Nuds'
+                };
+                
+                dishCard.innerHTML = `
+                    <img src="${dish.image || 'image/GE.jpg'}" alt="${dish.name}" onerror="this.src='image/GE.jpg'">
+                    <div class="dish-card-info">
+                        <div class="dish-card-name">${dish.name}</div>
+                        <div class="dish-card-price">${dish.price} FCFA</div>
+                        <div class="dish-card-desc">${dish.description}</div>
+                        <span class="category-badge">${categoryNames[dish.category] || dish.category}</span>
+                    </div>
+                    <div class="dish-card-actions">
+                        <button class="btn btn-danger" onclick="window.deleteDish(${index})">
+                            🗑️ Supprimer
+                        </button>
+                    </div>
+                `;
+                
+                container.appendChild(dishCard);
+            });
+        }
+
+        // Fonction pour charger les plats depuis localStorage
+        function loadDishes() {
+            myDishes = JSON.parse(localStorage.getItem('marcioDishes') || '[]');
+            displayDishes();
+            updateStats();
+        }
+
+        // Fonction pour sauvegarder les plats
+        function saveDishes() {
+            localStorage.setItem('marcioDishes', JSON.stringify(myDishes));
+        }
+
+        // Fonction pour supprimer un plat
+        window.deleteDish = function(index) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer ce plat ?')) {
+                const deletedDish = myDishes.splice(index, 1)[0];
+                
+                // Sauvegarder les modifications locales
+                saveDishes();
+                
+                // Supprimer aussi de la liste synchronisée avec m.html
+                let syncedDishes = JSON.parse(localStorage.getItem('syncedDishes') || '[]');
+                syncedDishes = syncedDishes.filter(dish => dish.name !== deletedDish.name);
+                localStorage.setItem('syncedDishes', JSON.stringify(syncedDishes));
+                
+                // Rafraîchir l'affichage
+                displayDishes();
+                updateStats();
+                
+                showNotification(`🗑️ ${deletedDish.name} supprimé de toutes les pages`, 'warning');
+            }
+        };
+
+        // Fonction pour tout supprimer (y compris les anciens plats)
+        window.clearAllDishes = function() {
+            if (confirm('⚠️ ATTENTION !\n\nCela va supprimer TOUS les plats (y compris les anciens).\n\nÊtes-vous absolument sûr ?')) {
+                // Vider toutes les listes
+                myDishes = [];
+                saveDishes();
+                
+                // Vider aussi la liste synchronisée
+                localStorage.removeItem('syncedDishes');
+                
+                // Rafraîchir l'affichage
+                displayDishes();
+                updateStats();
+                
+                showNotification('🗑️ Tous les plats ont été supprimés', 'warning');
+            }
+        };
+
+        // Gérer la soumission du formulaire
+        document.getElementById('dish-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Vérifier qu'une image a été sélectionnée
+            if (!selectedImageBase64) {
+                showNotification('❌ Veuillez sélectionner une image', 'error');
+                return;
+            }
+
+            const dishData = {
+                name: document.getElementById('dish-name').value.trim(),
+                price: parseInt(document.getElementById('dish-price').value),
+                category: document.getElementById('dish-category').value,
+                description: document.getElementById('dish-description').value.trim(),
+                image: selectedImageBase64, // Image en base64
+                createdAt: new Date().toISOString()
+            };
+
+            // Ajouter le plat à la liste locale
+            myDishes.push(dishData);
+            saveDishes();
+
+            // Synchroniser avec m.html
+            syncDishToMainPage(dishData);
+
+            // Afficher les plats
+            displayDishes();
+
+            // Réinitialiser le formulaire
+            this.reset();
+            document.getElementById('image-preview').innerHTML = '📷 Aucune image sélectionnée';
+            document.getElementById('image-preview').classList.add('empty');
+            selectedImageBase64 = '';
+
+            // Notification de succès
+            showNotification(`✅ ${dishData.name} ajouté avec succès !`, 'success');
+
+            // Faire défiler jusqu'à la liste
+            document.querySelector('.dishes-list').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // Charger les plats au démarrage
+        loadDishes();
+    </script>
+</body>
+</html>
