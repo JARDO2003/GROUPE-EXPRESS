@@ -19,6 +19,140 @@
     <!-- FCM Configuration -->
     <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-messaging-compat.js"></script>
+    
+    <!-- Scripts pour les modals et fonctions -->
+    <script>
+        // Variable pour stocker les données temporaires de la quantité
+        let quantityData = {
+            itemName: '',
+            price: 0,
+            category: ''
+        };
+
+        // Fonction pour afficher le formulaire de commande
+        function showOrderForm() {
+            const formFields = document.getElementById('order-form-fields');
+            const showBtn = document.getElementById('show-form-btn');
+            
+            if (formFields && showBtn) {
+                formFields.style.display = 'block';
+                showBtn.style.display = 'none';
+            }
+        }
+
+        // Fonction pour sélectionner le mode de paiement
+        function selectPayment(method) {
+            // Retirer la sélection de tous les modes
+            document.querySelectorAll('.payment-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // Ajouter la sélection au mode choisi
+            event.currentTarget.classList.add('selected');
+            
+            // Mettre à jour le champ caché
+            const paymentInput = document.getElementById('payment-method');
+            if (paymentInput) {
+                paymentInput.value = method;
+            }
+        }
+
+        // Fonction pour ouvrir la modal de quantité (appelée par promptAddToCart)
+        window.promptAddToCart = function(itemName, price, category) {
+            quantityData = { itemName, price, category };
+            
+            const modal = document.getElementById('quantity-modal');
+            const nameElement = document.getElementById('quantity-item-name');
+            const inputElement = document.getElementById('quantity-input');
+            
+            if (modal && nameElement && inputElement) {
+                nameElement.textContent = itemName;
+                inputElement.value = 1;
+                modal.classList.add('show');
+            }
+        };
+
+        // Fonction pour fermer la modal de quantité
+        function closeQuantityModal() {
+            const modal = document.getElementById('quantity-modal');
+            if (modal) {
+                modal.classList.remove('show');
+            }
+            quantityData = { itemName: '', price: 0, category: '' };
+        }
+
+        // Fonction pour augmenter la quantité
+        function increaseQuantity() {
+            const input = document.getElementById('quantity-input');
+            if (input) {
+                let value = parseInt(input.value) || 1;
+                if (value < 99) {
+                    input.value = value + 1;
+                }
+            }
+        }
+
+        // Fonction pour diminuer la quantité
+        function decreaseQuantity() {
+            const input = document.getElementById('quantity-input');
+            if (input) {
+                let value = parseInt(input.value) || 1;
+                if (value > 1) {
+                    input.value = value - 1;
+                }
+            }
+        }
+
+        // Fonction pour mettre à jour la quantité
+        function updateQuantity() {
+            const input = document.getElementById('quantity-input');
+            if (input) {
+                let value = parseInt(input.value) || 1;
+                if (value < 1) value = 1;
+                if (value > 99) value = 99;
+                input.value = value;
+            }
+        }
+
+        // Fonction pour confirmer la quantité
+        function confirmQuantity() {
+            const input = document.getElementById('quantity-input');
+            if (input && quantityData.itemName) {
+                const quantity = parseInt(input.value) || 1;
+                
+                // Appeler la fonction addToCart de suite.js si elle existe
+                if (typeof window.addToCart === 'function') {
+                    window.addToCart(quantityData.itemName, quantityData.price, quantityData.category, quantity);
+                } else {
+                    // Fallback: créer un événement personnalisé
+                    const event = new CustomEvent('addToCartEvent', {
+                        detail: {
+                            name: quantityData.itemName,
+                            price: quantityData.price,
+                            category: quantityData.category,
+                            quantity: quantity
+                        }
+                    });
+                    window.dispatchEvent(event);
+                }
+                
+                closeQuantityModal();
+            }
+        }
+
+        // Fermer la modal en cliquant en dehors
+        document.addEventListener('DOMContentLoaded', function() {
+            const quantityModal = document.getElementById('quantity-modal');
+            if (quantityModal) {
+                quantityModal.addEventListener('click', function(event) {
+                    if (event.target === quantityModal) {
+                        closeQuantityModal();
+                    }
+                });
+            }
+        });
+    </script>
+    
     <style>
         * {
             margin: 0;
@@ -2560,132 +2694,5 @@
     </div>
 
     <script type="module" src="suite.js"></script>
-    <script>
-        // Variable pour stocker les données temporaires de la quantité
-        let quantityData = {
-            itemName: '',
-            price: 0,
-            category: ''
-        };
-
-        // Fonction pour afficher le formulaire de commande
-        function showOrderForm() {
-            const formFields = document.getElementById('order-form-fields');
-            const showBtn = document.getElementById('show-form-btn');
-            
-            if (formFields && showBtn) {
-                formFields.style.display = 'block';
-                showBtn.style.display = 'none';
-            }
-        }
-
-        // Fonction pour sélectionner le mode de paiement
-        function selectPayment(method) {
-            // Retirer la sélection de tous les modes
-            document.querySelectorAll('.payment-option').forEach(option => {
-                option.classList.remove('selected');
-            });
-            
-            // Ajouter la sélection au mode choisi
-            event.currentTarget.classList.add('selected');
-            
-            // Mettre à jour le champ caché
-            const paymentInput = document.getElementById('payment-method');
-            if (paymentInput) {
-                paymentInput.value = method;
-            }
-        }
-
-        // Fonction pour ouvrir la modal de quantité (appelée par promptAddToCart)
-        window.promptAddToCart = function(itemName, price, category) {
-            quantityData = { itemName, price, category };
-            
-            const modal = document.getElementById('quantity-modal');
-            const nameElement = document.getElementById('quantity-item-name');
-            const inputElement = document.getElementById('quantity-input');
-            
-            if (modal && nameElement && inputElement) {
-                nameElement.textContent = itemName;
-                inputElement.value = 1;
-                modal.classList.add('show');
-            }
-        };
-
-        // Fonction pour fermer la modal de quantité
-        function closeQuantityModal() {
-            const modal = document.getElementById('quantity-modal');
-            if (modal) {
-                modal.classList.remove('show');
-            }
-            quantityData = { itemName: '', price: 0, category: '' };
-        }
-
-        // Fonction pour augmenter la quantité
-        function increaseQuantity() {
-            const input = document.getElementById('quantity-input');
-            if (input) {
-                let value = parseInt(input.value) || 1;
-                if (value < 99) {
-                    input.value = value + 1;
-                }
-            }
-        }
-
-        // Fonction pour diminuer la quantité
-        function decreaseQuantity() {
-            const input = document.getElementById('quantity-input');
-            if (input) {
-                let value = parseInt(input.value) || 1;
-                if (value > 1) {
-                    input.value = value - 1;
-                }
-            }
-        }
-
-        // Fonction pour mettre à jour la quantité
-        function updateQuantity() {
-            const input = document.getElementById('quantity-input');
-            if (input) {
-                let value = parseInt(input.value) || 1;
-                if (value < 1) value = 1;
-                if (value > 99) value = 99;
-                input.value = value;
-            }
-        }
-
-        // Fonction pour confirmer la quantité
-        function confirmQuantity() {
-            const input = document.getElementById('quantity-input');
-            if (input && quantityData.itemName) {
-                const quantity = parseInt(input.value) || 1;
-                
-                // Appeler la fonction addToCart de suite.js si elle existe
-                if (typeof window.addToCart === 'function') {
-                    window.addToCart(quantityData.itemName, quantityData.price, quantityData.category, quantity);
-                } else {
-                    // Fallback: créer un événement personnalisé
-                    const event = new CustomEvent('addToCartEvent', {
-                        detail: {
-                            name: quantityData.itemName,
-                            price: quantityData.price,
-                            category: quantityData.category,
-                            quantity: quantity
-                        }
-                    });
-                    window.dispatchEvent(event);
-                }
-                
-                closeQuantityModal();
-            }
-        }
-
-        // Fermer la modal en cliquant en dehors
-        document.addEventListener('click', function(event) {
-            const modal = document.getElementById('quantity-modal');
-            if (modal && event.target === modal) {
-                closeQuantityModal();
-            }
-        });
-    </script>
 </body>
 </html>
