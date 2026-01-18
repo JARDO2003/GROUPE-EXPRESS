@@ -16,6 +16,9 @@
     <meta name="apple-mobile-web-app-title" content="GROUPE EXPRESS">
     <link rel="apple-touch-icon" href="image/u.png">
     
+    <!-- FCM Configuration -->
+    <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-messaging-compat.js"></script>
     <style>
         * {
             margin: 0;
@@ -699,7 +702,7 @@
             background: var(--bg-primary);
             border-radius: var(--radius-xl);
             width: 100%;
-            max-width: 550px;
+            max-width: 650px;
             max-height: 90vh;
             overflow-y: auto;
             position: relative;
@@ -774,7 +777,7 @@
         }
 
         .cart-items {
-            max-height: 320px;
+            max-height: 500px;
             overflow-y: auto;
             margin-bottom: 20px;
         }
@@ -783,16 +786,22 @@
             display: flex;
             align-items: center;
             gap: 16px;
-            padding: 16px;
-            margin-bottom: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
             background: var(--bg-secondary);
             border-radius: var(--radius);
             box-shadow: var(--neu-shadow-inset);
+            transition: all 0.3s ease;
+        }
+
+        .cart-item:hover {
+            background: var(--bg-primary);
+            box-shadow: var(--neu-shadow-sm);
         }
 
         .cart-item-image {
-            width: 60px;
-            height: 60px;
+            width: 70px;
+            height: 70px;
             border-radius: 12px;
             object-fit: cover;
             box-shadow: var(--neu-shadow-sm);
@@ -803,15 +812,19 @@
         }
 
         .cart-item-name {
-            font-size: 15px;
+            font-size: 16px;
             font-weight: 700;
             margin-bottom: 6px;
             color: var(--text-primary);
         }
 
         .cart-item-price {
-            font-size: 13px;
-            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 600;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .remove-btn {
