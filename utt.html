@@ -141,6 +141,29 @@
             text-decoration: none;
         }
 
+        .cart-icon {
+            animation: cartBounce 2s ease-in-out infinite;
+        }
+
+        @keyframes cartBounce {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: var(--neu-shadow-sm);
+            }
+            25% {
+                transform: scale(1.15);
+                box-shadow: var(--neu-shadow-hover);
+            }
+            50% {
+                transform: scale(1);
+                box-shadow: var(--neu-shadow-sm);
+            }
+            75% {
+                transform: scale(1.1);
+                box-shadow: var(--neu-shadow);
+            }
+        }
+
         .cart-icon:hover, .contact-service-btn:hover {
             box-shadow: var(--neu-shadow-hover);
             transform: translateY(-3px) scale(1.05);
@@ -166,12 +189,18 @@
             justify-content: center;
             font-weight: 700;
             box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
-            animation: pulse 2s infinite;
+            animation: badgePulse 1.5s infinite;
         }
 
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
+        @keyframes badgePulse {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+            }
+            50% { 
+                transform: scale(1.2);
+                box-shadow: 0 6px 20px rgba(255, 107, 107, 0.7);
+            }
         }
 
         /* ALERT NEUMORPHIQUE */
@@ -910,6 +939,163 @@
             box-shadow: var(--neu-shadow-sm);
         }
 
+        /* FORMULAIRE DE COMMANDE STYLISÉ */
+        .order-form-container {
+            margin-top: 24px;
+            padding: 24px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius);
+            box-shadow: var(--neu-shadow-inset);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: var(--radius);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 15px;
+            font-family: inherit;
+            box-shadow: var(--neu-shadow-inset);
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light), 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-input::placeholder, .form-textarea::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.7;
+        }
+
+        .form-required {
+            color: #ff6b6b;
+            margin-left: 4px;
+        }
+
+        .form-hint {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 6px;
+            font-style: italic;
+        }
+
+        .payment-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .payment-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 16px;
+            border-radius: var(--radius);
+            background: var(--bg-primary);
+            box-shadow: var(--neu-shadow-sm);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .payment-option:hover {
+            box-shadow: var(--neu-shadow-hover);
+            transform: translateY(-3px);
+        }
+
+        .payment-option.selected {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+
+        .payment-icon {
+            font-size: 32px;
+        }
+
+        .payment-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            text-align: center;
+        }
+
+        .submit-order-btn {
+            width: 100%;
+            background: var(--accent-gradient);
+            color: white;
+            border: none;
+            padding: 20px;
+            border-radius: var(--radius);
+            font-size: 18px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+            margin-top: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-order-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .submit-order-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .submit-order-btn:hover {
+            box-shadow: 0 12px 28px rgba(102, 126, 234, 0.5);
+            transform: translateY(-3px);
+        }
+
+        .submit-order-btn:active {
+            transform: translateY(0);
+        }
+
+        .submit-order-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
         .degue-option, .selection-option {
             display: flex;
             align-items: center;
@@ -1585,7 +1771,53 @@
                 </div>
                 
                 <form id="order-form">
-                    <button type="submit" class="checkout-btn">
+                    <div class="order-form-container" id="order-form-fields" style="display: none;">
+                        <div class="form-group">
+                            <label class="form-label">Nom complet <span class="form-required">*</span></label>
+                            <input type="text" class="form-input" id="customer-name" placeholder="Entrez votre nom complet" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Numéro de téléphone <span class="form-required">*</span></label>
+                            <input type="tel" class="form-input" id="customer-phone" placeholder="+225 XX XX XX XX XX" required>
+                            <div class="form-hint">📱 Pour vous contacter si nécessaire</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Résidence / Lieu de livraison <span class="form-required">*</span></label>
+                            <input type="text" class="form-input" id="customer-residence" placeholder="Ex: Cité universitaire, Bâtiment A" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Instructions spéciales</label>
+                            <textarea class="form-textarea" id="special-instructions" placeholder="Précisions supplémentaires pour votre commande..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Mode de paiement <span class="form-required">*</span></label>
+                            <div class="payment-methods">
+                                <div class="payment-option" onclick="selectPayment('cash')">
+                                    <div class="payment-icon">💵</div>
+                                    <div class="payment-name">Espèces</div>
+                                </div>
+                                <div class="payment-option" onclick="selectPayment('mobile')">
+                                    <div class="payment-icon">📱</div>
+                                    <div class="payment-name">Mobile Money</div>
+                                </div>
+                                <div class="payment-option" onclick="selectPayment('card')">
+                                    <div class="payment-icon">💳</div>
+                                    <div class="payment-name">Carte</div>
+                                </div>
+                            </div>
+                            <input type="hidden" id="payment-method" required>
+                        </div>
+
+                        <button type="submit" class="submit-order-btn">
+                            ✨ Confirmer la commande
+                        </button>
+                    </div>
+
+                    <button type="button" class="checkout-btn" id="show-form-btn" onclick="showOrderForm()">
                         🎯 Commander maintenant
                     </button>
                 </form>
@@ -2093,5 +2325,34 @@
     </div>
 
     <script type="module" src="suite.js"></script>
+    <script>
+        // Fonction pour afficher le formulaire de commande
+        function showOrderForm() {
+            const formFields = document.getElementById('order-form-fields');
+            const showBtn = document.getElementById('show-form-btn');
+            
+            if (formFields && showBtn) {
+                formFields.style.display = 'block';
+                showBtn.style.display = 'none';
+            }
+        }
+
+        // Fonction pour sélectionner le mode de paiement
+        function selectPayment(method) {
+            // Retirer la sélection de tous les modes
+            document.querySelectorAll('.payment-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // Ajouter la sélection au mode choisi
+            event.currentTarget.classList.add('selected');
+            
+            // Mettre à jour le champ caché
+            const paymentInput = document.getElementById('payment-method');
+            if (paymentInput) {
+                paymentInput.value = method;
+            }
+        }
+    </script>
 </body>
 </html>
