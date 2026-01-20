@@ -4,14 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>GROUPE EXPRESS - Repas Universitaires</title>
-    <meta name="google-site-verification" content="Dslg7SeH2D1d_eRjYSEi22ZtU86QGVdAexktPU969Gw" />
-    <meta name="google-site-verification" content="_fI5_stSft_VB3HFOMJC4Iqjovlj0LL7ycXZamAGgOU" />
-    <meta name="Repas étudiant pas cher" content="Livraison des repas aux étudiants sur le campus" />
-    <meta name="Plats locaux pour étudiants" content="Livraison de repas universitaire sur le campus" />
-    <meta name="Restauration universitaire privée" content="plateforme de repas étudiants" />
-    <meta name="Plateforme de repas étudiant" content="Groupe express" />
-    <meta name="Groupe Express" content="Repas universitaires" />
-
+    <meta name="description" content="Livraison des repas aux étudiants sur le campus">
+    
     <!-- PWA Configuration -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#ff4e00">
@@ -20,9 +14,10 @@
     <meta name="apple-mobile-web-app-title" content="GROUPE EXPRESS">
     <link rel="apple-touch-icon" href="image/u.png">
     
-    <!-- FCM Configuration -->
-<script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-messaging-compat.js"></script>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-messaging-compat.js"></script>
+    
     <style>
         * {
             margin: 0;
@@ -31,81 +26,215 @@
         }
 
         :root {
-            --primary: #000000;
-            --primary-light: #100f0f;
-            --primary-dark: #280059;
-            --secondary: #131315;
-            --accent: #f10505;
-            --gradient: linear-gradient(45deg, #f3ecec, #d61215, #ffffff, #ff0004, #b62a2a, #d20d0d, #e2d9da, #f0eeea);
+            --primary: #ff4e00;
+            --primary-light: #ff6b2b;
+            --primary-dark: #cc3e00;
+            --secondary: #1a1a2e;
+            --accent: #ffd700;
             --surface: #FFFFFF;
-            --background: #FAFAFA;
-            --on-surface: #262626;
-            --on-surface-light: #8E8E8E;
-            --border: #DBDBDB;
-            --shadow: 0 2px 4px rgba(0,0,0,0.1);
-            --shadow-lg: 0 8px 25px rgba(0,0,0,0.15);
-            --radius: 12px;
+            --background: #f5f7fa;
+            --card-bg: #FFFFFF;
+            --text-primary: #1a1a2e;
+            --text-secondary: #6c757d;
+            --border: #e8ecef;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
+            --shadow-md: 0 4px 16px rgba(0,0,0,0.12);
+            --shadow-lg: 0 8px 32px rgba(0,0,0,0.16);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
             --radius-xl: 24px;
+            --gradient-primary: linear-gradient(135deg, #ff4e00 0%, #ff6b2b 100%);
+            --gradient-secondary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-success: linear-gradient(135deg, #28a745 0%, #34ce57 100%);
         }
 
         html {
             overflow-x: hidden;
-            width: 100%;
+            scroll-behavior: smooth;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', sans-serif;
             background: var(--background);
-            color: var(--on-surface);
+            color: var(--text-primary);
             line-height: 1.6;
             min-height: 100vh;
-            touch-action: manipulation;
             overflow-x: hidden;
-            width: 100%;
-            max-width: 100vw;
-            position: relative;
         }
 
-        .ads-section {
-            background: var(--surface);
+        /* HEADER MODERNE */
+        .header {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
             border-bottom: 1px solid var(--border);
             padding: 16px 0;
-            overflow: hidden;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+        }
+
+        .header-logo {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            object-fit: cover;
+            box-shadow: var(--shadow-md);
+            border: 3px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .header-logo:hover {
+            transform: scale(1.05) rotate(5deg);
+        }
+
+        .logo-text {
+            font-size: 20px;
+            font-weight: 700;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .icon-btn {
+            position: relative;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            cursor: pointer;
+            font-size: 24px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: var(--background);
+        }
+
+        .icon-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .icon-btn:active {
+            transform: scale(0.95);
+        }
+
+        .cart-icon {
+            background: var(--gradient-primary);
+            color: white;
+        }
+
+        .contact-btn {
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            color: white;
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: var(--accent);
+            color: var(--secondary);
+            border-radius: 50%;
+            min-width: 20px;
+            height: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid white;
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* ALERTE TEMPORELLE */
+        .time-alert {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 16px 20px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 15px;
+            box-shadow: var(--shadow-sm);
+            display: none;
+        }
+
+        .time-alert.urgent {
+            animation: pulse 2s infinite;
+            background: linear-gradient(135deg, #dc3545, #ff4757);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.9; }
+        }
+
+        /* SECTION PUBLICITÉS */
+        .ads-section {
+            background: white;
+            padding: 24px 0;
+            border-bottom: 1px solid var(--border);
         }
 
         .ads-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
             position: relative;
-            height: 200px;
-            border-radius: var(--radius);
+            height: 280px;
+            border-radius: var(--radius-xl);
             overflow: hidden;
-            margin: 0 16px;
-            box-shadow: var(--shadow);
         }
 
         .ads-slider {
             display: flex;
-            animation: slideAds 45s infinite linear;
-            width: 600%;
+            height: 100%;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .ad-item {
-            min-width: 16.666%;
-            height: 200px;
+            min-width: 100%;
+            height: 100%;
             position: relative;
             cursor: pointer;
-            transition: transform 0.3s ease;
-            flex-shrink: 0;
-            display: block;
-            line-height: 0;
+            border-radius: var(--radius-xl);
+            overflow: hidden;
         }
 
         .ad-image {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            border-radius: 0;
-            display: block;
-            vertical-align: bottom;
+            transition: transform 0.6s ease;
+        }
+
+        .ad-item:hover .ad-image {
+            transform: scale(1.05);
         }
 
         .ad-overlay {
@@ -113,276 +242,85 @@
             bottom: 0;
             left: 0;
             right: 0;
-            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
             color: white;
-            padding: 20px;
-            text-align: center;
+            padding: 32px;
         }
 
         .ad-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }
 
         .ad-subtitle {
-            font-size: 0.9rem;
-            opacity: 0.9;
-        }
-
-        @keyframes slideAds {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-        }
-
-        .header {
-            background: var(--surface);
-            border-bottom: 1px solid var(--border);
-            padding: 12px 0;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            backdrop-filter: blur(10px);
-        }
-
-        .header-content {
-            max-width: 975px;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 12px;
-            gap: 8px;
-        }
-
-        .logo-section {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-            flex-shrink: 0;
-        }
-
-        .header-logo {
-            vertical-align: middle;
-            height: 50px;
-            width: 50px;
-            object-fit: contain;
-            border-radius: 10px;
-            background: #fff;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.13);
-            border: 2px solid #ff4e00;
-        }
-
-        .logo-text {
             font-size: 16px;
-            font-weight: 600;
-            color: var(--on-surface);
-            font-family: 'Segoe UI', sans-serif;
-            letter-spacing: -0.5px;
-            white-space: nowrap;
+            opacity: 0.95;
+            line-height: 1.5;
         }
 
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: nowrap;
-            overflow: visible;
-        }
-
-        .cart-icon {
-            position: relative;
-            background: none;
-            border: none;
-            font-size: 22px;
-            cursor: pointer;
-            padding: 6px;
-            border-radius: 50%;
-            transition: all 0.3s ease;
-            min-width: 40px;
-            min-height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .cart-icon:hover {
-            background: var(--background);
-            transform: scale(1.1);
-        }
-
-        .cart-badge {
-            position: absolute;
-            top: -2px;
-            right: -2px;
-            background: var(--accent);
-            color: white;
-            border-radius: 50%;
-            width: 18px;
-            height: 18px;
-            font-size: 11px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            min-width: 18px;
-            border: 2px solid white;
-        }
-
-        .contact-service-btn {
-            position: relative;
-            background: linear-gradient(135deg, #25D366, #128C7E);
-            border: none;
-            font-size: 20px;
-            cursor: pointer;
-            padding: 6px;
-            border-radius: 50%;
-            transition: all 0.3s ease;
-            min-width: 40px;
-            min-height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-decoration: none;
-            box-shadow: 0 2px 8px rgba(37, 211, 102, 0.3);
-            flex-shrink: 0;
-        }
-
-        .contact-service-btn:hover {
-            background: linear-gradient(135deg, #128C7E, #075E54);
-            transform: scale(1.1);
-            box-shadow: 0 4px 12px rgba(37, 211, 102, 0.5);
-        }
-
-        .time-alert {
-            background: linear-gradient(135deg, #ff6b6b, #ff8e53);
-            color: white;
-            padding: 16px;
-            text-align: center;
-            font-weight: 600;
-            display: none;
-            font-size: 14px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .time-alert.urgent {
-            animation: blinkAlert 2s infinite;
-            background: linear-gradient(135deg, #ff3333, #ff6b6b);
-        }
-
-        .time-alert.warning {
-            animation: blinkAlert 2s infinite;
-            background: linear-gradient(135deg, #ff9800, #ffa726);
-        }
-
-        @keyframes blinkAlert {
-            0%, 100% {
-                opacity: 1;
-                transform: scale(1);
-            }
-            50% {
-                opacity: 0.85;
-                transform: scale(1.02);
-            }
-        }
-
+        /* NAVIGATION CATÉGORIES */
         .nav-section {
-            padding: 16px 0;
-            background: var(--surface);
+            background: white;
+            padding: 24px 0;
             border-bottom: 1px solid var(--border);
-            position: relative;
-        }
-
-        .scroll-indicator {
-            text-align: center;
-            padding: 8px 16px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            font-size: 13px;
-            font-weight: 600;
-            animation: slideDown 0.5s ease-out;
-        }
-
-        .scroll-arrow {
-            display: inline-block;
-            animation: bounce 2s infinite;
-            margin-left: 8px;
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% {
-                transform: translateY(0);
-            }
-            40% {
-                transform: translateY(-10px);
-            }
-            60% {
-                transform: translateY(-5px);
-            }
         }
 
         .nav-stories {
-            max-width: 975px;
+            max-width: 1200px;
             margin: 0 auto;
             display: flex;
-            gap: 16px;
+            gap: 20px;
             overflow-x: auto;
-            padding: 0 16px;
-            scrollbar-width: none;
+            padding: 0 20px 12px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary) transparent;
         }
 
         .nav-stories::-webkit-scrollbar {
-            display: none;
+            height: 6px;
+        }
+
+        .nav-stories::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .nav-stories::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 3px;
         }
 
         .nav-story {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            min-width: 80px;
+            gap: 10px;
+            min-width: 100px;
             text-decoration: none;
             color: inherit;
-            padding: 8px;
-            border-radius: 12px;
-            position: relative;
+            padding: 12px;
+            border-radius: var(--radius-md);
+            transition: all 0.3s ease;
         }
 
-        .nav-story:active {
+        .nav-story:hover {
             background: var(--background);
+            transform: translateY(-4px);
         }
 
         .nav-story-avatar {
-            width: 60px;
-            height: 60px;
+            width: 72px;
+            height: 72px;
             border-radius: 50%;
-            background: var(--gradient);
+            background: var(--gradient-primary);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-size: 28px;
-            position: relative;
-            padding: 3px;
-            overflow: hidden;
-            box-shadow: var(--shadow);
+            font-size: 36px;
+            box-shadow: var(--shadow-md);
             transition: all 0.3s ease;
+            position: relative;
         }
 
         .nav-story:hover .nav-story-avatar {
@@ -395,128 +333,237 @@
             height: 100%;
             border-radius: 50%;
             object-fit: cover;
-            border: 2px solid white;
+            border: 3px solid white;
         }
 
         .nav-story-text {
-            font-size: 12px;
-            font-weight: 400;
-            color: var(--on-surface);
+            font-size: 13px;
+            font-weight: 600;
             text-align: center;
-            line-height: 1.2;
-        }
-
-        @keyframes bounceShop {
-            0%, 20%, 50%, 80%, 100% {
-                transform: translateY(0) scale(1);
-            }
-            10% {
-                transform: translateY(-8px) scale(1.05);
-            }
-            30% {
-                transform: translateY(-4px) scale(1.02);
-            }
-            60% {
-                transform: translateY(-6px) scale(1.03);
-            }
-        }
-
-        @keyframes wiggleAnnonce {
-            0%, 50%, 100% {
-                transform: rotate(0deg) scale(1);
-            }
-            10%, 30% {
-                transform: rotate(-5deg) scale(1.05);
-            }
-            20%, 40% {
-                transform: rotate(5deg) scale(1.05);
-            }
-        }
-
-        @keyframes rainbow {
-            0% { background: linear-gradient(45deg, #ff6b6b, #4ecdc4); }
-            25% { background: linear-gradient(45deg, #4ecdc4, #45b7d1); }
-            50% { background: linear-gradient(45deg, #45b7d1, #96ceb4); }
-            75% { background: linear-gradient(45deg, #96ceb4, #ffeaa7); }
-            100% { background: linear-gradient(45deg, #ffeaa7, #ff6b6b); }
-        }
-
-        @keyframes glowPulse {
-            0%, 100% { 
-                box-shadow: 0 0 20px rgba(255, 20, 147, 0.6), 0 0 30px rgba(255, 20, 147, 0.3);
-            }
-            50% { 
-                box-shadow: 0 0 30px rgba(255, 20, 147, 0.9), 0 0 40px rgba(255, 20, 147, 0.5);
-            }
-        }
-
-        .nav-story.shopping-animate .nav-story-avatar {
-            animation: bounceShop 3s infinite ease-in-out, rainbow 4s infinite, glowPulse 2s infinite;
-            background-size: 300% 300%;
-        }
-
-        .nav-story.annonce-animate .nav-story-avatar {
-            animation: wiggleAnnonce 2.5s infinite ease-in-out, glowPulse 3s infinite;
-            background: linear-gradient(45deg, #ff9a9e, #fecfef, #ff6b9d, #c44569);
-            background-size: 300% 300%;
+            color: var(--text-primary);
         }
 
         .notification-badge {
             position: absolute;
-            top: -5px;
-            right: -5px;
+            top: -4px;
+            right: -4px;
             background: #ff0000;
             color: white;
             border-radius: 50%;
-            width: 22px;
-            height: 22px;
+            min-width: 24px;
+            height: 24px;
             font-size: 12px;
-            font-weight: bold;
+            font-weight: 700;
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 2px solid white;
-            box-shadow: 0 2px 8px rgba(255, 0, 0, 0.4);
-            z-index: 10;
-            animation: badgePulse 2s infinite ease-in-out;
+            border: 3px solid white;
+            animation: badgePulse 2s infinite;
         }
 
         @keyframes badgePulse {
-            0%, 100% { 
-                transform: scale(1);
-                background: #ff0000;
-            }
-            50% { 
-                transform: scale(1.2);
-                background: #ff3333;
-            }
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
         }
 
+        /* CONTENEUR PRINCIPAL */
         .container {
-            max-width: 975px;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 16px;
+            padding: 32px 20px;
         }
 
-        .main-feed {
+        /* CARTE DE CATÉGORIE */
+        .category-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            margin-bottom: 40px;
+            box-shadow: var(--shadow-md);
+            transition: all 0.4s ease;
+        }
+
+        .category-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .category-header {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 28px 32px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .category-icon {
+            font-size: 48px;
+            filter: drop-shadow(0 2px 8px rgba(0,0,0,0.2));
+        }
+
+        .category-info h3 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .category-info p {
+            font-size: 16px;
+            opacity: 0.95;
+        }
+
+        /* GRILLE DE PLATS */
+        .food-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
+            padding: 32px;
+        }
+
+        .food-item {
+            background: white;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            border: 1px solid var(--border);
+            height: 100%;
             display: flex;
             flex-direction: column;
-            gap: 24px;
         }
 
-        .post-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
+        .food-item:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary);
+        }
+
+        .food-image-wrapper {
+            position: relative;
+            width: 100%;
+            padding-top: 75%;
             overflow: hidden;
+            background: var(--background);
+        }
+
+        .food-item-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s ease;
+        }
+
+        .food-item:hover .food-item-image {
+            transform: scale(1.15);
+        }
+
+        .food-item-content {
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .food-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .food-description {
+            font-size: 14px;
+            color: var(--text-secondary);
             margin-bottom: 16px;
-            animation: slideUp 0.6s ease-out;
+            flex: 1;
+            line-height: 1.5;
+        }
+
+        .food-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: auto;
+        }
+
+        .food-price {
+            font-size: 22px;
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .add-to-cart-btn {
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: var(--radius-md);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-sm);
+            white-space: nowrap;
+        }
+
+        .add-to-cart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .add-to-cart-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* MODALES */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: var(--radius-xl);
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         @keyframes slideUp {
             from {
                 opacity: 0;
-                transform: translateY(20px);
+                transform: translateY(40px);
             }
             to {
                 opacity: 1;
@@ -524,259 +571,68 @@
             }
         }
 
-        .post-header {
-            padding: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .post-category {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .category-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: var(--gradient);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 16px;
-            font-weight: 600;
-        }
-
-        .category-info h3 {
-            font-size: 16px;
-            font-weight: 600;
-            margin: 0;
-        }
-
-        .category-info p {
-            font-size: 14px;
-            color: var(--on-surface-light);
-            margin: 0;
-        }
-
-        .food-grid {
-            display: grid;
-            gap: 1px;
-            background: var(--border);
-        }
-
-        @media (max-width: 480px) {
-            .food-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (min-width: 481px) and (max-width: 768px) {
-            .food-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-
-        @media (min-width: 769px) {
-            .food-grid {
-                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            }
-        }
-
-        .food-item {
-            position: relative;
-            background: var(--surface);
-            display: flex;
-            flex-direction: column;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .food-item:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .food-item:active {
-            transform: scale(0.98);
-        }
-
-        .food-item-image {
-            width: 100%;
-            aspect-ratio: 1;
-            object-fit: cover;
-            transition: all 0.3s ease;
-            cursor: zoom-in;
-        }
-
-        .food-item-image:hover {
-            opacity: 0.9;
-        }
-
-        .food-item-content {
-            padding: 12px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .food-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--on-surface);
-            line-height: 1.3;
-        }
-
-        .food-description {
-            font-size: 12px;
-            color: var(--on-surface-light);
-            flex: 1;
-            line-height: 1.4;
-        }
-
-        .food-price {
-            font-size: 16px;
-            font-weight: 700;
-            color: var(--primary);
-            margin: 8px 0;
-        }
-
-        .add-to-cart-btn {
-            background: var(--gradient);
-            color: white;
-            border: none;
-            padding: 12px 16px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            width: 100%;
-            min-height: 44px;
-        }
-
-        .add-to-cart-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .add-to-cart-btn:active {
-            transform: translateY(0);
-        }
-
-        .add-to-cart-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .post-actions {
-            padding: 16px;
-            border-top: 1px solid var(--border);
-        }
-
-        .modal, .cart-modal, .degue-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .modal.show, .cart-modal.show, .degue-modal.show {
-            display: flex;
-        }
-
-        .modal-content, .cart-modal-content, .degue-modal-content {
-            background: var(--surface);
-            border-radius: var(--radius-xl);
-            width: 100%;
-            max-width: 500px;
-            max-height: 90vh;
-            overflow-y: auto;
-            position: relative;
-        }
-
         .modal-header {
-            padding: 2rem;
+            padding: 32px;
             text-align: center;
             border-bottom: 1px solid var(--border);
+            background: linear-gradient(135deg, rgba(255, 78, 0, 0.05), rgba(255, 107, 43, 0.05));
         }
 
         .modal-header h2 {
-            margin-bottom: 0.5rem;
-            font-size: 1.5rem;
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
         }
 
-        .close-btn, .close-cart-btn {
+        .modal-header p {
+            font-size: 15px;
+            color: var(--text-secondary);
+        }
+
+        .close-btn {
             position: absolute;
             top: 16px;
             right: 16px;
-            background: rgba(0, 0, 0, 0.1);
-            border: none;
-            color: var(--on-surface);
-            width: 36px;
-            height: 36px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
+            background: rgba(0, 0, 0, 0.05);
+            border: none;
             cursor: pointer;
-            font-size: 20px;
+            font-size: 24px;
+            color: var(--text-primary);
             display: flex;
             align-items: center;
             justify-content: center;
-            min-width: 44px;
-            min-height: 44px;
+            transition: all 0.3s ease;
         }
 
-        .cart-modal-header {
-            padding: 2rem;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .cart-modal-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin: 0;
-        }
-
-        .cart-modal-body {
-            padding: 2rem;
+        .close-btn:hover {
+            background: rgba(0, 0, 0, 0.1);
+            transform: rotate(90deg);
         }
 
         .cart-items {
-            max-height: 300px;
+            padding: 24px;
+            max-height: 400px;
             overflow-y: auto;
-            margin-bottom: 16px;
         }
 
         .cart-item {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 12px 0;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .cart-item:last-child {
-            border-bottom: none;
+            gap: 16px;
+            padding: 16px;
+            background: var(--background);
+            border-radius: var(--radius-md);
+            margin-bottom: 12px;
         }
 
         .cart-item-image {
-            width: 48px;
-            height: 48px;
-            border-radius: 8px;
+            width: 60px;
+            height: 60px;
+            border-radius: var(--radius-sm);
             object-fit: cover;
         }
 
@@ -785,69 +641,57 @@
         }
 
         .cart-item-name {
-            font-size: 14px;
+            font-size: 16px;
             font-weight: 600;
+            color: var(--text-primary);
             margin-bottom: 4px;
         }
 
         .cart-item-price {
-            font-size: 12px;
-            color: var(--on-surface-light);
-        }
-
-        .cart-total {
-            font-size: 1.25rem;
-            font-weight: 700;
-            text-align: center;
-            margin: 1rem 0;
-            padding: 1rem;
-            background: var(--background);
-            border-radius: 8px;
+            font-size: 14px;
+            color: var(--text-secondary);
         }
 
         .remove-btn {
-            background: none;
-            border: none;
-            color: var(--on-surface-light);
-            cursor: pointer;
-            padding: 8px;
-            font-size: 20px;
-            min-width: 44px;
-            min-height: 44px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            background: rgba(220, 53, 69, 0.1);
+            border: none;
+            color: #dc3545;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
 
         .remove-btn:hover {
-            background: var(--background);
-            color: var(--accent);
+            background: #dc3545;
+            color: white;
         }
 
-        .empty-state {
+        .cart-total {
+            font-size: 24px;
+            font-weight: 700;
             text-align: center;
-            padding: 48px 16px;
-            color: var(--on-surface-light);
-        }
-
-        .empty-state-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
+            padding: 24px;
+            background: linear-gradient(135deg, rgba(255, 78, 0, 0.1), rgba(255, 107, 43, 0.1));
+            border-radius: var(--radius-md);
+            margin: 0 24px 24px;
         }
 
         .checkout-btn {
-            width: 100%;
-            background: var(--gradient);
+            width: calc(100% - 48px);
+            margin: 0 24px 24px;
+            background: var(--gradient-primary);
             color: white;
             border: none;
-            padding: 16px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
+            padding: 18px;
+            border-radius: var(--radius-md);
+            font-size: 17px;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
-            min-height: 48px;
+            box-shadow: var(--shadow-md);
         }
 
         .checkout-btn:hover {
@@ -855,1338 +699,1353 @@
             box-shadow: var(--shadow-lg);
         }
 
-        .checkout-btn:active {
-            transform: scale(0.98);
-        }
-
-        .degue-modal-header {
-            padding: 2rem;
+        .empty-state {
             text-align: center;
-            border-bottom: 1px solid var(--border);
+            padding: 60px 24px;
         }
 
-        .degue-modal-header h3 {
-            margin-bottom: 0.5rem;
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
         }
 
-        .degue-options {
-            padding: 1rem 2rem;
-        }
-
-        .degue-option {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 1rem;
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            margin-bottom: 0.5rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .degue-option:hover {
-            background: var(--background);
-            border-color: var(--primary);
-        }
-
-        .degue-option-info {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .degue-option-icon {
-            font-size: 1.5rem;
-        }
-
-        .degue-option-details h4 {
-            font-size: 1rem;
+        .empty-state h3 {
+            font-size: 20px;
             font-weight: 600;
-            margin: 0;
+            color: var(--text-primary);
+            margin-bottom: 8px;
         }
 
-        .degue-option-details p {
-            font-size: 0.875rem;
-            color: var(--on-surface-light);
-            margin: 0;
+        .empty-state p {
+            font-size: 15px;
+            color: var(--text-secondary);
         }
 
-        .degue-option-price {
-            font-size: 1rem;
-            font-weight: 700;
-            color: var(--primary);
-        }
-
-        .selection-modal {
-            display: none;
+        /* BOUTONS FLOTTANTS */
+        .floating-btns {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            backdrop-filter: blur(5px);
-        }
-
-        .selection-modal.show {
+            bottom: 24px;
+            right: 24px;
             display: flex;
-            animation: fadeIn 0.3s ease;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 999;
         }
 
-        .selection-modal-content {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            border-radius: 24px;
-            width: 100%;
-            max-width: 500px;
-            max-height: 85vh;
-            overflow-y: auto;
-            position: relative;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .selection-modal-header {
-            padding: 2rem;
-            text-align: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            background: linear-gradient(135deg, rgba(254, 44, 85, 0.1), rgba(255, 107, 157, 0.1));
-        }
-
-        .selection-modal-header h3 {
-            margin-bottom: 0.5rem;
-            font-size: 1.5rem;
-            color: white;
-            background: linear-gradient(45deg, #FE2C55, #FF6B9D);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .selection-modal-header p {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.9rem;
-        }
-
-        .selection-options {
-            padding: 1.5rem 2rem;
-        }
-
-        .selection-option {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 1.25rem;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            margin-bottom: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            background: rgba(255, 255, 255, 0.05);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .selection-option::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            transition: left 0.5s ease;
-        }
-
-        .selection-option:hover::before {
-            left: 100%;
-        }
-
-        .selection-option:hover {
-            background: linear-gradient(135deg, rgba(254, 44, 85, 0.2), rgba(255, 107, 157, 0.2));
-            border-color: #FE2C55;
-            transform: translateX(5px);
-            box-shadow: 0 8px 25px rgba(254, 44, 85, 0.3);
-        }
-
-        .selection-option:active {
-            transform: scale(0.98);
-        }
-
-        .selection-option-info {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .selection-option-icon {
-            font-size: 2rem;
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-        }
-
-        .selection-option-details h4 {
-            font-size: 1rem;
-            font-weight: 600;
-            margin: 0;
-            color: white;
-        }
-
-        .selection-option-details p {
-            font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.6);
-            margin: 0.25rem 0 0 0;
-        }
-
-        .selection-option-price {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: #FE2C55;
-            background: rgba(254, 44, 85, 0.1);
-            padding: 0.5rem 1rem;
-            border-radius: 12px;
-            border: 1px solid rgba(254, 44, 85, 0.3);
-        }
-
-        .selection-cancel-btn {
-            width: 100%;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 1rem;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 1rem;
-            font-weight: 600;
-        }
-
-        .selection-cancel-btn:hover {
-            background: rgba(255, 255, 255, 0.15);
-            transform: translateY(-2px);
-        }
-
-        .close-selection-btn {
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
-            width: 40px;
-            height: 40px;
+        .floating-btn {
+            width: 56px;
+            height: 56px;
             border-radius: 50%;
-            cursor: pointer;
-            font-size: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-        }
-
-        .close-selection-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: rotate(90deg);
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        .ads-nav-btn {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(0, 0, 0, 0.5);
-            color: white;
             border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            font-size: 24px;
             cursor: pointer;
-            z-index: 10;
+            font-size: 28px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s ease;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .ads-nav-btn:hover {
-            background: rgba(0, 0, 0, 0.8);
-            transform: translateY(-50%) scale(1.1);
+        .floating-btn:hover {
+            transform: scale(1.1) translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.25);
         }
 
-        .ads-prev {
-            left: 10px;
+        .floating-btn:active {
+            transform: scale(0.95);
         }
 
-        .ads-next {
-            right: 10px;
+        .notif-btn {
+            background: var(--gradient-secondary);
+            color: white;
         }
 
-        .scroll-dots {
-            display: flex;
-            justify-content: center;
-            gap: 6px;
-            padding: 8px 0;
-            margin-top: 8px;
+        .install-btn {
+            background: var(--gradient-primary);
+            color: white;
         }
 
-        .scroll-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #DBDBDB;
-            transition: all 0.3s ease;
-        }
-
-        .scroll-dot.active {
-            background: linear-gradient(45deg, #f3ecec, #d61215);
-            width: 24px;
-            border-radius: 4px;
-        }
-
+        /* RESPONSIVE */
         @media (max-width: 768px) {
-            .header-content {
-                padding: 0 8px;
-                gap: 6px;
-            }
-            
-            .logo-section {
-                gap: 8px;
-            }
-            
-            .header-logo {
-                height: 45px;
-                width: 45px;
-                border-radius: 8px;
-            }
-            
             .logo-text {
-                font-size: 14px;
-            }
-            
-            .header-actions {
-                gap: 6px;
+                font-size: 16px;
             }
 
-            .cart-icon,
-            .contact-service-btn {
-                font-size: 20px;
-                padding: 5px;
-                min-width: 38px;
-                min-height: 38px;
+            .header-logo {
+                width: 48px;
+                height: 48px;
             }
-            
-            .cart-badge {
-                width: 16px;
-                height: 16px;
-                font-size: 10px;
-                min-width: 16px;
+
+            .icon-btn {
+                width: 44px;
+                height: 44px;
+                font-size: 20px;
             }
 
             .ads-container {
-                height: 180px;
-                margin: 0 12px;
-                border-radius: 8px;
+                height: 200px;
+                padding: 0 12px;
             }
 
-            .ad-item {
-                height: 180px;
-            }
-            
-            .ad-overlay {
-                padding: 15px;
-            }
-            
             .ad-title {
-                font-size: 1.1rem;
-            }
-            
-            .ad-subtitle {
-                font-size: 0.85rem;
-            }
-
-            .nav-story {
-                min-width: 90px;
-            }
-            
-            .container {
-                padding: 12px;
-            }
-
-            .ads-nav-btn {
-                width: 35px;
-                height: 35px;
                 font-size: 20px;
             }
 
-            .scroll-dots {
-                gap: 5px;
-                padding: 6px 0;
+            .ad-subtitle {
+                font-size: 14px;
             }
-            
-            .scroll-dot {
-                width: 6px;
-                height: 6px;
+
+            .category-header {
+                padding: 20px 24px;
             }
-            
-            .scroll-dot.active {
-                width: 20px;
+
+            .category-icon {
+                font-size: 36px;
+            }
+
+            .category-info h3 {
+                font-size: 22px;
+            }
+
+            .category-info p {
+                font-size: 14px;
+            }
+
+            .food-grid {
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+                gap: 16px;
+                padding: 20px;
+            }
+
+            .food-title {
+                font-size: 16px;
+            }
+
+            .food-price {
+                font-size: 18px;
+            }
+
+            .add-to-cart-btn {
+                padding: 10px 16px;
+                font-size: 14px;
+            }
+
+            .floating-btns {
+                bottom: 16px;
+                right: 16px;
+            }
+
+            .floating-btn {
+                width: 52px;
+                height: 52px;
+                font-size: 24px;
             }
         }
 
         @media (max-width: 480px) {
-            .header-content {
-                padding: 0 6px;
-                gap: 4px;
-            }
-            
-            .logo-section {
-                gap: 6px;
-            }
-            
-            .header-logo {
-                height: 40px;
-                width: 40px;
-                border-radius: 8px;
-                border-width: 1.5px;
-            }
-            
-            .logo-text {
-                font-size: 12px;
-                max-width: 100px;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-            
-            .header-actions {
-                gap: 4px;
+            .food-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+                padding: 16px;
             }
 
-            .cart-icon,
-            .contact-service-btn {
-                font-size: 18px;
-                padding: 4px;
-                min-width: 36px;
-                min-height: 36px;
-            }
-            
-            .cart-badge {
-                width: 15px;
-                height: 15px;
-                font-size: 9px;
-                min-width: 15px;
-                top: -3px;
-                right: -3px;
-            }
-
-            .ads-section {
-                padding: 12px 0;
-            }
-            
-            .ads-container {
-                height: 160px;
-                margin: 0 8px;
-                border-radius: 8px;
-            }
-
-            .ad-item {
-                height: 160px;
-                display: block;
-                line-height: 0;
-            }
-            
-            .ad-image {
-                display: block;
-                vertical-align: bottom;
-            }
-
-            .ad-overlay {
-                padding: 12px;
-            }
-            
-            .ad-title {
-                font-size: 0.95rem;
-                margin-bottom: 0.3rem;
-            }
-
-            .ad-subtitle {
-                font-size: 0.75rem;
-                line-height: 1.3;
-            }
-            
-            .ads-nav-btn {
-                width: 32px;
-                height: 32px;
-                font-size: 18px;
-            }
-            
-            .ads-prev {
-                left: 5px;
-            }
-            
-            .ads-next {
-                right: 5px;
-            }
-
-            .modal-content, .cart-modal-content, .degue-modal-content, .selection-modal-content {
-                max-height: 95vh;
-                margin: 10px;
-                border-radius: 16px;
-            }
-            
-            .header {
-                padding: 8px 0;
-            }
-            
-            .nav-section {
-                padding: 12px 0;
-            }
-            
-            .post-header {
-                padding: 12px;
-            }
-            
-            .post-actions {
-                padding: 12px;
-            }
-
-            .food-title {
-                font-size: 13px;
-            }
-            
-            .food-description {
-                font-size: 11px;
-            }
-            
-            .food-price {
-                font-size: 14px;
-            }
-            
-            .add-to-cart-btn {
-                padding: 10px 12px;
-                font-size: 13px;
-            }
-            
             .food-item-content {
-                padding: 10px;
+                padding: 16px;
+            }
+
+            .food-footer {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .add-to-cart-btn {
+                width: 100%;
             }
         }
 
-        @media (max-width: 375px) {
-            .header-content {
-                padding: 0 4px;
-            }
-            
-            .header-logo {
-                height: 36px;
-                width: 36px;
-            }
-            
-            .logo-text {
-                font-size: 11px;
-                max-width: 80px;
-            }
-
-            .cart-icon,
-            .contact-service-btn {
-                font-size: 16px;
-                padding: 3px;
-                min-width: 32px;
-                min-height: 32px;
-            }
-            
-            .cart-badge {
-                width: 14px;
-                height: 14px;
-                font-size: 8px;
-                min-width: 14px;
-            }
-
-            .ads-container {
-                height: 140px;
-                margin: 0 8px;
-            }
-
-            .ad-item {
-                height: 140px;
-            }
-            
-            .ad-overlay {
-                padding: 10px;
-            }
-            
-            .ad-title {
-                font-size: 0.85rem;
-                margin-bottom: 0.25rem;
-            }
-
-            .ad-subtitle {
-                font-size: 0.7rem;
-            }
-        }
-
-        @media (max-width: 768px) {
-            input[type="text"], 
-            input[type="email"], 
-            input[type="tel"], 
-            textarea {
-                font-size: 16px !important;
-            }
-        }
-
-        @keyframes slideInRight {
-    from {
-        opacity: 0;
-        transform: translateX(100px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
+        /* Modal de quantité personnalisée */
+.quantity-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(8px);
+    z-index: 3000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeIn 0.3s ease;
 }
 
-@keyframes slideOutRight {
-    from {
-        opacity: 1;
-        transform: translateX(0);
-    }
-    to {
-        opacity: 0;
-        transform: translateX(100px);
-    }
+.quantity-modal.show {
+    display: flex;
 }
 
-#notification-button button:hover {
+.quantity-modal-content {
+    background: white;
+    border-radius: var(--radius-xl);
+    width: 100%;
+    max-width: 400px;
+    padding: 32px;
+    position: relative;
+    animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--shadow-lg);
+}
+
+.quantity-modal-header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.quantity-modal-header h3 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.quantity-modal-header p {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.quantity-input-group {
+    margin-bottom: 24px;
+}
+
+.quantity-input-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.quantity-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--background);
+    padding: 8px;
+    border-radius: var(--radius-md);
+}
+
+.quantity-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--gradient-primary);
+    color: white;
+    font-size: 24px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.quantity-btn:hover {
     transform: scale(1.1);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    box-shadow: var(--shadow-md);
 }
 
-#notification-button button:active {
+.quantity-btn:active {
     transform: scale(0.95);
 }
 
+.quantity-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.quantity-input {
+    flex: 1;
+    text-align: center;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--primary);
+    border: none;
+    background: transparent;
+    outline: none;
+}
+
+.quantity-modal-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.quantity-action-btn {
+    flex: 1;
+    padding: 14px;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.quantity-cancel-btn {
+    background: var(--background);
+    color: var(--text-primary);
+}
+
+.quantity-cancel-btn:hover {
+    background: #e0e0e0;
+}
+
+.quantity-confirm-btn {
+    background: var(--gradient-primary);
+    color: white;
+    box-shadow: var(--shadow-sm);
+}
+
+.quantity-confirm-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.dish-preview {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: var(--background);
+    border-radius: var(--radius-md);
+    margin-bottom: 20px;
+}
+
+.dish-preview-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: var(--radius-sm);
+    background: var(--gradient-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+}
+
+.dish-preview-info {
+    flex: 1;
+}
+
+.dish-preview-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.dish-preview-price {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.quantity-total {
+    text-align: center;
+    padding: 16px;
+    background: linear-gradient(135deg, rgba(255, 78, 0, 0.1), rgba(255, 107, 43, 0.1));
+    border-radius: var(--radius-md);
+    margin-bottom: 20px;
+}
+
+.quantity-total-label {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+}
+
+.quantity-total-amount {
+    font-size: 28px;
+    font-weight: 800;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .quantity-modal-content {
+        padding: 24px;
+    }
+    
+    .quantity-modal-header h3 {
+        font-size: 20px;
+    }
+    
+    .quantity-input {
+        font-size: 24px;
+    }
+    
+    .quantity-total-amount {
+        font-size: 24px;
+    }
+}
+
+/* Modal de collecte d'informations client */
+.customer-info-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(8px);
+    z-index: 3000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeIn 0.3s ease;
+}
+
+.customer-info-modal.show {
+    display: flex;
+}
+
+.customer-info-content {
+    background: white;
+    border-radius: var(--radius-xl);
+    width: 100%;
+    max-width: 450px;
+    padding: 32px;
+    position: relative;
+    animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--shadow-lg);
+}
+
+.customer-info-header {
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+.customer-info-icon {
+    font-size: 56px;
+    margin-bottom: 16px;
+}
+
+.customer-info-header h3 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.customer-info-header p {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.input-group {
+    margin-bottom: 20px;
+}
+
+.input-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.input-label .required {
+    color: var(--primary);
+    margin-left: 4px;
+}
+
+.custom-input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: 16px;
+    font-family: inherit;
+    transition: all 0.3s ease;
+    background: var(--background);
+}
+
+.custom-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: white;
+    box-shadow: 0 0 0 4px rgba(255, 78, 0, 0.1);
+}
+
+.custom-input::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.6;
+}
+
+.input-hint {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.customer-info-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.customer-action-btn {
+    flex: 1;
+    padding: 14px;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.customer-cancel-btn {
+    background: var(--background);
+    color: var(--text-primary);
+}
+
+.customer-cancel-btn:hover {
+    background: #e0e0e0;
+}
+
+.customer-submit-btn {
+    background: var(--gradient-primary);
+    color: white;
+    box-shadow: var(--shadow-sm);
+}
+
+.customer-submit-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.customer-submit-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.order-summary {
+    background: linear-gradient(135deg, rgba(255, 78, 0, 0.05), rgba(255, 107, 43, 0.05));
+    padding: 16px;
+    border-radius: var(--radius-md);
+    margin-bottom: 24px;
+    border: 1px solid rgba(255, 78, 0, 0.2);
+}
+
+.order-summary-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.order-summary-items {
+    font-size: 14px;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    max-height: 60px;
+    overflow-y: auto;
+}
+
+.order-summary-total {
+    font-size: 20px;
+    font-weight: 800;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-align: right;
+}
+
+@media (max-width: 480px) {
+    .customer-info-content {
+        padding: 24px;
+    }
+    
+    .customer-info-icon {
+        font-size: 48px;
+    }
+    
+    .customer-info-header h3 {
+        font-size: 20px;
+    }
+    
+    .custom-input {
+        font-size: 16px; /* Important pour éviter le zoom sur iOS */
+    }
+}
     </style>
 </head>
 <body>
-    <div class="time-alert" id="time-alert">
-        Les commandes sont fermées. Revenez entre 18h00 et 10h00 pour commander.
-    </div>
+    <!-- Alerte temporelle -->
+    <div class="time-alert" id="time-alert"></div>
 
+    <!-- Header -->
     <header class="header">
         <div class="header-content">
             <div class="logo-section">
-                <img src="image/GE.jpg" alt="Logo GROUPE EXPRESS" class="header-logo">
+                <img src="image/GE.jpg" alt="GROUPE EXPRESS" class="header-logo">
                 <div class="logo-text">GROUPE EXPRESS</div>
             </div>
             <div class="header-actions">
-                <button class="cart-icon" onclick="toggleCart()" id="cart-button">
+                <button class="icon-btn cart-icon" onclick="toggleCart()" id="cart-button">
                     🛒
                     <span class="cart-badge" id="cart-badge" style="display: none;">0</span>
                 </button>
-                
-                <a href="tel:+2250564061004" class="contact-service-btn" title="Appeler le service client">
-                    📞 
+                <a href="tel:+2250564061004" class="icon-btn contact-btn" title="Appeler">
+                    📞
                 </a>
             </div>
         </div>
     </header>
 
+    <!-- Section Publicités -->
     <section class="ads-section">
         <div class="ads-container">
             <div class="ads-slider" id="ads-slider">
                 <div class="ad-item" onclick="window.open('annonce.html', '_blank')">
-                    <img src="image/vi.jpg" alt="Promotion Spéciale" class="ad-image">
+                    <img src="image/vi.jpg" alt="Promotion" class="ad-image">
                     <div class="ad-overlay">
                         <div class="ad-title">🔥 Promotion Spéciale</div>
-                        <div class="ad-subtitle">Qu'en dites vous? 3 Plats offerts à 1500f alors commandez dès maintenant</div>
+                        <div class="ad-subtitle">3 Plats offerts à 1500F - Commandez maintenant!</div>
                     </div>
                 </div>
-                
                 <div class="ad-item" onclick="window.open('annonce.html', '_blank')">
-                    <img src="image/MEG2.jpg" alt="Nouveau Menu" class="ad-image">
+                    <img src="image/MEG2.jpg" alt="Nouveau" class="ad-image">
                     <div class="ad-overlay">
                         <div class="ad-title">🆕 Nouveau Menu</div>
-                        <div class="ad-subtitle">Rendez-vous au rez-de-chaussée pour le retrait de vos commandes</div>
-                    </div>
-                </div>
-                
-                <div class="ad-item" onclick="window.open('annonce.html', '_blank')">
-                    <img src="image/meg1.jpg" alt="Livraison Express" class="ad-image">
-                    <div class="ad-overlay">
-                        <div class="ad-title">⚡ Pour très bientôt</div>
-                        <div class="ad-subtitle"></div>
-                    </div>
-                </div>
-                
-                <div class="ad-item" onclick="window.open('annonce.html', '_blank')">
-                    <img src="image/vi.jpg" alt="Promotion Spéciale" class="ad-image">
-                    <div class="ad-overlay">
-                        <div class="ad-title">🔥 Promotion Spéciale</div>
-                        <div class="ad-subtitle">Qu'en dites vous? 3 Plats offerts à 1500f alors commandez dès maintenant</div>
+                        <div class="ad-subtitle">Retrait au rez-de-chaussée - Stand Groupe Express</div>
                     </div>
                 </div>
                 <div class="ad-item" onclick="window.open('annonce.html', '_blank')">
-                    <img src="image/MEG2.jpg" alt="Nouveau Menu" class="ad-image">
+                    <img src="image/meg1.jpg" alt="Bientôt" class="ad-image">
                     <div class="ad-overlay">
-                        <div class="ad-title">🆕 Nouveau Menu</div>
-                        <div class="ad-subtitle">Rendez-vous au rez-de-chaussée pour le retrait de vos commandes</div>
-                    </div>
-                </div>
-                <div class="ad-item" onclick="window.open('annonce.html', '_blank')">
-                    <img src="image/meg1.jpg" alt="Livraison Express" class="ad-image">
-                    <div class="ad-overlay">
-                        <div class="ad-title">⚡ Pour très bientôt</div>
-                        <div class="ad-subtitle"></div>
+                        <div class="ad-title">⚡ Très Bientôt</div>
+                        <div class="ad-subtitle">De nouvelles surprises vous attendent!</div>
                     </div>
                 </div>
             </div>
-            <button class="ads-nav-btn ads-prev" onclick="slideAds('prev')">‹</button>
-            <button class="ads-nav-btn ads-next" onclick="slideAds('next')">›</button>
         </div>
-    </section> 
-    
+    </section>
+
+    <!-- Navigation Catégories -->
     <section class="nav-section">
-        <div class="scroll-indicator">
-            Scrollez pour découvrir tous nos menus délicieux <span class="scroll-arrow">👇</span>
-        </div>
         <div class="nav-stories">
-            <a href="shopping.html" class="nav-story shopping-animate">
-                <div class="nav-story-avatar">
-                    🛍️
-                </div>
-                <div class="nav-story-text">Express-Shopping</div>
+            <a href="shopping.html" class="nav-story">
+                <div class="nav-story-avatar">🛍️</div>
+                <div class="nav-story-text">Shopping</div>
             </a>
             <div class="nav-story" onclick="toggleOrders()">
-                <div class="nav-story-avatar">
-                    📦
-                </div>
-                <div class="nav-story-text">Historique de mes commandes</div>
+                <div class="nav-story-avatar">📦</div>
+                <div class="nav-story-text">Mes commandes</div>
             </div>
             <a href="actualité.html" class="nav-story">
                 <div class="nav-story-avatar">
-                    <img src="image/re.jpg" alt="Gbèrè universitaire" class="nav-story-image">
+                    <img src="image/re.jpg" alt="Réseau" class="nav-story-image">
                 </div>
                 <div class="nav-story-text">Réseau social</div>
             </a>
             <a href="merlin.html" class="nav-story">
                 <div class="nav-story-avatar">
-                    <img src="image/tp.jpg" alt="compétition" class="nav-story-image">
+                    <img src="image/tp.jpg" alt="Jeu" class="nav-story-image">
                 </div>
                 <div class="nav-story-text">Gagner un plat</div>
             </a>
-            <a href="annonce.html" class="nav-story annonce-animate">
+            <a href="annonce.html" class="nav-story">
                 <div class="nav-story-avatar">
                     📢
                     <div class="notification-badge">7</div>
                 </div>
-                <div class="nav-story-text">Annonce</div>
+                <div class="nav-story-text">Annonces</div>
             </a>
             <a href="apropos.html" class="nav-story">
-                <div class="nav-story-avatar">
-                    ℹ️
-                </div>
-                <div class="nav-story-text">A propos</div>
+                <div class="nav-story-avatar">ℹ️</div>
+                <div class="nav-story-text">À propos</div>
             </a>
             <a href="fournisseur.html" class="nav-story">
-                <div class="nav-story-avatar">
-                    👨‍🍳
-                </div>
+                <div class="nav-story-avatar">👨‍🍳</div>
                 <div class="nav-story-text">Fournisseur</div>
             </a>
         </div>
-        
-        <div class="scroll-dots" id="scroll-dots">
-            <div class="scroll-dot active"></div>
-            <div class="scroll-dot"></div>
-            <div class="scroll-dot"></div>
-        </div>
     </section>
 
-    <!-- BOUTON NOTIFICATION -->
-<div id="notification-button" style="position: fixed; bottom: 150px; right: 20px; z-index: 999;">
-    <button onclick="requestNotificationPermission()" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 1rem; border-radius: 50%; width: 60px; height: 60px; cursor: pointer; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); font-size: 1.5rem; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">
-        🔔
-    </button>
-    <div id="notification-status" style="position: absolute; top: -5px; right: -5px; background: #dc3545; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 10px; display: none; align-items: center; justify-content: center; font-weight: bold;">OFF</div>
-</div>
+    <!-- Conteneur Principal -->
+    <div class="container">
+        <!-- Catégorie: Pâtes & Petit Pois -->
+        <div class="category-card">
+            <div class="category-header">
+                <div class="category-icon">🍝</div>
+                <div class="category-info">
+                    <h3>Pâtes & Petit Pois</h3>
+                    <p>Les classiques revisités</p>
+                </div>
+            </div>
+            <div class="food-grid">
+                <div class="food-item" onclick="promptAddToCart('Spaghetti rognon', 600, 'A')">
+                    <div class="food-image-wrapper">
+                        <img src="image/spa.jpg" alt="Spaghetti rognon" class="food-item-image">
+                    </div>
+                    <div class="food-item-content">
+                        <div class="food-title">Spaghetti rognon</div>
+                        <div class="food-description">Spaghetti préparé avec du rognon savoureux</div>
+                        <div class="food-footer">
+                            <div class="food-price">600 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="event.stopPropagation(); promptAddToCart('Spaghetti rognon', 600, 'A')">
+                                🛒 Ajouter
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
-<!-- BOUTON TÉLÉCHARGEMENT APP -->
-<div id="download-button" style="position: fixed; bottom: 80px; right: 20px; z-index: 999;">
-    <button onclick="triggerInstallPrompt()" style="background: linear-gradient(135deg, #ff4e00, #ff6b9d); color: white; border: none; padding: 1rem; border-radius: 50%; width: 60px; height: 60px; cursor: pointer; box-shadow: 0 4px 15px rgba(255, 78, 0, 0.4); font-size: 1.5rem; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">
-        📱
-    </button>
-    <div id="install-status" style="position: absolute; top: -5px; right: -5px; background: #28a745; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 10px; display: none; align-items: center; justify-content: center; font-weight: bold;">✓</div>
-</div>
+                <div class="food-item">
+                    <div class="food-image-wrapper">
+                        <img src="image/spaghetti nouv.jpg" alt="Spaghetti foi" class="food-item-image">
+                    </div>
+                    <div class="food-item-content">
+                        <div class="food-title">Spaghetti foi</div>
+                        <div class="food-description">Spaghetti préparé avec du foie tendre</div>
+                        <div class="food-footer">
+                            <div class="food-price">600 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Spaghetti foi', 600, 'A')">
+                                🛒 Ajouter
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
+                <div class="food-item">
+                    <div class="food-image-wrapper">
+                        <img src="image/vi.jpg" alt="Spaghetti viande" class="food-item-image">
+                    </div>
+                    <div class="food-item-content">
+                        <div class="food-title">Spaghetti à la viande</div>
+                        <div class="food-description">Spaghetti avec de la viande hachée savoureuse</div>
+                        <div class="food-footer">
+                            <div class="food-price">800 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Spaghetti à la viande', 800, 'A')">
+                                🛒 Ajouter
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
-    <!-- MODAL HISTORIQUE COMMANDES -->
-    <div class="modal" id="orders-modal">
+                <div class="food-item">
+                    <div class="food-image-wrapper">
+                        <img src="image/SPAHRA .jpg" alt="Spaghetti rognon + oeuf" class="food-item-image">
+                    </div>
+                    <div class="food-item-content">
+                        <div class="food-title">Spaghetti rognon + oeuf grillé</div>
+                        <div class="food-description">Combo parfait avec oeuf grillé</div>
+                        <div class="food-footer">
+                            <div class="food-price">700 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Spaghetti rognon + oeuf grillé', 700, 'A')">
+                                🛒 Ajouter
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="food-item">
+                    <div class="food-image-wrapper">
+                        <img src="image/spagh oeuf.jpg" alt="Spaghetti foi + oeuf" class="food-item-image">
+                    </div>
+                    <div class="food-item-content">
+                        <div class="food-title">Spaghetti foi + oeuf grillé</div>
+                        <div class="food-description">Délicieux mélange foi et oeuf</div>
+                        <div class="food-footer">
+                            <div class="food-price">700 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Spaghetti foi + oeuf grillé', 700, 'A')">
+                                🛒 Ajouter
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="food-item">
+                    <div class="food-image-wrapper">
+                        <img src="image/foi.jpg" alt="Sauter revenir foi" class="food-item-image">
+                    </div>
+                    <div class="food-item-content">
+                        <div class="food-title">Sauter revenir au foie</div>
+                        <div class="food-description">Plat sauté avec du foie savoureux</div>
+                        <div class="food-footer">
+                            <div class="food-price">1500 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Sauter revenir au foie', 1500, 'A')">
+                                🛒 Ajouter
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="food-item">
+                    <div class="food-image-wrapper">
+                        <img src="image/rognon.jpg" alt="Sauter revenir rognon" class="food-item-image">
+                    </div>
+                    <div class="food-item-content">
+                        <div class="food-title">Sauter revenir au rognon</div>
+                        <div class="food-description">Plat sauté avec du rognon tendre</div>
+                        <div class="food-footer">
+                            <div class="food-price">1500 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Sauter revenir au rognon', 1500, 'A')">
+                                🛒 Ajouter
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="food-item">
+                    <div class="food-image-wrapper">
+                        <img src="image/viande.jpg" alt="Sauter revenir viande" class="food-item-image">
+                    </div>
+                    <div class="food-item-content">
+                        <div class="food-title">Sauter revenir viande</div>
+                        <div class="food-description">Plat sauté avec de la viande</div>
+                        <div class="food-footer">
+                            <div class="food-price">1500 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Sauter revenir viande', 1500, 'A')">
+                                🛒 Ajouter
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="food-item">
+                    <div class="food-image-wrapper">
+                        <img src="image/petit poid.jpg" alt="Petit pois rognon" class="food-item-image">
+                    </div>
+                    <div class="food-item-content">
+                        <div class="food-title">Petit pois rognon</div>
+                        <div class="food-description">Petit pois accompagné de rognon</div>
+                        <div class="food-footer">
+                            <div class="food-price">1000 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Petit pois rognon', 1000, 'A')">
+                                🛒 Ajouter
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="food-item">
+                    <div class="food-image-wrapper">
+                        <img src="image/petit poid rogno,.jpg" alt="Petit pois viande" class="food-item-image">
+                    </div>
+                    <div class="food-item-content">
+                        <div class="food-title">Petit pois à la viande</div>
+                        <div class="food-description">Petit pois avec de la viande</div>
+                        <div class="food-footer">
+                            <div class="food-price">1500 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Petit pois à la viande', 1500, 'A')">
+                                🛒 Ajouter
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Catégorie: Tchèpes -->
+        <div class="category-card">
+            <div class="category-header">
+                <div class="category-icon">🍚</div>
+                <div class="category-info">
+                    <h3>Tchèpes</h3>
+                    <p>Nos plats de tchèpe savoureux</p>
+                </div>
+            </div>
+            <div class="food-grid">
+                <div class="food-item">
+                    <div class="food-image-wrapper">
+                        <img src="image/tcheo poi.jpg" alt="Tchèpe poisson" class="food-item-image">
+                    </div>
+                    <div class="food-item-content">
+                        <div class="food-title">Tchèpe au poisson</div>
+                        <div class="food-description">Tchèpe accompagné de poisson frais</div>
+                        <div class="food-footer">
+                            <div class="food-price">500 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="selectTchep('Tchèpe au poisson', 500)">
+                                📋 Choisir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="food-item">
+                    <div class="food-image-wrapper">
+                        <img src="image/tcheo.jpg" alt="Tchèpe poulet" class="food-item-image">
+                    </div>
+                    <div class="food-item-content">
+                        <div class="food-title">Tchèpe au poulet</div>
+                        <div class="food-description">Tchèpe savoureux au poulet</div>
+                        <div class="food-footer">
+                            <div class="food-price">1000 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="selectTchep('Tchèpe au poulet', 1000)">
+                                📋 Choisir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="food-item">
+                    <div class="food-image-wrapper">
+                        <img src="image/tchep poulet.jpg" alt="Tchèpe poulet XXL" class="food-item-image">
+                    </div>
+                    <div class="food-item-content">
+                        <div class="food-title">Tchèpe au poulet XXL</div>
+                        <div class="food-description">Format généreux pour grand appétit</div>
+                        <div class="food-footer">
+                            <div class="food-price">2000 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="selectTchep('Tchèpe au poulet XXL', 2000)">
+                                📋 Choisir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="food-item">
+                    <div class="food-image-wrapper">
+                        <img src="image/tchep ara.jpg" alt="Tchèpe viande XXL" class="food-item-image">
+                    </div>
+                    <div class="food-item-content">
+                        <div class="food-title">Tchèpe viande XXL</div>
+                        <div class="food-description">Tchèpe accompagné de viande généreuse</div>
+                        <div class="food-footer">
+                            <div class="food-price">2000 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="selectTchep('Tchèpe viande XXL', 2000)">
+                                📋 Choisir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Catégorie: Riz -->
+        <div class="category-card">
+            <div class="category-header">
+                <div class="category-icon">🍛</div>
+                <div class="category-info">
+                    <h3>Riz</h3>
+                    <p>Découvrez nos plats de riz</p>
+                </div>
+            </div>
+            <div class="food-grid">
+                <div class="food-item">
+                    <div class="food-image-wrapper">
+                        <img src="image/sauce arrrrachide.jpg" alt="Riz sauce arachide" class="food-item-image">
+                    </div>
+                    <div class="food-item-content">
+                        <div class="food-title">Riz sauce arachide</div>
+                        <div class="food-description">Riz accompagné de sauce arachide onctueuse</div>
+                        <div class="food-footer">
+                            <div class="food-price">Dès 500 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="selectRice('Riz sauce arachide')">
+                                📋 Formats
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="food-item">
+                    <div class="food-image-wrapper">
+                        <img src="image/riz nouv.jpg" alt="Riz sauce feuille" class="food-item-image">
+                    </div>
+                    <div class="food-item-content">
+                        <div class="food-title">Riz sauce feuille</div>
+                        <div class="food-description">Riz avec sauce aux feuilles vertes</div>
+                        <div class="food-footer">
+                            <div class="food-price">Dès 500 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="selectRice('Riz sauce feuille')">
+                                📋 Formats
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="food-item">
+                    <div class="food-image-wrapper">
+                        <img src="image/RIZ SA TOMA.jpg" alt="Riz sauce tomate" class="food-item-image">
+                    </div>
+                    <div class="food-item-content">
+                        <div class="food-title">Riz sauce tomate</div>
+                        <div class="food-description">Riz avec sauce tomate savoureuse</div>
+                        <div class="food-footer">
+                            <div class="food-price">Dès 500 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="selectRice('Riz sauce tomate')">
+                                📋 Formats
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Catégorie: Porc au four -->
+        <div class="category-card">
+            <div class="category-header">
+                <div class="category-icon">🐷</div>
+                <div class="category-info">
+                    <h3>Porc au four</h3>
+                    <p>Délicieux porc préparé au four</p>
+                </div>
+            </div>
+            <div class="food-grid">
+                <div class="food-item">
+                    <div class="food-image-wrapper">
+                        <img src="image/PORC1.jpg" alt="Porc 2 boules" class="food-item-image">
+                    </div>
+                    <div class="food-item-content">
+                        <div class="food-title">Porc au four (2 boules)</div>
+                        <div class="food-description">Porc avec 2 boules d'attiékè</div>
+                        <div class="food-footer">
+                            <div class="food-price">1200 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="selectPorc(1200, '2 boules')">
+                                📋 Choisir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="food-item">
+                    <div class="food-image-wrapper">
+                        <img src="image/PORC2.jpg" alt="Porc XXL" class="food-item-image">
+                    </div>
+                    <div class="food-item-content">
+                        <div class="food-title">Porc au four XXL</div>
+                        <div class="food-description">Portion généreuse avec attiékè</div>
+                        <div class="food-footer">
+                            <div class="food-price">2000 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="selectPorc(2000, 'XXL')">
+                                📋 Choisir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Catégorie: Attiékè spécialité -->
+        <div class="category-card">
+            <div class="category-header">
+                <div class="category-icon">🌾</div>
+                <div class="category-info">
+                    <h3>Attiékè spécialité</h3>
+                    <p>Nos spécialités d'attiékè</p>
+                </div>
+            </div>
+            <div class="food-grid">
+                <div class="food-item">
+                    <div class="food-image-wrapper">
+                        <img src="image/ChatGPT Image 21 sept. 2025, 17_49_08.png" alt="Attiékè poisson alloko" class="food-item-image">
+                    </div>
+                    <div class="food-item-content">
+                        <div class="food-title">Attiékè poisson alloko + Condiment</div>
+                        <div class="food-description">Avec poisson, alloko et condiments</div>
+                        <div class="food-footer">
+                            <div class="food-price">Dès 1000 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="selectAttiekePoisson()">
+                                📋 Formats
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="food-item">
+                    <div class="food-image-wrapper">
+                        <img src="image/20250921_1803_Qualité Image Améliorée_remix_01k5pg4v3weeea02t6htn46kjd.png" alt="Attiékè poulet alloko" class="food-item-image">
+                    </div>
+                    <div class="food-item-content">
+                        <div class="food-title">Attiékè poulet alloko + Condiment</div>
+                        <div class="food-description">Avec poulet, alloko et condiments</div>
+                        <div class="food-footer">
+                            <div class="food-price">Dès 1500 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="selectAttiekePouletAlloko()">
+                                📋 Formats
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="food-item">
+                    <div class="food-image-wrapper">
+                        <img src="image/ATIEKEPOULET.jpg" alt="Attiékè poulet" class="food-item-image">
+                    </div>
+                    <div class="food-item-content">
+                        <div class="food-title">Attiékè poulet + Condiment</div>
+                        <div class="food-description">Attiékè poulet avec condiments</div>
+                        <div class="food-footer">
+                            <div class="food-price">Dès 1000 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="selectAttiekePoulet()">
+                                📋 Formats
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="food-item">
+                    <div class="food-image-wrapper">
+                        <img src="image/garba.jpg" alt="Garba" class="food-item-image">
+                    </div>
+                    <div class="food-item-content">
+                        <div class="food-title">Spécialité Garba</div>
+                        <div class="food-description">Notre spécialité Garba traditionnelle</div>
+                        <div class="food-footer">
+                            <div class="food-price">Dès 500 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="selectGarba()">
+                                📋 Formats
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="food-item">
+                    <div class="food-image-wrapper">
+                        <img src="image/at.jpg" alt="Attiékè poisson" class="food-item-image">
+                    </div>
+                    <div class="food-item-content">
+                        <div class="food-title">Attiékè poisson</div>
+                        <div class="food-description">Attiékè accompagné de poisson</div>
+                        <div class="food-footer">
+                            <div class="food-price">1000 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Attiékè poisson', 1000, 'E')">
+                                🛒 Ajouter
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Catégorie: Sucreries -->
+        <div class="category-card">
+            <div class="category-header">
+                <div class="category-icon">🍹</div>
+                <div class="category-info">
+                    <h3>Nos Sucreries</h3>
+                    <p>Boissons et douceurs</p>
+                </div>
+            </div>
+            <div class="food-grid">
+                <div class="food-item">
+                    <div class="food-image-wrapper">
+                        <img src="image/orangina.jpg" alt="Orangina" class="food-item-image">
+                    </div>
+                    <div class="food-item-content">
+                        <div class="food-title">Orangina</div>
+                        <div class="food-description">Boisson rafraîchissante</div>
+                        <div class="food-footer">
+                            <div class="food-price">500 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Orangina', 500, 'I')">
+                                🛒 Ajouter
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="food-item">
+                    <div class="food-image-wrapper">
+                        <img src="image/kapa300.jpg" alt="Kapa" class="food-item-image">
+                    </div>
+                    <div class="food-item-content">
+                        <div class="food-title">Kapa</div>
+                        <div class="food-description">Boisson locale populaire</div>
+                        <div class="food-footer">
+                            <div class="food-price">300 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Kapa', 300, 'I')">
+                                🛒 Ajouter
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="food-item">
+                    <div class="food-image-wrapper">
+                        <img src="image/codys.jpg" alt="Cody's" class="food-item-image">
+                    </div>
+                    <div class="food-item-content">
+                        <div class="food-title">Cody's</div>
+                        <div class="food-description">Jus de fruits savoureux</div>
+                        <div class="food-footer">
+                            <div class="food-price">500 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Codys', 500, 'I')">
+                                🛒 Ajouter
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="food-item">
+                    <div class="food-image-wrapper">
+                        <img src="image/koka.jpg" alt="Coca-Cola 50cl" class="food-item-image">
+                    </div>
+                    <div class="food-item-content">
+                        <div class="food-title">Coca-Cola 50cl</div>
+                        <div class="food-description">Grande bouteille</div>
+                        <div class="food-footer">
+                            <div class="food-price">500 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Coca cola 50cl', 500, 'I')">
+                                🛒 Ajouter
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="food-item">
+                    <div class="food-image-wrapper">
+                        <img src="image/cook300.jpg" alt="Coca-Cola 33cl" class="food-item-image">
+                    </div>
+                    <div class="food-item-content">
+                        <div class="food-title">Coca-Cola 33cl</div>
+                        <div class="food-description">Format standard</div>
+                        <div class="food-footer">
+                            <div class="food-price">300 FCFA</div>
+                            <button class="add-to-cart-btn" onclick="promptAddToCart('Coca cola 33cl', 300, 'I')">
+                                🛒 Ajouter
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Panier -->
+    <div class="modal-overlay" id="cart-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <button class="close-btn" onclick="toggleOrders()">&times;</button>
-                <h2>🧾 Mes Commandes</h2>
-                <p>Historique de vos commandes récentes</p>
+                <button class="close-btn" onclick="toggleCart()">×</button>
+                <h2>🛒 Mon Panier</h2>
+                <p>Vérifiez vos articles</p>
             </div>
-            <div style="padding: 2rem;">
+            <div class="cart-items" id="cart-items">
+                <div class="empty-state">
+                    <div class="empty-state-icon">🛒</div>
+                    <h3>Panier vide</h3>
+                    <p>Ajoutez des plats pour commencer</p>
+                </div>
+            </div>
+            <div class="cart-total" id="cart-total">Total: 0 FCFA</div>
+            <form id="order-form">
+                <button type="submit" class="checkout-btn">🎯 Commander maintenant</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Historique -->
+    <div class="modal-overlay" id="orders-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button class="close-btn" onclick="toggleOrders()">×</button>
+                <h2>📦 Mes Commandes</h2>
+                <p>Historique de vos commandes</p>
+            </div>
+            <div style="padding: 24px;">
                 <div id="orders-list">
                     <div class="empty-state">
-                        <div class="empty-state-icon">🛒</div>
+                        <div class="empty-state-icon">📦</div>
                         <h3>Aucune commande</h3>
                         <p>Vos commandes apparaîtront ici</p>
                     </div>
                 </div>
-                <button onclick="clearOrders()" class="checkout-btn" style="background: linear-gradient(135deg, #dc3545, #c82333); margin-top: 1rem;">
+                <button onclick="clearOrders()" class="checkout-btn" style="background: linear-gradient(135deg, #dc3545, #c82333); margin-top: 16px;">
                     🗑️ Vider l'historique
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL SELECTION (DEGUE) -->
-    <div class="degue-modal" id="degue-modal">
-        <div class="degue-modal-content">
-            <div class="degue-modal-header">
-                <h3 id="degue-modal-title">🥛 Choisir votre format de Dêguê</h3>
-                <p>Sélectionnez la taille qui vous convient</p>
+    <!-- Modal Sélection (Riz, Tchep, Porc, Attiékè) -->
+    <div class="modal-overlay" id="selection-modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeSelectionModal()">×</button>
+            <div class="modal-header">
+                <h2 id="selection-modal-title">Faites votre choix</h2>
+                <p id="selection-modal-subtitle">Sélectionnez votre option</p>
             </div>
-            <div class="degue-options" id="degue-options">
-            </div>
-            <div style="padding: 0 2rem 2rem;">
-                <button onclick="closeDegueModal()" style="width: 100%; background: var(--border); color: var(--on-surface); border: none; padding: 1rem; border-radius: 8px; cursor: pointer;">
-                    Annuler
-                </button>
-            </div>
+            <div style="padding: 24px;" id="selection-options"></div>
         </div>
     </div>
 
-    <!-- MODAL PANIER -->
-    <div class="cart-modal" id="cart-modal">
-        <div class="cart-modal-content">
-            <div class="cart-modal-header">
-                <h3 class="cart-modal-title">🛒 Mon Panier</h3>
-                <button class="close-cart-btn" onclick="toggleCart()">&times;</button>
-            </div>
-            <div class="cart-modal-body">
-                <div class="cart-items" id="cart-items">
-                    <div class="empty-state">
-                        <div class="empty-state-icon">🛒</div>
-                        <p>Votre panier est vide</p>
-                    </div>
-                </div>
-                
-                <div class="cart-total" id="cart-total">
-                    Total: 0 FCFA
-                </div>
-                
-                <form id="order-form">
-                    <button type="submit" class="checkout-btn">
-                        🎯 Commander maintenant
-                    </button>
-                </form>
-            </div>
+      <!-- Modal Quantité Personnalisée -->
+<div class="quantity-modal" id="quantity-modal">
+    <div class="quantity-modal-content">
+        <div class="quantity-modal-header">
+            <h3>Choisir la quantité</h3>
+            <p>Ajustez selon vos besoins</p>
         </div>
-    </div>
-
-    <!-- MODAL SELECTION (RIZ, TCHEP, PORC, ATTIEKE) -->
-    <div class="selection-modal" id="selection-modal">
-        <div class="selection-modal-content">
-            <button class="close-selection-btn" onclick="closeSelectionModal()">&times;</button>
-            <div class="selection-modal-header">
-                <h3 id="selection-modal-title">Faites votre choix</h3>
-                <p id="selection-modal-subtitle">Sélectionnez votre option préférée</p>
-            </div>
-            <div class="selection-options" id="selection-options">
-            </div>
-            <div style="padding: 0 2rem 2rem;">
-                <button class="selection-cancel-btn" onclick="closeSelectionModal()">
-                    ❌ Annuler
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <div class="container">
-        <div class="main-feed">
-            <!-- PÂTES & PETIT POIS -->
-            <div class="post-card">
-                <div class="post-header">
-                    <div class="post-category">
-                        <div class="category-avatar">🍝</div>
-                        <div class="category-info">
-                            <h3>Pâtes & Petit pois</h3>
-                            <p>Les classiques revisités</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="food-grid">
-                    <div class="food-item">
-                        <img src="image/spa.jpg" alt="Spaghetti rognon" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Spaghetti rognon</div>
-                            <div class="food-description">Spaghetti préparé avec du rognon</div>
-                            <div class="food-price">600 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="promptAddToCart('Spaghetti rognon', 600, 'A')">
-                                🛒 Ajouter au panier
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="food-item">
-                        <img src="image/spaghetti nouv.jpg" alt="Spaghetti avec foi" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Spaghetti avec foi</div>
-                            <div class="food-description">Spaghetti préparé avec du foie</div>
-                            <div class="food-price">600 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="promptAddToCart('Spaghetti foi', 600, 'A')">
-                                🛒 Ajouter au panier
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="food-item">
-                        <img src="image/vi.jpg" alt="Spaghetti à la viande" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Spaghetti à la viande</div>
-                            <div class="food-description">Spaghetti avec de la viande hachée</div>
-                            <div class="food-price">800 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="promptAddToCart('Spaghetti à la viande', 800, 'A')">
-                                🛒 Ajouter au panier
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="food-item">
-                        <img src="image/SPAHRA .jpg" alt="Spaghetti rognon + oeuf grillé" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Spaghetti ROGNON + oeuf grillé</div>
-                            <div class="food-description">Spaghetti ROGNON + oeuf grillé</div>
-                            <div class="food-price">700 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="promptAddToCart('Spaghetti ROGNON + oeuf grillé', 700, 'A')">
-                                🛒 Ajouter au panier
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="food-item">
-                        <img src="image/spagh oeuf.jpg" alt="Spaghetti foi + oeuf grillé" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Spaghetti foi + oeuf grillé</div>
-                            <div class="food-description">Spaghetti + oeuf grillé</div>
-                            <div class="food-price">700 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="promptAddToCart('Spaghetti foi + oeuf grillé', 700, 'A')">
-                                🛒 Ajouter au panier
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="food-item">
-                        <img src="image/foi.jpg" alt="sauter revenir au foie" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Sauter revenir au foie</div>
-                            <div class="food-description">Sauter revenir au foie</div>
-                            <div class="food-price">1500 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="promptAddToCart('sauter revenir au foie', 1500, 'A')">
-                                🛒 Ajouter au panier
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="food-item">
-                        <img src="image/rognon.jpg" alt="Sauter revenir au rognon" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Sauter revenir au rognon</div>
-                            <div class="food-description">Sauter revenir au rognon</div>
-                            <div class="food-price">1500 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="promptAddToCart('Sauter revenir au rognon', 1500, 'A')">
-                                🛒 Ajouter au panier
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="food-item">
-                        <img src="image/viande.jpg" alt="Sauter Revenir viande" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Sauter revenir viande</div>
-                            <div class="food-description">Sauter revenir viande</div>
-                            <div class="food-price">1500 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="promptAddToCart('Sauter revenir viande', 1500, 'A')">
-                                🛒 Ajouter au panier
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="food-item">
-                        <img src="image/petit poid.jpg" alt="Petit pois au rognon" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Petit pois rognon</div>
-                            <div class="food-description">Petit pois accompagné de rognon</div>
-                            <div class="food-price">1000 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="promptAddToCart('Petit pois rognon', 1000, 'A')">
-                                🛒 Ajouter au panier
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="food-item">
-                        <img src="image/petit poid rogno,.jpg" alt="Petit pois à la viande" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Petit pois à la viande</div>
-                            <div class="food-description">Petit pois à la viande</div>
-                            <div class="food-price">1500 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="promptAddToCart('Petit pois à la viande', 1500, 'A')">
-                                🛒 Ajouter au panier
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="post-actions">
-                    <p style="font-size: 0.9rem; color: var(--on-surface); text-align: center; font-style: italic; padding: 0.5rem; background: var(--background); border-radius: 8px;">
-                        "La vie est trop courte pour manger mal - Régalez-vous avec nos délices !" 
-                    </p>
-                </div>
-            </div>
-
-            <!-- TCHÈPES -->
-            <div class="post-card">
-                <div class="post-header">
-                    <divclass="post-category">
-                        <div class="category-avatar">🍚</div>
-                        <div class="category-info">
-                            <h3>Tchèpes</h3>
-                            <p>Nos plats de tchèpe savoureux</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="food-grid">
-                    <div class="food-item">
-                        <img src="image/tcheo poi.jpg" alt="Tchèpe au poisson" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Tchèpe au poisson</div>
-                            <div class="food-description">Tchèpe accompagné de poisson frais</div>
-                            <div class="food-price">500 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="selectTchep('Tchèpe au poisson', 500)">
-                                📋 Choisir le type
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="food-item">
-                        <img src="image/tcheo.jpg" alt="Tchèpe au poulet" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Tchèpe au poulet</div>
-                            <div class="food-description">Tchèpe au poulet</div>
-                            <div class="food-price">1000 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="selectTchep('Tchèpe au poulet', 1000)">
-                                📋 Choisir le type
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="food-item">
-                        <img src="image/tchep poulet.jpg" alt="Tchèpe au poulet XXL" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Tchèpe au poulet XXL</div>
-                            <div class="food-description">Tchèpe au poulet XXL</div>
-                            <div class="food-price">2000 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="selectTchep('Tchèpe au poulet XXL', 2000)">
-                                📋 Choisir le type
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="food-item">
-                        <img src="image/tchep ara.jpg" alt="Tchèpe accompagné de la viande XXL" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Tchèpe viande XXL</div>
-                            <div class="food-description">Tchèpe accompagné de la viande</div>
-                            <div class="food-price">2000 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="selectTchep('Tchèpe viande XXL', 2000)">
-                                📋 Choisir le type
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="post-actions">
-                    <p style="font-size: 0.9rem; color: var(--on-surface); text-align: center; font-style: italic; padding: 0.5rem; background: var(--background); border-radius: 8px;">
-                        🍚 "Chaque bouchée est une célébration - Savourez la tradition !" 🌟
-                    </p>
-                </div>
-            </div>
-
-            <!-- RIZ -->
-            <div class="post-card">
-                <div class="post-header">
-                    <div class="post-category">
-                        <div class="category-avatar">🍛</div>
-                        <div class="category-info">
-                            <h3>RIZ</h3>
-                            <p>Découvrez nos plats de riz</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="food-grid">
-                    <div class="food-item">
-                        <img src="image/sauce arrrrachide.jpg" alt="Riz sauce arachide" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Riz sauce arachide</div>
-                            <div class="food-description">Riz sauce arachide</div>
-                            <div class="food-price">À partir de 500 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="selectRice('Riz sauce arachide')">
-                                📋 Sélectionner le format
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="food-item">
-                        <img src="image/riz nouv.jpg" alt="Riz sauce feuille" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Riz sauce feuille</div>
-                            <div class="food-description">Riz accompagné de sauce aux feuilles vertes</div>
-                            <div class="food-price">À partir de 500 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="selectRice('Riz sauce feuille')">
-                                📋 Sélectionner le format
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="food-item">
-                        <img src="image/RIZ SA TOMA.jpg" alt="Riz sauce tomate" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Riz sauce tomate</div>
-                            <div class="food-description">Riz sauce tomate</div>
-                            <div class="food-price">À partir de 500 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="selectRice('Riz sauce tomate')">
-                                📋 Sélectionner le format
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="post-actions">
-                    <p style="font-size: 0.9rem; color: var(--on-surface); text-align: center; font-style: italic; padding: 0.5rem; background: var(--background); border-radius: 8px;">
-                        🍛 "Le bonheur commence dans votre assiette - Commandez sans hésiter !" 
-                    </p>
-                </div>
-            </div>
-
-            <!-- PORC AU FOUR -->
-            <div class="post-card">
-                <div class="post-header">
-                    <div class="post-category">
-                        <div class="category-avatar">🐷</div>
-                        <div class="category-info">
-                            <h3>Porc au four</h3>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="food-grid">
-                    <div class="food-item">
-                        <img src="image/PORC1.jpg" alt="Porc au four + Attiékè" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Porc au four (2 boules)</div>
-                            <div class="food-description">Porc au four avec 2 boules d'attiékè</div>
-                            <div class="food-price">1200 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="selectPorc(1200, '2 boules')">
-                                📋 Choisir la préparation
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="food-item">
-                        <img src="image/PORC2.jpg" alt="Porc au four + Attiékè XXL" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Porc au four XXL</div>
-                            <div class="food-description">Portion généreuse de porc avec attiékè</div>
-                            <div class="food-price">2000 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="selectPorc(2000, 'XXL')">
-                                📋 Choisir la préparation
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="post-actions">
-                    <p style="font-size: 0.9rem; color: var(--on-surface); text-align: center; font-style: italic; padding: 0.5rem; background: var(--background); border-radius: 8px;">
-                        "Un délice unique qui ravira vos papilles - Laissez-vous tenter !" 
-                    </p>
-                </div>
-            </div>
-
-           <!-- ATTIÉKÈ SPÉCIALITÉ -->
-<div class="post-card">
-    <div class="post-header">
-        <div class="post-category">
-            <div class="category-avatar">🌾</div>
-            <div class="category-info">
-                <h3>Attiékè spécialité</h3>
-                <p>Découvrez nos plats d'attiékè bien réussi</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="food-grid">
-        <div class="food-item">
-            <img src="image/ChatGPT Image 21 sept. 2025, 17_49_08.png" alt="Attiékè poisson alloko" class="food-item-image">
-            <div class="food-item-content">
-                <div class="food-title">Attiékè poisson alloko + Condiment</div>
-                <div class="food-description">Attiékè servi avec du poisson</div>
-                <div class="food-price">À partir de 1000 FCFA</div>
-                <button class="add-to-cart-btn" onclick="selectAttiekePoisson()">
-                    📋 Choisir le format
-                </button>
-            </div>
-        </div>
-
-        <div class="food-item">
-            <img src="image/20250921_1803_Qualité Image Améliorée_remix_01k5pg4v3weeea02t6htn46kjd.png" alt="Attiékè poulet alloko + Condiments" class="food-item-image">
-            <div class="food-item-content">
-                <div class="food-title">Attiékè poulet alloko + Condiment</div>
-                <div class="food-description">Attiékè poulet</div>
-                <div class="food-price">À partir de 1500 FCFA</div>
-                <button class="add-to-cart-btn" onclick="selectAttiekePouletAlloko()">
-                    📋 Choisir le format
-                </button>
+        
+        <div class="dish-preview">
+            <div class="dish-preview-icon" id="dish-icon">🍽️</div>
+            <div class="dish-preview-info">
+                <div class="dish-preview-name" id="dish-name">Plat</div>
+                <div class="dish-preview-price" id="dish-price">0 FCFA</div>
             </div>
         </div>
         
-        <div class="food-item">
-            <img src="image/ATIEKEPOULET.jpg" alt="Attiékè poulet + Condiments" class="food-item-image">
-            <div class="food-item-content">
-                <div class="food-title">Attiékè poulet + Condiment</div>
-                <div class="food-description">Attiékè poulet</div>
-                <div class="food-price">À partir de 1000 FCFA</div>
-                <button class="add-to-cart-btn" onclick="selectAttiekePoulet()">
-                    📋 Choisir le format
-                </button>
+        <div class="quantity-input-group">
+            <label class="quantity-input-label">Quantité</label>
+            <div class="quantity-controls">
+                <button class="quantity-btn" id="quantity-decrease">−</button>
+                <input type="number" class="quantity-input" id="quantity-value" value="1" min="1" max="99" readonly>
+                <button class="quantity-btn" id="quantity-increase">+</button>
             </div>
         </div>
-
-        <div class="food-item">
-            <img src="image/garba.jpg" alt="Spécialité Garba" class="food-item-image">
-            <div class="food-item-content">
-                <div class="food-title">Spécialité Garba</div>
-                <div class="food-description">GARBA</div>
-                <div class="food-price">À partir de 500 FCFA</div>
-                <button class="add-to-cart-btn" onclick="selectGarba()">
-                    📋 Choisir le format
-                </button>
-            </div>
+        
+        <div class="quantity-total">
+            <div class="quantity-total-label">Total</div>
+            <div class="quantity-total-amount" id="quantity-total">0 FCFA</div>
         </div>
-
-        <div class="food-item">
-            <img src="image/at.jpg" alt="Attiékè poisson" class="food-item-image">
-            <div class="food-item-content">
-                <div class="food-title">Attiékè poisson</div>
-                <div class="food-description">Attiékè poisson</div>
-                <div class="food-price">1000 FCFA</div>
-                <button class="add-to-cart-btn" onclick="promptAddToCart('ATTIEKE POISSON', 1000, 'E')">
-                    🛒 Ajouter au panier
-                </button>
-            </div>
+        
+        <div class="quantity-modal-actions">
+            <button class="quantity-action-btn quantity-cancel-btn" onclick="closeQuantityModal()">
+                Annuler
+            </button>
+            <button class="quantity-action-btn quantity-confirm-btn" id="quantity-confirm">
+                ✓ Confirmer
+            </button>
         </div>
-    </div>
-    
-    <div class="post-actions">
-        <p class="promotional-text">
-            🌾 "L'authenticité dans chaque grain - Goûtez à notre tradition !" 
-        </p>
     </div>
 </div>
 
-
-            <!-- SUCRERIES -->
-            <div class="post-card">
-                <div class="post-header">
-                    <div class="post-category">
-                        <div class="category-avatar">🍹</div>
-                        <div class="category-info">
-                            <h3>NOS SUCRERIES</h3>
-                            <p>Goûtez et variez vos plaisirs</p>
-                        </div>
-                    </div>
-                </div>
-                 
-                <div class="food-grid">
-                    <div class="food-item">
-                        <img src="image/orangina.jpg" alt="Orangina" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Orangina</div>
-                            <div class="food-description">Orangina</div>
-                            <div class="food-price">500 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="promptAddToCart('Orangina', 500, 'I')">
-                                🛒 Ajouter au panier
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="food-item">
-                        <img src="image/kapa300.jpg" alt="Kapa" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Kapa</div>
-                            <div class="food-description">Kapa</div>
-                            <div class="food-price">300 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="promptAddToCart('Kapa', 300, 'I')">
-                                🛒 Ajouter au panier
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="food-item">
-                        <img src="image/codys.jpg" alt="Cody's" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Cody's</div>
-                            <div class="food-description">Cody's</div>
-                            <div class="food-price">500 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="promptAddToCart('Codys', 500, 'I')">
-                                🛒 Ajouter au panier
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="food-item">
-                        <img src="image/koka.jpg" alt="Coca-Cola" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Coca-Cola</div>
-                            <div class="food-description">Coca-Cola 50cl</div>
-                            <div class="food-price">500 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="promptAddToCart('Coca cola 50cl', 500, 'I')">
-                                🛒 Ajouter au panier
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="food-item">
-                        <img src="image/cook300.jpg" alt="Coca-Cola" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Coca-Cola</div>
-                            <div class="food-description">Coca-Cola 33cl</div>
-                            <div class="food-price">300 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="promptAddToCart('Coca cola 33cl', 300, 'I')">
-                                🛒 Ajouter au panier
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<!-- Modal Informations Client -->
+<div class="customer-info-modal" id="customer-info-modal">
+    <div class="customer-info-content">
+        <div class="customer-info-header">
+            <div class="customer-info-icon">📋</div>
+            <h3>Finaliser la commande</h3>
+            <p>Vos coordonnées pour la livraison</p>
+        </div>
+        
+        <div class="order-summary">
+            <div class="order-summary-title">Récapitulatif</div>
+            <div class="order-summary-items" id="summary-items"></div>
+            <div class="order-summary-total" id="summary-total">0 FCFA</div>
+        </div>
+        
+        <form id="customer-info-form">
+            <div class="input-group">
+    <label class="input-label">
+        Nom complet <span class="required">*</span>
+    </label>
+    <input 
+        type="text" 
+        class="custom-input" 
+        id="customer-name-input"
+        placeholder="Ex: Kouassi Jean-Marc"
+        required
+        autocomplete="name"
+    >
+</div>
 
 
                 <!-- SECTION NOUVEAUX PLATS DEPUIS MARCIO -->
@@ -2212,6 +2071,670 @@
     </div>
 </div>
  </div> 
-    <script type="module" src="suite.js"></script>
-</body>
-</html>
+
+<!-- NOUVEAU CHAMP - Sélection établissement -->
+<div class="input-group">
+    <label class="input-label">
+        Établissement <span class="required">*</span>
+    </label>
+    <select 
+        class="custom-input" 
+        id="customer-establishment-input"
+        required
+        style="cursor: pointer;"
+    >
+        <option value="">Sélectionnez votre établissement</option>
+        <option value="utt-loko">🏫 UTT Loko Zone 4</option>
+        <option value="la-fontaine">🏢 La Fontaine</option>
+    </select>
+    <div class="input-hint">
+        🏛️ Choisissez votre lieu de retrait
+    </div>
+</div>
+
+<div class="input-group">
+    <label class="input-label">
+        Numéro WhatsApp <span class="required">*</span>
+    </label>
+    <input 
+        type="tel" 
+        class="custom-input" 
+        id="customer-whatsapp-input"
+        placeholder="Ex: 0712345678"
+        required
+        autocomplete="tel"
+    >
+    <div class="input-hint">
+        📱 Format: 07XX XX XX XX ou +225 07XX XX XX XX
+    </div>
+</div>
+            
+            <div class="customer-info-actions">
+                <button type="button" class="customer-action-btn customer-cancel-btn" onclick="closeCustomerInfoModal()">
+                    Annuler
+                </button>
+                <button type="submit" class="customer-action-btn customer-submit-btn">
+                    ✓ Confirmer la commande
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+    <!-- Boutons Flottants -->
+    <div class="floating-btns">
+        <button class="floating-btn notif-btn" onclick="requestNotificationPermission()" title="Notifications">
+            🔔
+        </button>
+        <button class="floating-btn install-btn" onclick="triggerInstallPrompt()" title="Installer l'app">
+            📱
+        </button>
+    </div>
+
+ <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+
+// ========================================
+// CONFIGURATIONS FIREBASE
+// ========================================
+const firebaseConfig = {
+    apiKey: "AIzaSyBsGrY-AqYMoI70kT3WMxLgW0HwYA4KyaQ",
+    authDomain: "livraison-c8498.firebaseapp.com",
+    projectId: "livraison-c8498",
+    storageBucket: "livraison-c8498.firebasestorage.app",
+    messagingSenderId: "403240604780",
+    appId: "1:403240604780:web:77d84ad03d68bdaddfb449",
+    measurementId: "G-5YF89BZ5RY"
+};
+
+const firebaseConfigFontaine = {
+    apiKey: "AIzaSyC1pJG97RoIJL-zvrRP5OaJAIVkFNoMC1Q",
+    authDomain: "livreur-21be8.firebaseapp.com",
+    databaseURL: "https://livreur-21be8-default-rtdb.firebaseio.com",
+    projectId: "livreur-21be8",
+    storageBucket: "livreur-21be8.firebasestorage.app",
+    messagingSenderId: "330461481415",
+    appId: "1:330461481415:web:3c9987401062181f9731e2",
+    measurementId: "G-1KWC1NCJ45"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const appFontaine = initializeApp(firebaseConfigFontaine, "fontaine");
+const dbFontaine = getFirestore(appFontaine);
+
+// ========================================
+// VARIABLES GLOBALES
+// ========================================
+let cart = [];
+let total = 0;
+let customerOrders = JSON.parse(localStorage.getItem('customerOrders')) || [];
+let currentAdIndex = 0;
+
+const riceOptions = [
+    { format: 'Petit', price: 500, icon: '🍚', desc: 'Format individuel' },
+    { format: 'Moyen', price: 1000, icon: '🥘', desc: 'Pour 1-2 personnes' },
+    { format: 'Grand', price: 1500, icon: '🍲', desc: 'Pour 2-3 personnes' },
+    { format: 'XXL', price: 2000, icon: '🥣', desc: 'Pour la famille' }
+];
+
+const porcPreparations = [
+    { type: 'Sauté', icon: '🔥', desc: 'Porc sauté revenu' },
+    { type: 'Grillé', icon: '🍖', desc: 'Porc grillé croustillant' },
+    { type: 'Soupe', icon: '🍜', desc: 'Porc en soupe' }
+];
+
+const tchepTypes = [
+    { type: 'Rouge', icon: '🔴', desc: 'Sauce rouge traditionnelle' },
+    { type: 'Jaune', icon: '🟡', desc: 'Sauce jaune délicate' }
+];
+
+let currentQuantityData = { name: '', price: 0, category: '', callback: null };
+
+// ========================================
+// GESTION QUANTITÉ
+// ========================================
+function updateQuantityTotal() {
+    const quantityInput = document.getElementById('quantity-value');
+    const totalElement = document.getElementById('quantity-total');
+    if (!quantityInput || !totalElement) return;
+    const quantity = parseInt(quantityInput.value) || 1;
+    const total = currentQuantityData.price * quantity;
+    totalElement.textContent = `${total.toLocaleString()} FCFA`;
+}
+
+function openQuantityModal(name, price, category, callback) {
+    currentQuantityData = { name, price, category, callback };
+    const dishName = document.getElementById('dish-name');
+    const dishPrice = document.getElementById('dish-price');
+    const quantityValue = document.getElementById('quantity-value');
+    const modal = document.getElementById('quantity-modal');
+    if (dishName) dishName.textContent = name;
+    if (dishPrice) dishPrice.textContent = `${price.toLocaleString()} FCFA l'unité`;
+    if (quantityValue) quantityValue.value = 1;
+    updateQuantityTotal();
+    if (modal) modal.classList.add('show');
+}
+
+window.closeQuantityModal = function() {
+    const modal = document.getElementById('quantity-modal');
+    if (modal) modal.classList.remove('show');
+    currentQuantityData = { name: '', price: 0, category: '', callback: null };
+};
+
+window.promptAddToCart = function(name, price, category) {
+    openQuantityModal(name, price, category, (quantity) => {
+        addToCart(name, price, category, quantity);
+    });
+};
+
+// ========================================
+// GESTION PANIER
+// ========================================
+function addToCart(name, price, category, qty = 1) {
+    cart.push({ name, price, category, qty });
+    updateCart();
+    updateCartBadge();
+    const notification = document.createElement('div');
+    notification.innerHTML = `✅ ${qty} ${name} ajouté(s)!`;
+    notification.style.cssText = `position:fixed;top:80px;right:20px;background:var(--gradient-success);color:white;padding:16px 24px;border-radius:var(--radius-md);z-index:3000;font-weight:600;box-shadow:var(--shadow-lg);`;
+    document.body.appendChild(notification);
+    setTimeout(() => notification.remove(), 3000);
+}
+
+function updateCart() {
+    const cartItems = document.getElementById('cart-items');
+    const cartTotal = document.getElementById('cart-total');
+    if (!cartItems || !cartTotal) return;
+    cartItems.innerHTML = '';
+    total = 0;
+    if (cart.length === 0) {
+        cartItems.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🛒</div><h3>Panier vide</h3><p>Ajoutez des plats pour commencer</p></div>`;
+    } else {
+        cart.forEach((item, index) => {
+            const cartItem = document.createElement('div');
+            cartItem.className = 'cart-item';
+            cartItem.innerHTML = `<img src="https://ui-avatars.com/api/?name=${encodeURIComponent(item.name)}&background=ff4e00&color=fff&size=60" class="cart-item-image" alt="${item.name}"><div class="cart-item-info"><div class="cart-item-name">${item.qty}x ${item.name}</div><div class="cart-item-price">${(item.price * item.qty).toLocaleString()} FCFA</div></div><button class="remove-btn" onclick="removeFromCart(${index})">×</button>`;
+            cartItems.appendChild(cartItem);
+            total += item.price * item.qty;
+        });
+    }
+    cartTotal.textContent = `Total: ${total.toLocaleString()} FCFA`;
+}
+
+function updateCartBadge() {
+    const badge = document.getElementById('cart-badge');
+    if (!badge) return;
+    const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+    if (totalItems > 0) {
+        badge.textContent = totalItems;
+        badge.style.display = 'flex';
+    } else {
+        badge.style.display = 'none';
+    }
+}
+
+window.removeFromCart = function(index) {
+    cart.splice(index, 1);
+    updateCart();
+    updateCartBadge();
+};
+
+window.toggleCart = function() {
+    const modal = document.getElementById('cart-modal');
+    if (modal) modal.classList.toggle('show');
+};
+
+// ========================================
+// HISTORIQUE COMMANDES
+// ========================================
+window.toggleOrders = function() {
+    const modal = document.getElementById('orders-modal');
+    if (modal) modal.classList.toggle('show');
+    updateOrdersList();
+};
+
+function updateOrdersList() {
+    const ordersList = document.getElementById('orders-list');
+    if (!ordersList) return;
+    ordersList.innerHTML = '';
+    if (customerOrders.length === 0) {
+        ordersList.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📦</div><h3>Aucune commande</h3><p>Vos commandes apparaîtront ici</p></div>`;
+    } else {
+        customerOrders.slice().reverse().forEach(entry => {
+            const orderDiv = document.createElement('div');
+            orderDiv.style.cssText = `background:var(--background);border-radius:var(--radius-md);padding:16px;margin-bottom:12px;`;
+            orderDiv.innerHTML = `<div style="font-weight:700;color:var(--primary);margin-bottom:8px;">${entry.code}</div><div style="font-size:14px;margin-bottom:8px;color:var(--text-secondary);">${entry.summary}</div><div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-weight:700;color:var(--primary);">${entry.total.toLocaleString()} FCFA</span><span style="font-size:12px;color:var(--text-secondary);">${entry.date}</span></div>`;
+            ordersList.appendChild(orderDiv);
+        });
+    }
+}
+
+window.clearOrders = function() {
+    if (confirm("Vider l'historique ?")) {
+        customerOrders = [];
+        localStorage.removeItem('customerOrders');
+        updateOrdersList();
+    }
+};
+
+// ========================================
+// SÉLECTIONS
+// ========================================
+window.selectRice = function(riceName) {
+    document.getElementById('selection-modal-title').textContent = `🍛 ${riceName}`;
+    document.getElementById('selection-modal-subtitle').textContent = 'Choisissez votre format';
+    const optionsContainer = document.getElementById('selection-options');
+    optionsContainer.innerHTML = '';
+    riceOptions.forEach(option => {
+        const optionDiv = document.createElement('div');
+        optionDiv.style.cssText = `display:flex;align-items:center;justify-content:space-between;padding:16px;background:var(--background);border-radius:var(--radius-md);margin-bottom:12px;cursor:pointer;transition:all 0.3s ease;`;
+        optionDiv.onmouseover = () => optionDiv.style.background = 'rgba(255,78,0,0.1)';
+        optionDiv.onmouseout = () => optionDiv.style.background = 'var(--background)';
+        optionDiv.onclick = () => {
+            openQuantityModal(`${riceName} (${option.format})`, option.price, 'C', (quantity) => {
+                addToCart(`${riceName} (${option.format})`, option.price, 'C', quantity);
+                closeSelectionModal();
+            });
+        };
+        optionDiv.innerHTML = `<div style="display:flex;align-items:center;gap:16px;"><div style="font-size:32px;">${option.icon}</div><div><div style="font-weight:600;margin-bottom:4px;">${option.format}</div><div style="font-size:13px;color:var(--text-secondary);">${option.desc}</div></div></div><div style="font-weight:700;color:var(--primary);">${option.price} FCFA</div>`;
+        optionsContainer.appendChild(optionDiv);
+    });
+    document.getElementById('selection-modal').classList.add('show');
+};
+
+window.selectPorc = function(price, format) {
+    document.getElementById('selection-modal-title').textContent = `🐷 Porc au four (${format})`;
+    document.getElementById('selection-modal-subtitle').textContent = 'Choisissez la préparation';
+    const optionsContainer = document.getElementById('selection-options');
+    optionsContainer.innerHTML = '';
+    porcPreparations.forEach(prep => {
+        const optionDiv = document.createElement('div');
+        optionDiv.style.cssText = `display:flex;align-items:center;justify-content:space-between;padding:16px;background:var(--background);border-radius:var(--radius-md);margin-bottom:12px;cursor:pointer;transition:all 0.3s ease;`;
+        optionDiv.onmouseover = () => optionDiv.style.background = 'rgba(255,78,0,0.1)';
+        optionDiv.onmouseout = () => optionDiv.style.background = 'var(--background)';
+        optionDiv.onclick = () => {
+            openQuantityModal(`Porc ${prep.type} (${format})`, price, 'D', (quantity) => {
+                addToCart(`Porc ${prep.type} (${format})`, price, 'D', quantity);
+                closeSelectionModal();
+            });
+        };
+        optionDiv.innerHTML = `<div style="display:flex;align-items:center;gap:16px;"><div style="font-size:32px;">${prep.icon}</div><div><div style="font-weight:600;margin-bottom:4px;">${prep.type}</div><div style="font-size:13px;color:var(--text-secondary);">${prep.desc}</div></div></div><div style="font-weight:700;color:var(--primary);">${price} FCFA</div>`;
+        optionsContainer.appendChild(optionDiv);
+    });
+    document.getElementById('selection-modal').classList.add('show');
+};
+
+window.selectTchep = function(tchepName, price) {
+    document.getElementById('selection-modal-title').textContent = `🍚 ${tchepName}`;
+    document.getElementById('selection-modal-subtitle').textContent = 'Choisissez le type';
+    const optionsContainer = document.getElementById('selection-options');
+    optionsContainer.innerHTML = '';
+    tchepTypes.forEach(type => {
+        const optionDiv = document.createElement('div');
+        optionDiv.style.cssText = `display:flex;align-items:center;justify-content:space-between;padding:16px;background:var(--background);border-radius:var(--radius-md);margin-bottom:12px;cursor:pointer;transition:all 0.3s ease;`;
+        optionDiv.onmouseover = () => optionDiv.style.background = 'rgba(255,78,0,0.1)';
+        optionDiv.onmouseout = () => optionDiv.style.background = 'var(--background)';
+        optionDiv.onclick = () => {
+            openQuantityModal(`${tchepName} ${type.type}`, price, 'B', (quantity) => {
+                addToCart(`${tchepName} ${type.type}`, price, 'B', quantity);
+                closeSelectionModal();
+            });
+        };
+        optionDiv.innerHTML = `<div style="display:flex;align-items:center;gap:16px;"><div style="font-size:32px;">${type.icon}</div><div><div style="font-weight:600;margin-bottom:4px;">Tchèpe ${type.type}</div><div style="font-size:13px;color:var(--text-secondary);">${type.desc}</div></div></div><div style="font-weight:700;color:var(--primary);">${price} FCFA</div>`;
+        optionsContainer.appendChild(optionDiv);
+    });
+    document.getElementById('selection-modal').classList.add('show');
+};
+
+window.selectAttiekePoisson = function() {
+    showFormatSelection('Attiékè Poisson Alloko', [
+        { name: 'Petit', price: 1000, icon: '🍽️' },
+        { name: 'Moyen', price: 1500, icon: '🥘' },
+        { name: 'Grand', price: 2000, icon: '🍲' }
+    ], 'E');
+};
+
+window.selectAttiekePouletAlloko = function() {
+    showFormatSelection('Attiékè Poulet Alloko', [
+        { name: 'Petit', price: 1500, icon: '🍽️' },
+        { name: 'Moyen', price: 2000, icon: '🥘' },
+        { name: 'Grand', price: 2500, icon: '🍲' }
+    ], 'E');
+};
+
+window.selectAttiekePoulet = function() {
+    showFormatSelection('Attiékè Poulet', [
+        { name: 'Petit', price: 1000, icon: '🍽️' },
+        { name: 'Moyen', price: 1500, icon: '🥘' },
+        { name: 'Grand', price: 2000, icon: '🍲' }
+    ], 'E');
+};
+
+window.selectGarba = function() {
+    showFormatSelection('Garba', [
+        { name: 'Petit', price: 500, icon: '🍽️' },
+        { name: 'Moyen', price: 1000, icon: '🥘' },
+        { name: 'Grand', price: 1500, icon: '🍲' },
+        { name: 'XXL', price: 2000, icon: '🥣' }
+    ], 'E');
+};
+
+function showFormatSelection(dishName, formats, category) {
+    document.getElementById('selection-modal-title').textContent = dishName;
+    document.getElementById('selection-modal-subtitle').textContent = 'Choisissez votre format';
+    const optionsContainer = document.getElementById('selection-options');
+    optionsContainer.innerHTML = '';
+    formats.forEach(format => {
+        const optionDiv = document.createElement('div');
+        optionDiv.style.cssText = `display:flex;align-items:center;justify-content:space-between;padding:16px;background:var(--background);border-radius:var(--radius-md);margin-bottom:12px;cursor:pointer;transition:all 0.3s ease;`;
+        optionDiv.onmouseover = () => optionDiv.style.background = 'rgba(255,78,0,0.1)';
+        optionDiv.onmouseout = () => optionDiv.style.background = 'var(--background)';
+        optionDiv.onclick = () => {
+            openQuantityModal(`${dishName} (${format.name})`, format.price, category, (quantity) => {
+                addToCart(`${dishName} (${format.name})`, format.price, category, quantity);
+                closeSelectionModal();
+            });
+        };
+        optionDiv.innerHTML = `<div style="display:flex;align-items:center;gap:16px;"><div style="font-size:32px;">${format.icon}</div><div><div style="font-weight:600;">${format.name}</div></div></div><div style="font-weight:700;color:var(--primary);">${format.price} FCFA</div>`;
+        optionsContainer.appendChild(optionDiv);
+    });
+    document.getElementById('selection-modal').classList.add('show');
+}
+
+window.closeSelectionModal = function() {
+    const modal = document.getElementById('selection-modal');
+    if (modal) modal.classList.remove('show');
+};
+
+// ========================================
+// HEURES & ADS
+// ========================================
+function checkOrderingHours() {
+    const now = new Date();
+    const abidjanTime = new Date(now.toLocaleString("en-US", {timeZone: "Africa/Abidjan"}));
+    const hour = abidjanTime.getHours();
+    const minutes = abidjanTime.getMinutes();
+    const timeAlert = document.getElementById('time-alert');
+    if (!timeAlert) return;
+    if (hour >= 0 && hour < 10) {
+        timeAlert.innerHTML = `⚡ URGENT : Commandez AVANT 10H pour un retrait IMMÉDIAT ! Il reste ${9-hour}h${60-minutes<10?'0':''}${60-minutes}min`;
+        timeAlert.classList.add('urgent');
+        timeAlert.style.display = 'block';
+    } else if (hour >= 10) {
+        timeAlert.innerHTML = `⏰ Commandes après 10H traitées pour DEMAIN - Retrait au stand du groupe Express`;
+        timeAlert.classList.remove('urgent');
+        timeAlert.style.display = 'block';
+    }
+}
+
+function slideAds(direction) {
+    const slider = document.getElementById('ads-slider');
+    if (!slider) return;
+    const totalAds = 3;
+    if (direction === 'next') {
+        currentAdIndex = (currentAdIndex + 1) % totalAds;
+    } else {
+        currentAdIndex = (currentAdIndex - 1 + totalAds) % totalAds;
+    }
+    slider.style.transform = `translateX(-${currentAdIndex * 100}%)`;
+}
+
+// ========================================
+// MODAL CLIENT
+// ========================================
+function openCustomerInfoModal() {
+    const modal = document.getElementById('customer-info-modal');
+    const summaryItems = document.getElementById('summary-items');
+    const summaryTotal = document.getElementById('summary-total');
+    if (!modal || !summaryItems || !summaryTotal) return;
+    const itemsList = cart.map(item => `${item.qty}x ${item.name}`).join(', ');
+    summaryItems.textContent = itemsList;
+    summaryTotal.textContent = `${total.toLocaleString()} FCFA`;
+    const nameInput = document.getElementById('customer-name-input');
+    const establishmentInput = document.getElementById('customer-establishment-input');
+    const whatsappInput = document.getElementById('customer-whatsapp-input');
+    if (nameInput) nameInput.value = '';
+    if (establishmentInput) establishmentInput.value = '';
+    if (whatsappInput) whatsappInput.value = '';
+    modal.classList.add('show');
+    setTimeout(() => { if (nameInput) nameInput.focus(); }, 400);
+}
+
+window.closeCustomerInfoModal = function() {
+    const modal = document.getElementById('customer-info-modal');
+    if (modal) modal.classList.remove('show');
+};
+
+// ========================================
+// SOUMISSION COMMANDE
+// ========================================
+const customerInfoForm = document.getElementById('customer-info-form');
+if (customerInfoForm) {
+    customerInfoForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const nameInput = document.getElementById('customer-name-input');
+        const establishmentInput = document.getElementById('customer-establishment-input');
+        const whatsappInput = document.getElementById('customer-whatsapp-input');
+        if (!nameInput || !establishmentInput || !whatsappInput) return;
+        const customerName = nameInput.value.trim();
+        const establishment = establishmentInput.value;
+        const whatsappNumber = whatsappInput.value.trim();
+        if (!customerName || customerName.length < 2) {
+            alert("❌ Veuillez entrer un nom valide");
+            nameInput.focus();
+            return;
+        }
+        if (!establishment) {
+            alert("❌ Veuillez sélectionner votre établissement");
+            establishmentInput.focus();
+            return;
+        }
+        const cleanNumber = whatsappNumber.replace(/\s+/g, '');
+        if (cleanNumber.length < 8) {
+            alert("❌ Numéro WhatsApp invalide. Veuillez réessayer.");
+            whatsappInput.focus();
+            return;
+        }
+        const submitBtn = this.querySelector('.customer-submit-btn');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ Envoi en cours...';
+        }
+        const now = new Date();
+        const abidjanTime = new Date(now.toLocaleString("en-US", {timeZone: "Africa/Abidjan"}));
+        const hour = abidjanTime.getHours();
+        try {
+            const order = {
+                customer: {
+                    name: customerName,
+                    whatsapp: cleanNumber,
+                    establishment: establishment === 'utt-loko' ? 'UTT Loko Zone 4' : 'La Fontaine'
+                },
+                items: [...cart],
+                total,
+                timestamp: new Date().toISOString(),
+                deliveryDate: hour >= 10 ? 'lendemain' : 'aujourdhui'
+            };
+            const targetDb = establishment === 'la-fontaine' ? dbFontaine : db;
+            const docRef = await addDoc(collection(targetDb, 'orders'), order);
+            const orderCode = `#GE${cart[0].category}${Date.now().toString().slice(-6)}`;
+            customerOrders.push({
+                code: orderCode,
+                summary: cart.map(i => `${i.qty}x ${i.name}`).join(', '),
+                total,
+                establishment: order.customer.establishment,
+                date: new Date().toLocaleString()
+            });
+            localStorage.setItem('customerOrders', JSON.stringify(customerOrders));
+            closeCustomerInfoModal();
+            cart = [];
+            updateCart();
+            updateCartBadge();
+            toggleCart();
+            const establishmentName = establishment === 'utt-loko' ? 'UTT Loko Zone 4' : 'La Fontaine';
+            const successMessage = document.createElement('div');
+            successMessage.style.cssText = `position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:white;padding:32px;border-radius:var(--radius-xl);box-shadow:var(--shadow-lg);z-index:4000;text-align:center;max-width:400px;width:90%;`;
+            successMessage.innerHTML = `<div style="font-size:64px;margin-bottom:16px;">🎉</div><h3 style="font-size:22px;font-weight:700;margin-bottom:12px;color:var(--text-primary);">Commande envoyée !</h3><div style="background:var(--background);padding:16px;border-radius:var(--radius-md);margin-bottom:16px;"><div style="font-size:18px;font-weight:700;color:var(--primary);margin-bottom:8px;">${orderCode}</div><div style="font-size:14px;color:var(--text-secondary);margin-bottom:4px;">Client: ${customerName}</div><div style="font-size:14px;color:var(--text-secondary);">📍 ${establishmentName}</div></div><div style="padding:16px;background:${hour<10?'linear-gradient(135deg,rgba(40,167,69,0.1),rgba(52,206,87,0.1))':'linear-gradient(135deg,rgba(255,152,0,0.1),rgba(245,124,0,0.1))'};border-radius:var(--radius-md);margin-bottom:20px;"><div style="font-size:16px;font-weight:600;margin-bottom:4px;">${hour<10?'🚀 Retrait IMMÉDIAT':'📅 Retrait DEMAIN'}</div><div style="font-size:13px;color:var(--text-secondary);">Au stand du groupe Express à 12H00</div></div><button onclick="this.parentElement.remove()" style="background:var(--gradient-primary);color:white;border:none;padding:12px 32px;border-radius:var(--radius-md);font-weight:600;cursor:pointer;font-size:15px;">Super ! 👍</button>`;
+            document.body.appendChild(successMessage);
+            setTimeout(() => { if (successMessage.parentElement) { successMessage.remove(); } }, 8000);
+        } catch (error) {
+            console.error('Erreur:', error);
+            alert("❌ Erreur lors de l'envoi. Vérifiez votre connexion.");
+        } finally {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '✓ Confirmer la commande';
+            }
+        }
+    });
+}
+
+const orderForm = document.getElementById('order-form');
+if (orderForm) {
+    orderForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        if (cart.length === 0) {
+            alert("Votre panier est vide !");
+            return;
+        }
+        openCustomerInfoModal();
+    });
+}
+
+// ========================================
+// NOUVEAUX PLATS
+// ========================================
+async function loadNewDishes() {
+    try {
+        const newDishesQuery = query(collection(db, 'nouveaux_plats'), orderBy('timestamp', 'desc'), limit(10));
+        const snapshot = await getDocs(newDishesQuery);
+        if (snapshot.empty) {
+            console.log('Aucun nouveau plat trouvé');
+            return;
+        }
+        const container = document.querySelector('.container');
+        if (!container) return;
+        const newDishesSection = document.createElement('div');
+        newDishesSection.className = 'category-card';
+        newDishesSection.innerHTML = `<div class="category-header"><div class="category-icon">🆕</div><div class="category-info"><h3>Nouveaux Plats</h3><p>Découvrez nos dernières créations</p></div></div><div class="food-grid" id="new-dishes-grid"></div>`;
+        container.insertBefore(newDishesSection, container.firstChild);
+        const newDishesGrid = document.getElementById('new-dishes-grid');
+        snapshot.forEach(doc => {
+            const dish = doc.data();
+            const dishCard = document.createElement('div');
+            dishCard.className = 'food-item';
+            dishCard.innerHTML = `<div class="food-image-wrapper"><img src="${dish.image||'image/default.jpg'}" alt="${dish.name}" class="food-item-image"></div><div class="food-item-content"><div class="food-title">${dish.name}</div><div class="food-description">${dish.description||'Nouveau plat délicieux'}</div><div class="food-footer"><div class="food-price">${dish.price} FCFA</div><button class="add-to-cart-btn" onclick="promptAddToCart('${dish.name.replace(/'/g,"\\'")}',${dish.price},'${dish.category||'N'}')">🛒 Ajouter</button></div></div>`;
+            newDishesGrid.appendChild(dishCard);
+        });
+        console.log(`${snapshot.size} nouveaux plats chargés`);
+    } catch (error) {
+        console.error('Erreur lors du chargement des nouveaux plats:', error);
+    }
+}
+
+// ========================================
+// PWA
+window.requestNotificationPermission = async function() {
+    try {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+            alert('✅ Notifications activées!');
+        } else {
+            alert('❌ Notifications refusées');
+        }
+    } catch (error) {
+        console.error('Erreur notifications:', error);
+        alert('❌ Erreur lors de l\'activation des notifications');
+    }
+};
+
+window.triggerInstallPrompt = function() {
+    alert('📱 Pour installer l\'application:\n\n• Chrome/Edge: Menu ⋮ > "Ajouter à l\'écran d\'accueil"\n• Safari: Partager 📤 > "Sur l\'écran d\'accueil"');
+};
+
+// ========================================
+// ÉVÉNEMENTS DOM
+// ========================================
+document.addEventListener('DOMContentLoaded', function() {
+    // Bouton diminuer quantité
+    const decreaseBtn = document.getElementById('quantity-decrease');
+    if (decreaseBtn) {
+        decreaseBtn.addEventListener('click', function() {
+            const input = document.getElementById('quantity-value');
+            if (!input) return;
+            
+            let value = parseInt(input.value) || 1;
+            if (value > 1) {
+                input.value = value - 1;
+                updateQuantityTotal();
+            }
+        });
+    }
+
+    // Bouton augmenter quantité
+    const increaseBtn = document.getElementById('quantity-increase');
+    if (increaseBtn) {
+        increaseBtn.addEventListener('click', function() {
+            const input = document.getElementById('quantity-value');
+            if (!input) return;
+            
+            let value = parseInt(input.value) || 1;
+            if (value < 99) {
+                input.value = value + 1;
+                updateQuantityTotal();
+            }
+        });
+    }
+
+    // Bouton confirmer quantité
+    const confirmBtn = document.getElementById('quantity-confirm');
+    if (confirmBtn) {
+        confirmBtn.addEventListener('click', function() {
+            const input = document.getElementById('quantity-value');
+            if (!input) return;
+            
+            const quantity = parseInt(input.value) || 1;
+            if (currentQuantityData.callback) {
+                currentQuantityData.callback(quantity);
+            }
+            closeQuantityModal();
+        });
+    }
+
+    // Fermer modale quantité en cliquant à l'extérieur
+    const quantityModal = document.getElementById('quantity-modal');
+    if (quantityModal) {
+        quantityModal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeQuantityModal();
+            }
+        });
+    }
+
+    // Fermer modale client en cliquant à l'extérieur
+    const customerModal = document.getElementById('customer-info-modal');
+    if (customerModal) {
+        customerModal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeCustomerInfoModal();
+            }
+        });
+    }
+});
+
+// Fermer toutes les modales en cliquant à l'extérieur
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('modal-overlay')) {
+        e.target.classList.remove('show');
+    }
+});
+
+// ========================================
+// INITIALISATION
+// ========================================
+checkOrderingHours();
+setInterval(checkOrderingHours, 60000);
+setInterval(() => slideAds('next'), 5000);
+loadNewDishes();
+</script>
