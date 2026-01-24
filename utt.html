@@ -31,14 +31,14 @@
         }
 
         :root {
-            --primary: #000000;
-            --primary-light: #100f0f;
-            --primary-dark: #280059;
+            --primary: #ff4e00;
+            --primary-light: #ff6b2b;
+            --primary-dark: #cc3e00;
             --secondary: #131315;
             --accent: #f10505;
-            --gradient: linear-gradient(45deg, #f3ecec, #d61215, #ffffff, #ff0004, #b62a2a, #d20d0d, #e2d9da, #f0eeea);
+            --gradient: linear-gradient(135deg, #ff4e00, #ff6b9d);
             --surface: #FFFFFF;
-            --background: #FAFAFA;
+            --background: #e0e5ec;
             --on-surface: #262626;
             --on-surface-light: #8E8E8E;
             --border: #DBDBDB;
@@ -46,6 +46,11 @@
             --shadow-lg: 0 8px 25px rgba(0,0,0,0.15);
             --radius: 12px;
             --radius-xl: 24px;
+            
+            /* Neumorphisme */
+            --neu-shadow: 9px 9px 16px rgba(163, 177, 198, 0.6), -9px -9px 16px rgba(255, 255, 255, 0.5);
+            --neu-shadow-inset: inset 6px 6px 10px rgba(163, 177, 198, 0.6), inset -6px -6px 10px rgba(255, 255, 255, 0.5);
+            --neu-shadow-sm: 4px 4px 8px rgba(163, 177, 198, 0.4), -4px -4px 8px rgba(255, 255, 255, 0.5);
         }
 
         html {
@@ -66,9 +71,10 @@
             position: relative;
         }
 
+        /* ===== ADS SECTION ===== */
         .ads-section {
-            background: var(--surface);
-            border-bottom: 1px solid var(--border);
+            background: var(--background);
+            border-bottom: none;
             padding: 16px 0;
             overflow: hidden;
         }
@@ -76,10 +82,10 @@
         .ads-container {
             position: relative;
             height: 200px;
-            border-radius: var(--radius);
+            border-radius: 20px;
             overflow: hidden;
             margin: 0 16px;
-            box-shadow: var(--shadow);
+            box-shadow: var(--neu-shadow);
         }
 
         .ads-slider {
@@ -135,14 +141,70 @@
             100% { transform: translateX(-50%); }
         }
 
+        .ads-nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .ads-nav-btn:hover {
+            background: rgba(0, 0, 0, 0.8);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .ads-prev {
+            left: 10px;
+        }
+
+        .ads-next {
+            right: 10px;
+        }
+
+        .scroll-dots {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px 0;
+            margin-top: 8px;
+        }
+
+        .scroll-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #DBDBDB;
+            transition: all 0.3s ease;
+        }
+
+        .scroll-dot.active {
+            background: linear-gradient(45deg, #ff4e00, #ff6b9d);
+            width: 24px;
+            border-radius: 4px;
+        }
+
+        /* ===== HEADER ===== */
         .header {
-            background: var(--surface);
-            border-bottom: 1px solid var(--border);
+            background: var(--background);
+            border-bottom: none;
             padding: 12px 0;
             position: sticky;
             top: 0;
             z-index: 100;
             backdrop-filter: blur(10px);
+            box-shadow: var(--neu-shadow-sm);
         }
 
         .header-content {
@@ -170,8 +232,8 @@
             object-fit: contain;
             border-radius: 10px;
             background: #fff;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.13);
-            border: 2px solid #ff4e00;
+            box-shadow: var(--neu-shadow-sm);
+            border: none;
         }
 
         .logo-text {
@@ -191,9 +253,10 @@
             overflow: visible;
         }
 
+        /* ===== CART ICON WITH ANIMATION ===== */
         .cart-icon {
             position: relative;
-            background: none;
+            background: var(--background);
             border: none;
             font-size: 22px;
             cursor: pointer;
@@ -206,11 +269,54 @@
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
+            box-shadow: var(--neu-shadow-sm);
+            animation: cartPulse 2s ease-in-out infinite;
+        }
+
+        .cart-icon::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            border-radius: 50%;
+            border: 2px solid var(--primary);
+            animation: cartRing 2s ease-in-out infinite;
+            opacity: 0;
+        }
+
+        @keyframes cartPulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: var(--neu-shadow-sm);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 6px 6px 12px rgba(255, 78, 0, 0.3), -6px -6px 12px rgba(255, 255, 255, 0.8);
+            }
+        }
+
+        @keyframes cartRing {
+            0% {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1.4);
+                opacity: 0;
+            }
         }
 
         .cart-icon:hover {
-            background: var(--background);
             transform: scale(1.1);
+        }
+
+        .cart-icon:active {
+            box-shadow: var(--neu-shadow-inset);
         }
 
         .cart-badge {
@@ -229,6 +335,16 @@
             font-weight: 600;
             min-width: 18px;
             border: 2px solid white;
+            animation: badgeBounce 1s ease-in-out infinite;
+        }
+
+        @keyframes badgeBounce {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.2);
+            }
         }
 
         .contact-service-btn {
@@ -256,6 +372,7 @@
             box-shadow: 0 4px 12px rgba(37, 211, 102, 0.5);
         }
 
+        /* ===== TIME ALERT ===== */
         .time-alert {
             background: linear-gradient(135deg, #ff6b6b, #ff8e53);
             color: white;
@@ -289,6 +406,143 @@
             }
         }
 
+        /* ===== NAVIGATION MODERNE COMPACTE ===== */
+        .nav-section-modern {
+            background: var(--background);
+            padding: 1rem 0;
+            border-bottom: none;
+        }
+
+        .nav-buttons-grid {
+            display: grid;
+            gap: 0.75rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 0.75rem;
+        }
+
+        .nav-btn {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.75rem 0.5rem;
+            background: var(--background);
+            border: none;
+            border-radius: 15px;
+            text-decoration: none;
+            color: var(--on-surface);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            box-shadow: var(--neu-shadow-sm);
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .nav-btn:active {
+            box-shadow: var(--neu-shadow-inset);
+        }
+
+        .nav-btn.shopping,
+        .nav-btn.annonce {
+            animation: buttonGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes buttonGlow {
+            0%, 100% {
+                box-shadow: var(--neu-shadow-sm);
+            }
+            50% {
+                box-shadow: 6px 6px 12px rgba(255, 78, 0, 0.4), -6px -6px 12px rgba(255, 255, 255, 0.8);
+            }
+        }
+
+        .nav-btn-icon {
+            font-size: 1.75rem;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+
+        .nav-btn-text {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-align: center;
+            line-height: 1.1;
+        }
+
+        .nav-btn-badge {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: linear-gradient(135deg, #ff3333, #ff6666);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(255, 0, 0, 0.3);
+            animation: badgePulse 2s infinite ease-in-out;
+        }
+
+        @keyframes badgePulse {
+            0%, 100% { 
+                transform: scale(1);
+                background: #ff0000;
+            }
+            50% { 
+                transform: scale(1.2);
+                background: #ff3333;
+            }
+        }
+
+        /* ===== RESPONSIVE NAVIGATION ===== */
+        @media (max-width: 768px) {
+            .nav-buttons-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 0.5rem;
+                padding: 0 0.5rem;
+            }
+            
+            .nav-btn {
+                padding: 0.65rem 0.25rem;
+                min-height: auto;
+            }
+            
+            .nav-btn-icon {
+                font-size: 1.5rem;
+            }
+            
+            .nav-btn-text {
+                font-size: 0.65rem;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .nav-buttons-grid {
+                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+                gap: 1rem;
+            }
+            
+            .nav-btn {
+                padding: 1.25rem 1rem;
+            }
+            
+            .nav-btn-icon {
+                font-size: 2rem;
+            }
+            
+            .nav-btn-text {
+                font-size: 0.85rem;
+            }
+        }
+
+        /* ===== OLD NAVIGATION (KEPT FOR COMPATIBILITY) ===== */
         .nav-section {
             padding: 16px 0;
             background: var(--surface);
@@ -481,1005 +735,1509 @@
             animation: badgePulse 2s infinite ease-in-out;
         }
 
-        @keyframes badgePulse {
-            0%, 100% { 
-                transform: scale(1);
-                background: #ff0000;
-            }
-            50% { 
-                transform: scale(1.2);
-                background: #ff3333;
-            }
-        }
-
+        /* ===== CONTAINER & MENU SECTION ===== */
         .container {
             max-width: 975px;
             margin: 0 auto;
             padding: 16px;
         }
 
+        .menu-section {
+            padding: 1.5rem 0;
+            position: relative;
+        }
+
+        .section-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 0.5rem;
+            color: var(--on-surface);
+            animation: titlePulse 3s ease-in-out infinite;
+        }
+
+        @keyframes titlePulse {
+            0%, 100% {
+                transform: scale(1);
+                color: var(--on-surface);
+            }
+            50% {
+                transform: scale(1.02);
+                color: var(--primary);
+            }
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: var(--on-surface-light);
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        /* ===== MENU INDICATOR ===== */
+        .menu-indicator {
+            text-align: center;
+            padding: 1rem 0;
+            font-size: 2rem;
+            animation: bounceDown 2s ease-in-out infinite;
+        }
+
+        @keyframes bounceDown {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-15px);
+            }
+            60% {
+                transform: translateY(-7px);
+            }
+        }
+
+        /* ===== CATEGORY BLOCKS ===== */
+        .category-block {
+            margin-bottom: 2.5rem;
+        }
+
+        .category-title {
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--on-surface);
+            padding: 0.75rem 1rem;
+            background: var(--background);
+            border-radius: 15px;
+            box-shadow: var(--neu-shadow-sm);
+        }
+
+        .category-icon {
+            font-size: 1.75rem;
+        }
+
+        /* ===== DISHES GRID ===== */
+        .dishes-modern-grid {
+            display: grid;
+            gap: 1.25rem;
+        }
+
+        .dish-card-modern {
+            background: var(--background);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--neu-shadow);
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .dish-card-modern:hover {
+            transform: translateY(-5px);
+            box-shadow: 12px 12px 20px rgba(163, 177, 198, 0.6), -12px -12px 20px rgba(255, 255, 255, 0.5);
+        }
+
+        .dish-card-modern:active {
+            box-shadow: var(--neu-shadow-inset);
+        }
+
+        .dish-image-wrapper {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1;
+            overflow: hidden;
+            background: var(--background);
+        }
+
+        .dish-image-modern {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .dish-card-modern:hover .dish-image-modern {
+            transform: scale(1.1);
+        }
+
+        .dish-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .dish-card-modern:hover .dish-overlay {
+            opacity: 1;
+        }
+
+        .quick-add-btn {
+            background: var(--background);
+            color: var(--primary);
+            border: none;
+            padding: 0.75rem 1.25rem;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+            box-shadow: var(--neu-shadow-sm);
+        }
+
+        .dish-card-modern:hover .quick-add-btn {
+            transform: translateY(0);
+        }
+
+        .quick-add-btn:hover {
+            box-shadow: var(--neu-shadow);
+        }
+
+        .quick-add-btn:active {
+            box-shadow: var(--neu-shadow-inset);
+        }
+
+        .dish-content-modern {
+            padding: 1rem;
+        }
+
+        .dish-name-modern {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 0.35rem;
+            color: var(--on-surface);
+            line-height: 1.2;
+        }
+
+        .dish-desc-modern {
+            font-size: 0.75rem;
+            color: var(--on-surface-light);
+            margin-bottom: 0.75rem;
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .dish-footer-modern {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .dish-price-modern {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .add-cart-btn-modern {
+            background: var(--background);
+            color: var(--primary);
+            border: none;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            box-shadow: var(--neu-shadow-sm);
+            animation: buttonPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes buttonPulse {
+            0%, 100% {
+                box-shadow: var(--neu-shadow-sm);
+            }
+            50% {
+                box-shadow: 6px 6px 12px rgba(255, 78, 0, 0.3), -6px -6px 12px rgba(255, 255, 255, 0.8);
+            }
+        }
+
+        .add-cart-btn-modern:hover {
+            transform: scale(1.1);
+        }
+
+        .add-cart-btn-modern:active {
+            transform: scale(0.95);
+            box-shadow: var(--neu-shadow-inset);
+        }
+
+        /* ===== RESPONSIVE DISHES GRID ===== */
+        @media (max-width: 480px) {
+            .dishes-modern-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.75rem;
+            }
+            
+            .dish-content-modern {
+                padding: 0.75rem;
+            }
+            
+            .add-cart-btn-modern {
+                width: 38px;
+                height: 38px;
+                font-size: 1.1rem;
+            }
+            
+            .category-title {
+                font-size: 1.15rem;
+                padding: 0.5rem 0.75rem;
+                margin-bottom: 0.75rem;
+            }
+            
+            .category-icon {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (min-width: 481px) and (max-width: 768px) {
+            .dishes-modern-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 1rem;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .dishes-modern-grid {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                gap: 1.5rem;
+            }
+        }
+
+        /* ===== OLD FOOD GRID (KEPT FOR COMPATIBILITY) ===== */
         .main-feed {
             display: flex;
             flex-direction: column;
             gap: 24px;
         }
 
-        .post-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            overflow: hidden;
-            margin-bottom: 16px;
-            animation: slideUp 0.6s ease-out;
-        }
+        .post-card {background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+        margin-bottom: 16px;
+        animation: slideUp 0.6s ease-out;
+    }
 
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
         }
-
-        .post-header {
-            padding: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .post-category {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .category-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: var(--gradient);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 16px;
-            font-weight: 600;
-        }
-
-        .category-info h3 {
-            font-size: 16px;
-            font-weight: 600;
-            margin: 0;
-        }
-
-        .category-info p {
-            font-size: 14px;
-            color: var(--on-surface-light);
-            margin: 0;
-        }
-
-        .food-grid {
-            display: grid;
-            gap: 1px;
-            background: var(--border);
-        }
-
-        @media (max-width: 480px) {
-            .food-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (min-width: 481px) and (max-width: 768px) {
-            .food-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-
-        @media (min-width: 769px) {
-            .food-grid {
-                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            }
-        }
-
-        .food-item {
-            position: relative;
-            background: var(--surface);
-            display: flex;
-            flex-direction: column;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .food-item:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .food-item:active {
-            transform: scale(0.98);
-        }
-
-        .food-item-image {
-            width: 100%;
-            aspect-ratio: 1;
-            object-fit: cover;
-            transition: all 0.3s ease;
-            cursor: zoom-in;
-        }
-
-        .food-item-image:hover {
-            opacity: 0.9;
-        }
-
-        .food-item-content {
-            padding: 12px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .food-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--on-surface);
-            line-height: 1.3;
-        }
-
-        .food-description {
-            font-size: 12px;
-            color: var(--on-surface-light);
-            flex: 1;
-            line-height: 1.4;
-        }
-
-        .food-price {
-            font-size: 16px;
-            font-weight: 700;
-            color: var(--primary);
-            margin: 8px 0;
-        }
-
-        .add-to-cart-btn {
-            background: var(--gradient);
-            color: white;
-            border: none;
-            padding: 12px 16px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            width: 100%;
-            min-height: 44px;
-        }
-
-        .add-to-cart-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .add-to-cart-btn:active {
+        to {
+            opacity: 1;
             transform: translateY(0);
         }
+    }
 
-        .add-to-cart-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
+    .post-header {
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .post-category {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .category-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--gradient);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    .category-info h3 {
+        font-size: 16px;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .category-info p {
+        font-size: 14px;
+        color: var(--on-surface-light);
+        margin: 0;
+    }
+
+    .food-grid {
+        display: grid;
+        gap: 1px;
+        background: var(--border);
+    }
+
+    @media (max-width: 480px) {
+        .food-grid {
+            grid-template-columns: repeat(2, 1fr);
         }
+    }
 
-        .post-actions {
-            padding: 16px;
-            border-top: 1px solid var(--border);
+    @media (min-width: 481px) and (max-width: 768px) {
+        .food-grid {
+            grid-template-columns: repeat(3, 1fr);
         }
+    }
 
-        .modal, .cart-modal, .degue-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+    @media (min-width: 769px) {
+        .food-grid {
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
         }
+    }
 
-        .modal.show, .cart-modal.show, .degue-modal.show {
-            display: flex;
+    .food-item {
+        position: relative;
+        background: var(--surface);
+        display: flex;
+        flex-direction: column;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .food-item:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .food-item:active {
+        transform: scale(0.98);
+    }
+
+    .food-item-image {
+        width: 100%;
+        aspect-ratio: 1;
+        object-fit: cover;
+        transition: all 0.3s ease;
+        cursor: zoom-in;
+    }
+
+    .food-item-image:hover {
+        opacity: 0.9;
+    }
+
+    .food-item-content {
+        padding: 12px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .food-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--on-surface);
+        line-height: 1.3;
+    }
+
+    .food-description {
+        font-size: 12px;
+        color: var(--on-surface-light);
+        flex: 1;
+        line-height: 1.4;
+    }
+
+    .food-price {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--primary);
+        margin: 8px 0;
+    }
+
+    .add-to-cart-btn {
+        background: var(--gradient);
+        color: white;
+        border: none;
+        padding: 12px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+        min-height: 44px;
+    }
+
+    .add-to-cart-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .add-to-cart-btn:active {
+        transform: translateY(0);
+    }
+
+    .add-to-cart-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .post-actions {
+        padding: 16px;
+        border-top: 1px solid var(--border);
+    }
+
+    /* ===== MODALS ===== */
+    .modal, .cart-modal, .degue-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .modal.show, .cart-modal.show, .degue-modal.show {
+        display: flex;
+    }
+
+    .modal-content, .cart-modal-content, .degue-modal-content {
+        background: var(--surface);
+        border-radius: var(--radius-xl);
+        width: 100%;
+        max-width: 500px;
+        max-height: 90vh;
+        overflow-y: auto;
+        position: relative;
+    }
+
+    .modal-header {
+        padding: 2rem;
+        text-align: center;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .modal-header h2 {
+        margin-bottom: 0.5rem;
+        font-size: 1.5rem;
+    }
+
+    .close-btn, .close-cart-btn {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        background: rgba(0, 0, 0, 0.1);
+        border: none;
+        color: var(--on-surface);
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    .cart-modal-header {
+        padding: 2rem;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .cart-modal-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .cart-modal-body {
+        padding: 2rem;
+    }
+
+    .cart-items {
+        max-height: 300px;
+        overflow-y: auto;
+        margin-bottom: 16px;
+    }
+
+    .cart-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .cart-item:last-child {
+        border-bottom: none;
+    }
+
+    .cart-item-image {
+        width: 48px;
+        height: 48px;
+        border-radius: 8px;
+        object-fit: cover;
+    }
+
+    .cart-item-info {
+        flex: 1;
+    }
+
+    .cart-item-name {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+
+    .cart-item-price {
+        font-size: 12px;
+        color: var(--on-surface-light);
+    }
+
+    .cart-total {
+        font-size: 1.25rem;
+        font-weight: 700;
+        text-align: center;
+        margin: 1rem 0;
+        padding: 1rem;
+        background: var(--background);
+        border-radius: 8px;
+    }
+
+    .remove-btn {
+        background: none;
+        border: none;
+        color: var(--on-surface-light);
+        cursor: pointer;
+        padding: 8px;
+        font-size: 20px;
+        min-width: 44px;
+        min-height: 44px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .remove-btn:hover {
+        background: var(--background);
+        color: var(--accent);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 48px 16px;
+        color: var(--on-surface-light);
+    }
+
+    .empty-state-icon {
+        font-size: 48px;
+        margin-bottom: 16px;
+    }
+
+    .checkout-btn {
+        width: 100%;
+        background: var(--gradient);
+        color: white;
+        border: none;
+        padding: 16px;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        min-height: 48px;
+    }
+
+    .checkout-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .checkout-btn:active {
+        transform: scale(0.98);
+    }
+
+    .degue-modal-header {
+        padding: 2rem;
+        text-align: center;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .degue-modal-header h3 {
+        margin-bottom: 0.5rem;
+    }
+
+    .degue-options {
+        padding: 1rem 2rem;
+    }
+
+    .degue-option {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        margin-bottom: 0.5rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .degue-option:hover {
+        background: var(--background);
+        border-color: var(--primary);
+    }
+
+    .degue-option-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .degue-option-icon {
+        font-size: 1.5rem;
+    }
+
+    .degue-option-details h4 {
+        font-size: 1rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .degue-option-details p {
+        font-size: 0.875rem;
+        color: var(--on-surface-light);
+        margin: 0;
+    }
+
+    .degue-option-price {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--primary);
+    }
+
+    /* ===== SELECTION MODAL ===== */
+    .selection-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.85);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        backdrop-filter: blur(5px);
+    }
+
+    .selection-modal.show {
+        display: flex;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .selection-modal-content {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        border-radius: 24px;
+        width: 100%;
+        max-width: 500px;
+        max-height: 85vh;
+        overflow-y: auto;
+        position: relative;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .selection-modal-header {
+        padding: 2rem;
+        text-align: center;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        background: linear-gradient(135deg, rgba(254, 44, 85, 0.1), rgba(255, 107, 157, 0.1));
+    }
+
+    .selection-modal-header h3 {
+        margin-bottom: 0.5rem;
+        font-size: 1.5rem;
+        color: white;
+        background: linear-gradient(45deg, #FE2C55, #FF6B9D);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .selection-modal-header p {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.9rem;
+    }
+
+    .selection-options {
+        padding: 1.5rem 2rem;
+    }
+
+    .selection-option {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1.25rem;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        margin-bottom: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.05);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .selection-option::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .selection-option:hover::before {
+        left: 100%;
+    }
+
+    .selection-option:hover {
+        background: linear-gradient(135deg, rgba(254, 44, 85, 0.2), rgba(255, 107, 157, 0.2));
+        border-color: #FE2C55;
+        transform: translateX(5px);
+        box-shadow: 0 8px 25px rgba(254, 44, 85, 0.3);
+    }
+
+    .selection-option:active {
+        transform: scale(0.98);
+    }
+
+    .selection-option-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .selection-option-icon {
+        font-size: 2rem;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    }
+
+    .selection-option-details h4 {
+        font-size: 1rem;
+        font-weight: 600;
+        margin: 0;
+        color: white;
+    }
+
+    .selection-option-details p {
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.6);
+        margin: 0.25rem 0 0 0;
+    }
+
+    .selection-option-price {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #FE2C55;
+        background: rgba(254, 44, 85, 0.1);
+        padding: 0.5rem 1rem;
+        border-radius: 12px;
+        border: 1px solid rgba(254, 44, 85, 0.3);
+    }
+
+    .selection-cancel-btn {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 1rem;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+        font-weight: 600;
+    }
+
+    .selection-cancel-btn:hover {
+        background: rgba(255, 255, 255, 0.15);
+        transform: translateY(-2px);
+    }
+
+    .close-selection-btn {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+    }
+
+    .close-selection-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: rotate(90deg);
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: scale(0.9); }
+        to { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(100px);
         }
-
-        .modal-content, .cart-modal-content, .degue-modal-content {
-            background: var(--surface);
-            border-radius: var(--radius-xl);
-            width: 100%;
-            max-width: 500px;
-            max-height: 90vh;
-            overflow-y: auto;
-            position: relative;
+        to {
+            opacity: 1;
+            transform: translateX(0);
         }
+    }
 
-        .modal-header {
-            padding: 2rem;
-            text-align: center;
-            border-bottom: 1px solid var(--border);
+    @keyframes slideOutRight {
+        from {
+            opacity: 1;
+            transform: translateX(0);
         }
-
-        .modal-header h2 {
-            margin-bottom: 0.5rem;
-            font-size: 1.5rem;
+        to {
+            opacity: 0;
+            transform: translateX(100px);
         }
+    }
 
-        .close-btn, .close-cart-btn {
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            background: rgba(0, 0, 0, 0.1);
-            border: none;
-            color: var(--on-surface);
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 44px;
-            min-height: 44px;
+    /* ===== FLOATING BUTTONS ===== */
+    #notification-button,
+    #download-button {
+        position: fixed;
+        right: 15px;
+        z-index: 999;
+    }
+
+    #notification-button {
+        bottom: 140px;
+    }
+
+    #download-button {
+        bottom: 75px;
+    }
+
+    #notification-button button,
+    #download-button button {
+        background: var(--background);
+        color: var(--primary);
+        border: none;
+        padding: 1rem;
+        border-radius: 50%;
+        width: 56px;
+        height: 56px;
+        cursor: pointer;
+        box-shadow: var(--neu-shadow);
+        font-size: 1.4rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% {
+            transform: translateY(0px);
         }
-
-        .cart-modal-header {
-            padding: 2rem;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+        50% {
+            transform: translateY(-8px);
         }
+    }
 
-        .cart-modal-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin: 0;
+    #notification-button button:hover,
+    #download-button button:hover {
+        transform: scale(1.1) translateY(-3px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    }
+
+    #download-button button:hover {
+        box-shadow: 0 6px 20px rgba(255, 78, 0, 0.6);
+    }
+
+    #notification-button button:active,
+    #download-button button:active {
+        transform: scale(0.95);
+        box-shadow: var(--neu-shadow-inset);
+    }
+
+    /* ===== RESPONSIVE MEDIA QUERIES ===== */
+    @media (max-width: 768px) {
+        .header-content {
+            padding: 0 8px;
+            gap: 6px;
         }
-
-        .cart-modal-body {
-            padding: 2rem;
+        
+        .logo-section {
+            gap: 8px;
         }
-
-        .cart-items {
-            max-height: 300px;
-            overflow-y: auto;
-            margin-bottom: 16px;
-        }
-
-        .cart-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 0;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .cart-item:last-child {
-            border-bottom: none;
-        }
-
-        .cart-item-image {
-            width: 48px;
-            height: 48px;
+        
+        .header-logo {
+            height: 45px;
+            width: 45px;
             border-radius: 8px;
-            object-fit: cover;
         }
-
-        .cart-item-info {
-            flex: 1;
-        }
-
-        .cart-item-name {
+        
+        .logo-text {
             font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 4px;
+        }
+        
+        .header-actions {
+            gap: 6px;
         }
 
-        .cart-item-price {
-            font-size: 12px;
-            color: var(--on-surface-light);
-        }
-
-        .cart-total {
-            font-size: 1.25rem;
-            font-weight: 700;
-            text-align: center;
-            margin: 1rem 0;
-            padding: 1rem;
-            background: var(--background);
-            border-radius: 8px;
-        }
-
-        .remove-btn {
-            background: none;
-            border: none;
-            color: var(--on-surface-light);
-            cursor: pointer;
-            padding: 8px;
+        .cart-icon,
+        .contact-service-btn {
             font-size: 20px;
-            min-width: 44px;
-            min-height: 44px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            padding: 5px;
+            min-width: 38px;
+            min-height: 38px;
+        }
+        
+        .cart-badge {
+            width: 16px;
+            height: 16px;
+            font-size: 10px;
+            min-width: 16px;
         }
 
-        .remove-btn:hover {
-            background: var(--background);
-            color: var(--accent);
+        .ads-container {
+            height: 180px;
+            margin: 0 12px;
+            border-radius: 15px;
         }
 
-        .empty-state {
-            text-align: center;
-            padding: 48px 16px;
-            color: var(--on-surface-light);
+        .ad-item {
+            height: 180px;
         }
-
-        .empty-state-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
+        
+        .ad-overlay {
+            padding: 15px;
         }
-
-        .checkout-btn {
-            width: 100%;
-            background: var(--gradient);
-            color: white;
-            border: none;
-            padding: 16px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            min-height: 48px;
-        }
-
-        .checkout-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .checkout-btn:active {
-            transform: scale(0.98);
-        }
-
-        .degue-modal-header {
-            padding: 2rem;
-            text-align: center;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .degue-modal-header h3 {
-            margin-bottom: 0.5rem;
-        }
-
-        .degue-options {
-            padding: 1rem 2rem;
-        }
-
-        .degue-option {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 1rem;
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            margin-bottom: 0.5rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .degue-option:hover {
-            background: var(--background);
-            border-color: var(--primary);
-        }
-
-        .degue-option-info {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .degue-option-icon {
-            font-size: 1.5rem;
-        }
-
-        .degue-option-details h4 {
-            font-size: 1rem;
-            font-weight: 600;
-            margin: 0;
-        }
-
-        .degue-option-details p {
-            font-size: 0.875rem;
-            color: var(--on-surface-light);
-            margin: 0;
-        }
-
-        .degue-option-price {
-            font-size: 1rem;
-            font-weight: 700;
-            color: var(--primary);
-        }
-
-        .selection-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            backdrop-filter: blur(5px);
-        }
-
-        .selection-modal.show {
-            display: flex;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .selection-modal-content {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            border-radius: 24px;
-            width: 100%;
-            max-width: 500px;
-            max-height: 85vh;
-            overflow-y: auto;
-            position: relative;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .selection-modal-header {
-            padding: 2rem;
-            text-align: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            background: linear-gradient(135deg, rgba(254, 44, 85, 0.1), rgba(255, 107, 157, 0.1));
-        }
-
-        .selection-modal-header h3 {
-            margin-bottom: 0.5rem;
-            font-size: 1.5rem;
-            color: white;
-            background: linear-gradient(45deg, #FE2C55, #FF6B9D);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .selection-modal-header p {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.9rem;
-        }
-
-        .selection-options {
-            padding: 1.5rem 2rem;
-        }
-
-        .selection-option {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 1.25rem;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            margin-bottom: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            background: rgba(255, 255, 255, 0.05);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .selection-option::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            transition: left 0.5s ease;
-        }
-
-        .selection-option:hover::before {
-            left: 100%;
-        }
-
-        .selection-option:hover {
-            background: linear-gradient(135deg, rgba(254, 44, 85, 0.2), rgba(255, 107, 157, 0.2));
-            border-color: #FE2C55;
-            transform: translateX(5px);
-            box-shadow: 0 8px 25px rgba(254, 44, 85, 0.3);
-        }
-
-        .selection-option:active {
-            transform: scale(0.98);
-        }
-
-        .selection-option-info {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .selection-option-icon {
-            font-size: 2rem;
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-        }
-
-        .selection-option-details h4 {
-            font-size: 1rem;
-            font-weight: 600;
-            margin: 0;
-            color: white;
-        }
-
-        .selection-option-details p {
-            font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.6);
-            margin: 0.25rem 0 0 0;
-        }
-
-        .selection-option-price {
+        
+        .ad-title {
             font-size: 1.1rem;
-            font-weight: 700;
-            color: #FE2C55;
-            background: rgba(254, 44, 85, 0.1);
-            padding: 0.5rem 1rem;
-            border-radius: 12px;
-            border: 1px solid rgba(254, 44, 85, 0.3);
+        }
+        
+        .ad-subtitle {
+            font-size: 0.85rem;
         }
 
-        .selection-cancel-btn {
-            width: 100%;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 1rem;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 1rem;
-            font-weight: 600;
+        .nav-story {
+            min-width: 90px;
         }
-
-        .selection-cancel-btn:hover {
-            background: rgba(255, 255, 255, 0.15);
-            transform: translateY(-2px);
-        }
-
-        .close-selection-btn {
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-        }
-
-        .close-selection-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: rotate(90deg);
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+        
+        .container {
+            padding: 12px;
         }
 
         .ads-nav-btn {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(0, 0, 0, 0.5);
-            color: white;
-            border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            font-size: 24px;
-            cursor: pointer;
-            z-index: 10;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-        }
-
-        .ads-nav-btn:hover {
-            background: rgba(0, 0, 0, 0.8);
-            transform: translateY(-50%) scale(1.1);
-        }
-
-        .ads-prev {
-            left: 10px;
-        }
-
-        .ads-next {
-            right: 10px;
+            width: 35px;
+            height: 35px;
+            font-size: 20px;
         }
 
         .scroll-dots {
-            display: flex;
-            justify-content: center;
-            gap: 6px;
-            padding: 8px 0;
-            margin-top: 8px;
+            gap: 5px;
+            padding: 6px 0;
         }
-
+        
         .scroll-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #DBDBDB;
-            transition: all 0.3s ease;
+            width: 6px;
+            height: 6px;
         }
-
+        
         .scroll-dot.active {
-            background: linear-gradient(45deg, #f3ecec, #d61215);
-            width: 24px;
-            border-radius: 4px;
+            width: 20px;
         }
 
-        @media (max-width: 768px) {
-            .header-content {
-                padding: 0 8px;
-                gap: 6px;
-            }
-            
-            .logo-section {
-                gap: 8px;
-            }
-            
-            .header-logo {
-                height: 45px;
-                width: 45px;
-                border-radius: 8px;
-            }
-            
-            .logo-text {
-                font-size: 14px;
-            }
-            
-            .header-actions {
-                gap: 6px;
-            }
+        .section-title {
+            font-size: 1.5rem;
+        }
+        
+        .section-subtitle {
+            font-size: 0.85rem;
+        }
+    }
 
-            .cart-icon,
-            .contact-service-btn {
-                font-size: 20px;
-                padding: 5px;
-                min-width: 38px;
-                min-height: 38px;
-            }
-            
-            .cart-badge {
-                width: 16px;
-                height: 16px;
-                font-size: 10px;
-                min-width: 16px;
-            }
-
-            .ads-container {
-                height: 180px;
-                margin: 0 12px;
-                border-radius: 8px;
-            }
-
-            .ad-item {
-                height: 180px;
-            }
-            
-            .ad-overlay {
-                padding: 15px;
-            }
-            
-            .ad-title {
-                font-size: 1.1rem;
-            }
-            
-            .ad-subtitle {
-                font-size: 0.85rem;
-            }
-
-            .nav-story {
-                min-width: 90px;
-            }
-            
-            .container {
-                padding: 12px;
-            }
-
-            .ads-nav-btn {
-                width: 35px;
-                height: 35px;
-                font-size: 20px;
-            }
-
-            .scroll-dots {
-                gap: 5px;
-                padding: 6px 0;
-            }
-            
-            .scroll-dot {
-                width: 6px;
-                height: 6px;
-            }
-            
-            .scroll-dot.active {
-                width: 20px;
-            }
+    @media (max-width: 480px) {
+        .header-content {
+            padding: 0 6px;
+            gap: 4px;
+        }
+        
+        .logo-section {
+            gap: 6px;
+        }
+        
+        .header-logo {
+            height: 40px;
+            width: 40px;
+            border-radius: 8px;
+        }
+        
+        .logo-text {
+            font-size: 12px;
+            max-width: 100px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .header-actions {
+            gap: 4px;
         }
 
-        @media (max-width: 480px) {
-            .header-content {
-                padding: 0 6px;
-                gap: 4px;
-            }
-            
-            .logo-section {
-                gap: 6px;
-            }
-            
-            .header-logo {
-                height: 40px;
-                width: 40px;
-                border-radius: 8px;
-                border-width: 1.5px;
-            }
-            
-            .logo-text {
-                font-size: 12px;
-                max-width: 100px;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-            
-            .header-actions {
-                gap: 4px;
-            }
-
-            .cart-icon,
-            .contact-service-btn {
-                font-size: 18px;
-                padding: 4px;
-                min-width: 36px;
-                min-height: 36px;
-            }
-            
-            .cart-badge {
-                width: 15px;
-                height: 15px;
-                font-size: 9px;
-                min-width: 15px;
-                top: -3px;
-                right: -3px;
-            }
-
-            .ads-section {
-                padding: 12px 0;
-            }
-            
-            .ads-container {
-                height: 160px;
-                margin: 0 8px;
-                border-radius: 8px;
-            }
-
-            .ad-item {
-                height: 160px;
-                display: block;
-                line-height: 0;
-            }
-            
-            .ad-image {
-                display: block;
-                vertical-align: bottom;
-            }
-
-            .ad-overlay {
-                padding: 12px;
-            }
-            
-            .ad-title {
-                font-size: 0.95rem;
-                margin-bottom: 0.3rem;
-            }
-
-            .ad-subtitle {
-                font-size: 0.75rem;
-                line-height: 1.3;
-            }
-            
-            .ads-nav-btn {
-                width: 32px;
-                height: 32px;
-                font-size: 18px;
-            }
-            
-            .ads-prev {
-                left: 5px;
-            }
-            
-            .ads-next {
-                right: 5px;
-            }
-
-            .modal-content, .cart-modal-content, .degue-modal-content, .selection-modal-content {
-                max-height: 95vh;
-                margin: 10px;
-                border-radius: 16px;
-            }
-            
-            .header {
-                padding: 8px 0;
-            }
-            
-            .nav-section {
-                padding: 12px 0;
-            }
-            
-            .post-header {
-                padding: 12px;
-            }
-            
-            .post-actions {
-                padding: 12px;
-            }
-
-            .food-title {
-                font-size: 13px;
-            }
-            
-            .food-description {
-                font-size: 11px;
-            }
-            
-            .food-price {
-                font-size: 14px;
-            }
-            
-            .add-to-cart-btn {
-                padding: 10px 12px;
-                font-size: 13px;
-            }
-            
-            .food-item-content {
-                padding: 10px;
-            }
+        .cart-icon,
+        .contact-service-btn {
+            font-size: 18px;
+            padding: 4px;
+            min-width: 36px;
+            min-height: 36px;
+        }
+        
+        .cart-badge {
+            width: 15px;
+            height: 15px;
+            font-size: 9px;
+            min-width: 15px;
+            top: -3px;
+            right: -3px;
         }
 
-        @media (max-width: 375px) {
-            .header-content {
-                padding: 0 4px;
-            }
-            
-            .header-logo {
-                height: 36px;
-                width: 36px;
-            }
-            
-            .logo-text {
-                font-size: 11px;
-                max-width: 80px;
-            }
-
-            .cart-icon,
-            .contact-service-btn {
-                font-size: 16px;
-                padding: 3px;
-                min-width: 32px;
-                min-height: 32px;
-            }
-            
-            .cart-badge {
-                width: 14px;
-                height: 14px;
-                font-size: 8px;
-                min-width: 14px;
-            }
-
-            .ads-container {
-                height: 140px;
-                margin: 0 8px;
-            }
-
-            .ad-item {
-                height: 140px;
-            }
-            
-            .ad-overlay {
-                padding: 10px;
-            }
-            
-            .ad-title {
-                font-size: 0.85rem;
-                margin-bottom: 0.25rem;
-            }
-
-            .ad-subtitle {
-                font-size: 0.7rem;
-            }
+        .ads-section {
+            padding: 12px 0;
+        }
+        
+        .ads-container {
+            height: 160px;
+            margin: 0 8px;
+            border-radius: 12px;
         }
 
-        @media (max-width: 768px) {
-            input[type="text"], 
-            input[type="email"], 
-            input[type="tel"], 
-            textarea {
-                font-size: 16px !important;
-            }
+        .ad-item {
+            height: 160px;
         }
 
-        @keyframes slideInRight {
+        .ad-overlay {
+            padding: 12px;
+        }
+        
+        .ad-title {
+            font-size: 0.95rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .ad-subtitle {
+            font-size: 0.75rem;
+            line-height: 1.3;
+        }
+        
+        .ads-nav-btn {
+            width: 32px;
+            height: 32px;
+            font-size: 18px;
+        }
+        
+        .ads-prev {
+            left: 5px;
+        }
+        
+        .ads-next {
+            right: 5px;
+        }
+
+        .modal-content, .cart-modal-content, .degue-modal-content, .selection-modal-content {
+            max-height: 95vh;
+            margin: 10px;
+            border-radius: 16px;
+        }
+        
+        .header {
+            padding: 8px 0;
+        }
+        
+        .nav-section {
+            padding: 12px 0;
+        }
+        
+        .post-header {
+            padding: 12px;
+        }
+        
+        .post-actions {
+            padding: 12px;
+        }
+
+        .food-title {
+            font-size: 13px;
+        }
+        
+        .food-description {
+            font-size: 11px;
+        }
+        
+        .food-price {
+            font-size: 14px;
+        }
+        
+        .add-to-cart-btn {
+            padding: 10px 12px;
+            font-size: 13px;
+        }
+        
+        .food-item-content {
+            padding: 10px;
+        }
+
+        #notification-button,
+        #download-button {
+            right: 12px;
+        }
+        
+        #notification-button {
+            bottom: 120px;
+        }
+        
+        #download-button {
+            bottom: 65px;
+        }
+        
+        #notification-button button,
+        #download-button button {
+            width: 52px;
+            height: 52px;
+            font-size: 1.3rem;
+        }
+
+        .container {
+            padding: 0.75rem;
+        }
+    }
+
+    @media (max-width: 375px) {
+        .header-content {
+            padding: 0 4px;
+        }
+        
+        .header-logo {
+            height: 36px;
+            width: 36px;
+        }
+        
+        .logo-text {
+            font-size: 11px;
+            max-width: 80px;
+        }
+
+        .cart-icon,
+        .contact-service-btn {
+            font-size: 16px;
+            padding: 3px;
+            min-width: 32px;
+            min-height: 32px;
+        }
+        
+        .cart-badge {
+            width: 14px;
+            height: 14px;
+            font-size: 8px;
+            min-width: 14px;
+        }
+
+        .ads-container {
+            height: 140px;
+        }
+
+        .ad-item {
+            height: 140px;
+        }
+        
+        .ad-overlay {
+            padding: 10px;
+        }
+        
+        .ad-title {
+            font-size: 0.85rem;
+        }
+
+        .ad-subtitle {
+            font-size: 0.7rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        input[type="text"], 
+        input[type="email"], 
+        input[type="tel"], 
+        textarea {
+            font-size: 16px !important;
+        }
+    }
+
+    #quantity-error.show,
+#name-error.show,
+#whatsapp-error.show,
+#establishment-error.show {
+    display: block !important;
+    animation: shake 0.3s ease;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+/* ===== MODAL ALERT PERSONNALISÉ ===== */
+.custom-alert-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 10000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    backdrop-filter: blur(10px);
+    animation: fadeInAlert 0.3s ease;
+}
+
+.custom-alert-modal.show {
+    display: flex;
+}
+
+@keyframes fadeInAlert {
     from {
         opacity: 0;
-        transform: translateX(100px);
     }
     to {
         opacity: 1;
-        transform: translateX(0);
     }
 }
 
-@keyframes slideOutRight {
+.custom-alert-content {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border-radius: 24px;
+    width: 100%;
+    max-width: 500px;
+    padding: 3rem 2rem 2rem;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideUpAlert 0.4s ease;
+    text-align: center;
+}
+
+@keyframes slideUpAlert {
     from {
-        opacity: 1;
-        transform: translateX(0);
+        opacity: 0;
+        transform: translateY(50px) scale(0.9);
     }
     to {
-        opacity: 0;
-        transform: translateX(100px);
+        opacity: 1;
+        transform: translateY(0) scale(1);
     }
 }
 
-#notification-button button:hover {
-    transform: scale(1.1);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+.custom-alert-icon {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 1.5rem;
+    background: linear-gradient(135deg, #28a745, #20c997);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3.5rem;
+    box-shadow: 0 10px 30px rgba(40, 167, 69, 0.3);
+    animation: bounceIcon 0.6s ease;
 }
 
-#notification-button button:active {
-    transform: scale(0.95);
+@keyframes bounceIcon {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
 }
 
-    </style>
-</head>
+.custom-alert-icon.error {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    box-shadow: 0 10px 30px rgba(220, 53, 69, 0.3);
+}
+
+.custom-alert-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #28a745, #20c997);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.custom-alert-code {
+    display: inline-block;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    letter-spacing: 1px;
+}
+
+.custom-alert-message {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #495057;
+    margin-bottom: 2rem;
+    padding: 0 1rem;
+}
+
+.custom-alert-details {
+    background: #f8f9fa;
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border: 2px solid #e9ecef;
+}
+
+.alert-detail-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.alert-detail-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.detail-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.detail-text {
+    font-size: 0.95rem;
+    color: #495057;
+    text-align: left;
+    flex: 1;
+}
+
+.custom-alert-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #ff4e00, #ff6b9d);
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(255, 78, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.custom-alert-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 78, 0, 0.4);
+}
+
+.custom-alert-btn:active {
+    transform: translateY(0);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .custom-alert-content {
+        padding: 2rem 1.5rem 1.5rem;
+        border-radius: 20px;
+    }
+    
+    .custom-alert-icon {
+        width: 80px;
+        height: 80px;
+        font-size: 2.5rem;
+    }
+    
+    .custom-alert-title {
+        font-size: 1.5rem;
+    }
+    
+    .custom-alert-code {
+        font-size: 1rem;
+        padding: 0.6rem 1.2rem;
+    }
+    
+    .custom-alert-message {
+        font-size: 1rem;
+    }
+    
+    .detail-icon {
+        font-size: 1.25rem;
+    }
+    
+    .detail-text {
+        font-size: 0.875rem;
+    }
+}
+</style>
 <body>
     <div class="time-alert" id="time-alert">
         Les commandes sont fermées. Revenez entre 18h00 et 10h00 pour commander.
@@ -1557,65 +2315,826 @@
             <button class="ads-nav-btn ads-next" onclick="slideAds('next')">›</button>
         </div>
     </section> 
-    
-    <section class="nav-section">
-        <div class="scroll-indicator">
-            Scrollez pour découvrir tous nos menus délicieux <span class="scroll-arrow">👇</span>
-        </div>
-        <div class="nav-stories">
-            <a href="shopping.html" class="nav-story shopping-animate">
-                <div class="nav-story-avatar">
-                    🛍️
-                </div>
-                <div class="nav-story-text">Express-Shopping</div>
-            </a>
-            <div class="nav-story" onclick="toggleOrders()">
-                <div class="nav-story-avatar">
-                    📦
-                </div>
-                <div class="nav-story-text">Historique de mes commandes</div>
-            </div>
-            <a href="actualité.html" class="nav-story">
-                <div class="nav-story-avatar">
-                    <img src="image/re.jpg" alt="Gbèrè universitaire" class="nav-story-image">
-                </div>
-                <div class="nav-story-text">Réseau social</div>
-            </a>
-            <a href="merlin.html" class="nav-story">
-                <div class="nav-story-avatar">
-                    <img src="image/tp.jpg" alt="compétition" class="nav-story-image">
-                </div>
-                <div class="nav-story-text">Gagner un plat</div>
-            </a>
-            <a href="annonce.html" class="nav-story annonce-animate">
-                <div class="nav-story-avatar">
-                    📢
-                    <div class="notification-badge">7</div>
-                </div>
-                <div class="nav-story-text">Annonce</div>
-            </a>
-            <a href="apropos.html" class="nav-story">
-                <div class="nav-story-avatar">
-                    ℹ️
-                </div>
-                <div class="nav-story-text">A propos</div>
-            </a>
-            <a href="fournisseur.html" class="nav-story">
-                <div class="nav-story-avatar">
-                    👨‍🍳
-                </div>
-                <div class="nav-story-text">Fournisseur</div>
-            </a>
-        </div>
-        
-        <div class="scroll-dots" id="scroll-dots">
-            <div class="scroll-dot active"></div>
-            <div class="scroll-dot"></div>
-            <div class="scroll-dot"></div>
-        </div>
-    </section>
 
-    <!-- BOUTON NOTIFICATION -->
+    <!-- NOUVEAU - Navigation améliorée -->
+<section class="nav-section-modern">
+    <div class="container">
+        <div class="nav-buttons-grid">
+            <a href="shopping.html" class="nav-btn shopping">
+                <span class="nav-btn-icon">🛍️</span>
+                <span class="nav-btn-text">Express-Shopping</span>
+            </a>
+            
+            <button onclick="toggleOrders()" class="nav-btn orders">
+                <span class="nav-btn-icon">📦</span>
+                <span class="nav-btn-text">Mes commandes</span>
+            </button>
+            
+            <a href="actualité.html" class="nav-btn social">
+                <span class="nav-btn-icon">📱</span>
+                <span class="nav-btn-text">Réseau social</span>
+            </a>
+            
+            <a href="merlin.html" class="nav-btn game">
+                <span class="nav-btn-icon">🎮</span>
+                <span class="nav-btn-text">Gagner un plat</span>
+            </a>
+            
+            <a href="annonce.html" class="nav-btn annonce">
+                <span class="nav-btn-icon">📢</span>
+                <span class="nav-btn-text">Annonces</span>
+                <span class="nav-btn-badge">7</span>
+            </a>
+            
+            <a href="apropos.html" class="nav-btn about">
+                <span class="nav-btn-icon">ℹ️</span>
+                <span class="nav-btn-text">À propos</span>
+            </a>
+            
+            <a href="fournisseur.html" class="nav-btn supplier">
+                <span class="nav-btn-icon">👨‍🍳</span>
+                <span class="nav-btn-text">Fournisseur</span>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- NOUVEAU - Structure des plats moderne -->
+<div class="container">
+    <div class="menu-section">
+        <h2 class="section-title">Notre Menu</h2>
+        <p class="section-subtitle">Groupe Express, votre restaurant 100% en ligne à Abidjan</p>
+        
+        <!-- Pâtes & Petit pois -->
+        <div class="category-block">
+            <h3 class="category-title">
+                <span class="category-icon">🍝</span>
+                Pâtes & Petit pois
+            </h3>
+            
+            <div class="dishes-modern-grid">
+                <div class="dish-card-modern">
+                    <div class="dish-image-wrapper">
+                        <img src="image/spa.jpg" alt="Spaghetti rognon" class="dish-image-modern">
+                        <div class="dish-overlay">
+                            <button class="quick-add-btn" onclick="promptAddToCart('Spaghetti rognon', 600, 'A')">
+                                Ajouter rapidement
+                            </button>
+                        </div>
+                    </div>
+                    <div class="dish-content-modern">
+                        <h4 class="dish-name-modern">Spaghetti rognon</h4>
+                        <p class="dish-desc-modern">Spaghetti préparé avec du rognon</p>
+                        <div class="dish-footer-modern">
+                            <span class="dish-price-modern">600 FCFA</span>
+                            <button class="add-cart-btn-modern" onclick="promptAddToCart('Spaghetti rognon', 600, 'A')">
+                                <span>🛒</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dish-card-modern">
+                    <div class="dish-image-wrapper">
+                        <img src="image/spaghetti nouv.jpg" alt="Spaghetti foi" class="dish-image-modern">
+                        <div class="dish-overlay">
+                            <button class="quick-add-btn" onclick="promptAddToCart('Spaghetti foi', 600, 'A')">
+                                Ajouter rapidement
+                            </button>
+                        </div>
+                    </div>
+                    <div class="dish-content-modern">
+                        <h4 class="dish-name-modern">Spaghetti foi</h4>
+                        <p class="dish-desc-modern">Spaghetti préparé avec du foie</p>
+                        <div class="dish-footer-modern">
+                            <span class="dish-price-modern">600 FCFA</span>
+                            <button class="add-cart-btn-modern" onclick="promptAddToCart('Spaghetti foi', 600, 'A')">
+                                <span>🛒</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dish-card-modern">
+                    <div class="dish-image-wrapper">
+                        <img src="image/vi.jpg" alt="Spaghetti viande" class="dish-image-modern">
+                        <div class="dish-overlay">
+                            <button class="quick-add-btn" onclick="promptAddToCart('Spaghetti à la viande', 800, 'A')">
+                                Ajouter rapidement
+                            </button>
+                        </div>
+                    </div>
+                    <div class="dish-content-modern">
+                        <h4 class="dish-name-modern">Spaghetti à la viande</h4>
+                        <p class="dish-desc-modern">Spaghetti avec viande hachée</p>
+                        <div class="dish-footer-modern">
+                            <span class="dish-price-modern">800 FCFA</span>
+                            <button class="add-cart-btn-modern" onclick="promptAddToCart('Spaghetti à la viande', 800, 'A')">
+                                <span>🛒</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dish-card-modern">
+                    <div class="dish-image-wrapper">
+                        <img src="image/SPAHRA .jpg" alt="Spaghetti rognon + oeuf" class="dish-image-modern">
+                        <div class="dish-overlay">
+                            <button class="quick-add-btn" onclick="promptAddToCart('Spaghetti ROGNON + oeuf grillé', 700, 'A')">
+                                Ajouter rapidement
+                            </button>
+                        </div>
+                    </div>
+                    <div class="dish-content-modern">
+                        <h4 class="dish-name-modern">Spaghetti ROGNON + oeuf grillé</h4>
+                        <p class="dish-desc-modern">Spaghetti rognon avec oeuf grillé</p>
+                        <div class="dish-footer-modern">
+                            <span class="dish-price-modern">700 FCFA</span>
+                            <button class="add-cart-btn-modern" onclick="promptAddToCart('Spaghetti ROGNON + oeuf grillé', 700, 'A')">
+                                <span>🛒</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dish-card-modern">
+                    <div class="dish-image-wrapper">
+                        <img src="image/spagh oeuf.jpg" alt="Spaghetti foi + oeuf" class="dish-image-modern">
+                        <div class="dish-overlay">
+                            <button class="quick-add-btn" onclick="promptAddToCart('Spaghetti foi + oeuf grillé', 700, 'A')">
+                                Ajouter rapidement
+                            </button>
+                        </div>
+                    </div>
+                    <div class="dish-content-modern">
+                        <h4 class="dish-name-modern">Spaghetti foi + oeuf grillé</h4>
+                        <p class="dish-desc-modern">Spaghetti foi avec oeuf grillé</p>
+                        <div class="dish-footer-modern">
+                            <span class="dish-price-modern">700 FCFA</span>
+                            <button class="add-cart-btn-modern" onclick="promptAddToCart('Spaghetti foi + oeuf grillé', 700, 'A')">
+                                <span>🛒</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dish-card-modern">
+                    <div class="dish-image-wrapper">
+                        <img src="image/foi.jpg" alt="Sauter revenir foie" class="dish-image-modern">
+                        <div class="dish-overlay">
+                            <button class="quick-add-btn" onclick="promptAddToCart('Sauter revenir au foie', 1500, 'A')">
+                                Ajouter rapidement
+                            </button>
+                        </div>
+                    </div>
+                    <div class="dish-content-modern">
+                        <h4 class="dish-name-modern">Sauter revenir au foie</h4>
+                        <p class="dish-desc-modern">Sauter revenir au foie</p>
+                        <div class="dish-footer-modern">
+                            <span class="dish-price-modern">1500 FCFA</span>
+                            <button class="add-cart-btn-modern" onclick="promptAddToCart('Sauter revenir au foie', 1500, 'A')">
+                                <span>🛒</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dish-card-modern">
+                    <div class="dish-image-wrapper">
+                        <img src="image/rognon.jpg" alt="Sauter revenir rognon" class="dish-image-modern">
+                        <div class="dish-overlay">
+                            <button class="quick-add-btn" onclick="promptAddToCart('Sauter revenir au rognon', 1500, 'A')">
+                                Ajouter rapidement
+                            </button>
+                        </div>
+                    </div>
+                    <div class="dish-content-modern">
+                        <h4 class="dish-name-modern">Sauter revenir au rognon</h4>
+                        <p class="dish-desc-modern">Sauter revenir au rognon</p>
+                        <div class="dish-footer-modern">
+                            <span class="dish-price-modern">1500 FCFA</span>
+                            <button class="add-cart-btn-modern" onclick="promptAddToCart('Sauter revenir au rognon', 1500, 'A')">
+                                <span>🛒</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dish-card-modern">
+                    <div class="dish-image-wrapper">
+                        <img src="image/viande.jpg" alt="Sauter revenir viande" class="dish-image-modern">
+                        <div class="dish-overlay">
+                            <button class="quick-add-btn" onclick="promptAddToCart('Sauter revenir viande', 1500, 'A')">
+                                Ajouter rapidement
+                            </button>
+                        </div>
+                    </div>
+                    <div class="dish-content-modern">
+                        <h4 class="dish-name-modern">Sauter revenir viande</h4>
+                        <p class="dish-desc-modern">Sauter revenir viande</p>
+                        <div class="dish-footer-modern">
+                            <span class="dish-price-modern">1500 FCFA</span>
+                            <button class="add-cart-btn-modern" onclick="promptAddToCart('Sauter revenir viande', 1500, 'A')">
+                                <span>🛒</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dish-card-modern">
+                    <div class="dish-image-wrapper">
+                        <img src="image/petit poid.jpg" alt="Petit pois rognon" class="dish-image-modern">
+                        <div class="dish-overlay">
+                            <button class="quick-add-btn" onclick="promptAddToCart('Petit pois rognon', 1000, 'A')">
+                                Ajouter rapidement
+                            </button>
+                        </div>
+                    </div>
+                    <div class="dish-content-modern">
+                        <h4 class="dish-name-modern">Petit pois rognon</h4>
+                        <p class="dish-desc-modern">Petit pois accompagné de rognon</p>
+                        <div class="dish-footer-modern">
+                            <span class="dish-price-modern">1000 FCFA</span>
+                            <button class="add-cart-btn-modern" onclick="promptAddToCart('Petit pois rognon', 1000, 'A')">
+                                <span>🛒</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dish-card-modern">
+                    <div class="dish-image-wrapper">
+                        <img src="image/petit poid rogno,.jpg" alt="Petit pois viande" class="dish-image-modern">
+                        <div class="dish-overlay">
+                            <button class="quick-add-btn" onclick="promptAddToCart('Petit pois à la viande', 1500, 'A')">
+                                Ajouter rapidement
+                            </button>
+                        </div>
+                    </div>
+                    <div class="dish-content-modern">
+                        <h4 class="dish-name-modern">Petit pois à la viande</h4>
+                        <p class="dish-desc-modern">Petit pois à la viande</p>
+                        <div class="dish-footer-modern">
+                            <span class="dish-price-modern">1500 FCFA</span>
+                            <button class="add-cart-btn-modern" onclick="promptAddToCart('Petit pois à la viande', 1500, 'A')">
+                                <span>🛒</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tchèpes -->
+        <div class="category-block">
+            <h3 class="category-title">
+                <span class="category-icon">🍚</span>
+                Tchèpes
+            </h3>
+            
+            <div class="dishes-modern-grid">
+                <div class="dish-card-modern">
+                    <div class="dish-image-wrapper">
+                        <img src="image/tcheo poi.jpg" alt="Tchèpe poisson" class="dish-image-modern">
+                        <div class="dish-overlay">
+                            <button class="quick-add-btn" onclick="selectTchep('Tchèpe au poisson', 500)">
+                                Choisir le type
+                            </button>
+                        </div>
+                    </div>
+                    <div class="dish-content-modern">
+                        <h4 class="dish-name-modern">Tchèpe au poisson</h4>
+                        <p class="dish-desc-modern">Tchèpe accompagné de poisson frais</p>
+                        <div class="dish-footer-modern">
+                            <span class="dish-price-modern">500 FCFA</span>
+                            <button class="add-cart-btn-modern" onclick="selectTchep('Tchèpe au poisson', 500)">
+                                <span>📋</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dish-card-modern">
+                    <div class="dish-image-wrapper">
+                        <img src="image/tcheo.jpg" alt="Tchèpe poulet" class="dish-image-modern">
+                        <div class="dish-overlay">
+                            <button class="quick-add-btn" onclick="selectTchep('Tchèpe au poulet', 1000)">
+                                Choisir le type
+                            </button>
+                        </div>
+                    </div>
+                    <div class="dish-content-modern">
+                        <h4 class="dish-name-modern">Tchèpe au poulet</h4>
+                        <p class="dish-desc-modern">Tchèpe au poulet</p>
+                        <div class="dish-footer-modern">
+                            <span class="dish-price-modern">1000 FCFA</span>
+                            <button class="add-cart-btn-modern" onclick="selectTchep('Tchèpe au poulet', 1000)">
+                                <span>📋</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dish-card-modern">
+                    <div class="dish-image-wrapper">
+                        <img src="image/tchep poulet.jpg" alt="Tchèpe poulet XXL" class="dish-image-modern">
+                        <div class="dish-overlay">
+                            <button class="quick-add-btn" onclick="selectTchep('Tchèpe au poulet XXL', 2000)">
+                                Choisir le type
+                            </button>
+                        </div>
+                    </div>
+                    <div class="dish-content-modern">
+                        <h4 class="dish-name-modern">Tchèpe au poulet XXL</h4>
+                        <p class="dish-desc-modern">Tchèpe au poulet XXL</p>
+                        <div class="dish-footer-modern">
+                            <span class="dish-price-modern">2000 FCFA</span>
+                            <button class="add-cart-btn-modern" onclick="selectTchep('Tchèpe au poulet XXL', 2000)">
+                                <span>📋</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dish-card-modern">
+                    <div class="dish-image-wrapper">
+                        <img src="image/tchep ara.jpg" alt="Tchèpe viande XXL" class="dish-image-modern">
+                        <div class="dish-overlay">
+                            <button class="quick-add-btn" onclick="selectTchep('Tchèpe viande XXL', 2000)">
+                                Choisir le type
+                            </button>
+                        </div>
+                    </div>
+                    <div class="dish-content-modern">
+                        <h4 class="dish-name-modern">Tchèpe viande XXL</h4>
+                        <p class="dish-desc-modern">Tchèpe accompagné de la viande</p>
+                        <div class="dish-footer-modern">
+                            <span class="dish-price-modern">2000 FCFA</span>
+                            <button class="add-cart-btn-modern" onclick="selectTchep('Tchèpe viande XXL', 2000)">
+                                <span>📋</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIZ -->
+        <div class="category-block">
+            <h3 class="category-title">
+                <span class="category-icon">🍛</span>
+                Riz
+            </h3>
+            
+            <div class="dishes-modern-grid">
+                <div class="dish-card-modern">
+                    <div class="dish-image-wrapper">
+                        <img src="image/sauce arrrrachide.jpg" alt="Riz sauce arachide" class="dish-image-modern">
+                        <div class="dish-overlay">
+                            <button class="quick-add-btn" onclick="selectRice('Riz sauce arachide')">
+                                Sélectionner le format
+                            </button>
+                        </div>
+                    </div>
+                    <div class="dish-content-modern">
+                        <h4 class="dish-name-modern">Riz sauce arachide</h4>
+                        <p class="dish-desc-modern">Riz sauce arachide</p>
+                        <div class="dish-footer-modern">
+                            <span class="dish-price-modern">À partir de 500 FCFA</span>
+                            <button class="add-cart-btn-modern" onclick="selectRice('Riz sauce arachide')">
+                                <span>📋</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dish-card-modern">
+                    <div class="dish-image-wrapper">
+                        <img src="image/riz nouv.jpg" alt="Riz sauce feuille" class="dish-image-modern">
+                        <div class="dish-overlay">
+                            <button class="quick-add-btn" onclick="selectRice('Riz sauce feuille')">
+                                Sélectionner le format
+                            </button>
+                        </div>
+                    </div>
+                    <div class="dish-content-modern">
+                        <h4 class="dish-name-modern">Riz sauce feuille</h4>
+                        <p class="dish-desc-modern">Riz accompagné de sauce aux feuilles</p>
+                        <div class="dish-footer-modern">
+                            <span class="dish-price-modern">À partir de 500 FCFA</span>
+                            <button class="add-cart-btn-modern" onclick="selectRice('Riz sauce feuille')">
+                                <span>📋</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dish-card-modern">
+                    <div class="dish-image-wrapper">
+                        <img src="image/RIZ SA TOMA.jpg" alt="Riz sauce tomate" class="dish-image-modern">
+                        <div class="dish-overlay">
+                            <button class="quick-add-btn" onclick="selectRice('Riz sauce tomate')">
+                                Sélectionner le format
+                            </button>
+                        </div>
+                    </div>
+                    <div class="dish-content-modern">
+                        <h4 class="dish-name-modern">Riz sauce tomate</h4>
+                        <p class="dish-desc-modern">Riz sauce tomate</p>
+                        <div class="dish-footer-modern">
+                            <span class="dish-price-modern">À partir de 500 FCFA</span>
+                            <button class="add-cart-btn-modern" onclick="selectRice('Riz sauce tomate')">
+                                <span>📋</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Porc au four -->
+        <div class="category-block">
+            <h3 class="category-title">
+                <span class="category-icon">🐷</span>
+                Porc au four
+            </h3>
+            
+            <div class="dishes-modern-grid">
+                <div class="dish-card-modern">
+                    <div class="dish-image-wrapper">
+                        <img src="image/PORC1.jpg" alt="Porc au four 2 boules" class="dish-image-modern">
+                        <div class="dish-overlay">
+                            <button class="quick-add-btn" onclick="selectPorc(1200, '2 boules')">
+                                Choisir la préparation
+                            </button>
+                        </div>
+                    </div>
+                    <div class="dish-content-modern">
+                        <h4 class="dish-name-modern">Porc au four (2 boules)</h4>
+                        <p class="dish-desc-modern">Porc au four avec 2 boules d'attiékè</p>
+                        <div class="dish-footer-modern">
+                            <span class="dish-price-modern">1200 FCFA</span>
+                            <button class="add-cart-btn-modern" onclick="selectPorc(1200, '2 boules')">
+                                <span>📋</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dish-card-modern">
+                    <div class="dish-image-wrapper">
+                        <img src="image/PORC2.jpg" alt="Porc au four XXL" class="dish-image-modern">
+                        <div class="dish-overlay">
+                            <button class="quick-add-btn" onclick="selectPorc(2000, 'XXL')">
+                                Choisir la préparation
+                            </button>
+                        </div>
+                    </div>
+                    <div class="dish-content-modern">
+                        <h4 class="dish-name-modern">Porc au four XXL</h4>
+                        <p class="dish-desc-modern">Portion généreuse de porc avec attiékè</p>
+                        <div class="dish-footer-modern">
+                            <span class="dish-price-modern">2000 FCFA</span>
+                            <button class="add-cart-btn-modern" onclick="selectPorc(2000, 'XXL')">
+                                <span>📋</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attiékè spécialité -->
+        <div class="category-block">
+            <h3 class="category-title">
+                <span class="category-icon">🌾</span>
+                Attiékè spécialité
+            </h3>
+            
+            <div class="dishes-modern-grid">
+                <div class="dish-card-modern">
+                    <div class="dish-image-wrapper">
+                        <img src="image/ChatGPT Image 21 sept. 2025, 17_49_08.png" alt="Attiékè poisson alloko" class="dish-image-modern">
+                        <div class="dish-overlay">
+                            <button class="quick-add-btn" onclick="selectAttiekePoisson()">
+                                Choisir le format
+                            </button>
+                        </div>
+                    </div>
+                    <div class="dish-content-modern">
+                        <h4 class="dish-name-modern">Attiékè poisson alloko + Condiment</h4>
+                        <p class="dish-desc-modern">Attiékè servi avec du poisson</p>
+                        <div class="dish-footer-modern">
+                            <span class="dish-price-modern">À partir de 1000 FCFA</span>
+                            <button class="add-cart-btn-modern" onclick="selectAttiekePoisson()">
+                                <span>📋</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dish-card-modern">
+                    <div class="dish-image-wrapper">
+                        <img src="image/20250921_1803_Qualité Image Améliorée_remix_01k5pg4v3weeea02t6htn46kjd.png" alt="Attiékè poulet alloko" class="dish-image-modern">
+                        <div class="dish-overlay">
+                            <button class="quick-add-btn" onclick="selectAttiekePouletAlloko()">
+                                Choisir le format
+                            </button>
+                        </div>
+                    </div>
+                    <div class="dish-content-modern">
+                        <h4 class="dish-name-modern">Attiékè poulet alloko + Condiment</h4>
+                        <p class="dish-desc-modern">Attiékè poulet alloko</p>
+                        <div class="dish-footer-modern">
+                            <span class="dish-price-modern">À partir de 1500 FCFA</span>
+                            <button class="add-cart-btn-modern" onclick="selectAttiekePouletAlloko()">
+                                <span>📋</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dish-card-modern">
+                    <div class="dish-image-wrapper">
+                        <img src="image/ATIEKEPOULET.jpg" alt="Attiékè poulet" class="dish-image-modern">
+                        <div class="dish-overlay">
+                            <button class="quick-add-btn" onclick="selectAttiekePoulet()">
+                                Choisir le format
+                            </button>
+                        </div>
+                    </div>
+                    <div class="dish-content-modern">
+                        <h4 class="dish-name-modern">Attiékè poulet + Condiment</h4>
+                        <p class="dish-desc-modern">Attiékè poulet</p>
+                        <div class="dish-footer-modern">
+                            <span class="dish-price-modern">À partir de 1000 FCFA</span>
+                            <button class="add-cart-btn-modern" onclick="selectAttiekePoulet()">
+                                <span>📋</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dish-card-modern">
+                    <div class="dish-image-wrapper">
+                        <img src="image/garba.jpg" alt="Garba" class="dish-image-modern">
+                        <div class="dish-overlay">
+                            <button class="quick-add-btn" onclick="selectGarba()">
+                                Choisir le format
+                            </button>
+                        </div>
+                    </div>
+                    <div class="dish-content-modern">
+                        <h4 class="dish-name-modern">Spécialité Garba</h4>
+                        <p class="dish-desc-modern">GARBA</p>
+                        <div class="dish-footer-modern">
+                            <span class="dish-price-modern">À partir de 500 FCFA</span>
+                            <button class="add-cart-btn-modern" onclick="selectGarba()">
+                                <span>📋</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dish-card-modern">
+                    <div class="dish-image-wrapper">
+                        <img src="image/at.jpg" alt="Attiékè poisson" class="dish-image-modern">
+                        <div class="dish-overlay">
+                            <button class="quick-add-btn" onclick="promptAddToCart('ATTIEKE POISSON', 1000, 'E')">
+                                Ajouter rapidement
+                            </button>
+                        </div>
+                    </div>
+                    <div class="dish-content-modern">
+                        <h4 class="dish-name-modern">Attiékè poisson</h4>
+                        <p class="dish-desc-modern">Attiékè poisson</p>
+                        <div class="dish-footer-modern">
+                            <span class="dish-price-modern">1000 FCFA</span>
+                            <button class="add-cart-btn-modern" onclick="promptAddToCart('ATTIEKE POISSON', 1000, 'E')">
+                                <span>🛒</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sucreries -->
+        <div class="category-block">
+            <h3 class="category-title">
+                <span class="category-icon">🍹</span>
+                Nos Sucreries
+            </h3>
+            
+            <div class="dishes-modern-grid">
+                <div class="dish-card-modern">
+                    <div class="dish-image-wrapper">
+                        <img src="image/orangina.jpg" alt="Orangina" class="dish-image-modern">
+                        <div class="dish-overlay">
+                            <button class="quick-add-btn" onclick="promptAddToCart('Orangina', 500, 'I')">
+                                Ajouter rapidement
+                            </button>
+                        </div>
+                    </div>
+                    <div class="dish-content-modern">
+                        <h4 class="dish-name-modern">Orangina</h4>
+                        <p class="dish-desc-modern">Orangina</p>
+                        <div class="dish-footer-modern">
+                            <span class="dish-price-modern">500 FCFA</span>
+                            <button class="add-cart-btn-modern" onclick="promptAddToCart('Orangina', 500, 'I')">
+                                <span>🛒</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dish-card-modern">
+                    <div class="dish-image-wrapper">
+                        <img src="image/kapa300.jpg" alt="Kapa" class="dish-image-modern">
+                        <div class="dish-overlay">
+                            <button class="quick-add-btn" onclick="promptAddToCart('Kapa', 300, 'I')">
+                                Ajouter rapidement
+                            </button>
+                        </div>
+                    </div>
+                    <div class="dish-content-modern">
+                        <h4 class="dish-name-modern">Kapa</h4>
+                        <p class="dish-desc-modern">Kapa</p>
+                        <div class="dish-footer-modern">
+                            <span class="dish-price-modern">300 FCFA</span>
+                            <button class="add-cart-btn-modern" onclick="promptAddToCart('Kapa', 300, 'I')">
+                                <span>🛒</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dish-card-modern">
+                    <div class="dish-image-wrapper">
+                        <img src="image/codys.jpg" alt="Cody's" class="dish-image-modern">
+                        <div class="dish-overlay">
+                            <button class="quick-add-btn" onclick="promptAddToCart('Codys', 500, 'I')">
+                                Ajouter rapidement
+                            </button>
+                        </div>
+                    </div>
+                    <div class="dish-content-modern">
+                        <h4 class="dish-name-modern">Cody's</h4>
+                        <p class="dish-desc-modern">Cody's</p>
+                        <div class="dish-footer-modern">
+                            <span class="dish-price-modern">500 FCFA</span>
+                            <button class="add-cart-btn-modern" onclick="promptAddToCart('Codys', 500, 'I')">
+                                <span>🛒</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dish-card-modern">
+                    <div class="dish-image-wrapper">
+                        <img src="image/koka.jpg" alt="Coca-Cola 50cl" class="dish-image-modern">
+                        <div class="dish-overlay">
+                            <button class="quick-add-btn" onclick="promptAddToCart('Coca cola 50cl', 500, 'I')">
+                                Ajouter rapidement
+                            </button>
+                        </div>
+                    </div>
+                    <div class="dish-content-modern">
+                        <h4 class="dish-name-modern">Coca-Cola</h4>
+                        <p class="dish-desc-modern">Coca-Cola 50cl</p>
+                        <div class="dish-footer-modern">
+                            <span class="dish-price-modern">500 FCFA</span>
+                            <button class="add-cart-btn-modern" onclick="promptAddToCart('Coca cola 50cl', 500, 'I')">
+                                <span>🛒</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dish-card-modern">
+                    <div class="dish-image-wrapper">
+                        <img src="image/cook300.jpg" alt="Coca-Cola 33cl" class="dish-image-modern">
+                        <div class="dish-overlay">
+                            <button class="quick-add-btn" onclick="promptAddToCart('Coca cola 33cl', 300, 'I')">
+                                Ajouter rapidement
+                            </button>
+                        </div>
+                    </div>
+                    <div class="dish-content-modern">
+                        <h4 class="dish-name-modern">Coca-Cola</h4>
+                        <p class="dish-desc-modern">Coca-Cola 33cl</p>
+                        <div class="dish-footer-modern">
+                            <span class="dish-price-modern">300 FCFA</span>
+                            <button class="add-cart-btn-modern" onclick="promptAddToCart('Coca cola 33cl', 300, 'I')">
+                                <span>🛒</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Nouveaux Plats -->
+        <div class="category-block" id="new-dishes-section" style="display: none;">
+            <h3 class="category-title">
+                <span class="category-icon">🆕</span>
+                Nouveaux Plats
+            </h3>
+            
+            <div class="dishes-modern-grid" id="new-dishes-grid">
+                <!-- Les nouveaux plats seront ajoutés dynamiquement ici -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL SELECTION (RIZ, TCHEP, PORC, ATTIEKE) -->
+<div class="selection-modal" id="selection-modal">
+    <div class="selection-modal-content">
+        <button class="close-selection-btn" onclick="closeSelectionModal()">&times;</button>
+        <div class="selection-modal-header">
+            <h3 id="selection-modal-title">Faites votre choix</h3>
+            <p id="selection-modal-subtitle">Sélectionnez votre option préférée</p>
+        </div>
+        <div class="selection-options" id="selection-options">
+        </div>
+        <div style="padding: 0 2rem 2rem;">
+            <button class="selection-cancel-btn" onclick="closeSelectionModal()">
+                ❌ Annuler
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DEGUE -->
+<div class="degue-modal" id="degue-modal">
+    <div class="degue-modal-content">
+        <div class="degue-modal-header">
+            <h3 id="degue-modal-title">🥛 Choisir votre format de Dêguê</h3>
+            <p>Sélectionnez la taille qui vous convient</p>
+        </div>
+        <div class="degue-options" id="degue-options">
+        </div>
+        <div style="padding: 0 2rem 2rem;">
+            <button onclick="closeDegueModal()" style="width: 100%; background: var(--border); color: var(--on-surface); border: none; padding: 1rem; border-radius: 8px; cursor: pointer;">
+                Annuler
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL PANIER -->
+<div class="cart-modal" id="cart-modal">
+    <div class="cart-modal-content">
+        <div class="cart-modal-header">
+            <h3 class="cart-modal-title">🛒 Mon Panier</h3>
+            <button class="close-cart-btn" onclick="toggleCart()">&times;</button>
+        </div>
+        <div class="cart-modal-body">
+            <div class="cart-items" id="cart-items">
+                <div class="empty-state">
+                    <div class="empty-state-icon">🛒</div>
+                    <p>Votre panier est vide</p>
+                </div>
+            </div>
+            
+            <div class="cart-total" id="cart-total">
+                Total: 0 FCFA
+            </div>
+            
+            <form id="order-form">
+                <button type="submit" class="checkout-btn">
+                    🎯 Commander maintenant
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL HISTORIQUE COMMANDES -->
+<div class="modal" id="orders-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <button class="close-btn" onclick="toggleOrders()">&times;</button>
+            <h2>🧾 Mes Commandes</h2>
+            <p>Historique de vos commandes récentes</p>
+        </div>
+        <div style="padding: 2rem;">
+            <div id="orders-list">
+                <div class="empty-state">
+                    <div class="empty-state-icon">🛒</div>
+                    <h3>Aucune commande</h3>
+                    <p>Vos commandes apparaîtront ici</p>
+                </div>
+            </div>
+            <button onclick="clearOrders()" class="checkout-btn" style="background: linear-gradient(135deg, #dc3545, #c82333); margin-top: 1rem;">
+                🗑️ Vider l'historique
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- BOUTON NOTIFICATION -->
 <div id="notification-button" style="position: fixed; bottom: 150px; right: 20px; z-index: 999;">
     <button onclick="requestNotificationPermission()" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 1rem; border-radius: 50%; width: 60px; height: 60px; cursor: pointer; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); font-size: 1.5rem; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">
         🔔
@@ -1631,587 +3150,146 @@
     <div id="install-status" style="position: absolute; top: -5px; right: -5px; background: #28a745; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 10px; display: none; align-items: center; justify-content: center; font-weight: bold;">✓</div>
 </div>
 
-
-    <!-- MODAL HISTORIQUE COMMANDES -->
-    <div class="modal" id="orders-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button class="close-btn" onclick="toggleOrders()">&times;</button>
-                <h2>🧾 Mes Commandes</h2>
-                <p>Historique de vos commandes récentes</p>
-            </div>
-            <div style="padding: 2rem;">
-                <div id="orders-list">
-                    <div class="empty-state">
-                        <div class="empty-state-icon">🛒</div>
-                        <h3>Aucune commande</h3>
-                        <p>Vos commandes apparaîtront ici</p>
-                    </div>
-                </div>
-                <button onclick="clearOrders()" class="checkout-btn" style="background: linear-gradient(135deg, #dc3545, #c82333); margin-top: 1rem;">
-                    🗑️ Vider l'historique
-                </button>
-            </div>
+<!-- MODAL QUANTITÉ -->
+<div class="modal" id="quantity-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <button class="close-btn" onclick="closeQuantityModal()">&times;</button>
+            <h2 id="quantity-modal-title">Quantité</h2>
+            <p id="quantity-modal-subtitle">Combien souhaitez-vous commander ?</p>
         </div>
-    </div>
-
-    <!-- MODAL SELECTION (DEGUE) -->
-    <div class="degue-modal" id="degue-modal">
-        <div class="degue-modal-content">
-            <div class="degue-modal-header">
-                <h3 id="degue-modal-title">🥛 Choisir votre format de Dêguê</h3>
-                <p>Sélectionnez la taille qui vous convient</p>
+        <div style="padding: 2rem;">
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Quantité :</label>
+                <input 
+                    type="number" 
+                    id="quantity-input" 
+                    min="1" 
+                    max="50" 
+                    value="1"
+                    style="width: 100%; padding: 0.75rem; border: 2px solid var(--border); border-radius: 8px; font-size: 16px; text-align: center;"
+                    placeholder="Entrez la quantité"
+                >
+                <div id="quantity-error" style="color: #dc3545; margin-top: 0.5rem; font-size: 0.875rem; display: none;"></div>
             </div>
-            <div class="degue-options" id="degue-options">
-            </div>
-            <div style="padding: 0 2rem 2rem;">
-                <button onclick="closeDegueModal()" style="width: 100%; background: var(--border); color: var(--on-surface); border: none; padding: 1rem; border-radius: 8px; cursor: pointer;">
-                    Annuler
-                </button>
-            </div>
+            
+            <button 
+                onclick="confirmQuantity()" 
+                class="checkout-btn"
+                style="margin-bottom: 0.5rem;"
+            >
+                ✅ Confirmer
+            </button>
+            
+            <button 
+                onclick="closeQuantityModal()" 
+                class="checkout-btn"
+                style="background: linear-gradient(135deg, #6c757d, #5a6268);"
+            >
+                ❌ Annuler
+            </button>
         </div>
-    </div>
-
-    <!-- MODAL PANIER -->
-    <div class="cart-modal" id="cart-modal">
-        <div class="cart-modal-content">
-            <div class="cart-modal-header">
-                <h3 class="cart-modal-title">🛒 Mon Panier</h3>
-                <button class="close-cart-btn" onclick="toggleCart()">&times;</button>
-            </div>
-            <div class="cart-modal-body">
-                <div class="cart-items" id="cart-items">
-                    <div class="empty-state">
-                        <div class="empty-state-icon">🛒</div>
-                        <p>Votre panier est vide</p>
-                    </div>
-                </div>
-                
-                <div class="cart-total" id="cart-total">
-                    Total: 0 FCFA
-                </div>
-                
-                <form id="order-form">
-                    <button type="submit" class="checkout-btn">
-                        🎯 Commander maintenant
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL SELECTION (RIZ, TCHEP, PORC, ATTIEKE) -->
-    <div class="selection-modal" id="selection-modal">
-        <div class="selection-modal-content">
-            <button class="close-selection-btn" onclick="closeSelectionModal()">&times;</button>
-            <div class="selection-modal-header">
-                <h3 id="selection-modal-title">Faites votre choix</h3>
-                <p id="selection-modal-subtitle">Sélectionnez votre option préférée</p>
-            </div>
-            <div class="selection-options" id="selection-options">
-            </div>
-            <div style="padding: 0 2rem 2rem;">
-                <button class="selection-cancel-btn" onclick="closeSelectionModal()">
-                    ❌ Annuler
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <div class="container">
-        <div class="main-feed">
-            <!-- PÂTES & PETIT POIS -->
-            <div class="post-card">
-                <div class="post-header">
-                    <div class="post-category">
-                        <div class="category-avatar">🍝</div>
-                        <div class="category-info">
-                            <h3>Pâtes & Petit pois</h3>
-                            <p>Les classiques revisités</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="food-grid">
-                    <div class="food-item">
-                        <img src="image/spa.jpg" alt="Spaghetti rognon" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Spaghetti rognon</div>
-                            <div class="food-description">Spaghetti préparé avec du rognon</div>
-                            <div class="food-price">600 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="promptAddToCart('Spaghetti rognon', 600, 'A')">
-                                🛒 Ajouter au panier
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="food-item">
-                        <img src="image/spaghetti nouv.jpg" alt="Spaghetti avec foi" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Spaghetti avec foi</div>
-                            <div class="food-description">Spaghetti préparé avec du foie</div>
-                            <div class="food-price">600 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="promptAddToCart('Spaghetti foi', 600, 'A')">
-                                🛒 Ajouter au panier
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="food-item">
-                        <img src="image/vi.jpg" alt="Spaghetti à la viande" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Spaghetti à la viande</div>
-                            <div class="food-description">Spaghetti avec de la viande hachée</div>
-                            <div class="food-price">800 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="promptAddToCart('Spaghetti à la viande', 800, 'A')">
-                                🛒 Ajouter au panier
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="food-item">
-                        <img src="image/SPAHRA .jpg" alt="Spaghetti rognon + oeuf grillé" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Spaghetti ROGNON + oeuf grillé</div>
-                            <div class="food-description">Spaghetti ROGNON + oeuf grillé</div>
-                            <div class="food-price">700 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="promptAddToCart('Spaghetti ROGNON + oeuf grillé', 700, 'A')">
-                                🛒 Ajouter au panier
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="food-item">
-                        <img src="image/spagh oeuf.jpg" alt="Spaghetti foi + oeuf grillé" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Spaghetti foi + oeuf grillé</div>
-                            <div class="food-description">Spaghetti + oeuf grillé</div>
-                            <div class="food-price">700 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="promptAddToCart('Spaghetti foi + oeuf grillé', 700, 'A')">
-                                🛒 Ajouter au panier
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="food-item">
-                        <img src="image/foi.jpg" alt="sauter revenir au foie" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Sauter revenir au foie</div>
-                            <div class="food-description">Sauter revenir au foie</div>
-                            <div class="food-price">1500 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="promptAddToCart('sauter revenir au foie', 1500, 'A')">
-                                🛒 Ajouter au panier
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="food-item">
-                        <img src="image/rognon.jpg" alt="Sauter revenir au rognon" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Sauter revenir au rognon</div>
-                            <div class="food-description">Sauter revenir au rognon</div>
-                            <div class="food-price">1500 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="promptAddToCart('Sauter revenir au rognon', 1500, 'A')">
-                                🛒 Ajouter au panier
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="food-item">
-                        <img src="image/viande.jpg" alt="Sauter Revenir viande" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Sauter revenir viande</div>
-                            <div class="food-description">Sauter revenir viande</div>
-                            <div class="food-price">1500 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="promptAddToCart('Sauter revenir viande', 1500, 'A')">
-                                🛒 Ajouter au panier
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="food-item">
-                        <img src="image/petit poid.jpg" alt="Petit pois au rognon" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Petit pois rognon</div>
-                            <div class="food-description">Petit pois accompagné de rognon</div>
-                            <div class="food-price">1000 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="promptAddToCart('Petit pois rognon', 1000, 'A')">
-                                🛒 Ajouter au panier
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="food-item">
-                        <img src="image/petit poid rogno,.jpg" alt="Petit pois à la viande" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Petit pois à la viande</div>
-                            <div class="food-description">Petit pois à la viande</div>
-                            <div class="food-price">1500 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="promptAddToCart('Petit pois à la viande', 1500, 'A')">
-                                🛒 Ajouter au panier
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="post-actions">
-                    <p style="font-size: 0.9rem; color: var(--on-surface); text-align: center; font-style: italic; padding: 0.5rem; background: var(--background); border-radius: 8px;">
-                        "La vie est trop courte pour manger mal - Régalez-vous avec nos délices !" 
-                    </p>
-                </div>
-            </div>
-
-            <!-- TCHÈPES -->
-            <div class="post-card">
-                <div class="post-header">
-                    <divclass="post-category">
-                        <div class="category-avatar">🍚</div>
-                        <div class="category-info">
-                            <h3>Tchèpes</h3>
-                            <p>Nos plats de tchèpe savoureux</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="food-grid">
-                    <div class="food-item">
-                        <img src="image/tcheo poi.jpg" alt="Tchèpe au poisson" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Tchèpe au poisson</div>
-                            <div class="food-description">Tchèpe accompagné de poisson frais</div>
-                            <div class="food-price">500 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="selectTchep('Tchèpe au poisson', 500)">
-                                📋 Choisir le type
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="food-item">
-                        <img src="image/tcheo.jpg" alt="Tchèpe au poulet" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Tchèpe au poulet</div>
-                            <div class="food-description">Tchèpe au poulet</div>
-                            <div class="food-price">1000 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="selectTchep('Tchèpe au poulet', 1000)">
-                                📋 Choisir le type
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="food-item">
-                        <img src="image/tchep poulet.jpg" alt="Tchèpe au poulet XXL" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Tchèpe au poulet XXL</div>
-                            <div class="food-description">Tchèpe au poulet XXL</div>
-                            <div class="food-price">2000 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="selectTchep('Tchèpe au poulet XXL', 2000)">
-                                📋 Choisir le type
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="food-item">
-                        <img src="image/tchep ara.jpg" alt="Tchèpe accompagné de la viande XXL" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Tchèpe viande XXL</div>
-                            <div class="food-description">Tchèpe accompagné de la viande</div>
-                            <div class="food-price">2000 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="selectTchep('Tchèpe viande XXL', 2000)">
-                                📋 Choisir le type
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="post-actions">
-                    <p style="font-size: 0.9rem; color: var(--on-surface); text-align: center; font-style: italic; padding: 0.5rem; background: var(--background); border-radius: 8px;">
-                        🍚 "Chaque bouchée est une célébration - Savourez la tradition !" 🌟
-                    </p>
-                </div>
-            </div>
-
-            <!-- RIZ -->
-            <div class="post-card">
-                <div class="post-header">
-                    <div class="post-category">
-                        <div class="category-avatar">🍛</div>
-                        <div class="category-info">
-                            <h3>RIZ</h3>
-                            <p>Découvrez nos plats de riz</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="food-grid">
-                    <div class="food-item">
-                        <img src="image/sauce arrrrachide.jpg" alt="Riz sauce arachide" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Riz sauce arachide</div>
-                            <div class="food-description">Riz sauce arachide</div>
-                            <div class="food-price">À partir de 500 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="selectRice('Riz sauce arachide')">
-                                📋 Sélectionner le format
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="food-item">
-                        <img src="image/riz nouv.jpg" alt="Riz sauce feuille" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Riz sauce feuille</div>
-                            <div class="food-description">Riz accompagné de sauce aux feuilles vertes</div>
-                            <div class="food-price">À partir de 500 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="selectRice('Riz sauce feuille')">
-                                📋 Sélectionner le format
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="food-item">
-                        <img src="image/RIZ SA TOMA.jpg" alt="Riz sauce tomate" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Riz sauce tomate</div>
-                            <div class="food-description">Riz sauce tomate</div>
-                            <div class="food-price">À partir de 500 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="selectRice('Riz sauce tomate')">
-                                📋 Sélectionner le format
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="post-actions">
-                    <p style="font-size: 0.9rem; color: var(--on-surface); text-align: center; font-style: italic; padding: 0.5rem; background: var(--background); border-radius: 8px;">
-                        🍛 "Le bonheur commence dans votre assiette - Commandez sans hésiter !" 
-                    </p>
-                </div>
-            </div>
-
-            <!-- PORC AU FOUR -->
-            <div class="post-card">
-                <div class="post-header">
-                    <div class="post-category">
-                        <div class="category-avatar">🐷</div>
-                        <div class="category-info">
-                            <h3>Porc au four</h3>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="food-grid">
-                    <div class="food-item">
-                        <img src="image/PORC1.jpg" alt="Porc au four + Attiékè" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Porc au four (2 boules)</div>
-                            <div class="food-description">Porc au four avec 2 boules d'attiékè</div>
-                            <div class="food-price">1200 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="selectPorc(1200, '2 boules')">
-                                📋 Choisir la préparation
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="food-item">
-                        <img src="image/PORC2.jpg" alt="Porc au four + Attiékè XXL" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Porc au four XXL</div>
-                            <div class="food-description">Portion généreuse de porc avec attiékè</div>
-                            <div class="food-price">2000 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="selectPorc(2000, 'XXL')">
-                                📋 Choisir la préparation
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="post-actions">
-                    <p style="font-size: 0.9rem; color: var(--on-surface); text-align: center; font-style: italic; padding: 0.5rem; background: var(--background); border-radius: 8px;">
-                        "Un délice unique qui ravira vos papilles - Laissez-vous tenter !" 
-                    </p>
-                </div>
-            </div>
-
-           <!-- ATTIÉKÈ SPÉCIALITÉ -->
-<div class="post-card">
-    <div class="post-header">
-        <div class="post-category">
-            <div class="category-avatar">🌾</div>
-            <div class="category-info">
-                <h3>Attiékè spécialité</h3>
-                <p>Découvrez nos plats d'attiékè bien réussi</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="food-grid">
-        <div class="food-item">
-            <img src="image/ChatGPT Image 21 sept. 2025, 17_49_08.png" alt="Attiékè poisson alloko" class="food-item-image">
-            <div class="food-item-content">
-                <div class="food-title">Attiékè poisson alloko + Condiment</div>
-                <div class="food-description">Attiékè servi avec du poisson</div>
-                <div class="food-price">À partir de 1000 FCFA</div>
-                <button class="add-to-cart-btn" onclick="selectAttiekePoisson()">
-                    📋 Choisir le format
-                </button>
-            </div>
-        </div>
-
-        <div class="food-item">
-            <img src="image/20250921_1803_Qualité Image Améliorée_remix_01k5pg4v3weeea02t6htn46kjd.png" alt="Attiékè poulet alloko + Condiments" class="food-item-image">
-            <div class="food-item-content">
-                <div class="food-title">Attiékè poulet alloko + Condiment</div>
-                <div class="food-description">Attiékè poulet</div>
-                <div class="food-price">À partir de 1500 FCFA</div>
-                <button class="add-to-cart-btn" onclick="selectAttiekePouletAlloko()">
-                    📋 Choisir le format
-                </button>
-            </div>
-        </div>
-        
-        <div class="food-item">
-            <img src="image/ATIEKEPOULET.jpg" alt="Attiékè poulet + Condiments" class="food-item-image">
-            <div class="food-item-content">
-                <div class="food-title">Attiékè poulet + Condiment</div>
-                <div class="food-description">Attiékè poulet</div>
-                <div class="food-price">À partir de 1000 FCFA</div>
-                <button class="add-to-cart-btn" onclick="selectAttiekePoulet()">
-                    📋 Choisir le format
-                </button>
-            </div>
-        </div>
-
-        <div class="food-item">
-            <img src="image/garba.jpg" alt="Spécialité Garba" class="food-item-image">
-            <div class="food-item-content">
-                <div class="food-title">Spécialité Garba</div>
-                <div class="food-description">GARBA</div>
-                <div class="food-price">À partir de 500 FCFA</div>
-                <button class="add-to-cart-btn" onclick="selectGarba()">
-                    📋 Choisir le format
-                </button>
-            </div>
-        </div>
-
-        <div class="food-item">
-            <img src="image/at.jpg" alt="Attiékè poisson" class="food-item-image">
-            <div class="food-item-content">
-                <div class="food-title">Attiékè poisson</div>
-                <div class="food-description">Attiékè poisson</div>
-                <div class="food-price">1000 FCFA</div>
-                <button class="add-to-cart-btn" onclick="promptAddToCart('ATTIEKE POISSON', 1000, 'E')">
-                    🛒 Ajouter au panier
-                </button>
-            </div>
-        </div>
-    </div>
-    
-    <div class="post-actions">
-        <p class="promotional-text">
-            🌾 "L'authenticité dans chaque grain - Goûtez à notre tradition !" 
-        </p>
     </div>
 </div>
 
-
-            <!-- SUCRERIES -->
-            <div class="post-card">
-                <div class="post-header">
-                    <div class="post-category">
-                        <div class="category-avatar">🍹</div>
-                        <div class="category-info">
-                            <h3>NOS SUCRERIES</h3>
-                            <p>Goûtez et variez vos plaisirs</p>
-                        </div>
-                    </div>
-                </div>
-                 
-                <div class="food-grid">
-                    <div class="food-item">
-                        <img src="image/orangina.jpg" alt="Orangina" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Orangina</div>
-                            <div class="food-description">Orangina</div>
-                            <div class="food-price">500 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="promptAddToCart('Orangina', 500, 'I')">
-                                🛒 Ajouter au panier
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="food-item">
-                        <img src="image/kapa300.jpg" alt="Kapa" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Kapa</div>
-                            <div class="food-description">Kapa</div>
-                            <div class="food-price">300 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="promptAddToCart('Kapa', 300, 'I')">
-                                🛒 Ajouter au panier
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="food-item">
-                        <img src="image/codys.jpg" alt="Cody's" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Cody's</div>
-                            <div class="food-description">Cody's</div>
-                            <div class="food-price">500 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="promptAddToCart('Codys', 500, 'I')">
-                                🛒 Ajouter au panier
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="food-item">
-                        <img src="image/koka.jpg" alt="Coca-Cola" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Coca-Cola</div>
-                            <div class="food-description">Coca-Cola 50cl</div>
-                            <div class="food-price">500 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="promptAddToCart('Coca cola 50cl', 500, 'I')">
-                                🛒 Ajouter au panier
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="food-item">
-                        <img src="image/cook300.jpg" alt="Coca-Cola" class="food-item-image">
-                        <div class="food-item-content">
-                            <div class="food-title">Coca-Cola</div>
-                            <div class="food-description">Coca-Cola 33cl</div>
-                            <div class="food-price">300 FCFA</div>
-                            <button class="add-to-cart-btn" onclick="promptAddToCart('Coca cola 33cl', 300, 'I')">
-                                🛒 Ajouter au panier
-                            </button>
-                        </div>
-                    </div>
-                </div>
+<!-- MODAL INFORMATIONS CLIENT -->
+<div class="modal" id="customer-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <button class="close-btn" onclick="closeCustomerModal()">&times;</button>
+            <h2>📋 Vos informations</h2>
+            <p>Pour finaliser votre commande</p>
+        </div>
+        <div style="padding: 2rem;">
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Nom complet :</label>
+                <input 
+                    type="text" 
+                    id="customer-name" 
+                    style="width: 100%; padding: 0.75rem; border: 2px solid var(--border); border-radius: 8px; font-size: 16px;"
+                    placeholder="Votre nom et prénom"
+                >
+                <div id="name-error" style="color: #dc3545; margin-top: 0.5rem; font-size: 0.875rem; display: none;"></div>
             </div>
-
-
-                <!-- SECTION NOUVEAUX PLATS DEPUIS MARCIO -->
-<div class="post-card" id="new-dishes-section" style="display: none;">
-    <div class="post-header">
-        <div class="post-category">
-            <div class="category-avatar">🆕</div>
-            <div class="category-info">
-                <h3>Nouveaux Plats</h3>
-                <p>Découvrez nos dernières créations</p>
+            
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Numéro WhatsApp :</label>
+                <input 
+                    type="tel" 
+                    id="customer-whatsapp" 
+                    style="width: 100%; padding: 0.75rem; border: 2px solid var(--border); border-radius: 8px; font-size: 16px;"
+                    placeholder="Ex: 0123456789"
+                >
+                <div id="whatsapp-error" style="color: #dc3545; margin-top: 0.5rem; font-size: 0.875rem; display: none;"></div>
             </div>
+            
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Établissement :</label>
+                <select 
+                    id="customer-establishment" 
+                    style="width: 100%; padding: 0.75rem; border: 2px solid var(--border); border-radius: 8px; font-size: 16px;"
+                >
+                    <option value="">-- Sélectionnez --</option>
+                    <option value="UTT LOKO ZONE4C">UTT LOKO ZONE4C</option>
+                    <option value="LA FONTAINE"> LA FONTAINE</option>
+                </select>
+                <div id="establishment-error" style="color: #dc3545; margin-top: 0.5rem; font-size: 0.875rem; display: none;"></div>
+            </div>
+            
+            <button 
+                onclick="confirmCustomerInfo()" 
+                class="checkout-btn"
+                style="margin-bottom: 0.5rem;"
+            >
+                ✅ Valider ma commande
+            </button>
+            
+            <button 
+                onclick="closeCustomerModal()" 
+                class="checkout-btn"
+                style="background: linear-gradient(135deg, #6c757d, #5a6268);"
+            >
+                ❌ Annuler
+            </button>
         </div>
     </div>
-    
-    <div class="food-grid" id="new-dishes-grid">
-        <!-- Les nouveaux plats seront ajoutés ici automatiquement -->
-    </div>
-    
-    <div class="post-actions">
-        <p style="font-size: 0.9rem; color: var(--on-surface); text-align: center; font-style: italic; padding: 0.5rem; background: var(--background); border-radius: 8px;">
-            🆕 "Nos toutes dernières créations spécialement pour vous !" ✨
-        </p>
+</div>
+
+<!-- MODAL CONFIRMATION COMMANDE -->
+<div class="custom-alert-modal" id="custom-alert-modal">
+    <div class="custom-alert-content">
+        <div class="custom-alert-icon" id="custom-alert-icon">
+            ✅
+        </div>
+        <h2 class="custom-alert-title" id="custom-alert-title">
+            Commande confirmée !
+        </h2>
+        <div class="custom-alert-code" id="custom-alert-code">
+            #GEC123456
+        </div>
+        <div class="custom-alert-message" id="custom-alert-message">
+            Merci de bien vouloir passer à notre stand à 12H00 pour le retrait de votre commande.
+        </div>
+        <div class="custom-alert-details" id="custom-alert-details">
+            <div class="alert-detail-item">
+                <span class="detail-icon">📍</span>
+                <span class="detail-text">Stand GROUPE EXPRESS - Rez-de-chaussée</span>
+            </div>
+            <div class="alert-detail-item">
+                <span class="detail-icon">💬</span>
+                <span class="detail-text">Confirmation envoyée sur WhatsApp</span>
+            </div>
+            <div class="alert-detail-item">
+                <span class="detail-icon">⏰</span>
+                <span class="detail-text">Heure de retrait : 12H00</span>
+            </div>
+        </div>
+        <button class="custom-alert-btn" onclick="closeCustomAlert()">
+            <span>Compris</span>
+            <span style="margin-left: 8px;">👍</span>
+        </button>
     </div>
 </div>
- </div> 
     <script type="module" src="suite.js"></script>
 </body>
 </html>
