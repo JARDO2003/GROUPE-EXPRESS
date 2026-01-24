@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, onSnapshot, query, where } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyBsGrY-AqYMoI70kT3WMxLgW0HwYA4KyaQ",
@@ -30,6 +30,112 @@ const messaging = firebase.messaging();
 const VAPID_KEY = "BGL6IVuJSbQjI69fot6FvfGEBmq1t4_hPP1Dhx_KYiIEFCrOLjtYFWjID_MlteNgJtm7FFbdIfBygdRi_IF-qng";
 
 let notificationInterval = null;
+
+// ===== GESTION DES NOUVEAUX PLATS DEPUIS FIREBASE =====
+let newDishesLoaded = false;
+
+// Charger les nouveaux plats depuis Firebase
+function loadNewDishesFromFirebase() {
+    try {
+        const newDishesQuery = query(
+            collection(db, 'nouveaux_plats'),
+            where('active', '==', true)
+        );
+        
+        onSnapshot(newDishesQuery, (snapshot) => {
+            const newDishes = [];
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                newDishes.push({
+                    id: doc.id,
+                    ...data
+                });
+            });
+            
+            console.log(`✅ ${newDishes.length} nouveaux plats chargés depuis Firebase`);
+            
+            displayNewDishes(newDishes);
+        }, (error) => {
+            console.error('❌ Erreur lors du chargement des nouveaux plats:', error);
+        });
+    } catch (error) {
+        console.error('❌ Erreur Firebase nouveaux plats:', error);
+    }
+}
+
+// Afficher les nouveaux plats sur la page
+function displayNewDishes(dishes) {
+    const section = document.getElementById('new-dishes-section');
+    const grid = document.getElementById('new-dishes-grid');
+    
+    if (!section || !grid) {
+        console.error('Section nouveaux plats non trouvée');
+        return;
+    }
+    
+    if (dishes.length === 0) {
+        section.style.display = 'none';
+        return;
+    }
+    
+    // Afficher la section
+    section.style.display = 'block';
+    
+    // Générer le HTML des plats
+    grid.innerHTML = dishes.map(dish => {
+        const imageUrl = dish.imageUrl || 'image/placeholder.jpg';
+        const dishName = dish.name || 'Nouveau plat';
+        const dishDesc = dish.description || 'Découvrez notre nouvelle création';
+        const dishPrice = dish.price || 0;
+        const dishCategory = dish.category || 'I';
+        
+        return `
+            <div class="dish-card-modern">
+                <div class="dish-image-wrapper">
+                    <img src="${imageUrl}" alt="${dishName}" class="dish-image-modern" 
+                         onerror="this.src='image/placeholder.jpg'">
+                    <div class="dish-overlay">
+                        <button class="quick-add-btn" onclick="promptAddToCart('${dishName.replace(/'/g, "\\'")}', ${dishPrice}, '${dishCategory}')">
+                            Ajouter rapidement
+                        </button>
+                    </div>
+                </div>
+                <div class="dish-content-modern">
+                    <h4 class="dish-name-modern">${dishName}</h4>
+                    <p class="dish-desc-modern">${dishDesc}</p>
+                    <div class="dish-footer-modern">
+                        <span class="dish-price-modern">${dishPrice} FCFA</span>
+                        <button class="add-cart-btn-modern" onclick="promptAddToCart('${dishName.replace(/'/g, "\\'")}', ${dishPrice}, '${dishCategory}')">
+                            <span>🛒</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    // Animation d'apparition
+    if (!newDishesLoaded) {
+        section.style.animation = 'slideUp 0.6s ease-out';
+        newDishesLoaded = true;
+    }
+}
+
+// Ajouter l'animation CSS pour l'apparition
+const styleElement = document.createElement('style');
+styleElement.textContent = `
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+`;
+document.head.appendChild(styleElement);
 
 // ===== VARIABLES GLOBALES =====
 let cart = [];
@@ -990,6 +1096,9 @@ document.addEventListener('DOMContentLoaded', () => {
     updateOrdersList();
     startAdsAutoPlay();
     checkNotificationPermissionStatus();
+    
+    // NOUVEAU: Charger les nouveaux plats depuis Firebase
+    loadNewDishesFromFirebase();
     
     // Vérifier les horaires toutes les minutes
     setInterval(checkOrderingHours, 60000);
