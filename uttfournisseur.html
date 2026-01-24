@@ -38,6 +38,78 @@
             margin: 0 auto;
         }
 
+        /* Modal de sélection d'établissement */
+        .establishment-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .establishment-modal.hidden {
+            display: none;
+        }
+
+        .establishment-content {
+            background: white;
+            padding: 3rem;
+            border-radius: 25px;
+            max-width: 600px;
+            width: 90%;
+            box-shadow: var(--shadow-lg);
+            text-align: center;
+        }
+
+        .establishment-content h2 {
+            font-size: 2rem;
+            color: var(--dark);
+            margin-bottom: 1rem;
+        }
+
+        .establishment-content p {
+            color: #6c757d;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        .establishment-buttons {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .establishment-btn {
+            padding: 1.5rem 2rem;
+            border: 3px solid var(--border);
+            border-radius: 15px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .establishment-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary);
+            background: linear-gradient(135deg, var(--primary), #ff6b9d);
+            color: white;
+        }
+
+        .establishment-btn .icon {
+            font-size: 2rem;
+        }
+
         .header {
             background: white;
             padding: 2rem;
@@ -51,9 +123,7 @@
             gap: 1rem;
         }
 
-        .header h1 {
-            font-size: 2rem;
-            color: var(--dark);
+        .header-left {
             display: flex;
             align-items: center;
             gap: 1rem;
@@ -70,10 +140,39 @@
             font-size: 2rem;
         }
 
+        .header-info h1 {
+            font-size: 1.8rem;
+            color: var(--dark);
+            margin-bottom: 0.3rem;
+        }
+
+        .header-details {
+            display: flex;
+            gap: 1.5rem;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        .header-details span {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .current-establishment {
+            background: linear-gradient(135deg, var(--primary), #ff6b9d);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
         .header-actions {
             display: flex;
             gap: 1rem;
             align-items: center;
+            flex-wrap: wrap;
         }
 
         .connection-status {
@@ -94,6 +193,25 @@
         .connection-status.disconnected {
             background: #f8d7da;
             color: #721c24;
+        }
+
+        .btn-change-establishment {
+            background: linear-gradient(135deg, var(--info), #20c9e0);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-change-establishment:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
         }
 
         .btn-reset-all {
@@ -732,6 +850,11 @@
                 padding: 1.5rem;
             }
 
+            .header-left {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
             .header h1 {
                 font-size: 1.5rem;
             }
@@ -764,6 +887,10 @@
 
             .btn {
                 min-width: 100%;
+            }
+
+            .establishment-buttons {
+                grid-template-columns: 1fr;
             }
         }
 
@@ -803,17 +930,45 @@
     </style>
 </head>
 <body>
+    <!-- Modal de sélection d'établissement -->
+    <div class="establishment-modal" id="establishment-modal">
+        <div class="establishment-content">
+            <h2>🏢 Sélectionner un établissement</h2>
+            <p>Veuillez choisir l'établissement pour lequel vous souhaitez voir les commandes</p>
+            <div class="establishment-buttons">
+                <button class="establishment-btn" data-establishment="UTT LOKO ZONE 4C">
+                    <span class="icon">🏫</span>
+                    <span>UTT LOKO ZONE 4C</span>
+                </button>
+                <button class="establishment-btn" data-establishment="LA FONTAINE">
+                    <span class="icon">⛲</span>
+                    <span>LA FONTAINE</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         <div class="header">
-            <h1>
+            <div class="header-left">
                 <div class="header-logo">🍽️</div>
-                Dashboard Commandes
-            </h1>
+                <div class="header-info">
+                    <h1>Dashboard Commandes</h1>
+                    <div class="header-details">
+                        <span>📅 <span id="current-date">--</span></span>
+                        <span>⏰ <span id="current-time">--:--</span></span>
+                        <span class="current-establishment" id="current-establishment">--</span>
+                    </div>
+                </div>
+            </div>
             <div class="header-actions">
                 <div class="connection-status" id="connection-status">
                     <span>🔄</span>
                     <span>Connexion...</span>
                 </div>
+                <button class="btn-change-establishment" id="change-establishment-btn">
+                    🔄 Changer d'établissement
+                </button>
                 <button class="btn-reset-all" id="reset-all-btn">
                     🗑️ Réinitialiser tout
                 </button>
@@ -990,9 +1145,10 @@
         let app;
         let db;
         let allOrders = [];
-        let isConnected= false;
+        let isConnected = false;
         let highlightedOrderId = null;
         let orderToDelete = null;
+        let currentEstablishment = localStorage.getItem('selectedEstablishment') || null;
 
         // Initialisation Firebase
         try {
@@ -1005,6 +1161,55 @@
             updateConnectionStatus(false);
             showError('Erreur de connexion à Firebase');
         }
+
+        // Mise à jour de l'heure en temps réel
+        function updateDateTime() {
+            const now = new Date();
+            const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const dateStr = now.toLocaleDateString('fr-FR', dateOptions);
+            const timeStr = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            
+            document.getElementById('current-date').textContent = dateStr;
+            document.getElementById('current-time').textContent = timeStr;
+        }
+
+        // Mettre à jour l'heure toutes les secondes
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
+
+        // Gestion de la sélection d'établissement
+        function showEstablishmentModal() {
+            document.getElementById('establishment-modal').classList.remove('hidden');
+        }
+
+        function hideEstablishmentModal() {
+            document.getElementById('establishment-modal').classList.add('hidden');
+        }
+
+        function selectEstablishment(establishment) {
+            currentEstablishment = establishment;
+            localStorage.setItem('selectedEstablishment', establishment);
+            document.getElementById('current-establishment').textContent = `🏢 ${establishment}`;
+            hideEstablishmentModal();
+            loadOrders();
+            showToast(`✅ Établissement sélectionné: ${establishment}`, 'success');
+        }
+
+        // Vérifier si un établissement est sélectionné
+        if (!currentEstablishment) {
+            showEstablishmentModal();
+        } else {
+            document.getElementById('current-establishment').textContent = `🏢 ${currentEstablishment}`;
+        }
+
+        // Événements pour les boutons d'établissement
+        document.querySelectorAll('.establishment-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                selectEstablishment(btn.dataset.establishment);
+            });
+        });
+
+        document.getElementById('change-establishment-btn').addEventListener('click', showEstablishmentModal);
 
         // Mise à jour du statut de connexion
         function updateConnectionStatus(connected) {
@@ -1043,9 +1248,10 @@
             if (!confirm('Voulez-vous vraiment réinitialiser le revenu du jour ?')) return;
             
             const today = getTodayDate();
-            const dailyRevenue = JSON.parse(localStorage.getItem('dailyRevenue') || '{}');
+            const revenueKey = `dailyRevenue_${currentEstablishment}`;
+            const dailyRevenue = JSON.parse(localStorage.getItem(revenueKey) || '{}');
             dailyRevenue[today] = 0;
-            localStorage.setItem('dailyRevenue', JSON.stringify(dailyRevenue));
+            localStorage.setItem(revenueKey, JSON.stringify(dailyRevenue));
             
             updateStats();
             showToast('✅ Revenu du jour réinitialisé !', 'success');
@@ -1075,24 +1281,24 @@
             try {
                 const ordersSnapshot = await getDocs(collection(db, 'orders'));
                 const deletePromises = [];
+                
                 ordersSnapshot.forEach((docSnapshot) => {
-                    deletePromises.push(deleteDoc(doc(db, 'orders', docSnapshot.id)));
+                    const data = docSnapshot.data();
+                    const orderEstablishment = data.customer?.establishment || data.establishment;
+                    
+                    if (orderEstablishment === currentEstablishment) {
+                        deletePromises.push(deleteDoc(doc(db, 'orders', docSnapshot.id)));
+                    }
                 });
 
                 await Promise.all(deletePromises);
                 
                 const today = getTodayDate();
-                await setDoc(doc(db, 'accounting', today), {
-                    date: today,
-                    revenue: 0,
-                    deliveredOrders: 0,
-                    updatedAt: new Date().toISOString()
-                });
-
-                localStorage.setItem('dailyRevenue', JSON.stringify({}));
+                const revenueKey = `dailyRevenue_${currentEstablishment}`;
+                localStorage.setItem(revenueKey, JSON.stringify({ [today]: 0 }));
 
                 closeResetModal();
-                showToast('✅ Toutes les commandes ont été supprimées !', 'success');
+                showToast('✅ Toutes les commandes de cet établissement ont été supprimées !', 'success');
                 
                 setTimeout(() => location.reload(), 1000);
             } catch (error) {
@@ -1146,7 +1352,8 @@
                     name: customerName,
                     whatsapp: customerWhatsapp,
                     blockedAt: new Date().toISOString(),
-                    orderId: orderId
+                    orderId: orderId,
+                    establishment: currentEstablishment
                 });
 
                 showToast(`✅ Client ${customerName} bloqué avec succès !`, 'success');
@@ -1163,6 +1370,11 @@
                 return;
             }
 
+            if (!currentEstablishment) {
+                showError('Veuillez sélectionner un établissement');
+                return;
+            }
+
             try {
                 const ordersQuery = collection(db, 'orders');
                 
@@ -1170,27 +1382,29 @@
                     allOrders = [];
                     snapshot.forEach((docSnap) => {
                         const data = docSnap.data();
-                        console.log('📦 Document chargé:', docSnap.id, data);
+                        const orderEstablishment = data.customer?.establishment || data.establishment;
                         
-                        // S'assurer que toutes les propriétés nécessaires existent
-                        const order = {
-                            id: docSnap.id,
-                            code: data.code || docSnap.id,
-                            customer: data.customer || { 
-                                name: data.customerName || 'N/A', 
-                                whatsapp: data.customerWhatsapp || 'N/A',
-                                establishment: data.establishment || 'N/A'
-                            },
-                            items: data.items || [],
-                            total: data.total || 0,
-                            status: data.status || 'nouveau',
-                            createdAt: data.createdAt || data.timestamp || null,
-                            timestamp: data.timestamp || data.createdAt || new Date().toISOString(),
-                            deliveredAt: data.deliveredAt || null,
-                            deliveryDate: data.deliveryDate || null
-                        };
-                        
-                        allOrders.push(order);
+                        // Filtrer uniquement les commandes de l'établissement sélectionné
+                        if (orderEstablishment === currentEstablishment) {
+                            const order = {
+                                id: docSnap.id,
+                                code: data.code || docSnap.id,
+                                customer: data.customer || { 
+                                    name: data.customerName || 'N/A', 
+                                    whatsapp: data.customerWhatsapp || 'N/A',
+                                    establishment: orderEstablishment || 'N/A'
+                                },
+                                items: data.items || [],
+                                total: data.total || 0,
+                                status: data.status || 'nouveau',
+                                createdAt: data.createdAt || data.timestamp || null,
+                                timestamp: data.timestamp || data.createdAt || new Date().toISOString(),
+                                deliveredAt: data.deliveredAt || null,
+                                deliveryDate: data.deliveryDate || null
+                            };
+                            
+                            allOrders.push(order);
+                        }
                     });
                     
                     // Trier par date de création (plus récent en premier)
@@ -1200,11 +1414,7 @@
                         return dateB - dateA;
                     });
                     
-                    console.log(`✅ ${allOrders.length} commandes chargées`);
-                    
-                    if (allOrders.length === 0) {
-                        console.log('⚠️ Aucune commande trouvée dans Firebase');
-                    }
+                    console.log(`✅ ${allOrders.length} commandes chargées pour ${currentEstablishment}`);
                     
                     updateConnectionStatus(true);
                     filterOrders();
@@ -1527,12 +1737,13 @@
                 });
 
                 const today = getTodayDate();
-                const dailyRevenue = JSON.parse(localStorage.getItem('dailyRevenue') || '{}');
+                const revenueKey = `dailyRevenue_${currentEstablishment}`;
+                const dailyRevenue = JSON.parse(localStorage.getItem(revenueKey) || '{}');
                 if (!dailyRevenue[today]) {
                     dailyRevenue[today] = 0;
                 }
                 dailyRevenue[today] += orderTotal;
-                localStorage.setItem('dailyRevenue', JSON.stringify(dailyRevenue));
+                localStorage.setItem(revenueKey, JSON.stringify(dailyRevenue));
 
                 showToast('✅ Commande marquée comme livrée !', 'success');
                 updateStats();
@@ -1545,7 +1756,8 @@
         // Mettre à jour les statistiques
         function updateStats() {
             const today = getTodayDate();
-            const dailyRevenue = JSON.parse(localStorage.getItem('dailyRevenue') || '{}');
+            const revenueKey = `dailyRevenue_${currentEstablishment}`;
+            const dailyRevenue = JSON.parse(localStorage.getItem(revenueKey) || '{}');
             
             const todayOrders = allOrders.filter(order => {
                 const orderDate = order.createdAt 
@@ -1596,7 +1808,9 @@
         document.getElementById('category-filter').addEventListener('change', filterOrders);
 
         // Charger les commandes au démarrage
-        loadOrders();
+        if (currentEstablishment) {
+            loadOrders();
+        }
     </script>
 </body>
 </html>
