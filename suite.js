@@ -499,14 +499,14 @@ function selectTchep(tchepName, basePrice) {
     const options = document.getElementById('selection-options');
     
     title.textContent = tchepName;
-    subtitle.textContent = 'Choisissez le type de sauce';
+    subtitle.textContent = 'Choisissez le type de tchep';
     
     options.innerHTML = tchepTypes.map(type => `
         <div class="selection-option" onclick="addTchepToCart('${tchepName}', '${type.type}', ${basePrice})">
             <div class="selection-option-info">
                 <div class="selection-option-icon">${type.icon}</div>
                 <div class="selection-option-details">
-                    <h4>Sauce ${type.type}</h4>
+                    <h4>tchep ${type.type}</h4>
                     <p>${type.desc}</p>
                 </div>
             </div>
