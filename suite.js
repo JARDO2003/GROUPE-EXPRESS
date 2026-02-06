@@ -165,8 +165,8 @@ const porcPreparations = [
 
 // Données pour les types de tchèpe
 const tchepTypes = [
-    { type: 'Rouge', icon: '🔴', desc: 'Tchèpe sauce rouge traditionnelle' },
-    { type: 'Jaune', icon: '🟡', desc: 'Tchèpe sauce jaune délicate' }
+    { type: 'Rouge', icon: '🔴', desc: 'Tchèpe  rouge traditionnelle' },
+    { type: 'Jaune', icon: '🟡', desc: 'Tchèpe jaune délicate' }
 ];
 
 let currentSelection = {
