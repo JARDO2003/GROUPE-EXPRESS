@@ -13,10 +13,6 @@
 
         :root {
             --primary: #ff4e00;
-            --primary-light: #ff6b2b;
-            --primary-dark: #cc3e00;
-            --secondary: #131315;
-            --accent: #f10505;
             --gradient: linear-gradient(135deg, #ff4e00, #ff6b9d);
             --surface: #FFFFFF;
             --background: #e0e5ec;
@@ -26,25 +22,19 @@
             --shadow: 0 2px 4px rgba(0,0,0,0.1);
             --shadow-lg: 0 8px 25px rgba(0,0,0,0.15);
             --radius: 12px;
-            --radius-xl: 24px;
-            
-            /* Neumorphisme */
             --neu-shadow: 9px 9px 16px rgba(163, 177, 198, 0.6), -9px -9px 16px rgba(255, 255, 255, 0.5);
-            --neu-shadow-inset: inset 6px 6px 10px rgba(163, 177, 198, 0.6), inset -6px -6px 10px rgba(255, 255, 255, 0.5);
             --neu-shadow-sm: 4px 4px 8px rgba(163, 177, 198, 0.4), -4px -4px 8px rgba(255, 255, 255, 0.5);
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: var(--background);
             color: var(--on-surface);
-            line-height: 1.6;
             min-height: 100vh;
         }
 
         .header {
             background: var(--background);
-            border-bottom: none;
             padding: 16px 0;
             box-shadow: var(--neu-shadow-sm);
             position: sticky;
@@ -78,7 +68,6 @@
         .logo-text {
             font-size: 18px;
             font-weight: 600;
-            color: var(--on-surface);
         }
 
         .back-btn {
@@ -90,19 +79,8 @@
             font-weight: 600;
             cursor: pointer;
             box-shadow: var(--neu-shadow-sm);
-            transition: all 0.3s ease;
             text-decoration: none;
             color: var(--on-surface);
-            display: inline-block;
-        }
-
-        .back-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--neu-shadow);
-        }
-
-        .back-btn:active {
-            box-shadow: var(--neu-shadow-inset);
         }
 
         .container {
@@ -113,7 +91,7 @@
 
         .page-title {
             text-align: center;
-            margin-bottom: 16px;
+            margin-bottom: 32px;
         }
 
         .page-title h1 {
@@ -127,7 +105,6 @@
 
         .page-title p {
             color: var(--on-surface-light);
-            font-size: 1rem;
         }
 
         .tabs {
@@ -149,8 +126,8 @@
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
             color: var(--on-surface-light);
+            transition: all 0.3s;
         }
 
         .tab-btn.active {
@@ -189,7 +166,6 @@
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
-            color: var(--on-surface);
         }
 
         .form-group input,
@@ -202,7 +178,6 @@
             font-size: 16px;
             font-family: inherit;
             background: var(--surface);
-            transition: all 0.3s ease;
         }
 
         .form-group input:focus,
@@ -224,7 +199,7 @@
             padding: 32px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
             background: var(--surface);
         }
 
@@ -233,14 +208,16 @@
             background: rgba(255, 78, 0, 0.05);
         }
 
-        .image-upload-area.dragover {
+        .image-upload-area.uploading {
             border-color: var(--primary);
-            background: rgba(255, 78, 0, 0.1);
+            background: rgba(255, 78, 0, 0.05);
+            pointer-events: none;
         }
 
         .image-preview {
             margin-top: 16px;
             display: none;
+            position: relative;
         }
 
         .image-preview img {
@@ -248,6 +225,19 @@
             max-height: 300px;
             border-radius: 12px;
             box-shadow: var(--shadow);
+        }
+
+        .image-preview .remove-image {
+            position: absolute;
+            top: 8px;
+            right: calc(50% - 150px);
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
         }
 
         .form-row {
@@ -266,22 +256,56 @@
             font-size: 18px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: var(--shadow);
+            transition: all 0.3s;
         }
 
-        .submit-btn:hover {
+        .submit-btn:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: var(--shadow-lg);
-        }
-
-        .submit-btn:active {
-            transform: translateY(0);
         }
 
         .submit-btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .alert {
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            font-weight: 600;
+            animation: slideDown 0.3s ease;
+        }
+
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .dishes-list {
@@ -295,12 +319,11 @@
             border-radius: 20px;
             overflow: hidden;
             box-shadow: var(--neu-shadow);
-            transition: all 0.3s ease;
+            transition: all 0.3s;
         }
 
         .dish-card:hover {
             transform: translateY(-5px);
-            box-shadow: 12px 12px 20px rgba(163, 177, 198, 0.6), -12px -12px 20px rgba(255, 255, 255, 0.5);
         }
 
         .dish-card-image {
@@ -311,6 +334,25 @@
 
         .dish-card-content {
             padding: 16px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .status-badge.active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-badge.inactive {
+            background: #f8d7da;
+            color: #721c24;
         }
 
         .dish-card-title {
@@ -350,105 +392,12 @@
             cursor: pointer;
             font-size: 14px;
             font-weight: 600;
-            transition: all 0.3s ease;
             box-shadow: var(--neu-shadow-sm);
         }
 
-        .action-btn.delete {
-            color: #dc3545;
-        }
-
-        .action-btn.toggle {
-            color: #28a745;
-        }
-
-        .action-btn.inactive {
-            color: #6c757d;
-        }
-
-        .action-btn:hover {
-            transform: scale(1.05);
-        }
-
-        .action-btn:active {
-            box-shadow: var(--neu-shadow-inset);
-        }
-
-        .status-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .status-badge.active {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .status-badge.inactive {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .alert {
-            padding: 16px;
-            border-radius: 12px;
-            margin-bottom: 24px;
-            font-weight: 600;
-            animation: slideDown 0.3s ease;
-        }
-
-        .alert.success {
-            background: #d4edda;
-            color: #155724;
-            border: 2px solid #c3e6cb;
-        }
-
-        .alert.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 2px solid #f5c6cb;
-        }
-
-        .alert.info {
-            background: #d1ecf1;
-            color: #0c5460;
-            border: 2px solid #bee5eb;
-        }
-
-        .alert.warning {
-            background: #fff3cd;
-            color: #856404;
-            border: 2px solid #ffc107;
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .loading-spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+        .action-btn.delete { color: #dc3545; }
+        .action-btn.toggle { color: #28a745; }
+        .action-btn.inactive { color: #6c757d; }
 
         .stats-grid {
             display: grid;
@@ -480,19 +429,43 @@
             margin-top: 8px;
         }
 
+        .upload-progress {
+            margin-top: 12px;
+            display: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e5ec;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient);
+            transition: width 0.3s;
+            width: 0%;
+        }
+
+        .progress-text {
+            margin-top: 8px;
+            font-size: 14px;
+            color: var(--on-surface-light);
+            text-align: center;
+        }
+
         @media (max-width: 768px) {
             .form-row {
                 grid-template-columns: 1fr;
             }
-
             .dishes-list {
                 grid-template-columns: 1fr;
             }
-
             .tabs {
                 flex-direction: column;
             }
-
             .form-section {
                 padding: 20px;
             }
@@ -503,7 +476,7 @@
     <header class="header">
         <div class="header-content">
             <div class="logo-section">
-                <img src="image/GE.jpg" alt="Logo GROUPE EXPRESS" class="header-logo" onerror="this.style.display='none'">
+                <img src="image/GE.jpg" alt="Logo" class="header-logo" onerror="this.style.display='none'">
                 <div class="logo-text">GROUPE EXPRESS</div>
             </div>
             <a href="index.html" class="back-btn">← Retour</a>
@@ -513,7 +486,7 @@
     <div class="container">
         <div class="page-title">
             <h1>👨‍🍳 Espace Fournisseur</h1>
-            <p>Gérez vos plats et votre menu en temps réel</p>
+            <p>Gestion optimisée avec Cloudinary</p>
         </div>
 
         <div id="alert-container"></div>
@@ -523,10 +496,10 @@
             <button class="tab-btn" onclick="switchTab('manage')">📋 Gérer les plats</button>
         </div>
 
-        <!-- TAB: Ajouter un plat -->
+        <!-- TAB: Ajouter -->
         <div id="tab-add" class="tab-content active">
             <div class="form-section">
-                <h2 style="margin-bottom: 24px; color: var(--on-surface);">Ajouter un nouveau plat</h2>
+                <h2 style="margin-bottom: 24px;">Ajouter un nouveau plat</h2>
                 
                 <form id="add-dish-form">
                     <div class="form-group">
@@ -562,12 +535,19 @@
                     <div class="form-group">
                         <label>Image du plat *</label>
                         <div class="image-upload-area" id="image-upload-area">
-                            <div class="upload-icon" style="font-size: 48px; margin-bottom: 16px;">📸</div>
-                            <p style="font-weight: 600; margin-bottom: 8px;">Cliquez ou glissez une image ici</p>
-                            <p style="font-size: 14px; color: var(--on-surface-light);">PNG, JPG jusqu'à 2MB</p>
+                            <div style="font-size: 48px; margin-bottom: 16px;">📸</div>
+                            <p style="font-weight: 600; margin-bottom: 8px;">Cliquez pour choisir une image</p>
+                            <p style="font-size: 14px; color: var(--on-surface-light);">JPG, PNG jusqu'à 10MB</p>
                             <input type="file" id="dish-image" accept="image/*" style="display: none;" required>
                         </div>
+                        <div class="upload-progress" id="upload-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progress-fill"></div>
+                            </div>
+                            <div class="progress-text" id="progress-text">Upload en cours...</div>
+                        </div>
                         <div class="image-preview" id="image-preview">
+                            <button type="button" class="remove-image" onclick="removeImage()">✕ Retirer</button>
                             <img id="preview-img" src="" alt="Aperçu">
                         </div>
                     </div>
@@ -582,9 +562,9 @@
             </div>
         </div>
 
-        <!-- TAB: Gérer les plats -->
+        <!-- TAB: Gérer -->
         <div id="tab-manage" class="tab-content">
-            <div class="stats-grid" id="stats-grid">
+            <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-number" id="stat-total">0</div>
                     <div class="stat-label">Total de plats</div>
@@ -600,7 +580,7 @@
             </div>
 
             <div class="form-section">
-                <h2 style="margin-bottom: 24px; color: var(--on-surface);">Mes plats</h2>
+                <h2 style="margin-bottom: 24px;">Mes plats</h2>
                 <div class="dishes-list" id="dishes-list">
                     <div style="text-align: center; padding: 48px; color: var(--on-surface-light);">
                         <div style="font-size: 64px; margin-bottom: 16px;">🍽️</div>
@@ -621,14 +601,21 @@
             projectId: "livraison-c8498",
             storageBucket: "livraison-c8498.firebasestorage.app",
             messagingSenderId: "403240604780",
-            appId: "1:403240604780:web:77d84ad03d68bdaddfb449",
-            measurementId: "G-5YF89BZ5RY"
+            appId: "1:403240604780:web:77d84ad03d68bdaddfb449"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // ===== GESTION DES ONGLETS =====
+        // Configuration Cloudinary
+        const cloudinaryConfig = {
+            cloudName: 'djxcqczh1',
+            uploadPreset: 'database'
+        };
+
+        let currentImageUrl = '';
+
+        // ===== ONGLETS =====
         window.switchTab = function(tabName) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
@@ -636,83 +623,109 @@
             event.target.classList.add('active');
             document.getElementById(`tab-${tabName}`).classList.add('active');
             
-            if (tabName === 'manage') {
-                loadDishes();
-            }
+            if (tabName === 'manage') loadDishes();
         };
 
-        // ===== AFFICHER LES ALERTES =====
+        // ===== ALERTES =====
         function showAlert(message, type = 'info') {
-            const alertContainer = document.getElementById('alert-container');
+            const container = document.getElementById('alert-container');
             const alert = document.createElement('div');
             alert.className = `alert ${type}`;
             alert.innerHTML = message;
-            
-            alertContainer.appendChild(alert);
-            
-            setTimeout(() => {
-                alert.style.animation = 'slideDown 0.3s ease reverse';
-                setTimeout(() => alert.remove(), 300);
-            }, 5000);
+            container.appendChild(alert);
+            setTimeout(() => alert.remove(), 5000);
         }
 
-        // ===== GESTION UPLOAD IMAGE =====
+        // ===== UPLOAD VERS CLOUDINARY =====
         const uploadArea = document.getElementById('image-upload-area');
         const fileInput = document.getElementById('dish-image');
         const previewContainer = document.getElementById('image-preview');
         const previewImg = document.getElementById('preview-img');
-        let currentImageBase64 = '';
+        const uploadProgress = document.getElementById('upload-progress');
+        const progressFill = document.getElementById('progress-fill');
+        const progressText = document.getElementById('progress-text');
 
         uploadArea.addEventListener('click', () => fileInput.click());
 
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.classList.add('dragover');
-        });
-
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.classList.remove('dragover');
-        });
-
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove('dragover');
-            
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                fileInput.files = files;
-                handleImageSelect(files[0]);
-            }
-        });
-
-        fileInput.addEventListener('change', (e) => {
+        fileInput.addEventListener('change', async (e) => {
             if (e.target.files.length > 0) {
-                handleImageSelect(e.target.files[0]);
+                const file = e.target.files[0];
+                
+                if (!file.type.startsWith('image/')) {
+                    showAlert('❌ Veuillez sélectionner une image', 'error');
+                    return;
+                }
+
+                // Vérifier la taille (10MB max)
+                if (file.size > 10 * 1024 * 1024) {
+                    showAlert('❌ L\'image est trop grande (max 10MB)', 'error');
+                    return;
+                }
+
+                await uploadToCloudinary(file);
             }
         });
 
-        function handleImageSelect(file) {
-            if (!file.type.startsWith('image/')) {
-                showAlert('❌ Veuillez sélectionner une image valide', 'error');
-                return;
-            }
+        async function uploadToCloudinary(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', cloudinaryConfig.uploadPreset);
 
-            // Limite à 2MB pour éviter les problèmes
-            if (file.size > 2 * 1024 * 1024) {
-                showAlert('❌ L\'image ne doit pas dépasser 2MB', 'error');
-                return;
-            }
+            uploadArea.classList.add('uploading');
+            uploadProgress.style.display = 'block';
+            progressFill.style.width = '0%';
+            progressText.textContent = 'Upload en cours...';
 
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                currentImageBase64 = e.target.result;
-                previewImg.src = currentImageBase64;
-                previewContainer.style.display = 'block';
-            };
-            reader.readAsDataURL(file);
+            try {
+                const xhr = new XMLHttpRequest();
+                
+                // Progression de l'upload
+                xhr.upload.addEventListener('progress', (e) => {
+                    if (e.lengthComputable) {
+                        const percentComplete = (e.loaded / e.total) * 100;
+                        progressFill.style.width = percentComplete + '%';
+                        progressText.textContent = `Upload: ${Math.round(percentComplete)}%`;
+                    }
+                });
+
+                xhr.addEventListener('load', () => {
+                    if (xhr.status === 200) {
+                        const response = JSON.parse(xhr.responseText);
+                        currentImageUrl = response.secure_url;
+                        
+                        previewImg.src = currentImageUrl;
+                        previewContainer.style.display = 'block';
+                        uploadProgress.style.display = 'none';
+                        uploadArea.classList.remove('uploading');
+                        
+                        showAlert('✅ Image uploadée avec succès !', 'success');
+                    } else {
+                        throw new Error('Erreur lors de l\'upload');
+                    }
+                });
+
+                xhr.addEventListener('error', () => {
+                    throw new Error('Erreur réseau');
+                });
+
+                xhr.open('POST', `https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/image/upload`);
+                xhr.send(formData);
+
+            } catch (error) {
+                console.error('Erreur upload:', error);
+                showAlert('❌ Erreur lors de l\'upload de l\'image', 'error');
+                uploadArea.classList.remove('uploading');
+                uploadProgress.style.display = 'none';
+            }
         }
 
-        // ===== AJOUTER UN PLAT (STOCKAGE BASE64 DIRECT) =====
+        window.removeImage = function() {
+            currentImageUrl = '';
+            previewContainer.style.display = 'none';
+            fileInput.value = '';
+        };
+
+        // ===== AJOUTER PLAT =====
         document.getElementById('add-dish-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -730,28 +743,26 @@
                 const price = parseInt(document.getElementById('dish-price').value);
                 const category = document.getElementById('dish-category').value;
 
-                if (!currentImageBase64) {
-                    throw new Error('Veuillez sélectionner une image');
+                if (!currentImageUrl) {
+                    throw new Error('Veuillez sélectionner et uploader une image');
                 }
 
-                // Stocker directement l'image en base64 dans Firestore
-                // C'est une solution de contournement pour éviter les problèmes CORS
+                // Ajout dans Firebase avec URL Cloudinary
                 await addDoc(collection(db, 'nouveaux_plats'), {
                     name,
                     description,
                     price,
                     category,
-                    imageUrl: currentImageBase64, // Stockage base64 direct
+                    imageUrl: currentImageUrl,
                     active: true,
                     createdAt: new Date().toISOString()
                 });
 
                 showAlert('✅ Plat ajouté avec succès !', 'success');
                 
-                // Reset form
                 e.target.reset();
                 previewContainer.style.display = 'none';
-                currentImageBase64 = '';
+                currentImageUrl = '';
                 
             } catch (error) {
                 console.error('Erreur:', error);
@@ -763,41 +774,30 @@
             }
         });
 
-        // ===== CHARGER LES PLATS =====
+        // ===== CHARGER PLATS =====
         async function loadDishes() {
             const dishesList = document.getElementById('dishes-list');
-            dishesList.innerHTML = '<div style="text-align: center; padding: 48px;"><span class="loading-spinner" style="width: 40px; height: 40px; border: 3px solid var(--primary); border-top-color: transparent;"></span><p style="margin-top: 16px;">Chargement...</p></div>';
+            dishesList.innerHTML = '<div style="text-align: center; padding: 48px;"><span class="loading-spinner" style="width: 40px; height: 40px; border: 3px solid var(--primary); border-top-color: transparent;"></span></div>';
 
             try {
                 const q = query(collection(db, 'nouveaux_plats'), orderBy('createdAt', 'desc'));
-                const querySnapshot = await getDocs(q);
+                const snapshot = await getDocs(q);
                 
                 const dishes = [];
-                querySnapshot.forEach((doc) => {
+                snapshot.forEach((doc) => {
                     dishes.push({ id: doc.id, ...doc.data() });
                 });
 
-                // Mettre à jour les statistiques
-                const totalDishes = dishes.length;
-                const activeDishes = dishes.filter(d => d.active).length;
-                const inactiveDishes = totalDishes - activeDishes;
+                document.getElementById('stat-total').textContent = dishes.length;
+                document.getElementById('stat-active').textContent = dishes.filter(d => d.active).length;
+                document.getElementById('stat-inactive').textContent = dishes.filter(d => !d.active).length;
 
-                document.getElementById('stat-total').textContent = totalDishes;
-                document.getElementById('stat-active').textContent = activeDishes;
-                document.getElementById('stat-inactive').textContent = inactiveDishes;
-
-                // Afficher les plats
                 if (dishes.length === 0) {
-                    dishesList.innerHTML = `
-                        <div style="text-align: center; padding: 48px; color: var(--on-surface-light); grid-column: 1 / -1;">
-                            <div style="font-size: 64px; margin-bottom: 16px;">🍽️</div>
-                            <p>Aucun plat pour le moment</p>
-                        </div>
-                    `;
+                    dishesList.innerHTML = '<div style="text-align: center; padding: 48px; grid-column: 1 / -1;"><div style="font-size: 64px;">🍽️</div><p>Aucun plat</p></div>';
                 } else {
                     dishesList.innerHTML = dishes.map(dish => `
                         <div class="dish-card">
-                            <img src="${dish.imageUrl}" alt="${dish.name}" class="dish-card-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27300%27 height=%27300%27%3E%3Crect fill=%27%23ddd%27 width=%27300%27 height=%27300%27/%3E%3Ctext fill=%27%23999%27 font-family=%27sans-serif%27 font-size=%2730%27 dy=%2710.5%27 font-weight=%27bold%27 x=%2750%25%27 y=%2750%25%27 text-anchor=%27middle%27%3E🍽️%3C/text%3E%3C/svg%3E'">
+                            <img src="${dish.imageUrl}" alt="${dish.name}" class="dish-card-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22300%22%3E%3Crect fill=%22%23e0e5ec%22 width=%22300%22 height=%22300%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%238E8E8E%22 font-size=%2248%22%3E🍽️%3C/text%3E%3C/svg%3E'">
                             <div class="dish-card-content">
                                 <span class="status-badge ${dish.active ? 'active' : 'inactive'}">
                                     ${dish.active ? '✅ Actif' : '⛔ Inactif'}
@@ -807,12 +807,10 @@
                                 <div class="dish-card-footer">
                                     <div class="dish-card-price">${dish.price} FCFA</div>
                                     <div class="dish-card-actions">
-                                        <button class="action-btn toggle ${dish.active ? '' : 'inactive'}" onclick="toggleDish('${dish.id}', ${!dish.active})">
+                                        <button class="action-btn toggle" onclick="toggleDish('${dish.id}', ${!dish.active})">
                                             ${dish.active ? '⏸️' : '▶️'}
                                         </button>
-                                        <button class="action-btn delete" onclick="deleteDish('${dish.id}')">
-                                            🗑️
-                                        </button>
+                                        <button class="action-btn delete" onclick="deleteDish('${dish.id}')">🗑️</button>
                                     </div>
                                 </div>
                             </div>
@@ -820,50 +818,34 @@
                     `).join('');
                 }
             } catch (error) {
-                console.error('Erreur lors du chargement:', error);
-                showAlert('❌ Erreur lors du chargement des plats', 'error');
-                dishesList.innerHTML = `
-                    <div style="text-align: center; padding: 48px; color: var(--on-surface-light); grid-column: 1 / -1;">
-                        <div style="font-size: 64px; margin-bottom: 16px;">❌</div>
-                        <p>Erreur lors du chargement</p>
-                    </div>
-                `;
+                console.error('Erreur:', error);
+                showAlert('❌ Erreur de chargement', 'error');
             }
         }
 
-        // ===== ACTIVER/DÉSACTIVER UN PLAT =====
+        // ===== TOGGLE & DELETE =====
         window.toggleDish = async function(dishId, newStatus) {
             try {
-                await updateDoc(doc(db, 'nouveaux_plats', dishId), {
-                    active: newStatus
-                });
-                
-                showAlert(`✅ Plat ${newStatus ? 'activé' : 'désactivé'} avec succès`, 'success');
+                await updateDoc(doc(db, 'nouveaux_plats', dishId), { active: newStatus });
+                showAlert(`✅ Plat ${newStatus ? 'activé' : 'désactivé'}`, 'success');
                 loadDishes();
             } catch (error) {
-                console.error('Erreur:', error);
-                showAlert('❌ Erreur lors de la mise à jour', 'error');
+                showAlert('❌ Erreur', 'error');
             }
         };
 
-        // ===== SUPPRIMER UN PLAT =====
         window.deleteDish = async function(dishId) {
-            if (!confirm('Êtes-vous sûr de vouloir supprimer ce plat ?')) {
-                return;
-            }
-
+            if (!confirm('⚠️ Êtes-vous sûr de vouloir supprimer ce plat ?')) return;
             try {
                 await deleteDoc(doc(db, 'nouveaux_plats', dishId));
-                showAlert('✅ Plat supprimé avec succès', 'success');
+                showAlert('✅ Plat supprimé', 'success');
                 loadDishes();
             } catch (error) {
-                console.error('Erreur:', error);
-                showAlert('❌ Erreur lors de la suppression', 'error');
+                showAlert('❌ Erreur de suppression', 'error');
             }
         };
 
-        // Charger les plats au démarrage
-        console.log('🚀 Application fournisseur initialisée');
+        // Chargement initial
         loadDishes();
     </script>
 </body>
