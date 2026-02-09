@@ -419,6 +419,12 @@
             border: 2px solid #bee5eb;
         }
 
+        .alert.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 2px solid #ffc107;
+        }
+
         @keyframes slideDown {
             from {
                 opacity: 0;
@@ -497,7 +503,7 @@
     <header class="header">
         <div class="header-content">
             <div class="logo-section">
-                <img src="image/GE.jpg" alt="Logo GROUPE EXPRESS" class="header-logo">
+                <img src="image/GE.jpg" alt="Logo GROUPE EXPRESS" class="header-logo" onerror="this.style.display='none'">
                 <div class="logo-text">GROUPE EXPRESS</div>
             </div>
             <a href="index.html" class="back-btn">← Retour</a>
@@ -558,7 +564,7 @@
                         <div class="image-upload-area" id="image-upload-area">
                             <div class="upload-icon" style="font-size: 48px; margin-bottom: 16px;">📸</div>
                             <p style="font-weight: 600; margin-bottom: 8px;">Cliquez ou glissez une image ici</p>
-                            <p style="font-size: 14px; color: var(--on-surface-light);">PNG, JPG jusqu'à 5MB</p>
+                            <p style="font-size: 14px; color: var(--on-surface-light);">PNG, JPG jusqu'à 2MB</p>
                             <input type="file" id="dish-image" accept="image/*" style="display: none;" required>
                         </div>
                         <div class="image-preview" id="image-preview">
@@ -608,7 +614,6 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-storage.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBsGrY-AqYMoI70kT3WMxLgW0HwYA4KyaQ",
@@ -622,7 +627,6 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const storage = getStorage(app);
 
         // ===== GESTION DES ONGLETS =====
         window.switchTab = function(tabName) {
@@ -642,7 +646,7 @@
             const alertContainer = document.getElementById('alert-container');
             const alert = document.createElement('div');
             alert.className = `alert ${type}`;
-            alert.textContent = message;
+            alert.innerHTML = message;
             
             alertContainer.appendChild(alert);
             
@@ -657,6 +661,7 @@
         const fileInput = document.getElementById('dish-image');
         const previewContainer = document.getElementById('image-preview');
         const previewImg = document.getElementById('preview-img');
+        let currentImageBase64 = '';
 
         uploadArea.addEventListener('click', () => fileInput.click());
 
@@ -692,20 +697,22 @@
                 return;
             }
 
-            if (file.size > 5 * 1024 * 1024) {
-                showAlert('❌ L\'image ne doit pas dépasser 5MB', 'error');
+            // Limite à 2MB pour éviter les problèmes
+            if (file.size > 2 * 1024 * 1024) {
+                showAlert('❌ L\'image ne doit pas dépasser 2MB', 'error');
                 return;
             }
 
             const reader = new FileReader();
             reader.onload = (e) => {
-                previewImg.src = e.target.result;
+                currentImageBase64 = e.target.result;
+                previewImg.src = currentImageBase64;
                 previewContainer.style.display = 'block';
             };
             reader.readAsDataURL(file);
         }
 
-        // ===== AJOUTER UN PLAT =====
+        // ===== AJOUTER UN PLAT (STOCKAGE BASE64 DIRECT) =====
         document.getElementById('add-dish-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -722,24 +729,19 @@
                 const description = document.getElementById('dish-description').value.trim();
                 const price = parseInt(document.getElementById('dish-price').value);
                 const category = document.getElementById('dish-category').value;
-                const imageFile = fileInput.files[0];
 
-                if (!imageFile) {
+                if (!currentImageBase64) {
                     throw new Error('Veuillez sélectionner une image');
                 }
 
-                // Upload image
-                const imageRef = ref(storage, `dishes/${Date.now()}_${imageFile.name}`);
-                await uploadBytes(imageRef, imageFile);
-                const imageUrl = await getDownloadURL(imageRef);
-
-                // Ajouter le plat à Firestore
+                // Stocker directement l'image en base64 dans Firestore
+                // C'est une solution de contournement pour éviter les problèmes CORS
                 await addDoc(collection(db, 'nouveaux_plats'), {
                     name,
                     description,
                     price,
                     category,
-                    imageUrl,
+                    imageUrl: currentImageBase64, // Stockage base64 direct
                     active: true,
                     createdAt: new Date().toISOString()
                 });
@@ -749,6 +751,7 @@
                 // Reset form
                 e.target.reset();
                 previewContainer.style.display = 'none';
+                currentImageBase64 = '';
                 
             } catch (error) {
                 console.error('Erreur:', error);
@@ -763,7 +766,7 @@
         // ===== CHARGER LES PLATS =====
         async function loadDishes() {
             const dishesList = document.getElementById('dishes-list');
-            dishesList.innerHTML = '<div style="text-align: center; padding: 48px;"><span class="loading-spinner" style="width: 40px; height: 40px;"></span><p style="margin-top: 16px;">Chargement...</p></div>';
+            dishesList.innerHTML = '<div style="text-align: center; padding: 48px;"><span class="loading-spinner" style="width: 40px; height: 40px; border: 3px solid var(--primary); border-top-color: transparent;"></span><p style="margin-top: 16px;">Chargement...</p></div>';
 
             try {
                 const q = query(collection(db, 'nouveaux_plats'), orderBy('createdAt', 'desc'));
@@ -794,7 +797,7 @@
                 } else {
                     dishesList.innerHTML = dishes.map(dish => `
                         <div class="dish-card">
-                            <img src="${dish.imageUrl}" alt="${dish.name}" class="dish-card-image" onerror="this.src='image/placeholder.jpg'">
+                            <img src="${dish.imageUrl}" alt="${dish.name}" class="dish-card-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27300%27 height=%27300%27%3E%3Crect fill=%27%23ddd%27 width=%27300%27 height=%27300%27/%3E%3Ctext fill=%27%23999%27 font-family=%27sans-serif%27 font-size=%2730%27 dy=%2710.5%27 font-weight=%27bold%27 x=%2750%25%27 y=%2750%25%27 text-anchor=%27middle%27%3E🍽️%3C/text%3E%3C/svg%3E'">
                             <div class="dish-card-content">
                                 <span class="status-badge ${dish.active ? 'active' : 'inactive'}">
                                     ${dish.active ? '✅ Actif' : '⛔ Inactif'}
@@ -860,6 +863,7 @@
         };
 
         // Charger les plats au démarrage
+        console.log('🚀 Application fournisseur initialisée');
         loadDishes();
     </script>
 </body>
