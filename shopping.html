@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GROUPE EXPRESS - Notifications</title>
+    <title>Notifications Push - Index</title>
     <style>
         * {
             margin: 0;
@@ -19,14 +19,15 @@
         }
 
         .container {
-            max-width: 500px;
+            max-width: 600px;
             margin: 0 auto;
         }
 
         .header {
             text-align: center;
             color: white;
-            padding: 40px 20px;
+            margin-bottom: 30px;
+            padding-top: 20px;
         }
 
         .header h1 {
@@ -41,95 +42,140 @@
         .card {
             background: white;
             border-radius: 20px;
-            padding: 30px;
+            padding: 25px;
             margin-bottom: 20px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.2);
         }
 
-        .logo {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 20px;
+        .status-indicator {
             display: flex;
             align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px;
-            font-size: 2.5rem;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .status-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            position: relative;
+        }
+
+        .status-dot.active {
+            background: #4ade80;
+            box-shadow: 0 0 20px #4ade80;
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.error {
+            background: #f87171;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.8; }
         }
 
         .btn {
             width: 100%;
-            padding: 18px;
+            padding: 15px;
             border: none;
-            border-radius: 14px;
-            font-size: 1.1rem;
-            font-weight: 700;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            text-decoration: none;
+            margin-bottom: 10px;
         }
 
         .btn-primary {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
         }
 
-        .btn-success {
-            background: #10b981;
-            color: white;
-        }
-
-        .status {
-            text-align: center;
-            padding: 20px;
-            border-radius: 14px;
-            margin-bottom: 20px;
-            display: none;
-        }
-
-        .status.active {
-            display: block;
-            background: #d1fae5;
-            color: #065f46;
-            animation: fadeIn 0.5s;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .instructions {
+        .btn-secondary {
             background: #f3f4f6;
-            border-radius: 14px;
-            padding: 20px;
-            margin-top: 20px;
-        }
-
-        .instructions h3 {
-            margin-bottom: 15px;
             color: #374151;
         }
 
-        .instructions ol {
-            margin-left: 20px;
-            color: #4b5563;
-            line-height: 1.8;
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
         }
 
-        .instructions li {
-            margin-bottom: 8px;
+        .token-display {
+            background: #f3f4f6;
+            border-radius: 12px;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            word-break: break-all;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .token-display.show {
+            display: block;
+        }
+
+        .notifications-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .notification-item {
+            background: #f9fafb;
+            border-left: 4px solid #667eea;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .notification-time {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-bottom: 5px;
+        }
+
+        .notification-title {
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 5px;
+        }
+
+        .notification-body {
+            color: #4b5563;
+            font-size: 0.9rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #9ca3af;
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 15px;
         }
 
         .toast {
@@ -139,7 +185,7 @@
             transform: translateX(-50%) translateY(100px);
             background: #1f2937;
             color: white;
-            padding: 16px 24px;
+            padding: 15px 25px;
             border-radius: 12px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             transition: transform 0.3s;
@@ -149,95 +195,246 @@
         .toast.show {
             transform: translateX(-50%) translateY(0);
         }
+
+        .info-box {
+            background: #dbeafe;
+            border: 1px solid #3b82f6;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #1e40af;
+            font-size: 0.9rem;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            margin-left: 10px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <div class="logo">🚀</div>
-            <h1>GROUPE EXPRESS</h1>
-            <p>Recevez nos notifications en temps réel</p>
+            <h1>🔔 Notifications Push</h1>
+            <p>Recevez des notifications même hors de l'application</p>
         </div>
 
         <div class="card">
-            <div class="status" id="status-box">
-                <div style="font-size: 2rem; margin-bottom: 10px;">✅</div>
-                <div style="font-weight: 700; font-size: 1.1rem;">Notifications activées !</div>
-                <div style="font-size: 0.9rem; margin-top: 5px;">Vous recevrez nos annonces sur cet appareil</div>
+            <div class="info-box">
+                💡 <strong>Comment ça marche :</strong> Autorisez les notifications pour recevoir des alertes en temps réel, même lorsque cette page est fermée.
             </div>
 
-            <button class="btn btn-primary" id="subscribe-btn" onclick="subscribe()">
-                <span>🔔</span>
-                <span>Activer les notifications</span>
+            <div class="status-indicator">
+                <div class="status-dot" id="status-dot"></div>
+                <div>
+                    <div style="font-weight: 600;" id="status-text">Notifications non activées</div>
+                    <div style="font-size: 0.85rem; color: #6b7280;" id="status-sub">Cliquez sur le bouton ci-dessous</div>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" id="subscribe-btn" onclick="requestPermission()">
+                🔔 Activer les notifications
             </button>
 
-            <div class="instructions">
-                <h3>📱 Comment ça marche ?</h3>
-                <ol>
-                    <li>Cliquez sur le bouton ci-dessus</li>
-                    <li>Autorisez les notifications dans votre navigateur</li>
-                    <li>Installez l'app ntfy si demandé (optionnel)</li>
-                    <li>Recevez nos annonces automatiquement !</li>
-                </ol>
-            </div>
+            <button class="btn btn-secondary" id="token-btn" onclick="copyToken()" style="display: none;">
+                📋 Copier le token
+            </button>
+
+            <div class="token-display" id="token-display"></div>
         </div>
 
-        <div class="card" style="text-align: center;">
-            <p style="color: #6b7280; font-size: 0.9rem;">
-                💡 Vous pouvez aussi rejoindre directement notre canal :
-            </p>
-            <a href="https://ntfy.sh/Z4KwfhD6M7HbfzE" target="_blank" style="color: #667eea; text-decoration: none; font-weight: 600; display: inline-block; margin-top: 10px;">
-                ntfy.sh/Z4KwfhD6M7HbfzE →
-            </a>
+        <div class="card">
+            <h2 style="margin-bottom: 20px; display: flex; align-items: center;">
+                📨 Notifications reçues
+                <span class="badge" id="notif-count">0</span>
+            </h2>
+            
+            <div class="notifications-list" id="notifications-list">
+                <div class="empty-state">
+                    <div class="empty-icon">📭</div>
+                    <p>Aucune notification reçue</p>
+                    <p style="font-size: 0.85rem; margin-top: 10px;">Les notifications apparaîtront ici</p>
+                </div>
+            </div>
         </div>
     </div>
 
     <div class="toast" id="toast">Message</div>
 
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-messaging-compat.js"></script>
+
     <script>
-        // Configuration ntfy
-        const NTFY_TOPIC = 'Z4KwfhD6M7HbfzE';
-        const NTFY_URL = `https://ntfy.sh/${NTFY_TOPIC}`;
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBsGrY-AqYMoI70kT3WMxLgW0HwYA4KyaQ",
+            authDomain: "livraison-c8498.firebaseapp.com",
+            projectId: "livraison-c8498",
+            storageBucket: "livraison-c8498.firebasestorage.app",
+            messagingSenderId: "403240604780",
+            appId: "1:403240604780:web:77d84ad03d68bdaddfb449"
+        };
 
-        // Vérifier si déjà abonné
-        if (localStorage.getItem('ntfy-subscribed') === 'true') {
-            showSubscribed();
+        let messaging;
+        let currentToken = null;
+        let notifications = [];
+
+        // Initialize Firebase
+        try {
+            firebase.initializeApp(firebaseConfig);
+            messaging = firebase.messaging();
+            console.log('Firebase initialized');
+        } catch (error) {
+            console.error('Firebase init error:', error);
+            showToast('Erreur d\'initialisation Firebase', 'error');
         }
 
-        function subscribe() {
-            // Ouvrir ntfy dans un nouvel onglet pour s'abonner
-            window.open(NTFY_URL, '_blank');
-            
-            // Marquer comme abonné
-            localStorage.setItem('ntfy-subscribed', 'true');
-            
-            // Afficher confirmation
-            showSubscribed();
-            showToast('Abonnement ouvert ! Autorisez les notifications.');
-            
-            // Envoyer une notification de test de bienvenue
-            setTimeout(() => {
-                sendWelcomeNotification();
-            }, 2000);
+        // Register service worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('firebase-messaging-sw.js')
+                .then((registration) => {
+                    console.log('Service Worker registered:', registration);
+                    messaging.useServiceWorker(registration);
+                    checkPermission();
+                })
+                .catch((err) => {
+                    console.error('SW registration failed:', err);
+                    showToast('Erreur d\'enregistrement du Service Worker', 'error');
+                });
         }
 
-        function showSubscribed() {
-            document.getElementById('status-box').classList.add('active');
-            document.getElementById('subscribe-btn').style.display = 'none';
+        // Check notification permission status
+        function checkPermission() {
+            if (!('Notification' in window)) {
+                updateStatus('error', 'Notifications non supportées', 'Votre navigateur ne supporte pas les notifications');
+                return;
+            }
+
+            if (Notification.permission === 'granted') {
+                getToken();
+            } else if (Notification.permission === 'denied') {
+                updateStatus('error', 'Notifications bloquées', 'Veuillez autoriser les notifications dans les paramètres');
+            }
         }
 
-        function sendWelcomeNotification() {
-            fetch(NTFY_URL, {
-                method: 'POST',
-                headers: {
-                    'Title': 'Bienvenue 👋',
-                    'Priority': 'high',
-                    'Tags': 'tada'
-                },
-                body: 'Vous êtes maintenant abonné aux notifications GROUPE EXPRESS ! 🎉'
+        // Request permission
+        async function requestPermission() {
+            if (!messaging) {
+                showToast('Firebase non initialisé', 'error');
+                return;
+            }
+
+            try {
+                const permission = await Notification.requestPermission();
+                
+                if (permission === 'granted') {
+                    showToast('Permission accordée !');
+                    await getToken();
+                } else {
+                    updateStatus('error', 'Permission refusée', 'Vous ne recevrez pas de notifications');
+                    showToast('Permission refusée', 'error');
+                }
+            } catch (error) {
+                console.error('Permission error:', error);
+                showToast('Erreur de permission', 'error');
+            }
+        }
+
+        // Get FCM token
+        async function getToken() {
+            try {
+                const vapidKey = 'PViQXia_vvFLKMAe2E2q5oTOX48XpRQIdx5P4xAFEPw';
+                currentToken = await messaging.getToken({ vapidKey });
+                
+                console.log('FCM Token:', currentToken);
+                
+                updateStatus('active', 'Notifications activées', 'Vous recevrez les notifications en arrière-plan');
+                document.getElementById('token-display').textContent = currentToken;
+                document.getElementById('token-display').classList.add('show');
+                document.getElementById('token-btn').style.display = 'block';
+                document.getElementById('subscribe-btn').style.display = 'none';
+                
+                // Save token to localStorage for demo
+                localStorage.setItem('fcmToken', currentToken);
+                
+                showToast('Token généré avec succès !');
+            } catch (error) {
+                console.error('Token error:', error);
+                updateStatus('error', 'Erreur de token', 'Impossible d\'obtenir le token FCM');
+            }
+        }
+
+        // Handle incoming messages while page is open
+        if (messaging) {
+            messaging.onMessage((payload) => {
+                console.log('Message received:', payload);
+                displayNotification(payload.notification);
+                showToast('🔔 Nouvelle notification reçue !');
             });
         }
 
+        // Display notification in list
+        function displayNotification(notification) {
+            const list = document.getElementById('notifications-list');
+            const emptyState = list.querySelector('.empty-state');
+            if (emptyState) emptyState.remove();
+
+            const notif = {
+                title: notification.title,
+                body: notification.body,
+                time: new Date().toLocaleString('fr-FR'),
+                icon: notification.icon
+            };
+            notifications.unshift(notif);
+
+            const item = document.createElement('div');
+            item.className = 'notification-item';
+            item.innerHTML = `
+                <div class="notification-time">${notif.time}</div>
+                <div class="notification-title">${notif.title}</div>
+                <div class="notification-body">${notif.body}</div>
+            `;
+            
+            list.insertBefore(item, list.firstChild);
+            document.getElementById('notif-count').textContent = notifications.length;
+        }
+
+        // Update status UI
+        function updateStatus(type, text, sub) {
+            const dot = document.getElementById('status-dot');
+            const textEl = document.getElementById('status-text');
+            const subEl = document.getElementById('status-sub');
+
+            dot.className = 'status-dot ' + (type === 'active' ? 'active' : type === 'error' ? 'error' : '');
+            textEl.textContent = text;
+            subEl.textContent = sub;
+        }
+
+        // Copy token to clipboard
+        function copyToken() {
+            if (!currentToken) return;
+            
+            navigator.clipboard.writeText(currentToken).then(() => {
+                showToast('Token copié dans le presse-papiers !');
+            }).catch(() => {
+                // Fallback
+                const textArea = document.createElement('textarea');
+                textArea.value = currentToken;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showToast('Token copié !');
+            });
+        }
+
+        // Show toast
         function showToast(message) {
             const toast = document.getElementById('toast');
             toast.textContent = message;
@@ -245,17 +442,19 @@
             setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
-        // Fonction globale pour envoyer des notifications (utilisée par luna.html)
-        window.sendNotification = function(title, message, priority = 'default') {
-            return fetch(NTFY_URL, {
-                method: 'POST',
-                headers: {
-                    'Title': title,
-                    'Priority': priority
-                },
-                body: message
-            });
-        };
+        // Load saved notifications from localStorage
+        window.addEventListener('load', () => {
+            const saved = localStorage.getItem('notifications');
+            if (saved) {
+                notifications = JSON.parse(saved);
+                notifications.forEach(n => displayNotification(n));
+            }
+        });
+
+        // Save notifications before unload
+        window.addEventListener('beforeunload', () => {
+            localStorage.setItem('notifications', JSON.stringify(notifications.slice(0, 50)));
+        });
     </script>
 </body>
 </html>
