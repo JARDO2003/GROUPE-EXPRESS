@@ -218,7 +218,7 @@
 
         <div class="card">
             <div class="info-box">
-                <strong>FCM :</strong> Notifications fiables sur tous les appareils, meme hors connexion.
+                <strong>FCM :</strong> Notifications fiables sur tous les appareils.
             </div>
 
             <div class="status" id="status-box">
@@ -253,13 +253,13 @@
 
     <div class="toast" id="toast"></div>
 
-    <!-- Firebase SDK COMPAT (version stable) -->
+    <!-- Firebase SDK COMPAT -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js"></script>
 
     <script>
         // ============================================
-        // CONFIGURATION FIREBASE
+        // CONFIGURATION
         // ============================================
         
         const firebaseConfig = {
@@ -279,42 +279,33 @@
         
         let messaging = null;
         let currentToken = null;
-        let swRegistration = null;
 
         // Initialiser Firebase
         try {
             firebase.initializeApp(firebaseConfig);
             messaging = firebase.messaging();
-            console.log("✅ Firebase initialise avec succes");
+            console.log("✅ Firebase initialise");
         } catch (error) {
             console.error("❌ Erreur Firebase:", error);
-            showToast("Erreur d'initialisation Firebase", "error");
+            showToast("Erreur d'initialisation", "error");
         }
 
         // ============================================
-        // ENREGISTREMENT SERVICE WORKER
+        // SERVICE WORKER (SANS useServiceWorker)
         // ============================================
 
+        // Le SW doit etre enregistre mais PAS attache manuellement a FCM
+        // FCM le trouve automatiquement s'il est a la racine
         if ("serviceWorker" in navigator) {
             navigator.serviceWorker.register("./firebase-messaging-sw.js")
                 .then((registration) => {
                     console.log("✅ Service Worker enregistre:", registration.scope);
-                    swRegistration = registration;
-                    
-                    // Attacher le SW a FCM (methode compat)
-                    if (messaging) {
-                        messaging.useServiceWorker(registration);
-                        console.log("✅ Service Worker attache a FCM");
-                    }
-                    
                     checkExistingToken();
                 })
                 .catch((err) => {
-                    console.error("❌ Erreur Service Worker:", err);
-                    showToast("Erreur Service Worker: " + err.message, "error");
+                    console.error("❌ Erreur SW:", err);
+                    showToast("Erreur Service Worker", "error");
                 });
-        } else {
-            showToast("Service Worker non supporte par ce navigateur", "error");
         }
 
         // ============================================
@@ -324,7 +315,6 @@
         function checkExistingToken() {
             const savedToken = localStorage.getItem("fcmToken");
             if (savedToken) {
-                console.log("📝 Token existant trouve");
                 currentToken = savedToken;
                 document.getElementById("token-content").textContent = savedToken;
                 document.getElementById("token-box").classList.add("show");
@@ -340,44 +330,36 @@
             btnText.innerHTML = '<span class="loading"></span> Chargement...';
 
             try {
-                // 1. Verifier support
+                // 1. Permission
                 if (!("Notification" in window)) {
                     throw new Error("Notifications non supportees");
                 }
 
-                // 2. Demander permission
-                console.log("🔔 Demande de permission...");
                 const permission = await Notification.requestPermission();
-                console.log("Permission:", permission);
-                
                 if (permission !== "granted") {
                     throw new Error("Permission refusee");
                 }
 
-                // 3. Attendre que le SW soit pret
-                if (!swRegistration) {
-                    throw new Error("Service Worker non pret");
-                }
-
-                // 4. Obtenir token FCM
+                // 2. Obtenir token (FCM trouve automatiquement le SW)
                 console.log("🔑 Obtention du token...");
                 currentToken = await messaging.getToken({
-                    vapidKey: VAPID_KEY,
-                    serviceWorkerRegistration: swRegistration
+                    vapidKey: VAPID_KEY
+                    // PAS de serviceWorkerRegistration ici !
+                    // FCM trouve automatiquement firebase-messaging-sw.js a la racine
                 });
                 
                 if (!currentToken) {
-                    throw new Error("Token vide - verifiez VAPID key");
+                    throw new Error("Token vide - verifiez la configuration Firebase");
                 }
 
-                console.log("✅ Token obtenu:", currentToken.substring(0, 30) + "...");
+                console.log("✅ Token obtenu:", currentToken);
 
-                // 5. Afficher et sauvegarder
+                // 3. Afficher
                 document.getElementById("token-content").textContent = currentToken;
                 document.getElementById("token-box").classList.add("show");
                 localStorage.setItem("fcmToken", currentToken);
 
-                // 6. Ecouter messages (premier plan)
+                // 4. Ecouter messages premier plan
                 messaging.onMessage((payload) => {
                     console.log("📨 Message recu:", payload);
                     displayNotification(payload.notification);
@@ -411,10 +393,6 @@
             list.insertBefore(div, list.firstChild);
         }
 
-        // ============================================
-        // UTILITAIRES UI
-        // ============================================
-
         function showActive() {
             document.getElementById("status-box").className = "status active";
             document.getElementById("subscribe-btn").style.display = "none";
@@ -433,16 +411,7 @@
 
         function copyToken() {
             if (!currentToken) return;
-            
             navigator.clipboard.writeText(currentToken).then(() => {
-                showToast("✅ Token copie !");
-            }).catch(() => {
-                const textArea = document.createElement("textarea");
-                textArea.value = currentToken;
-                document.body.appendChild(textArea);
-                textArea.select();
-                document.execCommand("copy");
-                document.body.removeChild(textArea);
                 showToast("✅ Token copie !");
             });
         }
@@ -459,35 +428,6 @@
             toast.classList.add("show");
             setTimeout(() => toast.classList.remove("show"), 4000);
         }
-
-        // ============================================
-        // GESTION TOKEN REFRESH (version compat)
-        // ============================================
-
-        // Surveiller les changements de token
-        setInterval(async () => {
-            if (messaging && currentToken) {
-                try {
-                    const newToken = await messaging.getToken({
-                        vapidKey: VAPID_KEY,
-                        serviceWorkerRegistration: swRegistration
-                    });
-                    
-                    if (newToken && newToken !== currentToken) {
-                        console.log("🔄 Token rafraichi:", newToken.substring(0, 30) + "...");
-                        currentToken = newToken;
-                        localStorage.setItem("fcmToken", newToken);
-                        document.getElementById("token-content").textContent = newToken;
-                        showToast("Token mis a jour");
-                    }
-                } catch (err) {
-                    console.log("Verification token:", err.message);
-                }
-            }
-        }, 60000); // Verifier toutes les minutes
-
-        console.log("🚀 App initialisee");
-        console.log("VAPID Key:", VAPID_KEY);
     </script>
 </body>
 </html>
