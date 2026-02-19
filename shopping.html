@@ -71,7 +71,6 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
-            text-decoration: none;
         }
 
         .btn-primary {
@@ -80,9 +79,14 @@
             box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
         }
 
-        .btn-primary:hover {
+        .btn-primary:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
 
         .btn-success {
@@ -90,19 +94,25 @@
             color: white;
         }
 
-        .status {
+        .status-box {
+            display: none;
             text-align: center;
             padding: 20px;
             border-radius: 14px;
             margin-bottom: 20px;
-            display: none;
+            animation: fadeIn 0.5s;
         }
 
-        .status.active {
+        .status-box.active {
             display: block;
             background: #d1fae5;
             color: #065f46;
-            animation: fadeIn 0.5s;
+        }
+
+        .status-box.error {
+            display: block;
+            background: #fee2e2;
+            color: #991b1b;
         }
 
         @keyframes fadeIn {
@@ -110,26 +120,46 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .instructions {
-            background: #f3f4f6;
-            border-radius: 14px;
-            padding: 20px;
-            margin-top: 20px;
+        .notifications-list {
+            max-height: 300px;
+            overflow-y: auto;
         }
 
-        .instructions h3 {
-            margin-bottom: 15px;
-            color: #374151;
+        .notification-item {
+            background: #f9fafb;
+            border-left: 4px solid #667eea;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            animation: slideIn 0.3s;
         }
 
-        .instructions ol {
-            margin-left: 20px;
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .notification-time {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-bottom: 5px;
+        }
+
+        .notification-title {
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 3px;
+        }
+
+        .notification-body {
             color: #4b5563;
-            line-height: 1.8;
+            font-size: 0.9rem;
         }
 
-        .instructions li {
-            margin-bottom: 8px;
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #9ca3af;
         }
 
         .toast {
@@ -149,6 +179,20 @@
         .toast.show {
             transform: translateX(-50%) translateY(0);
         }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -156,39 +200,33 @@
         <div class="header">
             <div class="logo">🚀</div>
             <h1>GROUPE EXPRESS</h1>
-            <p>Recevez nos notifications en temps réel</p>
+            <p>Notifications en temps réel</p>
         </div>
 
         <div class="card">
-            <div class="status" id="status-box">
-                <div style="font-size: 2rem; margin-bottom: 10px;">✅</div>
-                <div style="font-weight: 700; font-size: 1.1rem;">Notifications activées !</div>
-                <div style="font-size: 0.9rem; margin-top: 5px;">Vous recevrez nos annonces sur cet appareil</div>
+            <div class="status-box" id="status-box">
+                <div style="font-size: 2rem; margin-bottom: 10px;" id="status-icon">✅</div>
+                <div style="font-weight: 700; font-size: 1.1rem;" id="status-title">Notifications activées !</div>
+                <div style="font-size: 0.9rem; margin-top: 5px;" id="status-text">Vous recevrez nos annonces sur cet appareil</div>
             </div>
 
-            <button class="btn btn-primary" id="subscribe-btn" onclick="subscribe()">
+            <button class="btn btn-primary" id="subscribe-btn" onclick="subscribeToNotifications()">
                 <span>🔔</span>
-                <span>Activer les notifications</span>
+                <span id="btn-text">Activer les notifications</span>
             </button>
-
-            <div class="instructions">
-                <h3>📱 Comment ça marche ?</h3>
-                <ol>
-                    <li>Cliquez sur le bouton ci-dessus</li>
-                    <li>Autorisez les notifications dans votre navigateur</li>
-                    <li>Installez l'app ntfy si demandé (optionnel)</li>
-                    <li>Recevez nos annonces automatiquement !</li>
-                </ol>
-            </div>
         </div>
 
-        <div class="card" style="text-align: center;">
-            <p style="color: #6b7280; font-size: 0.9rem;">
-                💡 Vous pouvez aussi rejoindre directement notre canal :
-            </p>
-            <a href="https://ntfy.sh/Z4KwfhD6M7HbfzE" target="_blank" style="color: #667eea; text-decoration: none; font-weight: 600; display: inline-block; margin-top: 10px;">
-                ntfy.sh/Z4KwfhD6M7HbfzE →
-            </a>
+        <div class="card">
+            <h2 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                📨 Notifications reçues
+                <span id="notif-count" style="background: #667eea; color: white; padding: 2px 10px; border-radius: 20px; font-size: 0.8rem;">0</span>
+            </h2>
+            <div class="notifications-list" id="notifications-list">
+                <div class="empty-state">
+                    <div style="font-size: 3rem; margin-bottom: 10px;">📭</div>
+                    <p>Aucune notification reçue</p>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -198,46 +236,179 @@
         // Configuration ntfy
         const NTFY_TOPIC = 'Z4KwfhD6M7HbfzE';
         const NTFY_URL = `https://ntfy.sh/${NTFY_TOPIC}`;
+        
+        let notifications = [];
+        let eventSource = null;
 
-        // Vérifier si déjà abonné
-        if (localStorage.getItem('ntfy-subscribed') === 'true') {
-            showSubscribed();
-        }
+        // Vérifier si déjà abonné au chargement
+        window.addEventListener('load', () => {
+            if (localStorage.getItem('ntfy-subscribed') === 'true') {
+                startListening();
+                updateUI(true);
+            }
+        });
 
-        function subscribe() {
-            // Ouvrir ntfy dans un nouvel onglet pour s'abonner
-            window.open(NTFY_URL, '_blank');
+        // S'abonner aux notifications
+        async function subscribeToNotifications() {
+            const btn = document.getElementById('subscribe-btn');
+            const btnText = document.getElementById('btn-text');
             
-            // Marquer comme abonné
-            localStorage.setItem('ntfy-subscribed', 'true');
+            btn.disabled = true;
+            btnText.innerHTML = '<span class="loading"></span> Connexion...';
+
+            try {
+                // 1. Demander la permission navigateur
+                if (!('Notification' in window)) {
+                    throw new Error('Votre navigateur ne supporte pas les notifications');
+                }
+
+                const permission = await Notification.requestPermission();
+                
+                if (permission !== 'granted') {
+                    throw new Error('Permission refusée. Veuillez autoriser les notifications.');
+                }
+
+                // 2. Envoyer une notification de test pour s'assurer que le canal existe
+                await fetch(NTFY_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Title': 'Bienvenue 👋',
+                        'Tags': 'tada'
+                    },
+                    body: 'Vous êtes maintenant abonné aux notifications GROUPE EXPRESS ! 🎉'
+                });
+
+                // 3. Démarrer l'écoute en temps réel
+                startListening();
+                
+                // 4. Sauvegarder l'état
+                localStorage.setItem('ntfy-subscribed', 'true');
+                
+                // 5. Mettre à jour l'interface
+                updateUI(true);
+                showToast('✅ Notifications activées avec succès !');
+
+            } catch (error) {
+                console.error('Erreur:', error);
+                showStatus('error', '❌ Erreur', error.message);
+                btn.disabled = false;
+                btnText.textContent = 'Réessayer';
+            }
+        }
+
+        // Écouter les notifications en temps réel (SSE)
+        function startListening() {
+            if (eventSource) {
+                eventSource.close();
+            }
+
+            // Utiliser Server-Sent Events pour recevoir en temps réel
+            eventSource = new EventSource(`${NTFY_URL}/sse`);
+
+            eventSource.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    console.log('Notification reçue:', data);
+                    
+                    // Afficher dans la liste
+                    addNotification(data);
+                    
+                    // Afficher une notification système si l'onglet n'est pas actif
+                    if (document.hidden && Notification.permission === 'granted') {
+                        showSystemNotification(data);
+                    }
+                    
+                    showToast('🔔 Nouvelle notification reçue !');
+                    
+                } catch (e) {
+                    console.error('Erreur parsing:', e);
+                }
+            };
+
+            eventSource.onerror = (error) => {
+                console.error('SSE Error:', error);
+                // Reconnexion automatique après 5 secondes
+                setTimeout(() => {
+                    if (localStorage.getItem('ntfy-subscribed') === 'true') {
+                        startListening();
+                    }
+                }, 5000);
+            };
+        }
+
+        // Afficher une notification système
+        function showSystemNotification(data) {
+            const title = data.title || 'GROUPE EXPRESS';
+            const options = {
+                body: data.message || '',
+                icon: 'https://groupe-express.vercel.app/GE.jpg',
+                badge: 'https://groupe-express.vercel.app/GE.jpg',
+                tag: data.id || 'ntfy-' + Date.now(),
+                requireInteraction: true,
+                data: {
+                    url: 'https://groupe-express.vercel.app/shopping.html'
+                }
+            };
+
+            const notification = new Notification(title, options);
             
-            // Afficher confirmation
-            showSubscribed();
-            showToast('Abonnement ouvert ! Autorisez les notifications.');
+            notification.onclick = () => {
+                window.focus();
+                notification.close();
+            };
+        }
+
+        // Ajouter une notification à la liste
+        function addNotification(data) {
+            const list = document.getElementById('notifications-list');
+            const empty = list.querySelector('.empty-state');
+            if (empty) empty.remove();
+
+            const notif = {
+                id: data.id || Date.now(),
+                title: data.title || 'Notification',
+                body: data.message || '',
+                time: new Date(data.time || Date.now()).toLocaleString('fr-FR')
+            };
             
-            // Envoyer une notification de test de bienvenue
-            setTimeout(() => {
-                sendWelcomeNotification();
-            }, 2000);
+            notifications.unshift(notif);
+
+            const div = document.createElement('div');
+            div.className = 'notification-item';
+            div.innerHTML = `
+                <div class="notification-time">${notif.time}</div>
+                <div class="notification-title">${notif.title}</div>
+                <div class="notification-body">${notif.body}</div>
+            `;
+            
+            list.insertBefore(div, list.firstChild);
+            document.getElementById('notif-count').textContent = notifications.length;
         }
 
-        function showSubscribed() {
-            document.getElementById('status-box').classList.add('active');
-            document.getElementById('subscribe-btn').style.display = 'none';
+        // Mettre à jour l'interface
+        function updateUI(subscribed) {
+            const btn = document.getElementById('subscribe-btn');
+            
+            if (subscribed) {
+                btn.style.display = 'none';
+                showStatus('success', '✅ Notifications activées', 'Vous recevez les messages en temps réel');
+            } else {
+                btn.disabled = false;
+                document.getElementById('btn-text').textContent = 'Activer les notifications';
+            }
         }
 
-        function sendWelcomeNotification() {
-            fetch(NTFY_URL, {
-                method: 'POST',
-                headers: {
-                    'Title': 'Bienvenue 👋',
-                    'Priority': 'high',
-                    'Tags': 'tada'
-                },
-                body: 'Vous êtes maintenant abonné aux notifications GROUPE EXPRESS ! 🎉'
-            });
+        // Afficher le statut
+        function showStatus(type, title, text) {
+            const box = document.getElementById('status-box');
+            document.getElementById('status-icon').textContent = type === 'success' ? '✅' : '❌';
+            document.getElementById('status-title').textContent = title;
+            document.getElementById('status-text').textContent = text;
+            
+            box.className = 'status-box ' + (type === 'success' ? 'active' : 'error');
         }
 
+        // Toast
         function showToast(message) {
             const toast = document.getElementById('toast');
             toast.textContent = message;
@@ -245,17 +416,22 @@
             setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
-        // Fonction globale pour envoyer des notifications (utilisée par luna.html)
-        window.sendNotification = function(title, message, priority = 'default') {
-            return fetch(NTFY_URL, {
-                method: 'POST',
-                headers: {
-                    'Title': title,
-                    'Priority': priority
-                },
-                body: message
-            });
-        };
+        // Gestion de la visibilité de la page
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && eventSource?.readyState === EventSource.CLOSED) {
+                // Reconnexion si on revient sur la page
+                if (localStorage.getItem('ntfy-subscribed') === 'true') {
+                    startListening();
+                }
+            }
+        });
+
+        // Nettoyage avant de quitter
+        window.addEventListener('beforeunload', () => {
+            if (eventSource) {
+                eventSource.close();
+            }
+        });
     </script>
 </body>
 </html>
