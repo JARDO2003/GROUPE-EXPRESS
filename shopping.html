@@ -253,13 +253,13 @@
 
     <div class="toast" id="toast"></div>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-messaging-compat.js"></script>
+    <!-- Firebase SDK COMPAT (version stable) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js"></script>
 
     <script>
         // ============================================
-        // CONFIGURATION FIREBASE - TOKEN INTEGRE
+        // CONFIGURATION FIREBASE
         // ============================================
         
         const firebaseConfig = {
@@ -271,7 +271,6 @@
             appId: "1:403240604780:web:77d84ad03d68bdaddfb449"
         };
 
-        // VAPID KEY - CLE WEB PUSH
         const VAPID_KEY = "PViQXia_vvFLKMAe2E2q5oTOX48XpRQIdx5P4xAFEPw";
 
         // ============================================
@@ -280,43 +279,52 @@
         
         let messaging = null;
         let currentToken = null;
+        let swRegistration = null;
 
         // Initialiser Firebase
         try {
             firebase.initializeApp(firebaseConfig);
             messaging = firebase.messaging();
-            console.log("Firebase initialise avec succes");
-            console.log("VAPID Key:", VAPID_KEY);
+            console.log("✅ Firebase initialise avec succes");
         } catch (error) {
-            console.error("Erreur Firebase:", error);
+            console.error("❌ Erreur Firebase:", error);
             showToast("Erreur d'initialisation Firebase", "error");
         }
 
-        // Enregistrer Service Worker
+        // ============================================
+        // ENREGISTREMENT SERVICE WORKER
+        // ============================================
+
         if ("serviceWorker" in navigator) {
             navigator.serviceWorker.register("./firebase-messaging-sw.js")
                 .then((registration) => {
-                    console.log("Service Worker enregistre:", registration.scope);
-                    messaging.useServiceWorker(registration);
+                    console.log("✅ Service Worker enregistre:", registration.scope);
+                    swRegistration = registration;
+                    
+                    // Attacher le SW a FCM (methode compat)
+                    if (messaging) {
+                        messaging.useServiceWorker(registration);
+                        console.log("✅ Service Worker attache a FCM");
+                    }
+                    
                     checkExistingToken();
                 })
                 .catch((err) => {
-                    console.error("Erreur Service Worker:", err);
+                    console.error("❌ Erreur Service Worker:", err);
                     showToast("Erreur Service Worker: " + err.message, "error");
                 });
         } else {
-            showToast("Service Worker non supporte", "error");
+            showToast("Service Worker non supporte par ce navigateur", "error");
         }
 
         // ============================================
         // FONCTIONS PRINCIPALES
         // ============================================
 
-        // Verifier si deja abonne
         function checkExistingToken() {
             const savedToken = localStorage.getItem("fcmToken");
             if (savedToken) {
-                console.log("Token existant trouve:", savedToken.substring(0, 20) + "...");
+                console.log("📝 Token existant trouve");
                 currentToken = savedToken;
                 document.getElementById("token-content").textContent = savedToken;
                 document.getElementById("token-box").classList.add("show");
@@ -324,7 +332,6 @@
             }
         }
 
-        // S'abonner aux notifications
         async function subscribeToFCM() {
             const btn = document.getElementById("subscribe-btn");
             const btnText = document.getElementById("btn-text");
@@ -333,74 +340,61 @@
             btnText.innerHTML = '<span class="loading"></span> Chargement...';
 
             try {
-                // 1. Verifier support notifications
+                // 1. Verifier support
                 if (!("Notification" in window)) {
-                    throw new Error("Votre navigateur ne supporte pas les notifications");
+                    throw new Error("Notifications non supportees");
                 }
 
                 // 2. Demander permission
-                console.log("Demande de permission...");
+                console.log("🔔 Demande de permission...");
                 const permission = await Notification.requestPermission();
                 console.log("Permission:", permission);
                 
                 if (permission !== "granted") {
-                    throw new Error("Permission refusee par l'utilisateur");
+                    throw new Error("Permission refusee");
                 }
 
-                // 3. Obtenir token FCM avec VAPID KEY
-                console.log("Obtention du token avec VAPID:", VAPID_KEY);
-                currentToken = await messaging.getToken({ 
-                    vapidKey: VAPID_KEY 
+                // 3. Attendre que le SW soit pret
+                if (!swRegistration) {
+                    throw new Error("Service Worker non pret");
+                }
+
+                // 4. Obtenir token FCM
+                console.log("🔑 Obtention du token...");
+                currentToken = await messaging.getToken({
+                    vapidKey: VAPID_KEY,
+                    serviceWorkerRegistration: swRegistration
                 });
                 
                 if (!currentToken) {
-                    throw new Error("Aucun token genere - verifiez la configuration");
+                    throw new Error("Token vide - verifiez VAPID key");
                 }
 
-                console.log("Token FCM obtenu:", currentToken);
+                console.log("✅ Token obtenu:", currentToken.substring(0, 30) + "...");
 
-                // 4. Afficher et sauvegarder
+                // 5. Afficher et sauvegarder
                 document.getElementById("token-content").textContent = currentToken;
                 document.getElementById("token-box").classList.add("show");
                 localStorage.setItem("fcmToken", currentToken);
 
-                // 5. Envoyer token au serveur (optionnel mais recommande)
-                await sendTokenToServer(currentToken);
-
-                showActive();
-                showToast("Notifications activees ! Token: " + currentToken.substring(0, 20) + "...");
-
-                // 6. Ecouter messages en premier plan
+                // 6. Ecouter messages (premier plan)
                 messaging.onMessage((payload) => {
-                    console.log("Message recu en premier plan:", payload);
+                    console.log("📨 Message recu:", payload);
                     displayNotification(payload.notification);
                     showToast("Nouvelle notification !");
                 });
 
+                showActive();
+                showToast("✅ Notifications activees !");
+
             } catch (error) {
-                console.error("Erreur complete:", error);
+                console.error("❌ Erreur:", error);
                 showError(error.message);
                 btn.disabled = false;
                 btnText.textContent = "Reessayer";
             }
         }
 
-        // Envoyer token au serveur (pour luna.html)
-        async function sendTokenToServer(token) {
-            // Sauvegarder dans localStorage pour luna.html sur le meme domaine
-            localStorage.setItem("fcmToken_" + Date.now(), token);
-            
-            // Afficher dans console pour copie manuelle
-            console.log("=====================================");
-            console.log("TOKEN FCM A COPIER POUR LUNA:");
-            console.log(token);
-            console.log("=====================================");
-            
-            // Vous pouvez aussi envoyer a votre backend ici
-            // await fetch('/api/save-token', { method: 'POST', body: JSON.stringify({token}) });
-        }
-
-        // Afficher notification dans la liste
         function displayNotification(notification) {
             const list = document.getElementById("notifications-list");
             const empty = list.querySelector(".empty-state");
@@ -441,24 +435,21 @@
             if (!currentToken) return;
             
             navigator.clipboard.writeText(currentToken).then(() => {
-                showToast("Token copie dans le presse-papiers !");
+                showToast("✅ Token copie !");
             }).catch(() => {
-                // Fallback
                 const textArea = document.createElement("textarea");
                 textArea.value = currentToken;
                 document.body.appendChild(textArea);
                 textArea.select();
                 document.execCommand("copy");
                 document.body.removeChild(textArea);
-                showToast("Token copie !");
+                showToast("✅ Token copie !");
             });
         }
 
-        // Ouvrir luna.html avec le token
         function sendTestToLuna() {
             if (!currentToken) return;
-            const lunaUrl = "luna.html?token=" + encodeURIComponent(currentToken);
-            window.open(lunaUrl, "_blank");
+            window.open("luna.html?token=" + encodeURIComponent(currentToken), "_blank");
         }
 
         function showToast(msg, type = "success") {
@@ -470,28 +461,32 @@
         }
 
         // ============================================
-        // GESTION EVENEMENTS FCM
+        // GESTION TOKEN REFRESH (version compat)
         // ============================================
 
-        // Rafraichir token si change
-        if (messaging) {
-            messaging.onTokenRefresh(() => {
-                console.log("Token refresh necessaire...");
-                messaging.getToken({ vapidKey: VAPID_KEY }).then((newToken) => {
-                    console.log("Nouveau token:", newToken);
-                    currentToken = newToken;
-                    localStorage.setItem("fcmToken", newToken);
-                    document.getElementById("token-content").textContent = newToken;
-                    sendTokenToServer(newToken);
-                    showToast("Token rafraichi !");
-                }).catch((err) => {
-                    console.error("Erreur refresh token:", err);
-                });
-            });
-        }
+        // Surveiller les changements de token
+        setInterval(async () => {
+            if (messaging && currentToken) {
+                try {
+                    const newToken = await messaging.getToken({
+                        vapidKey: VAPID_KEY,
+                        serviceWorkerRegistration: swRegistration
+                    });
+                    
+                    if (newToken && newToken !== currentToken) {
+                        console.log("🔄 Token rafraichi:", newToken.substring(0, 30) + "...");
+                        currentToken = newToken;
+                        localStorage.setItem("fcmToken", newToken);
+                        document.getElementById("token-content").textContent = newToken;
+                        showToast("Token mis a jour");
+                    }
+                } catch (err) {
+                    console.log("Verification token:", err.message);
+                }
+            }
+        }, 60000); // Verifier toutes les minutes
 
-        // Debug: afficher config au chargement
-        console.log("Firebase Config:", firebaseConfig);
+        console.log("🚀 App initialisee");
         console.log("VAPID Key:", VAPID_KEY);
     </script>
 </body>
