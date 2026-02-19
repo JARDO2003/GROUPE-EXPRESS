@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notifications Push - Index</title>
+    <meta name="theme-color" content="#667eea">
+    <title>GROUPE EXPRESS - Notifications</title>
     <style>
         * {
             margin: 0;
@@ -19,15 +20,14 @@
         }
 
         .container {
-            max-width: 600px;
+            max-width: 500px;
             margin: 0 auto;
         }
 
         .header {
             text-align: center;
             color: white;
-            margin-bottom: 30px;
-            padding-top: 20px;
+            padding: 40px 20px;
         }
 
         .header h1 {
@@ -35,8 +35,18 @@
             margin-bottom: 10px;
         }
 
-        .header p {
-            opacity: 0.9;
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 2rem;
+            font-weight: 800;
+            color: #667eea;
         }
 
         .card {
@@ -47,46 +57,15 @@
             box-shadow: 0 10px 40px rgba(0,0,0,0.2);
         }
 
-        .status-indicator {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .status-dot {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: #e0e0e0;
-            position: relative;
-        }
-
-        .status-dot.active {
-            background: #4ade80;
-            box-shadow: 0 0 20px #4ade80;
-            animation: pulse 2s infinite;
-        }
-
-        .status-dot.error {
-            background: #f87171;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.2); opacity: 0.8; }
-        }
-
         .btn {
             width: 100%;
-            padding: 15px;
+            padding: 18px;
             border: none;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: 600;
+            border-radius: 14px;
+            font-size: 1.1rem;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.3s;
-            margin-bottom: 10px;
         }
 
         .btn-primary {
@@ -94,40 +73,67 @@
             color: white;
         }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
 
         .btn-secondary {
             background: #f3f4f6;
             color: #374151;
+            margin-top: 10px;
         }
 
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-
-        .token-display {
-            background: #f3f4f6;
-            border-radius: 12px;
-            padding: 15px;
-            font-family: monospace;
-            font-size: 0.8rem;
-            word-break: break-all;
-            margin-top: 15px;
+        .status {
+            padding: 20px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+            text-align: center;
             display: none;
         }
 
-        .token-display.show {
+        .status.active {
+            display: block;
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status.error {
+            display: block;
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .token-box {
+            background: #1f2937;
+            color: #10b981;
+            padding: 15px;
+            border-radius: 12px;
+            font-family: monospace;
+            font-size: 0.75rem;
+            word-break: break-all;
+            margin-top: 15px;
+            position: relative;
+            display: none;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .token-box.show {
             display: block;
         }
 
-        .notifications-list {
-            max-height: 400px;
-            overflow-y: auto;
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #374151;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.75rem;
         }
 
         .notification-item {
@@ -136,46 +142,28 @@
             border-radius: 12px;
             padding: 15px;
             margin-bottom: 10px;
-            animation: slideIn 0.3s ease;
+            animation: slideIn 0.3s;
         }
 
         @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateX(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
         }
 
         .notification-time {
             font-size: 0.75rem;
             color: #6b7280;
-            margin-bottom: 5px;
         }
 
         .notification-title {
             font-weight: 700;
-            color: #111827;
-            margin-bottom: 5px;
-        }
-
-        .notification-body {
-            color: #4b5563;
-            font-size: 0.9rem;
+            margin: 5px 0;
         }
 
         .empty-state {
             text-align: center;
             padding: 40px;
             color: #9ca3af;
-        }
-
-        .empty-icon {
-            font-size: 4rem;
-            margin-bottom: 15px;
         }
 
         .toast {
@@ -185,15 +173,28 @@
             transform: translateX(-50%) translateY(100px);
             background: #1f2937;
             color: white;
-            padding: 15px 25px;
+            padding: 16px 24px;
             border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             transition: transform 0.3s;
             z-index: 1000;
         }
 
         .toast.show {
             transform: translateX(-50%) translateY(0);
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         .info-box {
@@ -205,73 +206,62 @@
             color: #1e40af;
             font-size: 0.9rem;
         }
-
-        .badge {
-            display: inline-block;
-            background: #667eea;
-            color: white;
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            margin-left: 10px;
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🔔 Notifications Push</h1>
-            <p>Recevez des notifications même hors de l'application</p>
+            <div class="logo">GE</div>
+            <h1>GROUPE EXPRESS</h1>
+            <p>Notifications Firebase Cloud Messaging</p>
         </div>
 
         <div class="card">
             <div class="info-box">
-                💡 <strong>Comment ça marche :</strong> Autorisez les notifications pour recevoir des alertes en temps réel, même lorsque cette page est fermée.
+                <strong>FCM :</strong> Notifications fiables sur tous les appareils, meme hors connexion.
             </div>
 
-            <div class="status-indicator">
-                <div class="status-dot" id="status-dot"></div>
-                <div>
-                    <div style="font-weight: 600;" id="status-text">Notifications non activées</div>
-                    <div style="font-size: 0.85rem; color: #6b7280;" id="status-sub">Cliquez sur le bouton ci-dessous</div>
-                </div>
+            <div class="status" id="status-box">
+                <div style="font-size: 2rem; margin-bottom: 10px;">✓</div>
+                <div style="font-weight: 700;">Notifications activees !</div>
+                <div style="font-size: 0.9rem; margin-top: 5px;">Token genere avec succes</div>
             </div>
 
-            <button class="btn btn-primary" id="subscribe-btn" onclick="requestPermission()">
-                🔔 Activer les notifications
+            <button class="btn btn-primary" id="subscribe-btn" onclick="subscribeToFCM()">
+                <span id="btn-text">Activer les notifications</span>
             </button>
 
-            <button class="btn btn-secondary" id="token-btn" onclick="copyToken()" style="display: none;">
-                📋 Copier le token
-            </button>
+            <div class="token-box" id="token-box">
+                <button class="copy-btn" onclick="copyToken()">Copier</button>
+                <div id="token-content"></div>
+            </div>
 
-            <div class="token-display" id="token-display"></div>
+            <button class="btn btn-secondary" onclick="sendTestToLuna()" style="display: none;" id="luna-btn">
+                Envoyer a Luna
+            </button>
         </div>
 
         <div class="card">
-            <h2 style="margin-bottom: 20px; display: flex; align-items: center;">
-                📨 Notifications reçues
-                <span class="badge" id="notif-count">0</span>
-            </h2>
-            
-            <div class="notifications-list" id="notifications-list">
+            <h2 style="margin-bottom: 20px;">Messages recus</h2>
+            <div id="notifications-list">
                 <div class="empty-state">
-                    <div class="empty-icon">📭</div>
-                    <p>Aucune notification reçue</p>
-                    <p style="font-size: 0.85rem; margin-top: 10px;">Les notifications apparaîtront ici</p>
+                    <p>Aucune notification</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="toast" id="toast">Message</div>
+    <div class="toast" id="toast"></div>
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-messaging-compat.js"></script>
 
     <script>
-        // Firebase configuration
+        // ============================================
+        // CONFIGURATION FIREBASE - TOKEN INTEGRE
+        // ============================================
+        
         const firebaseConfig = {
             apiKey: "AIzaSyBsGrY-AqYMoI70kT3WMxLgW0HwYA4KyaQ",
             authDomain: "livraison-c8498.firebaseapp.com",
@@ -281,180 +271,228 @@
             appId: "1:403240604780:web:77d84ad03d68bdaddfb449"
         };
 
-        let messaging;
-        let currentToken = null;
-        let notifications = [];
+        // VAPID KEY - CLE WEB PUSH
+        const VAPID_KEY = "PViQXia_vvFLKMAe2E2q5oTOX48XpRQIdx5P4xAFEPw";
 
-        // Initialize Firebase
+        // ============================================
+        // INITIALISATION
+        // ============================================
+        
+        let messaging = null;
+        let currentToken = null;
+
+        // Initialiser Firebase
         try {
             firebase.initializeApp(firebaseConfig);
             messaging = firebase.messaging();
-            console.log('Firebase initialized');
+            console.log("Firebase initialise avec succes");
+            console.log("VAPID Key:", VAPID_KEY);
         } catch (error) {
-            console.error('Firebase init error:', error);
-            showToast('Erreur d\'initialisation Firebase', 'error');
+            console.error("Erreur Firebase:", error);
+            showToast("Erreur d'initialisation Firebase", "error");
         }
 
-        // Register service worker
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('firebase-messaging-sw.js')
+        // Enregistrer Service Worker
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("./firebase-messaging-sw.js")
                 .then((registration) => {
-                    console.log('Service Worker registered:', registration);
+                    console.log("Service Worker enregistre:", registration.scope);
                     messaging.useServiceWorker(registration);
-                    checkPermission();
+                    checkExistingToken();
                 })
                 .catch((err) => {
-                    console.error('SW registration failed:', err);
-                    showToast('Erreur d\'enregistrement du Service Worker', 'error');
+                    console.error("Erreur Service Worker:", err);
+                    showToast("Erreur Service Worker: " + err.message, "error");
                 });
+        } else {
+            showToast("Service Worker non supporte", "error");
         }
 
-        // Check notification permission status
-        function checkPermission() {
-            if (!('Notification' in window)) {
-                updateStatus('error', 'Notifications non supportées', 'Votre navigateur ne supporte pas les notifications');
-                return;
-            }
+        // ============================================
+        // FONCTIONS PRINCIPALES
+        // ============================================
 
-            if (Notification.permission === 'granted') {
-                getToken();
-            } else if (Notification.permission === 'denied') {
-                updateStatus('error', 'Notifications bloquées', 'Veuillez autoriser les notifications dans les paramètres');
+        // Verifier si deja abonne
+        function checkExistingToken() {
+            const savedToken = localStorage.getItem("fcmToken");
+            if (savedToken) {
+                console.log("Token existant trouve:", savedToken.substring(0, 20) + "...");
+                currentToken = savedToken;
+                document.getElementById("token-content").textContent = savedToken;
+                document.getElementById("token-box").classList.add("show");
+                showActive();
             }
         }
 
-        // Request permission
-        async function requestPermission() {
-            if (!messaging) {
-                showToast('Firebase non initialisé', 'error');
-                return;
-            }
+        // S'abonner aux notifications
+        async function subscribeToFCM() {
+            const btn = document.getElementById("subscribe-btn");
+            const btnText = document.getElementById("btn-text");
+            
+            btn.disabled = true;
+            btnText.innerHTML = '<span class="loading"></span> Chargement...';
 
             try {
-                const permission = await Notification.requestPermission();
-                
-                if (permission === 'granted') {
-                    showToast('Permission accordée !');
-                    await getToken();
-                } else {
-                    updateStatus('error', 'Permission refusée', 'Vous ne recevrez pas de notifications');
-                    showToast('Permission refusée', 'error');
+                // 1. Verifier support notifications
+                if (!("Notification" in window)) {
+                    throw new Error("Votre navigateur ne supporte pas les notifications");
                 }
+
+                // 2. Demander permission
+                console.log("Demande de permission...");
+                const permission = await Notification.requestPermission();
+                console.log("Permission:", permission);
+                
+                if (permission !== "granted") {
+                    throw new Error("Permission refusee par l'utilisateur");
+                }
+
+                // 3. Obtenir token FCM avec VAPID KEY
+                console.log("Obtention du token avec VAPID:", VAPID_KEY);
+                currentToken = await messaging.getToken({ 
+                    vapidKey: VAPID_KEY 
+                });
+                
+                if (!currentToken) {
+                    throw new Error("Aucun token genere - verifiez la configuration");
+                }
+
+                console.log("Token FCM obtenu:", currentToken);
+
+                // 4. Afficher et sauvegarder
+                document.getElementById("token-content").textContent = currentToken;
+                document.getElementById("token-box").classList.add("show");
+                localStorage.setItem("fcmToken", currentToken);
+
+                // 5. Envoyer token au serveur (optionnel mais recommande)
+                await sendTokenToServer(currentToken);
+
+                showActive();
+                showToast("Notifications activees ! Token: " + currentToken.substring(0, 20) + "...");
+
+                // 6. Ecouter messages en premier plan
+                messaging.onMessage((payload) => {
+                    console.log("Message recu en premier plan:", payload);
+                    displayNotification(payload.notification);
+                    showToast("Nouvelle notification !");
+                });
+
             } catch (error) {
-                console.error('Permission error:', error);
-                showToast('Erreur de permission', 'error');
+                console.error("Erreur complete:", error);
+                showError(error.message);
+                btn.disabled = false;
+                btnText.textContent = "Reessayer";
             }
         }
 
-        // Get FCM token
-        async function getToken() {
-            try {
-                const vapidKey = 'PViQXia_vvFLKMAe2E2q5oTOX48XpRQIdx5P4xAFEPw';
-                currentToken = await messaging.getToken({ vapidKey });
-                
-                console.log('FCM Token:', currentToken);
-                
-                updateStatus('active', 'Notifications activées', 'Vous recevrez les notifications en arrière-plan');
-                document.getElementById('token-display').textContent = currentToken;
-                document.getElementById('token-display').classList.add('show');
-                document.getElementById('token-btn').style.display = 'block';
-                document.getElementById('subscribe-btn').style.display = 'none';
-                
-                // Save token to localStorage for demo
-                localStorage.setItem('fcmToken', currentToken);
-                
-                showToast('Token généré avec succès !');
-            } catch (error) {
-                console.error('Token error:', error);
-                updateStatus('error', 'Erreur de token', 'Impossible d\'obtenir le token FCM');
-            }
+        // Envoyer token au serveur (pour luna.html)
+        async function sendTokenToServer(token) {
+            // Sauvegarder dans localStorage pour luna.html sur le meme domaine
+            localStorage.setItem("fcmToken_" + Date.now(), token);
+            
+            // Afficher dans console pour copie manuelle
+            console.log("=====================================");
+            console.log("TOKEN FCM A COPIER POUR LUNA:");
+            console.log(token);
+            console.log("=====================================");
+            
+            // Vous pouvez aussi envoyer a votre backend ici
+            // await fetch('/api/save-token', { method: 'POST', body: JSON.stringify({token}) });
         }
 
-        // Handle incoming messages while page is open
-        if (messaging) {
-            messaging.onMessage((payload) => {
-                console.log('Message received:', payload);
-                displayNotification(payload.notification);
-                showToast('🔔 Nouvelle notification reçue !');
-            });
-        }
-
-        // Display notification in list
+        // Afficher notification dans la liste
         function displayNotification(notification) {
-            const list = document.getElementById('notifications-list');
-            const emptyState = list.querySelector('.empty-state');
-            if (emptyState) emptyState.remove();
+            const list = document.getElementById("notifications-list");
+            const empty = list.querySelector(".empty-state");
+            if (empty) empty.remove();
 
-            const notif = {
-                title: notification.title,
-                body: notification.body,
-                time: new Date().toLocaleString('fr-FR'),
-                icon: notification.icon
-            };
-            notifications.unshift(notif);
-
-            const item = document.createElement('div');
-            item.className = 'notification-item';
-            item.innerHTML = `
-                <div class="notification-time">${notif.time}</div>
-                <div class="notification-title">${notif.title}</div>
-                <div class="notification-body">${notif.body}</div>
+            const div = document.createElement("div");
+            div.className = "notification-item";
+            div.innerHTML = `
+                <div class="notification-time">${new Date().toLocaleString("fr-FR")}</div>
+                <div class="notification-title">${notification?.title || "Message"}</div>
+                <div>${notification?.body || ""}</div>
             `;
             
-            list.insertBefore(item, list.firstChild);
-            document.getElementById('notif-count').textContent = notifications.length;
+            list.insertBefore(div, list.firstChild);
         }
 
-        // Update status UI
-        function updateStatus(type, text, sub) {
-            const dot = document.getElementById('status-dot');
-            const textEl = document.getElementById('status-text');
-            const subEl = document.getElementById('status-sub');
+        // ============================================
+        // UTILITAIRES UI
+        // ============================================
 
-            dot.className = 'status-dot ' + (type === 'active' ? 'active' : type === 'error' ? 'error' : '');
-            textEl.textContent = text;
-            subEl.textContent = sub;
+        function showActive() {
+            document.getElementById("status-box").className = "status active";
+            document.getElementById("subscribe-btn").style.display = "none";
+            document.getElementById("luna-btn").style.display = "block";
         }
 
-        // Copy token to clipboard
+        function showError(msg) {
+            const status = document.getElementById("status-box");
+            status.className = "status error";
+            status.innerHTML = `
+                <div style="font-size: 2rem;">✗</div>
+                <div style="font-weight: 700;">Erreur</div>
+                <div style="font-size: 0.9rem; margin-top: 5px;">${msg}</div>
+            `;
+        }
+
         function copyToken() {
             if (!currentToken) return;
             
             navigator.clipboard.writeText(currentToken).then(() => {
-                showToast('Token copié dans le presse-papiers !');
+                showToast("Token copie dans le presse-papiers !");
             }).catch(() => {
                 // Fallback
-                const textArea = document.createElement('textarea');
+                const textArea = document.createElement("textarea");
                 textArea.value = currentToken;
                 document.body.appendChild(textArea);
                 textArea.select();
-                document.execCommand('copy');
+                document.execCommand("copy");
                 document.body.removeChild(textArea);
-                showToast('Token copié !');
+                showToast("Token copie !");
             });
         }
 
-        // Show toast
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 3000);
+        // Ouvrir luna.html avec le token
+        function sendTestToLuna() {
+            if (!currentToken) return;
+            const lunaUrl = "luna.html?token=" + encodeURIComponent(currentToken);
+            window.open(lunaUrl, "_blank");
         }
 
-        // Load saved notifications from localStorage
-        window.addEventListener('load', () => {
-            const saved = localStorage.getItem('notifications');
-            if (saved) {
-                notifications = JSON.parse(saved);
-                notifications.forEach(n => displayNotification(n));
-            }
-        });
+        function showToast(msg, type = "success") {
+            const toast = document.getElementById("toast");
+            toast.textContent = msg;
+            toast.style.background = type === "error" ? "#ef4444" : "#1f2937";
+            toast.classList.add("show");
+            setTimeout(() => toast.classList.remove("show"), 4000);
+        }
 
-        // Save notifications before unload
-        window.addEventListener('beforeunload', () => {
-            localStorage.setItem('notifications', JSON.stringify(notifications.slice(0, 50)));
-        });
+        // ============================================
+        // GESTION EVENEMENTS FCM
+        // ============================================
+
+        // Rafraichir token si change
+        if (messaging) {
+            messaging.onTokenRefresh(() => {
+                console.log("Token refresh necessaire...");
+                messaging.getToken({ vapidKey: VAPID_KEY }).then((newToken) => {
+                    console.log("Nouveau token:", newToken);
+                    currentToken = newToken;
+                    localStorage.setItem("fcmToken", newToken);
+                    document.getElementById("token-content").textContent = newToken;
+                    sendTokenToServer(newToken);
+                    showToast("Token rafraichi !");
+                }).catch((err) => {
+                    console.error("Erreur refresh token:", err);
+                });
+            });
+        }
+
+        // Debug: afficher config au chargement
+        console.log("Firebase Config:", firebaseConfig);
+        console.log("VAPID Key:", VAPID_KEY);
     </script>
 </body>
 </html>
