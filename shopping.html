@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#667eea">
     <title>GROUPE EXPRESS - Notifications</title>
     <style>
         * {
@@ -37,19 +38,21 @@
         .logo {
             width: 80px;
             height: 80px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: white;
             border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0 auto 20px;
-            font-size: 2.5rem;
+            font-size: 2rem;
+            font-weight: 800;
+            color: #667eea;
         }
 
         .card {
             background: white;
             border-radius: 20px;
-            padding: 30px;
+            padding: 25px;
             margin-bottom: 20px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.2);
         }
@@ -63,10 +66,6 @@
             font-weight: 700;
             cursor: pointer;
             transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
         }
 
         .btn-primary {
@@ -76,24 +75,23 @@
 
         .btn:disabled {
             opacity: 0.6;
-            cursor: not-allowed;
         }
 
-        .status-box {
-            display: none;
-            text-align: center;
+        .status {
             padding: 20px;
             border-radius: 14px;
             margin-bottom: 20px;
+            text-align: center;
+            display: none;
         }
 
-        .status-box.active {
+        .status.active {
             display: block;
             background: #d1fae5;
             color: #065f46;
         }
 
-        .status-box.error {
+        .status.error {
             display: block;
             background: #fee2e2;
             color: #991b1b;
@@ -105,28 +103,16 @@
             border-radius: 12px;
             padding: 15px;
             margin-bottom: 10px;
-            animation: slideIn 0.3s;
-        }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateX(-20px); }
-            to { opacity: 1; transform: translateX(0); }
         }
 
         .notification-time {
             font-size: 0.75rem;
             color: #6b7280;
-            margin-bottom: 5px;
         }
 
         .notification-title {
             font-weight: 700;
-            color: #111827;
-        }
-
-        .notification-body {
-            color: #4b5563;
-            font-size: 0.9rem;
+            margin: 5px 0;
         }
 
         .empty-state {
@@ -152,6 +138,16 @@
             transform: translateX(-50%) translateY(0);
         }
 
+        .info-box {
+            background: #dbeafe;
+            border: 1px solid #3b82f6;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #1e40af;
+            font-size: 0.9rem;
+        }
+
         .loading {
             display: inline-block;
             width: 20px;
@@ -172,17 +168,21 @@
         <div class="header">
             <div class="logo">GE</div>
             <h1>GROUPE EXPRESS</h1>
-            <p>Notifications en temps reel</p>
+            <p>Notifications directes dans votre navigateur</p>
         </div>
 
         <div class="card">
-            <div class="status-box" id="status-box">
-                <div style="font-size: 2rem; margin-bottom: 10px;" id="status-icon">✓</div>
-                <div style="font-weight: 700;" id="status-title">Notifications activees !</div>
-                <div style="font-size: 0.9rem; margin-top: 5px;" id="status-text">Vous recevez les messages</div>
+            <div class="info-box">
+                <strong>Android / Chrome :</strong> Les notifications arrivent directement, aucune app a installer !
             </div>
 
-            <button class="btn btn-primary" id="subscribe-btn" onclick="subscribeToNotifications()">
+            <div class="status" id="status-box">
+                <div style="font-size: 2rem; margin-bottom: 10px;">✓</div>
+                <div style="font-weight: 700;">Notifications activees !</div>
+                <div style="font-size: 0.9rem; margin-top: 5px;">Meme en fermant le navigateur</div>
+            </div>
+
+            <button class="btn btn-primary" id="subscribe-btn" onclick="subscribe()">
                 <span id="btn-text">Activer les notifications</span>
             </button>
         </div>
@@ -200,112 +200,129 @@
     <div class="toast" id="toast"></div>
 
     <script>
+        // Configuration
         const NTFY_TOPIC = 'Z4KwfhD6M7HbfzE';
         const NTFY_URL = 'https://ntfy.sh/' + NTFY_TOPIC;
         
         let eventSource = null;
+        let notifications = [];
 
+        // Charger au demarrage
         window.addEventListener('load', () => {
-            if (localStorage.getItem('ntfy-subscribed') === 'true') {
+            if (localStorage.getItem('subscribed') === 'true') {
                 startListening();
-                updateUI(true);
+                showActive();
             }
         });
 
-        async function subscribeToNotifications() {
+        async function subscribe() {
             const btn = document.getElementById('subscribe-btn');
             const btnText = document.getElementById('btn-text');
             
             btn.disabled = true;
-            btnText.innerHTML = '<span class="loading"></span> Connexion...';
+            btnText.innerHTML = '<span class="loading"></span> Chargement...';
 
             try {
+                // 1. Verifier support
                 if (!('Notification' in window)) {
-                    throw new Error('Navigateur non supporte');
+                    throw new Error('Votre navigateur ne supporte pas les notifications');
                 }
 
+                // 2. Demander permission
                 const permission = await Notification.requestPermission();
                 
                 if (permission !== 'granted') {
-                    throw new Error('Permission refusee');
+                    throw new Error('Permission refusee. Activez les notifications dans les parametres.');
                 }
 
-                // Test sans caracteres speciaux dans les headers
+                // 3. Test envoi
                 await fetch(NTFY_URL, {
                     method: 'POST',
                     headers: {
                         'Title': 'Bienvenue',
-                        'Tags': 'tada'
+                        'Priority': 'high'
                     },
-                    body: 'Vous etes abonne aux notifications GROUPE EXPRESS !'
+                    body: 'Vous recevrez maintenant nos alertes !'
                 });
 
+                // 4. Demarrer ecoute
                 startListening();
-                localStorage.setItem('ntfy-subscribed', 'true');
-                updateUI(true);
+                localStorage.setItem('subscribed', 'true');
+                showActive();
                 showToast('Notifications activees !');
 
             } catch (error) {
-                console.error('Erreur:', error);
-                showStatus('error', 'Erreur', error.message);
+                console.error(error);
+                showError(error.message);
                 btn.disabled = false;
                 btnText.textContent = 'Reessayer';
             }
         }
 
         function startListening() {
+            // Fermer ancienne connexion
             if (eventSource) {
                 eventSource.close();
             }
 
+            // Nouvelle connexion SSE
             eventSource = new EventSource(NTFY_URL + '/sse');
 
             eventSource.onmessage = (event) => {
                 try {
                     const data = JSON.parse(event.data);
-                    console.log('Recu:', data);
+                    console.log('Notification:', data);
                     
-                    addNotification(data);
+                    // Ajouter a la liste
+                    addToList(data);
                     
-                    if (document.hidden && Notification.permission === 'granted') {
-                        showSystemNotification(data);
+                    // Notification systeme (meme si page fermee sur mobile)
+                    if (Notification.permission === 'granted') {
+                        showNotification(data);
                     }
                     
-                    showToast('Nouvelle notification !');
+                    showToast('Nouveau message !');
                     
                 } catch (e) {
-                    console.error('Erreur parsing:', e);
+                    console.error('Erreur:', e);
                 }
             };
 
             eventSource.onerror = () => {
+                console.log('Reconnexion...');
                 setTimeout(() => {
-                    if (localStorage.getItem('ntfy-subscribed') === 'true') {
+                    if (localStorage.getItem('subscribed') === 'true') {
                         startListening();
                     }
-                }, 5000);
+                }, 3000);
             };
         }
 
-        function showSystemNotification(data) {
+        function showNotification(data) {
             const title = data.title || 'GROUPE EXPRESS';
             const options = {
                 body: data.message || '',
                 icon: 'https://groupe-express.vercel.app/GE.jpg',
                 badge: 'https://groupe-express.vercel.app/GE.jpg',
-                tag: data.id || 'ntfy-' + Date.now(),
-                requireInteraction: true
+                tag: 'ge-' + (data.id || Date.now()),
+                requireInteraction: false,
+                vibrate: [200, 100, 200]
             };
 
-            const notification = new Notification(title, options);
-            
-            notification.onclick = () => {
-                window.focus();
-                notification.close();
-            };
+            // Service Worker pour notifications en arriere-plan (Android)
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.ready.then(registration => {
+                    registration.showNotification(title, options);
+                }).catch(() => {
+                    // Fallback sans SW
+                    new Notification(title, options);
+                });
+            } else {
+                new Notification(title, options);
+            }
         }
 
-        function addNotification(data) {
+        function addToList(data) {
             const list = document.getElementById('notifications-list');
             const empty = list.querySelector('.empty-state');
             if (empty) empty.remove();
@@ -316,48 +333,38 @@
             div.className = 'notification-item';
             div.innerHTML = `
                 <div class="notification-time">${time}</div>
-                <div class="notification-title">${data.title || 'Notification'}</div>
-                <div class="notification-body">${data.message || ''}</div>
+                <div class="notification-title">${data.title || 'Message'}</div>
+                <div>${data.message || ''}</div>
             `;
             
             list.insertBefore(div, list.firstChild);
+            notifications.push(data);
         }
 
-        function updateUI(subscribed) {
-            const btn = document.getElementById('subscribe-btn');
-            
-            if (subscribed) {
-                btn.style.display = 'none';
-                showStatus('success', 'Notifications activees', 'Vous recevez les messages');
-            }
+        function showActive() {
+            document.getElementById('status-box').className = 'status active';
+            document.getElementById('subscribe-btn').style.display = 'none';
         }
 
-        function showStatus(type, title, text) {
-            const box = document.getElementById('status-box');
-            document.getElementById('status-icon').textContent = type === 'success' ? '✓' : '✗';
-            document.getElementById('status-title').textContent = title;
-            document.getElementById('status-text').textContent = text;
-            box.className = 'status-box ' + (type === 'success' ? 'active' : 'error');
+        function showError(msg) {
+            const status = document.getElementById('status-box');
+            status.className = 'status error';
+            status.innerHTML = `<div style="font-size: 2rem; margin-bottom: 10px;">✗</div><div style="font-weight: 700;">Erreur</div><div style="font-size: 0.9rem; margin-top: 5px;">${msg}</div>`;
         }
 
-        function showToast(message) {
+        function showToast(msg) {
             const toast = document.getElementById('toast');
-            toast.textContent = message;
+            toast.textContent = msg;
             toast.classList.add('show');
             setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
+        // Reconnexion quand on revient sur la page
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden && eventSource?.readyState === EventSource.CLOSED) {
-                if (localStorage.getItem('ntfy-subscribed') === 'true') {
+                if (localStorage.getItem('subscribed') === 'true') {
                     startListening();
                 }
-            }
-        });
-
-        window.addEventListener('beforeunload', () => {
-            if (eventSource) {
-                eventSource.close();
             }
         });
     </script>
