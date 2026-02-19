@@ -271,7 +271,8 @@
             appId: "1:403240604780:web:77d84ad03d68bdaddfb449"
         };
 
-        const VAPID_KEY = "PViQXia_vvFLKMAe2E2q5oTOX48XpRQIdx5P4xAFEPw";
+        // ✅ VAPID KEY CORRECTE (Pair Key)
+        const VAPID_KEY = "BGL6IVuJSbQjI69fot6FvfGEBmq1t4_hPP1Dhx_KYiIEFCrOLjtYFWjID_MlteNgJtm7FFbdIfBygdRi_IF-qng";
 
         // ============================================
         // INITIALISATION
@@ -280,22 +281,20 @@
         let messaging = null;
         let currentToken = null;
 
-        // Initialiser Firebase
         try {
             firebase.initializeApp(firebaseConfig);
             messaging = firebase.messaging();
             console.log("✅ Firebase initialise");
+            console.log("🔑 VAPID Key:", VAPID_KEY.substring(0, 20) + "...");
         } catch (error) {
             console.error("❌ Erreur Firebase:", error);
             showToast("Erreur d'initialisation", "error");
         }
 
         // ============================================
-        // SERVICE WORKER (SANS useServiceWorker)
+        // SERVICE WORKER
         // ============================================
 
-        // Le SW doit etre enregistre mais PAS attache manuellement a FCM
-        // FCM le trouve automatiquement s'il est a la racine
         if ("serviceWorker" in navigator) {
             navigator.serviceWorker.register("./firebase-messaging-sw.js")
                 .then((registration) => {
@@ -309,7 +308,7 @@
         }
 
         // ============================================
-        // FONCTIONS PRINCIPALES
+        // FONCTIONS
         // ============================================
 
         function checkExistingToken() {
@@ -330,7 +329,7 @@
             btnText.innerHTML = '<span class="loading"></span> Chargement...';
 
             try {
-                // 1. Permission
+                // Permission
                 if (!("Notification" in window)) {
                     throw new Error("Notifications non supportees");
                 }
@@ -340,26 +339,24 @@
                     throw new Error("Permission refusee");
                 }
 
-                // 2. Obtenir token (FCM trouve automatiquement le SW)
+                // Obtenir token avec VAPID KEY
                 console.log("🔑 Obtention du token...");
                 currentToken = await messaging.getToken({
                     vapidKey: VAPID_KEY
-                    // PAS de serviceWorkerRegistration ici !
-                    // FCM trouve automatiquement firebase-messaging-sw.js a la racine
                 });
                 
                 if (!currentToken) {
-                    throw new Error("Token vide - verifiez la configuration Firebase");
+                    throw new Error("Token vide");
                 }
 
                 console.log("✅ Token obtenu:", currentToken);
 
-                // 3. Afficher
+                // Afficher
                 document.getElementById("token-content").textContent = currentToken;
                 document.getElementById("token-box").classList.add("show");
                 localStorage.setItem("fcmToken", currentToken);
 
-                // 4. Ecouter messages premier plan
+                // Ecouter messages
                 messaging.onMessage((payload) => {
                     console.log("📨 Message recu:", payload);
                     displayNotification(payload.notification);
