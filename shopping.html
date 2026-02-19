@@ -34,18 +34,6 @@
             margin-bottom: 10px;
         }
 
-        .header p {
-            opacity: 0.9;
-        }
-
-        .card {
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-        }
-
         .logo {
             width: 80px;
             height: 80px;
@@ -56,6 +44,14 @@
             justify-content: center;
             margin: 0 auto 20px;
             font-size: 2.5rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
         }
 
         .btn {
@@ -76,22 +72,11 @@
         .btn-primary {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-primary:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
         }
 
         .btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
-        }
-
-        .btn-success {
-            background: #10b981;
-            color: white;
         }
 
         .status-box {
@@ -100,7 +85,6 @@
             padding: 20px;
             border-radius: 14px;
             margin-bottom: 20px;
-            animation: fadeIn 0.5s;
         }
 
         .status-box.active {
@@ -113,16 +97,6 @@
             display: block;
             background: #fee2e2;
             color: #991b1b;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .notifications-list {
-            max-height: 300px;
-            overflow-y: auto;
         }
 
         .notification-item {
@@ -148,7 +122,6 @@
         .notification-title {
             font-weight: 700;
             color: #111827;
-            margin-bottom: 3px;
         }
 
         .notification-body {
@@ -171,7 +144,6 @@
             color: white;
             padding: 16px 24px;
             border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             transition: transform 0.3s;
             z-index: 1000;
         }
@@ -198,49 +170,41 @@
 <body>
     <div class="container">
         <div class="header">
-            <div class="logo">🚀</div>
+            <div class="logo">GE</div>
             <h1>GROUPE EXPRESS</h1>
-            <p>Notifications en temps réel</p>
+            <p>Notifications en temps reel</p>
         </div>
 
         <div class="card">
             <div class="status-box" id="status-box">
-                <div style="font-size: 2rem; margin-bottom: 10px;" id="status-icon">✅</div>
-                <div style="font-weight: 700; font-size: 1.1rem;" id="status-title">Notifications activées !</div>
-                <div style="font-size: 0.9rem; margin-top: 5px;" id="status-text">Vous recevrez nos annonces sur cet appareil</div>
+                <div style="font-size: 2rem; margin-bottom: 10px;" id="status-icon">✓</div>
+                <div style="font-weight: 700;" id="status-title">Notifications activees !</div>
+                <div style="font-size: 0.9rem; margin-top: 5px;" id="status-text">Vous recevez les messages</div>
             </div>
 
             <button class="btn btn-primary" id="subscribe-btn" onclick="subscribeToNotifications()">
-                <span>🔔</span>
                 <span id="btn-text">Activer les notifications</span>
             </button>
         </div>
 
         <div class="card">
-            <h2 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
-                📨 Notifications reçues
-                <span id="notif-count" style="background: #667eea; color: white; padding: 2px 10px; border-radius: 20px; font-size: 0.8rem;">0</span>
-            </h2>
-            <div class="notifications-list" id="notifications-list">
+            <h2 style="margin-bottom: 20px;">Messages recus</h2>
+            <div id="notifications-list">
                 <div class="empty-state">
-                    <div style="font-size: 3rem; margin-bottom: 10px;">📭</div>
-                    <p>Aucune notification reçue</p>
+                    <p>Aucune notification</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="toast" id="toast">Message</div>
+    <div class="toast" id="toast"></div>
 
     <script>
-        // Configuration ntfy
         const NTFY_TOPIC = 'Z4KwfhD6M7HbfzE';
-        const NTFY_URL = `https://ntfy.sh/${NTFY_TOPIC}`;
+        const NTFY_URL = 'https://ntfy.sh/' + NTFY_TOPIC;
         
-        let notifications = [];
         let eventSource = null;
 
-        // Vérifier si déjà abonné au chargement
         window.addEventListener('load', () => {
             if (localStorage.getItem('ntfy-subscribed') === 'true') {
                 startListening();
@@ -248,7 +212,6 @@
             }
         });
 
-        // S'abonner aux notifications
         async function subscribeToNotifications() {
             const btn = document.getElementById('subscribe-btn');
             const btnText = document.getElementById('btn-text');
@@ -257,77 +220,65 @@
             btnText.innerHTML = '<span class="loading"></span> Connexion...';
 
             try {
-                // 1. Demander la permission navigateur
                 if (!('Notification' in window)) {
-                    throw new Error('Votre navigateur ne supporte pas les notifications');
+                    throw new Error('Navigateur non supporte');
                 }
 
                 const permission = await Notification.requestPermission();
                 
                 if (permission !== 'granted') {
-                    throw new Error('Permission refusée. Veuillez autoriser les notifications.');
+                    throw new Error('Permission refusee');
                 }
 
-                // 2. Envoyer une notification de test pour s'assurer que le canal existe
+                // Test sans caracteres speciaux dans les headers
                 await fetch(NTFY_URL, {
                     method: 'POST',
                     headers: {
-                        'Title': 'Bienvenue 👋',
+                        'Title': 'Bienvenue',
                         'Tags': 'tada'
                     },
-                    body: 'Vous êtes maintenant abonné aux notifications GROUPE EXPRESS ! 🎉'
+                    body: 'Vous etes abonne aux notifications GROUPE EXPRESS !'
                 });
 
-                // 3. Démarrer l'écoute en temps réel
                 startListening();
-                
-                // 4. Sauvegarder l'état
                 localStorage.setItem('ntfy-subscribed', 'true');
-                
-                // 5. Mettre à jour l'interface
                 updateUI(true);
-                showToast('✅ Notifications activées avec succès !');
+                showToast('Notifications activees !');
 
             } catch (error) {
                 console.error('Erreur:', error);
-                showStatus('error', '❌ Erreur', error.message);
+                showStatus('error', 'Erreur', error.message);
                 btn.disabled = false;
-                btnText.textContent = 'Réessayer';
+                btnText.textContent = 'Reessayer';
             }
         }
 
-        // Écouter les notifications en temps réel (SSE)
         function startListening() {
             if (eventSource) {
                 eventSource.close();
             }
 
-            // Utiliser Server-Sent Events pour recevoir en temps réel
-            eventSource = new EventSource(`${NTFY_URL}/sse`);
+            eventSource = new EventSource(NTFY_URL + '/sse');
 
             eventSource.onmessage = (event) => {
                 try {
                     const data = JSON.parse(event.data);
-                    console.log('Notification reçue:', data);
+                    console.log('Recu:', data);
                     
-                    // Afficher dans la liste
                     addNotification(data);
                     
-                    // Afficher une notification système si l'onglet n'est pas actif
                     if (document.hidden && Notification.permission === 'granted') {
                         showSystemNotification(data);
                     }
                     
-                    showToast('🔔 Nouvelle notification reçue !');
+                    showToast('Nouvelle notification !');
                     
                 } catch (e) {
                     console.error('Erreur parsing:', e);
                 }
             };
 
-            eventSource.onerror = (error) => {
-                console.error('SSE Error:', error);
-                // Reconnexion automatique après 5 secondes
+            eventSource.onerror = () => {
                 setTimeout(() => {
                     if (localStorage.getItem('ntfy-subscribed') === 'true') {
                         startListening();
@@ -336,7 +287,6 @@
             };
         }
 
-        // Afficher une notification système
         function showSystemNotification(data) {
             const title = data.title || 'GROUPE EXPRESS';
             const options = {
@@ -344,10 +294,7 @@
                 icon: 'https://groupe-express.vercel.app/GE.jpg',
                 badge: 'https://groupe-express.vercel.app/GE.jpg',
                 tag: data.id || 'ntfy-' + Date.now(),
-                requireInteraction: true,
-                data: {
-                    url: 'https://groupe-express.vercel.app/shopping.html'
-                }
+                requireInteraction: true
             };
 
             const notification = new Notification(title, options);
@@ -358,57 +305,41 @@
             };
         }
 
-        // Ajouter une notification à la liste
         function addNotification(data) {
             const list = document.getElementById('notifications-list');
             const empty = list.querySelector('.empty-state');
             if (empty) empty.remove();
 
-            const notif = {
-                id: data.id || Date.now(),
-                title: data.title || 'Notification',
-                body: data.message || '',
-                time: new Date(data.time || Date.now()).toLocaleString('fr-FR')
-            };
+            const time = new Date(data.time || Date.now()).toLocaleString('fr-FR');
             
-            notifications.unshift(notif);
-
             const div = document.createElement('div');
             div.className = 'notification-item';
             div.innerHTML = `
-                <div class="notification-time">${notif.time}</div>
-                <div class="notification-title">${notif.title}</div>
-                <div class="notification-body">${notif.body}</div>
+                <div class="notification-time">${time}</div>
+                <div class="notification-title">${data.title || 'Notification'}</div>
+                <div class="notification-body">${data.message || ''}</div>
             `;
             
             list.insertBefore(div, list.firstChild);
-            document.getElementById('notif-count').textContent = notifications.length;
         }
 
-        // Mettre à jour l'interface
         function updateUI(subscribed) {
             const btn = document.getElementById('subscribe-btn');
             
             if (subscribed) {
                 btn.style.display = 'none';
-                showStatus('success', '✅ Notifications activées', 'Vous recevez les messages en temps réel');
-            } else {
-                btn.disabled = false;
-                document.getElementById('btn-text').textContent = 'Activer les notifications';
+                showStatus('success', 'Notifications activees', 'Vous recevez les messages');
             }
         }
 
-        // Afficher le statut
         function showStatus(type, title, text) {
             const box = document.getElementById('status-box');
-            document.getElementById('status-icon').textContent = type === 'success' ? '✅' : '❌';
+            document.getElementById('status-icon').textContent = type === 'success' ? '✓' : '✗';
             document.getElementById('status-title').textContent = title;
             document.getElementById('status-text').textContent = text;
-            
             box.className = 'status-box ' + (type === 'success' ? 'active' : 'error');
         }
 
-        // Toast
         function showToast(message) {
             const toast = document.getElementById('toast');
             toast.textContent = message;
@@ -416,17 +347,14 @@
             setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
-        // Gestion de la visibilité de la page
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden && eventSource?.readyState === EventSource.CLOSED) {
-                // Reconnexion si on revient sur la page
                 if (localStorage.getItem('ntfy-subscribed') === 'true') {
                     startListening();
                 }
             }
         });
 
-        // Nettoyage avant de quitter
         window.addEventListener('beforeunload', () => {
             if (eventSource) {
                 eventSource.close();
