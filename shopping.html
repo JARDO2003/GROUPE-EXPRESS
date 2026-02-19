@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#667eea">
     <title>GROUPE EXPRESS - Notifications</title>
     <style>
         * {
@@ -35,26 +34,28 @@
             margin-bottom: 10px;
         }
 
-        .logo {
-            width: 80px;
-            height: 80px;
-            background: white;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px;
-            font-size: 2rem;
-            font-weight: 800;
-            color: #667eea;
+        .header p {
+            opacity: 0.9;
         }
 
         .card {
             background: white;
             border-radius: 20px;
-            padding: 25px;
+            padding: 30px;
             margin-bottom: 20px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 2.5rem;
         }
 
         .btn {
@@ -66,22 +67,34 @@
             font-weight: 700;
             cursor: pointer;
             transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-decoration: none;
         }
 
         .btn-primary {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
         }
 
-        .btn:disabled {
-            opacity: 0.6;
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
         }
 
         .status {
+            text-align: center;
             padding: 20px;
             border-radius: 14px;
             margin-bottom: 20px;
-            text-align: center;
             display: none;
         }
 
@@ -89,36 +102,34 @@
             display: block;
             background: #d1fae5;
             color: #065f46;
+            animation: fadeIn 0.5s;
         }
 
-        .status.error {
-            display: block;
-            background: #fee2e2;
-            color: #991b1b;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .notification-item {
-            background: #f9fafb;
-            border-left: 4px solid #667eea;
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 10px;
+        .instructions {
+            background: #f3f4f6;
+            border-radius: 14px;
+            padding: 20px;
+            margin-top: 20px;
         }
 
-        .notification-time {
-            font-size: 0.75rem;
-            color: #6b7280;
+        .instructions h3 {
+            margin-bottom: 15px;
+            color: #374151;
         }
 
-        .notification-title {
-            font-weight: 700;
-            margin: 5px 0;
+        .instructions ol {
+            margin-left: 20px;
+            color: #4b5563;
+            line-height: 1.8;
         }
 
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: #9ca3af;
+        .instructions li {
+            margin-bottom: 8px;
         }
 
         .toast {
@@ -130,6 +141,7 @@
             color: white;
             padding: 16px 24px;
             border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             transition: transform 0.3s;
             z-index: 1000;
         }
@@ -137,236 +149,113 @@
         .toast.show {
             transform: translateX(-50%) translateY(0);
         }
-
-        .info-box {
-            background: #dbeafe;
-            border: 1px solid #3b82f6;
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 20px;
-            color: #1e40af;
-            font-size: 0.9rem;
-        }
-
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <div class="logo">GE</div>
+            <div class="logo">🚀</div>
             <h1>GROUPE EXPRESS</h1>
-            <p>Notifications directes dans votre navigateur</p>
+            <p>Recevez nos notifications en temps réel</p>
         </div>
 
         <div class="card">
-            <div class="info-box">
-                <strong>Android / Chrome :</strong> Les notifications arrivent directement, aucune app a installer !
-            </div>
-
             <div class="status" id="status-box">
-                <div style="font-size: 2rem; margin-bottom: 10px;">✓</div>
-                <div style="font-weight: 700;">Notifications activees !</div>
-                <div style="font-size: 0.9rem; margin-top: 5px;">Meme en fermant le navigateur</div>
+                <div style="font-size: 2rem; margin-bottom: 10px;">✅</div>
+                <div style="font-weight: 700; font-size: 1.1rem;">Notifications activées !</div>
+                <div style="font-size: 0.9rem; margin-top: 5px;">Vous recevrez nos annonces sur cet appareil</div>
             </div>
 
             <button class="btn btn-primary" id="subscribe-btn" onclick="subscribe()">
-                <span id="btn-text">Activer les notifications</span>
+                <span>🔔</span>
+                <span>Activer les notifications</span>
             </button>
+
+            <div class="instructions">
+                <h3>📱 Comment ça marche ?</h3>
+                <ol>
+                    <li>Cliquez sur le bouton ci-dessus</li>
+                    <li>Autorisez les notifications dans votre navigateur</li>
+                    <li>Installez l'app ntfy si demandé (optionnel)</li>
+                    <li>Recevez nos annonces automatiquement !</li>
+                </ol>
+            </div>
         </div>
 
-        <div class="card">
-            <h2 style="margin-bottom: 20px;">Messages recus</h2>
-            <div id="notifications-list">
-                <div class="empty-state">
-                    <p>Aucune notification</p>
-                </div>
-            </div>
+        <div class="card" style="text-align: center;">
+            <p style="color: #6b7280; font-size: 0.9rem;">
+                💡 Vous pouvez aussi rejoindre directement notre canal :
+            </p>
+            <a href="https://ntfy.sh/Z4KwfhD6M7HbfzE" target="_blank" style="color: #667eea; text-decoration: none; font-weight: 600; display: inline-block; margin-top: 10px;">
+                ntfy.sh/Z4KwfhD6M7HbfzE →
+            </a>
         </div>
     </div>
 
-    <div class="toast" id="toast"></div>
+    <div class="toast" id="toast">Message</div>
 
     <script>
-        // Configuration
+        // Configuration ntfy
         const NTFY_TOPIC = 'Z4KwfhD6M7HbfzE';
-        const NTFY_URL = 'https://ntfy.sh/' + NTFY_TOPIC;
-        
-        let eventSource = null;
-        let notifications = [];
+        const NTFY_URL = `https://ntfy.sh/${NTFY_TOPIC}`;
 
-        // Charger au demarrage
-        window.addEventListener('load', () => {
-            if (localStorage.getItem('subscribed') === 'true') {
-                startListening();
-                showActive();
-            }
-        });
+        // Vérifier si déjà abonné
+        if (localStorage.getItem('ntfy-subscribed') === 'true') {
+            showSubscribed();
+        }
 
-        async function subscribe() {
-            const btn = document.getElementById('subscribe-btn');
-            const btnText = document.getElementById('btn-text');
+        function subscribe() {
+            // Ouvrir ntfy dans un nouvel onglet pour s'abonner
+            window.open(NTFY_URL, '_blank');
             
-            btn.disabled = true;
-            btnText.innerHTML = '<span class="loading"></span> Chargement...';
-
-            try {
-                // 1. Verifier support
-                if (!('Notification' in window)) {
-                    throw new Error('Votre navigateur ne supporte pas les notifications');
-                }
-
-                // 2. Demander permission
-                const permission = await Notification.requestPermission();
-                
-                if (permission !== 'granted') {
-                    throw new Error('Permission refusee. Activez les notifications dans les parametres.');
-                }
-
-                // 3. Test envoi
-                await fetch(NTFY_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Title': 'Bienvenue',
-                        'Priority': 'high'
-                    },
-                    body: 'Vous recevrez maintenant nos alertes !'
-                });
-
-                // 4. Demarrer ecoute
-                startListening();
-                localStorage.setItem('subscribed', 'true');
-                showActive();
-                showToast('Notifications activees !');
-
-            } catch (error) {
-                console.error(error);
-                showError(error.message);
-                btn.disabled = false;
-                btnText.textContent = 'Reessayer';
-            }
-        }
-
-        function startListening() {
-            // Fermer ancienne connexion
-            if (eventSource) {
-                eventSource.close();
-            }
-
-            // Nouvelle connexion SSE
-            eventSource = new EventSource(NTFY_URL + '/sse');
-
-            eventSource.onmessage = (event) => {
-                try {
-                    const data = JSON.parse(event.data);
-                    console.log('Notification:', data);
-                    
-                    // Ajouter a la liste
-                    addToList(data);
-                    
-                    // Notification systeme (meme si page fermee sur mobile)
-                    if (Notification.permission === 'granted') {
-                        showNotification(data);
-                    }
-                    
-                    showToast('Nouveau message !');
-                    
-                } catch (e) {
-                    console.error('Erreur:', e);
-                }
-            };
-
-            eventSource.onerror = () => {
-                console.log('Reconnexion...');
-                setTimeout(() => {
-                    if (localStorage.getItem('subscribed') === 'true') {
-                        startListening();
-                    }
-                }, 3000);
-            };
-        }
-
-        function showNotification(data) {
-            const title = data.title || 'GROUPE EXPRESS';
-            const options = {
-                body: data.message || '',
-                icon: 'https://groupe-express.vercel.app/GE.jpg',
-                badge: 'https://groupe-express.vercel.app/GE.jpg',
-                tag: 'ge-' + (data.id || Date.now()),
-                requireInteraction: false,
-                vibrate: [200, 100, 200]
-            };
-
-            // Service Worker pour notifications en arriere-plan (Android)
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.ready.then(registration => {
-                    registration.showNotification(title, options);
-                }).catch(() => {
-                    // Fallback sans SW
-                    new Notification(title, options);
-                });
-            } else {
-                new Notification(title, options);
-            }
-        }
-
-        function addToList(data) {
-            const list = document.getElementById('notifications-list');
-            const empty = list.querySelector('.empty-state');
-            if (empty) empty.remove();
-
-            const time = new Date(data.time || Date.now()).toLocaleString('fr-FR');
+            // Marquer comme abonné
+            localStorage.setItem('ntfy-subscribed', 'true');
             
-            const div = document.createElement('div');
-            div.className = 'notification-item';
-            div.innerHTML = `
-                <div class="notification-time">${time}</div>
-                <div class="notification-title">${data.title || 'Message'}</div>
-                <div>${data.message || ''}</div>
-            `;
+            // Afficher confirmation
+            showSubscribed();
+            showToast('Abonnement ouvert ! Autorisez les notifications.');
             
-            list.insertBefore(div, list.firstChild);
-            notifications.push(data);
+            // Envoyer une notification de test de bienvenue
+            setTimeout(() => {
+                sendWelcomeNotification();
+            }, 2000);
         }
 
-        function showActive() {
-            document.getElementById('status-box').className = 'status active';
+        function showSubscribed() {
+            document.getElementById('status-box').classList.add('active');
             document.getElementById('subscribe-btn').style.display = 'none';
         }
 
-        function showError(msg) {
-            const status = document.getElementById('status-box');
-            status.className = 'status error';
-            status.innerHTML = `<div style="font-size: 2rem; margin-bottom: 10px;">✗</div><div style="font-weight: 700;">Erreur</div><div style="font-size: 0.9rem; margin-top: 5px;">${msg}</div>`;
+        function sendWelcomeNotification() {
+            fetch(NTFY_URL, {
+                method: 'POST',
+                headers: {
+                    'Title': 'Bienvenue 👋',
+                    'Priority': 'high',
+                    'Tags': 'tada'
+                },
+                body: 'Vous êtes maintenant abonné aux notifications GROUPE EXPRESS ! 🎉'
+            });
         }
 
-        function showToast(msg) {
+        function showToast(message) {
             const toast = document.getElementById('toast');
-            toast.textContent = msg;
+            toast.textContent = message;
             toast.classList.add('show');
             setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
-        // Reconnexion quand on revient sur la page
-        document.addEventListener('visibilitychange', () => {
-            if (!document.hidden && eventSource?.readyState === EventSource.CLOSED) {
-                if (localStorage.getItem('subscribed') === 'true') {
-                    startListening();
-                }
-            }
-        });
+        // Fonction globale pour envoyer des notifications (utilisée par luna.html)
+        window.sendNotification = function(title, message, priority = 'default') {
+            return fetch(NTFY_URL, {
+                method: 'POST',
+                headers: {
+                    'Title': title,
+                    'Priority': priority
+                },
+                body: message
+            });
+        };
     </script>
 </body>
 </html>
