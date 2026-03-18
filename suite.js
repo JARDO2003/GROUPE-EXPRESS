@@ -7,1148 +7,861 @@ const firebaseConfig = {
     projectId: "livraison-c8498",
     storageBucket: "livraison-c8498.firebasestorage.app",
     messagingSenderId: "403240604780",
-    appId: "1:403240604780:web:77d84ad03d68bdaddfb449",
-    measurementId: "G-5YF89BZ5RY"
+    appId: "1:403240604780:web:77d84ad03d68bdaddfb449"
 };
+
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// ===== CONFIGURATION FCM =====
-const firebaseConfigCompat = {
+// FCM Compat
+firebase.initializeApp({
     apiKey: "AIzaSyBsGrY-AqYMoI70kT3WMxLgW0HwYA4KyaQ",
     authDomain: "livraison-c8498.firebaseapp.com",
     projectId: "livraison-c8498",
     storageBucket: "livraison-c8498.firebasestorage.app",
     messagingSenderId: "403240604780",
     appId: "1:403240604780:web:77d84ad03d68bdaddfb449"
-};
+});
 
-firebase.initializeApp(firebaseConfigCompat);
 const messaging = firebase.messaging();
-
-// VAPID Key
 const VAPID_KEY = "BGL6IVuJSbQjI69fot6FvfGEBmq1t4_hPP1Dhx_KYiIEFCrOLjtYFWjID_MlteNgJtm7FFbdIfBygdRi_IF-qng";
 
-let notificationInterval = null;
-
-// ===== GESTION DES NOUVEAUX PLATS DEPUIS FIREBASE =====
-let newDishesLoaded = false;
-
-// Charger les nouveaux plats depuis Firebase
-function loadNewDishesFromFirebase() {
-    try {
-        const newDishesQuery = query(
-            collection(db, 'nouveaux_plats'),
-            where('active', '==', true)
-        );
-        
-        onSnapshot(newDishesQuery, (snapshot) => {
-            const newDishes = [];
-            snapshot.forEach((doc) => {
-                const data = doc.data();
-                newDishes.push({
-                    id: doc.id,
-                    ...data
-                });
-            });
-            
-            console.log(`✅ ${newDishes.length} nouveaux plats chargés depuis Firebase`);
-            
-            displayNewDishes(newDishes);
-        }, (error) => {
-            console.error('❌ Erreur lors du chargement des nouveaux plats:', error);
-        });
-    } catch (error) {
-        console.error('❌ Erreur Firebase nouveaux plats:', error);
-    }
-}
-
-// Afficher les nouveaux plats sur la page
-function displayNewDishes(dishes) {
-    const section = document.getElementById('new-dishes-section');
-    const grid = document.getElementById('new-dishes-grid');
-    
-    if (!section || !grid) {
-        console.error('Section nouveaux plats non trouvée');
-        return;
-    }
-    
-    if (dishes.length === 0) {
-        section.style.display = 'none';
-        return;
-    }
-    
-    // Afficher la section
-    section.style.display = 'block';
-    
-    // Générer le HTML des plats
-    grid.innerHTML = dishes.map(dish => {
-        const imageUrl = dish.imageUrl || 'image/placeholder.jpg';
-        const dishName = dish.name || 'Nouveau plat';
-        const dishDesc = dish.description || 'Découvrez notre nouvelle création';
-        const dishPrice = dish.price || 0;
-        const dishCategory = dish.category || 'I';
-        
-        return `
-            <div class="dish-card-modern">
-                <div class="dish-image-wrapper">
-                    <img src="${imageUrl}" alt="${dishName}" class="dish-image-modern" 
-                         onerror="this.src='image/placeholder.jpg'">
-                    <div class="dish-overlay">
-                        <button class="quick-add-btn" onclick="promptAddToCart('${dishName.replace(/'/g, "\\'")}', ${dishPrice}, '${dishCategory}')">
-                            Ajouter rapidement
-                        </button>
-                    </div>
-                </div>
-                <div class="dish-content-modern">
-                    <h4 class="dish-name-modern">${dishName}</h4>
-                    <p class="dish-desc-modern">${dishDesc}</p>
-                    <div class="dish-footer-modern">
-                        <span class="dish-price-modern">${dishPrice} FCFA</span>
-                        <button class="add-cart-btn-modern" onclick="promptAddToCart('${dishName.replace(/'/g, "\\'")}', ${dishPrice}, '${dishCategory}')">
-                            <span>🛒</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
-    }).join('');
-    
-    // Animation d'apparition
-    if (!newDishesLoaded) {
-        section.style.animation = 'slideUp 0.6s ease-out';
-        newDishesLoaded = true;
-    }
-}
-
-// Ajouter l'animation CSS pour l'apparition
-const styleElement = document.createElement('style');
-styleElement.textContent = `
-    @keyframes slideUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-`;
-document.head.appendChild(styleElement);
-
-// ===== VARIABLES GLOBALES =====
+// ===== STATE =====
 let cart = [];
 let total = 0;
-let customerOrders = JSON.parse(localStorage.getItem('customerOrders') || '[]');
-let currentAdIndex = 0;
-let adsAutoPlay = true;
-let adsInterval;
-let pendingCartItem = null;
-let pendingOrderData = null;
-let deferredPrompt = null;
+let pendingItem = null;
+let pendingQty = 1;
+let customerOrders = JSON.parse(localStorage.getItem('ge_orders') || '[]');
+let fcmToken = localStorage.getItem('fcmToken') || null;
 
-// Données pour les plats de riz
-const riceOptions = [
-    { format: 'Petit', price: 500, icon: '🍚', desc: 'Format individuel' },
-    { format: 'Moyen', price: 1000, icon: '🥘', desc: 'Pour 1-2 personnes' },
-    { format: 'Grand', price: 1500, icon: '🍲', desc: 'Pour 2-3 personnes' },
-    { format: 'XXL', price: 2000, icon: '🥣', desc: 'Pour la famille' }
+// Rice options
+const riceOpts = [
+    { name: 'Petit', price: 500, icon: '🍚', desc: 'Format individuel' },
+    { name: 'Moyen', price: 1000, icon: '🥘', desc: 'Pour 1-2 personnes' },
+    { name: 'Grand', price: 1500, icon: '🍲', desc: 'Pour 2-3 personnes' },
+    { name: 'XXL', price: 2000, icon: '🥣', desc: 'Pour la famille' }
 ];
 
-// Données pour les préparations de porc
-const porcPreparations = [
-    { type: 'Sauté', icon: '🔥', desc: 'Porc sauté revenu à la perfection' },
-    { type: 'Grillé', icon: '🍖', desc: 'Porc grillé croustillant' },
-    { type: 'Soupe', icon: '🍜', desc: 'Porc en soupe savoureuse' }
-];
-
-// Données pour les types de tchèpe
 const tchepTypes = [
-    { type: 'Rouge', icon: '🔴', desc: 'Tchèpe  rouge traditionnelle' },
-    { type: 'Jaune', icon: '🟡', desc: 'Tchèpe jaune délicate' }
+    { name: 'Rouge', icon: '🔴', desc: 'Tchèpe rouge traditionnel' },
+    { name: 'Jaune', icon: '🟡', desc: 'Tchèpe jaune délicat' }
 ];
 
-let currentSelection = {
-    type: '',
-    baseName: '',
-    basePrice: 0,
-    format: ''
-};
+const porcPreps = [
+    { name: 'Sauté', icon: '🔥', desc: 'Sauté revenu à la perfection' },
+    { name: 'Grillé', icon: '🍖', desc: 'Grillé croustillant' },
+    { name: 'Soupe', icon: '🍜', desc: 'En soupe savoureuse' }
+];
 
-const degueTypes = {
-    'raisin': {
-        name: 'Dêguê raisin',
-        prices: {
-            'Sachet': 250,
-            'Petit bidon': 500,
-            'Moyen bidon': 1500,
-            'Grand bidon': 3000
-        }
-    },
-    'coco': {
-        name: 'Dêguê coco',
-        prices: {
-            'Sachet': 300,
-            'Petit bidon': 600,
-            'Moyen bidon': 1600,
-            'Grand bidon': 3500
-        }
-    },
-    'simple': {
-        name: 'Dêguê simple',
-        prices: {
-            'Sachet': 200,
-            'Petit bidon': 500,
-            'Moyen bidon': 1500,
-            'Grand bidon': 3000
-        }
-    },
-    'raisin-coco': {
-        name: 'Dêguê raisin coco',
-        prices: {
-            'Sachet': 400,
-            'Petit bidon': 700,
-            'Moyen bidon': 1700,
-            'Grand bidon': 3600
-        }
-    }
-};
-
-let currentDegueType = '';
-
-// ===== GESTION DU PANIER =====
-function addToCart(name, price, category, quantity = 1) {
-    const existingItem = cart.find(item => item.name === name);
-    
-    if (existingItem) {
-        existingItem.quantity += quantity;
-    } else {
-        cart.push({ name, price, category, quantity });
-    }
-    
-    updateCart();
-    updateCartBadge();
-    showNotificationStatus(`✅ ${name} ajouté (x${quantity})`, '#28a745');
+// ===== CART =====
+function addToCart(name, price, category, qty = 1) {
+    const existing = cart.find(i => i.name === name);
+    if (existing) existing.qty += qty;
+    else cart.push({ name, price, category, qty });
+    updateCartUI();
+    showToast(`✅ ${name} ajouté (×${qty})`);
 }
 
-function updateCart() {
-    const cartItems = document.getElementById('cart-items');
-    const cartTotal = document.getElementById('cart-total');
-    
-    if (!cartItems || !cartTotal) return;
-    
-    total = 0;
-    
+function updateCartUI() {
+    total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+    const count = cart.reduce((s, i) => s + i.qty, 0);
+
+    // Badge
+    ['cart-badge', 'fab-badge'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.textContent = count;
+        el.style.display = count > 0 ? 'flex' : 'none';
+    });
+
+    // Cart count text
+    const cct = document.getElementById('cart-count-text');
+    if (cct) cct.textContent = count > 0 ? `${count} article(s) dans le panier` : 'Votre commande';
+
+    // Cart list
+    const list = document.getElementById('cart-items-list');
+    if (!list) return;
+
     if (cart.length === 0) {
-        cartItems.innerHTML = `
-            <div class="empty-state">
-                <div class="empty-state-icon">🛒</div>
-                <p>Votre panier est vide</p>
-            </div>
-        `;
+        list.innerHTML = `<div class="empty-cart"><div class="icon">🛒</div><p>Votre panier est vide.<br>Commencez à commander !</p></div>`;
     } else {
-        cartItems.innerHTML = cart.map((item, index) => {
-            const itemTotal = item.price * item.quantity;
-            total += itemTotal;
-            
-            return `
-                <div class="cart-item">
-                    <div class="cart-item-info">
-                        <div class="cart-item-name">${item.name}</div>
-                        <div class="cart-item-price">${item.price} FCFA × ${item.quantity} = ${itemTotal} FCFA</div>
-                    </div>
-                    <button class="remove-btn" onclick="removeFromCart(${index})">🗑️</button>
+        list.innerHTML = cart.map((item, i) => `
+            <div class="cart-item-row">
+                <div class="cart-item-info">
+                    <div class="cart-item-name">${item.name}</div>
+                    <div class="cart-item-price">${item.price} FCFA × ${item.qty} = ${item.price * item.qty} FCFA</div>
                 </div>
-            `;
-        }).join('');
+                <button class="cart-remove" onclick="window._removeFromCart(${i})">🗑️</button>
+            </div>
+        `).join('');
     }
-    
-    cartTotal.textContent = `Total: ${total} FCFA`;
+
+    const ct = document.getElementById('cart-total');
+    if (ct) ct.innerHTML = `<span>Total</span><span>${total} FCFA</span>`;
 }
 
-function updateCartBadge() {
-    const badge = document.getElementById('cart-badge');
-    if (!badge) return;
-    
-    const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-    
-    if (itemCount > 0) {
-        badge.textContent = itemCount;
-        badge.style.display = 'flex';
-    } else {
-        badge.style.display = 'none';
-    }
-}
+window._removeFromCart = function(i) {
+    cart.splice(i, 1);
+    updateCartUI();
+};
 
-function removeFromCart(index) {
-    cart.splice(index, 1);
-    updateCart();
-    updateCartBadge();
-}
+// ===== MODALS =====
+function openModal(id) { document.getElementById(id)?.classList.add('show'); }
+function closeModal(id) { document.getElementById(id)?.classList.remove('show'); }
+window.closeModal = closeModal;
 
 function toggleCart() {
-    const modal = document.getElementById('cart-modal');
-    if (modal) {
-        modal.classList.toggle('show');
-    }
+    document.getElementById('cart-modal')?.classList.toggle('show');
 }
 
-// ===== MODAL QUANTITÉ PERSONNALISÉ =====
-function promptAddToCart(name, price, category) {
-    const quantityModal = document.getElementById('quantity-modal');
-    const titleElem = document.getElementById('quantity-modal-title');
-    const subtitleElem = document.getElementById('quantity-modal-subtitle');
-    const inputElem = document.getElementById('quantity-input');
-    const errorElem = document.getElementById('quantity-error');
-    
-    if (!quantityModal || !titleElem || !subtitleElem || !inputElem || !errorElem) {
-        console.error('Éléments du modal quantité non trouvés');
-        addToCart(name, price, category, 1);
-        return;
-    }
-    
-    pendingCartItem = { name, price, category };
-    
-    titleElem.textContent = name;
-    subtitleElem.textContent = `Prix: ${price} FCFA`;
-    inputElem.value = 1;
-    errorElem.classList.remove('show');
-    errorElem.style.display = 'none';
-    
-    quantityModal.classList.add('show');
-    inputElem.focus();
+function toggleOrders() {
+    renderOrders();
+    openModal('orders-modal');
 }
 
-function closeQuantityModal() {
-    const quantityModal = document.getElementById('quantity-modal');
-    if (quantityModal) {
-        quantityModal.classList.remove('show');
-    }
-    pendingCartItem = null;
-}
-
-function confirmQuantity() {
-    const quantityInput = document.getElementById('quantity-input');
-    const errorDiv = document.getElementById('quantity-error');
-    
-    if (!quantityInput || !errorDiv) {
-        console.error('Éléments du modal non trouvés');
-        return;
-    }
-    
-    const quantity = parseInt(quantityInput.value, 10);
-    
-    if (!quantity || quantity < 1) {
-        errorDiv.textContent = '❌ Veuillez entrer une quantité valide (minimum 1)';
-        errorDiv.style.display = 'block';
-        errorDiv.classList.add('show');
-        quantityInput.focus();
-        return;
-    }
-    
-    if (quantity > 50) {
-        errorDiv.textContent = '❌ Quantité maximale: 50';
-        errorDiv.style.display = 'block';
-        errorDiv.classList.add('show');
-        quantityInput.focus();
-        return;
-    }
-    
-    if (pendingCartItem) {
-        addToCart(
-            pendingCartItem.name, 
-            pendingCartItem.price, 
-            pendingCartItem.category, 
-            quantity
-        );
-        closeQuantityModal();
-    }
-}
-
-// ===== MODAL INFORMATIONS CLIENT =====
-function openCustomerModal() {
-    const customerModal = document.getElementById('customer-modal');
-    const nameInput = document.getElementById('customer-name');
-    const whatsappInput = document.getElementById('customer-whatsapp');
-    const establishmentSelect = document.getElementById('customer-establishment');
-    
-    if (!customerModal || !nameInput || !whatsappInput || !establishmentSelect) {
-        console.error('Éléments du modal client non trouvés');
-        return;
-    }
-    
-    nameInput.value = '';
-    whatsappInput.value = '';
-    establishmentSelect.value = '';
-    
-    document.getElementById('name-error').classList.remove('show');
-    document.getElementById('whatsapp-error').classList.remove('show');
-    document.getElementById('establishment-error').classList.remove('show');
-    
-    customerModal.classList.add('show');
-    nameInput.focus();
-}
-
-function closeCustomerModal() {
-    const customerModal = document.getElementById('customer-modal');
-    if (customerModal) {
-        customerModal.classList.remove('show');
-    }
-    pendingOrderData = null;
-}
-
-function confirmCustomerInfo() {
-    const nameInput = document.getElementById('customer-name');
-    const whatsappInput = document.getElementById('customer-whatsapp');
-    const establishmentSelect = document.getElementById('customer-establishment');
-    
-    const customerName = nameInput.value.trim();
-    const whatsappNumber = whatsappInput.value.trim();
-    const establishment = establishmentSelect.value;
-    
-    let hasError = false;
-    
-    // Validation nom
-    if (!customerName || customerName.length < 2) {
-        document.getElementById('name-error').textContent = '❌ Veuillez entrer votre nom complet';
-        document.getElementById('name-error').style.display = 'block';
-        document.getElementById('name-error').classList.add('show');
-        hasError = true;
-    } else {
-        document.getElementById('name-error').classList.remove('show');
-        document.getElementById('name-error').style.display = 'none';
-    }
-    
-    // Validation WhatsApp
-    const cleanNumber = whatsappNumber.replace(/\s+/g, '');
-    if (!cleanNumber || cleanNumber.length < 8) {
-        document.getElementById('whatsapp-error').textContent = '❌ Numéro WhatsApp invalide (minimum 8 chiffres)';
-        document.getElementById('whatsapp-error').style.display = 'block';
-        document.getElementById('whatsapp-error').classList.add('show');
-        hasError = true;
-    } else {
-        document.getElementById('whatsapp-error').classList.remove('show');
-        document.getElementById('whatsapp-error').style.display = 'none';
-    }
-    
-    // Validation établissement
-    if (!establishment) {
-        document.getElementById('establishment-error').textContent = '❌ Veuillez sélectionner votre établissement';
-        document.getElementById('establishment-error').style.display = 'block';
-        document.getElementById('establishment-error').classList.add('show');
-        hasError = true;
-    } else {
-        document.getElementById('establishment-error').classList.remove('show');
-        document.getElementById('establishment-error').style.display = 'none';
-    }
-    
-    if (hasError) {
-        return;
-    }
-    
-    // Tout est valide, procéder à l'envoi
-    closeCustomerModal();
-    processOrder(customerName, cleanNumber, establishment);
-}
-
-// ===== SÉLECTION RIZ =====
-function selectRice(riceName) {
-    currentSelection.type = 'rice';
-    currentSelection.baseName = riceName;
-    
-    const modal = document.getElementById('selection-modal');
-    const title = document.getElementById('selection-modal-title');
-    const subtitle = document.getElementById('selection-modal-subtitle');
-    const options = document.getElementById('selection-options');
-    
-    title.textContent = riceName;
-    subtitle.textContent = 'Choisissez votre format';
-    
-    options.innerHTML = riceOptions.map(opt => `
-        <div class="selection-option" onclick="addRiceToCart('${riceName}', '${opt.format}', ${opt.price})">
-            <div class="selection-option-info">
-                <div class="selection-option-icon">${opt.icon}</div>
-                <div class="selection-option-details">
-                    <h4>${opt.format}</h4>
-                    <p>${opt.desc}</p>
+// ===== SELECTION MODAL =====
+function showSelectionModal(title, subtitle, options) {
+    document.getElementById('sel-title').textContent = title;
+    document.getElementById('sel-subtitle').textContent = subtitle;
+    document.getElementById('sel-options').innerHTML = options.map(o => `
+        <div class="option-item" onclick="${o.onclick}">
+            <div class="option-item-left">
+                <div class="option-emoji">${o.icon}</div>
+                <div>
+                    <h4>${o.label}</h4>
+                    <p>${o.desc}</p>
                 </div>
             </div>
-            <div class="selection-option-price">${opt.price} FCFA</div>
+            <div class="option-price">${o.price} FCFA</div>
         </div>
     `).join('');
-    
-    modal.classList.add('show');
+    openModal('selection-modal');
 }
 
-function addRiceToCart(riceName, format, price) {
-    const fullName = `${riceName} (${format})`;
-    closeSelectionModal();
-    promptAddToCart(fullName, price, 'B');
+// ===== RICE =====
+function selectRice(name) {
+    showSelectionModal(name, 'Choisissez votre format', riceOpts.map(o => ({
+        icon: o.icon, label: o.name, desc: o.desc, price: o.price,
+        onclick: `closeModal('selection-modal');promptAddToCart('${name} (${o.name})', ${o.price}, 'B')`
+    })));
 }
 
-// ===== SÉLECTION TCHÈPE =====
-function selectTchep(tchepName, basePrice) {
-    currentSelection.type = 'tchep';
-    currentSelection.baseName = tchepName;
-    currentSelection.basePrice = basePrice;
-    
-    const modal = document.getElementById('selection-modal');
-    const title = document.getElementById('selection-modal-title');
-    const subtitle = document.getElementById('selection-modal-subtitle');
-    const options = document.getElementById('selection-options');
-    
-    title.textContent = tchepName;
-    subtitle.textContent = 'Choisissez le type de tchep';
-    
-    options.innerHTML = tchepTypes.map(type => `
-        <div class="selection-option" onclick="addTchepToCart('${tchepName}', '${type.type}', ${basePrice})">
-            <div class="selection-option-info">
-                <div class="selection-option-icon">${type.icon}</div>
-                <div class="selection-option-details">
-                    <h4>tchep ${type.type}</h4>
-                    <p>${type.desc}</p>
-                </div>
-            </div>
-            <div class="selection-option-price">${basePrice} FCFA</div>
-        </div>
-    `).join('');
-    
-    modal.classList.add('show');
+// ===== TCHEP =====
+function selectTchep(name, price) {
+    showSelectionModal(name, 'Choisissez le type', tchepTypes.map(t => ({
+        icon: t.icon, label: `Tchèpe ${t.name}`, desc: t.desc, price,
+        onclick: `closeModal('selection-modal');promptAddToCart('${name} (${t.name})', ${price}, 'C')`
+    })));
 }
 
-function addTchepToCart(tchepName, type, price) {
-    const fullName = `${tchepName} (${type})`;
-    closeSelectionModal();
-    promptAddToCart(fullName, price, 'C');
-}
-
-// ===== SÉLECTION PORC =====
+// ===== PORC =====
 function selectPorc(price, format) {
-    currentSelection.type = 'porc';
-    currentSelection.basePrice = price;
-    currentSelection.format = format;
-    
-    const modal = document.getElementById('selection-modal');
-    const title = document.getElementById('selection-modal-title');
-    const subtitle = document.getElementById('selection-modal-subtitle');
-    const options = document.getElementById('selection-options');
-    
-    title.textContent = `Porc au four (${format})`;
-    subtitle.textContent = 'Choisissez la préparation';
-    
-    options.innerHTML = porcPreparations.map(prep => `
-        <div class="selection-option" onclick="addPorcToCart('${prep.type}', ${price}, '${format}')">
-            <div class="selection-option-info">
-                <div class="selection-option-icon">${prep.icon}</div>
-                <div class="selection-option-details">
-                    <h4>${prep.type}</h4>
-                    <p>${prep.desc}</p>
-                </div>
-            </div>
-            <div class="selection-option-price">${price} FCFA</div>
-        </div>
-    `).join('');
-    
-    modal.classList.add('show');
+    showSelectionModal(`Porc au four (${format})`, 'Choisissez la préparation', porcPreps.map(p => ({
+        icon: p.icon, label: p.name, desc: p.desc, price,
+        onclick: `closeModal('selection-modal');promptAddToCart('Porc au four ${p.name} (${format})', ${price}, 'D')`
+    })));
 }
 
-function addPorcToCart(type, price, format) {
-    const fullName = `Porc au four ${type} (${format})`;
-    closeSelectionModal();
-    promptAddToCart(fullName, price, 'D');
-}
-
-// ===== SÉLECTION ATTIÉKÉ =====
+// ===== ATTIÉKÈ =====
 function selectAttiekePoisson() {
-    const options = [
-        { name: 'Petit', price: 1000, icon: '🍽️', desc: '1 personne' },
-        { name: 'Moyen', price: 1500, icon: '🍛', desc: '1-2 personnes' },
-        { name: 'Grand', price: 2000, icon: '🥘', desc: '2-3 personnes' }
+    const opts = [
+        { name:'Petit', price:1000, icon:'🍽️', desc:'1 personne' },
+        { name:'Moyen', price:1500, icon:'🍛', desc:'1-2 personnes' },
+        { name:'Grand', price:2000, icon:'🥘', desc:'2-3 personnes' }
     ];
-    showAttiekeModal('Attiékè poisson alloko + Condiment', options, 'E');
+    showSelectionModal('Attiékè poisson alloko + Condiment', 'Choisissez votre format', opts.map(o => ({
+        icon: o.icon, label: o.name, desc: o.desc, price: o.price,
+        onclick: `closeModal('selection-modal');promptAddToCart('Attiékè poisson alloko (${o.name})', ${o.price}, 'E')`
+    })));
 }
 
 function selectAttiekePouletAlloko() {
-    const options = [
-        { name: 'Petit', price: 1500, icon: '🍽️', desc: '1 personne' },
-        { name: 'Moyen', price: 2000, icon: '🍛', desc: '1-2 personnes' },
-        { name: 'Grand', price: 2500, icon: '🥘', desc: '2-3 personnes' }
+    const opts = [
+        { name:'Petit', price:1500, icon:'🍽️', desc:'1 personne' },
+        { name:'Moyen', price:2000, icon:'🍛', desc:'1-2 personnes' },
+        { name:'Grand', price:2500, icon:'🥘', desc:'2-3 personnes' }
     ];
-    showAttiekeModal('Attiékè poulet alloko + Condiment', options, 'E');
+    showSelectionModal('Attiékè poulet alloko + Condiment', 'Choisissez votre format', opts.map(o => ({
+        icon: o.icon, label: o.name, desc: o.desc, price: o.price,
+        onclick: `closeModal('selection-modal');promptAddToCart('Attiékè poulet alloko (${o.name})', ${o.price}, 'E')`
+    })));
 }
 
 function selectAttiekePoulet() {
-    const options = [
-        { name: 'Petit', price: 1000, icon: '🍽️', desc: '1 personne' },
-        { name: 'Moyen', price: 1500, icon: '🍛', desc: '1-2 personnes' },
-        { name: 'Grand', price: 2000, icon: '🥘', desc: '2-3 personnes' }
+    const opts = [
+        { name:'Petit', price:1000, icon:'🍽️', desc:'1 personne' },
+        { name:'Moyen', price:1500, icon:'🍛', desc:'1-2 personnes' },
+        { name:'Grand', price:2000, icon:'🥘', desc:'2-3 personnes' }
     ];
-    showAttiekeModal('Attiékè poulet + Condiment', options, 'E');
+    showSelectionModal('Attiékè poulet + Condiment', 'Choisissez votre format', opts.map(o => ({
+        icon: o.icon, label: o.name, desc: o.desc, price: o.price,
+        onclick: `closeModal('selection-modal');promptAddToCart('Attiékè poulet (${o.name})', ${o.price}, 'E')`
+    })));
 }
 
 function selectGarba() {
-    const options = [
-        { name: 'Petit', price: 500, icon: '🍽️', desc: 'Format simple' },
-        { name: 'Moyen', price: 1000, icon: '🍛', desc: 'Format standard' },
-        { name: 'Grand', price: 1500, icon: '🥘', desc: 'Format généreux' }
+    const opts = [
+        { name:'Petit', price:500, icon:'🍽️', desc:'Format simple' },
+        { name:'Moyen', price:1000, icon:'🍛', desc:'Format standard' },
+        { name:'Grand', price:1500, icon:'🥘', desc:'Format généreux' }
     ];
-    showAttiekeModal('Spécialité Garba', options, 'E');
+    showSelectionModal('Spécialité Garba', 'Choisissez votre format', opts.map(o => ({
+        icon: o.icon, label: o.name, desc: o.desc, price: o.price,
+        onclick: `closeModal('selection-modal');promptAddToCart('Garba (${o.name})', ${o.price}, 'E')`
+    })));
 }
 
-function showAttiekeModal(dishName, options, category) {
-    const modal = document.getElementById('selection-modal');
-    const title = document.getElementById('selection-modal-title');
-    const subtitle = document.getElementById('selection-modal-subtitle');
-    const optionsDiv = document.getElementById('selection-options');
-    
-    title.textContent = dishName;
-    subtitle.textContent = 'Choisissez votre format';
-    
-    optionsDiv.innerHTML = options.map(opt => `
-        <div class="selection-option" onclick="addAttiekeToCart('${dishName}', '${opt.name}', ${opt.price}, '${category}')">
-            <div class="selection-option-info">
-                <div class="selection-option-icon">${opt.icon}</div>
-                <div class="selection-option-details">
-                    <h4>${opt.name}</h4>
-                    <p>${opt.desc}</p>
-                </div>
+// ===== QTY MODAL =====
+function promptAddToCart(name, price, category) {
+    pendingItem = { name, price, category };
+    pendingQty = 1;
+    document.getElementById('qty-title').textContent = name;
+    document.getElementById('qty-subtitle').textContent = `Prix unitaire : ${price} FCFA`;
+    document.getElementById('qty-display').textContent = '1';
+    document.getElementById('qty-error').style.display = 'none';
+    openModal('qty-modal');
+}
+
+function changeQty(delta) {
+    pendingQty = Math.max(1, Math.min(50, pendingQty + delta));
+    document.getElementById('qty-display').textContent = pendingQty;
+}
+
+function confirmQty() {
+    if (!pendingItem) return;
+    addToCart(pendingItem.name, pendingItem.price, pendingItem.category, pendingQty);
+    closeModal('qty-modal');
+    pendingItem = null;
+}
+
+// ===== CHECKOUT =====
+function startCheckout() {
+    if (cart.length === 0) {
+        showToast('🛒 Votre panier est vide', 'error');
+        return;
+    }
+    const now = new Date().getHours();
+    if (now >= 10 && now < 18) {
+        showToast('⛔ Commandes fermées de 10h à 18h', 'error');
+        return;
+    }
+    closeModal('cart-modal');
+    // Reset form
+    ['inp-name','inp-phone'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    const et = document.getElementById('inp-etab'); if (et) et.value = '';
+    ['err-name','err-phone','err-etab'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
+    openModal('customer-modal');
+}
+
+async function submitOrder() {
+    const name = document.getElementById('inp-name')?.value.trim() || '';
+    const phone = document.getElementById('inp-phone')?.value.trim().replace(/\s+/g,'') || '';
+    const etab = document.getElementById('inp-etab')?.value || '';
+
+    let err = false;
+    const showErr = (id, msg) => {
+        const el = document.getElementById(id);
+        if (el) { el.textContent = msg; el.style.display = 'block'; }
+        err = true;
+    };
+    const hideErr = id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; };
+
+    if (!name || name.length < 2) showErr('err-name', '❌ Entrez votre nom complet'); else hideErr('err-name');
+    if (!phone || phone.length < 8) showErr('err-phone', '❌ Numéro invalide (min. 8 chiffres)'); else hideErr('err-phone');
+    if (!etab) showErr('err-etab', '❌ Sélectionnez votre établissement'); else hideErr('err-etab');
+
+    if (err) return;
+
+    const btn = document.querySelector('#customer-modal .btn-primary');
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ Envoi en cours...'; }
+
+    try {
+        const orderData = {
+            customerName: name,
+            whatsappNumber: phone,
+            establishment: etab,
+            items: cart,
+            total,
+            fcmToken: fcmToken || null,
+            status: 'En attente',
+            createdAt: new Date().toISOString()
+        };
+
+        const docRef = await addDoc(collection(db, 'orders'), orderData);
+        const code = `#GEC${docRef.id.substring(0,6).toUpperCase()}`;
+
+        // Save locally
+        customerOrders.push({ ...orderData, code, timestamp: new Date().toISOString() });
+        localStorage.setItem('ge_orders', JSON.stringify(customerOrders));
+
+        // Clear cart
+        cart = [];
+        total = 0;
+        updateCartUI();
+
+        // Show success
+        closeModal('customer-modal');
+        document.getElementById('success-code').textContent = code;
+        document.getElementById('success-name').textContent = name;
+        document.getElementById('success-total').textContent = `Total payé : ${orderData.total} FCFA`;
+        openModal('success-modal');
+
+        // Send push notification via FCM (if token exists)
+        if (fcmToken) {
+            sendOrderNotification(name, code, orderData.total, fcmToken);
+        }
+
+    } catch (e) {
+        console.error('Order error:', e);
+        showToast('❌ Erreur lors de l\'envoi. Réessayez.', 'error');
+    } finally {
+        if (btn) { btn.disabled = false; btn.textContent = '✅ Valider ma commande'; }
+    }
+}
+
+// =====================================================
+// La notification push est envoyée AUTOMATIQUEMENT
+// par la Cloud Function "notifyOnNewOrder" dans
+// functions/index.js dès qu'une commande est créée
+// dans Firestore — même si le client a fermé l'app.
+//
+// En fallback (si pas de Cloud Function), on utilise
+// la notification locale via Service Worker.
+// =====================================================
+async function sendOrderNotification(name, code, amount, token) {
+    try {
+        // Notification locale immédiate (fallback)
+        if (Notification.permission === 'granted' && 'serviceWorker' in navigator) {
+            const reg = await navigator.serviceWorker.ready;
+            await reg.showNotification(`✅ Commande ${code} confirmée !`, {
+                body: `Bonjour ${name} ! Votre commande est enregistrée. Retrait à 12h00 au stand Groupe Express 🍽️`,
+                icon: '/image/GE.jpg',
+                badge: '/image/GE.jpg',
+                tag: 'order-' + code,
+                data: { url: '/', code },
+                actions: [
+                    { action: 'view', title: '📦 Voir ma commande' },
+                    { action: 'dismiss', title: 'Fermer' }
+                ],
+                requireInteraction: true,
+                vibrate: [200, 100, 300, 100, 200]
+            });
+        }
+        // Note: la Cloud Function envoie aussi automatiquement via FCM
+        // dès que la commande apparaît dans Firestore (même hors ligne)
+    } catch(e) {
+        console.log('Local notification error:', e);
+    }
+}
+
+// ===== ORDERS =====
+function renderOrders() {
+    const el = document.getElementById('orders-list-content');
+    if (!el) return;
+    if (!customerOrders.length) {
+        el.innerHTML = `<div class="empty-cart"><div class="icon">📦</div><p>Aucune commande pour l'instant</p></div>`;
+        return;
+    }
+    el.innerHTML = [...customerOrders].reverse().map(o => `
+        <div class="order-history-item">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+                <span class="code">${o.code || 'N/A'}</span>
+                <span class="date">${new Date(o.timestamp || o.createdAt).toLocaleDateString('fr-FR')}</span>
             </div>
-            <div class="selection-option-price">${opt.price} FCFA</div>
+            <div class="summary">${(o.items||[]).length} article(s) — ${o.total||0} FCFA — ${o.establishment||''}</div>
         </div>
     `).join('');
-    
-    modal.classList.add('show');
-}
-
-function addAttiekeToCart(dishName, format, price, category) {
-    const fullName = `${dishName} (${format})`;
-    closeSelectionModal();
-    promptAddToCart(fullName, price, category);
-}
-
-function closeSelectionModal() {
-    const modal = document.getElementById('selection-modal');
-    if (modal) modal.classList.remove('show');
-}
-
-// ===== AFFICHER ALERT PERSONNALISÉE =====
-function showCustomAlert(type, title, code, message, details) {
-    const modal = document.getElementById('custom-alert-modal');
-    const icon = document.getElementById('custom-alert-icon');
-    const titleElem = document.getElementById('custom-alert-title');
-    const codeElem = document.getElementById('custom-alert-code');
-    const messageElem = document.getElementById('custom-alert-message');
-    const detailsElem = document.getElementById('custom-alert-details');
-    
-    if (!modal || !icon || !titleElem || !codeElem || !messageElem || !detailsElem) {
-        console.error('Éléments du modal non trouvés');
-        return;
-    }
-    
-    // Icône selon le type
-    if (type === 'success') {
-        icon.textContent = '✅';
-        icon.className = 'custom-alert-icon';
-        titleElem.style.background = 'linear-gradient(135deg, #28a745, #20c997)';
-        titleElem.style.webkitBackgroundClip = 'text';
-        titleElem.style.webkitTextFillColor = 'transparent';
-        titleElem.style.backgroundClip = 'text';
-    } else if (type === 'error') {
-        icon.textContent = '❌';
-        icon.className = 'custom-alert-icon error';
-        titleElem.style.background = 'linear-gradient(135deg, #dc3545, #c82333)';
-        titleElem.style.webkitBackgroundClip = 'text';
-        titleElem.style.webkitTextFillColor = 'transparent';
-        titleElem.style.backgroundClip = 'text';
-    }
-    
-    // Contenu
-    titleElem.innerHTML = title;
-    messageElem.innerHTML = message;
-    
-    // Code de commande
-    if (code) {
-        codeElem.textContent = code;
-        codeElem.style.display = 'inline-block';
-    } else {
-        codeElem.style.display = 'none';
-    }
-    
-    // Détails
-    if (type === 'success') {
-        detailsElem.innerHTML = `
-            <div class="alert-detail-item">
-                <span class="detail-icon">📍</span>
-                <span class="detail-text">Stand GROUPE EXPRESS - Rez-de-chaussée</span>
-            </div>
-            <div class="alert-detail-item">
-                <span class="detail-icon">💬</span>
-                <span class="detail-text">Confirmation envoyée sur WhatsApp</span>
-            </div>
-            <div class="alert-detail-item">
-                <span class="detail-icon">⏰</span>
-                <span class="detail-text">Heure de retrait : 12H00</span>
-            </div>
-            <div class="alert-detail-item">
-                <span class="detail-icon">💰</span>
-                <span class="detail-text">Total à payer : ${total} FCFA</span>
-            </div>
-        `;
-    } else {
-        detailsElem.innerHTML = `
-            <div class="alert-detail-item">
-                <span class="detail-icon">📞</span>
-                <span class="detail-text">Service client : 05 64 06 10 04</span>
-            </div>
-            <div class="alert-detail-item">
-                <span class="detail-icon">💬</span>
-                <span class="detail-text">WhatsApp disponible 24/7</span>
-            </div>
-        `;
-    }
-    
-    // Afficher le modal
-    modal.classList.add('show');
-    
-    // Jouer un son de succès (optionnel)
-    if (type === 'success') {
-        playSuccessSound();
-    }
-}
-
-function closeCustomAlert() {
-    const modal = document.getElementById('custom-alert-modal');
-    if (modal) {
-        modal.classList.remove('show');
-    }
-}
-
-// Son de succès (optionnel)
-function playSuccessSound() {
-    try {
-        const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZSA0PVaru8K1aGAg+ltryxHMnBSh+zPLaizsIGGS57OihUBELTKXh8bllHAU2jdXzzn0vBSp7yvLajTkHG2u87OihUREKTqfg8bhkGwU1jNXzz3wvBCp8yvPajjoHGmu87+eZThENT6vl8bNeFgo9ltzzxnUnBSh9zPPaizsIGGS67OihUREMTqfg8bhkGwU2jNXzz30vBCp8yPPajjoIGmy97OehUBELTqfg8bhkGwU2jNXzz30vBCp8yPPajzoHG227');
-        audio.volume = 0.3;
-        audio.play().catch(() => {});
-    } catch(e) {
-        console.log('Son non disponible');
-    }
-}
-
-// ===== GESTION COMMANDES =====
-function toggleOrders() {
-    const modal = document.getElementById('orders-modal');
-    if (modal) modal.classList.toggle('show');
-}
-
-function updateOrdersList() {
-    const ordersList = document.getElementById('orders-list');
-    if (!ordersList) return;
-    
-    if (!customerOrders || !Array.isArray(customerOrders) || customerOrders.length === 0) {
-        ordersList.innerHTML = `
-            <div class="empty-state">
-                <div class="empty-state-icon">🛒</div>
-                <h3>Aucune commande</h3>
-                <p>Vos commandes apparaîtront ici</p>
-            </div>
-        `;
-        return;
-    }
-    
-    const ordersToDisplay = [...customerOrders].reverse();
-    
-    ordersList.innerHTML = ordersToDisplay.map(order => {
-        const code = order.code || 'N/A';
-        const timestamp = order.timestamp || new Date().toISOString();
-        const items = order.items || [];
-        const orderTotal = order.total || 0;
-        
-        return `
-            <div style="background: var(--background); padding: 1rem; border-radius: 12px; margin-bottom: 1rem;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                    <strong>${code}</strong>
-                    <span>${new Date(timestamp).toLocaleDateString()}</span>
-                </div>
-                <div style="font-size: 0.9rem; color: var(--on-surface-light);">
-                    ${items.length} article(s) - ${orderTotal} FCFA
-                </div>
-            </div>
-        `;
-    }).join('');
 }
 
 function clearOrders() {
-    if (customerOrders.length === 0) {
-        showCustomAlert(
-            'error',
-            'Historique vide',
-            '',
-            'Votre historique de commandes est déjà vide.',
-            ''
-        );
-        return;
-    }
-    
-    const confirmModal = document.createElement('div');
-    confirmModal.className = 'custom-alert-modal show';
-    confirmModal.innerHTML = `
-        <div class="custom-alert-content">
-            <div class="custom-alert-icon" style="background: linear-gradient(135deg, #ffc107, #ff9800);">
-                ⚠️
-            </div>
-            <h2 class="custom-alert-title" style="background: linear-gradient(135deg, #ffc107, #ff9800); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Vider l'historique</h2>
-            <div class="custom-alert-message" style="margin-bottom: 2rem;">Voulez-vous vraiment supprimer toutes vos commandes ?</div>
-            <div style="display: flex; gap: 1rem;">
-                <button class="custom-alert-btn" style="background: linear-gradient(135deg, #6c757d, #5a6268);" onclick="this.closest('.custom-alert-modal').remove()">
-                    ❌ Annuler
-                </button>
-                <button class="custom-alert-btn" onclick="confirmClearOrders(this)">
-                    ✅ Confirmer
-                </button>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(confirmModal);
-}
-
-function confirmClearOrders(btn) {
-    customerOrders = [];
-    localStorage.setItem('customerOrders', '[]');
-    updateOrdersList();
-    
-    const confirmModal = btn.closest('.custom-alert-modal');
-    if (confirmModal) {
-        confirmModal.remove();
-    }
-    
-    showCustomAlert(
-        'success',
-        'Historique vidé',
-        '',
-        'Toutes vos commandes ont été supprimées avec succès.',
-        ''
-    );
-}
-
-// ===== TRAITEMENT COMMANDE =====
-function processOrder(customerName, whatsappNumber, establishment) {
-    const orderData = {
-        customerName,
-        whatsappNumber,
-        establishment,
-        items: cart,
-        total,
-        timestamp: new Date().toISOString()
-    };
-    
-    submitOrder(orderData).then(code => {
-        if (code) {
-            customerOrders.push({ ...orderData, code });
-            localStorage.setItem('customerOrders', JSON.stringify(customerOrders));
-            
-            cart = [];
-            total = 0;
-            updateCart();
-            updateCartBadge();
-            toggleCart();
-            
-            showCustomAlert(
-                'success',
-                'Commande confirmée !',
-                code,
-                `Merci <strong>${customerName}</strong> ! Votre commande a été enregistrée avec succès.`,
-                'Merci de bien vouloir passer à notre stand à <strong>12H00</strong> pour le retrait de votre commande.'
-            );
-            
-            updateOrdersList();
-        } else {
-            showCustomAlert(
-                'error',
-                'Erreur de commande',
-                '',
-                'Une erreur est survenue lors de l\'envoi de votre commande.',
-                'Veuillez réessayer ou contactez notre service client au 05 64 06 10 04.'
-            );
-        }
-    });
-}
-async function submitOrder(orderData) {
-    try {
-        // 1. Enregistrement dans Firebase
-        const docRef = await addDoc(collection(db, 'orders'), {
-            ...orderData,
-            status: 'En attente',
-            createdAt: new Date().toISOString()
-        });
-        
-        // 2. Génération du code de commande unique
-        const orderCode = `#GEC${docRef.id.substring(0, 6).toUpperCase()}`;
-        
-        console.log('✅ Commande soumise avec succès:', orderCode);
-        
-        return orderCode;
-        
-    } catch (error) {
-        console.error('❌ Erreur lors de la soumission de la commande:', error);
-        
-        // Afficher une erreur utilisateur
-        showNotificationStatus(
-            '❌ Erreur lors de l\'envoi. Veuillez réessayer.',
-            '#dc3545'
-        );
-        
-        return null;
+    if (confirm('Vider tout l\'historique ?')) {
+        customerOrders = [];
+        localStorage.setItem('ge_orders', '[]');
+        renderOrders();
+        showToast('🗑️ Historique vidé');
     }
 }
 
-
-// ===== HORAIRES DE COMMANDE =====
-function checkOrderingHours() {
-    const now = new Date();
-    const hours = now.getHours();
-    const alert = document.getElementById('time-alert');
-    
-    if (!alert) return;
-    
-    if (hours >= 10 && hours < 18) {
-        alert.style.display = 'block';
-        alert.classList.remove('warning');
-        alert.classList.add('urgent');
-        alert.textContent = '⛔ Les commandes sont fermées. Revenez entre 18h00 et 10h00.';
-    } else {
-        alert.style.display = 'none';
-    }
-}
-
-// ===== GESTION FORMULAIRE COMMANDE =====
-document.getElementById('order-form')?.addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    if (cart.length === 0) {
-        showCustomAlert(
-            'error',
-            'Panier vide',
-            '',
-            'Votre panier est vide. Ajoutez des articles avant de commander.',
-            ''
-        );
-        return;
-    }
-    
-    const now = new Date();
-    const hours = now.getHours();
-    
-    if (hours >= 10 && hours < 18) {
-        showCustomAlert(
-            'error',
-            'Commandes fermées',
-            '',
-            'Les commandes sont actuellement fermées.',
-            'Revenez entre 18h00 et 10h00 pour passer commande.'
-        );
-        return;
-    }
-    
-    openCustomerModal();
-});
-
-// ===== PUBLICITÉS =====
-function startAdsAutoPlay() {
-    clearInterval(adsInterval);
-    adsInterval = setInterval(() => {
-        if (adsAutoPlay) slideAds('next');
-    }, 5000);
-}
-
-function slideAds(direction) {
-    const totalAds = 3;
-    currentAdIndex = direction === 'next' 
-        ? (currentAdIndex + 1) % totalAds 
-        : (currentAdIndex - 1 + totalAds) % totalAds;
-    
-    const slider = document.getElementById('ads-slider');
-    if (slider) {
-        slider.style.transform = `translateX(-${currentAdIndex * (100 / 6)}%)`;
-    }
-    
-    updateScrollDots();
-}
-
-function updateScrollDots() {
-    const dots = document.querySelectorAll('.scroll-dot');
-    dots.forEach((dot, index) => {
-        if (index === currentAdIndex) {
-            dot.classList.add('active');
-        } else {
-            dot.classList.remove('active');
-        }
-    });
-}
-
-// ===== NOTIFICATIONS =====
-function requestNotificationPermission() {
+// ===== NOTIFICATIONS — Vraie logique FCM =====
+async function requestNotificationPermission() {
     if (!('Notification' in window)) {
-        alert('Les notifications ne sont pas supportées par votre navigateur');
+        showToast('❌ Notifications non supportées sur ce navigateur', 'error');
         return;
     }
-    
-    Notification.requestPermission().then(permission => {
-        if (permission === 'granted') {
-            messaging.getToken({ vapidKey: VAPID_KEY })
-                .then(token => {
-                    console.log('Token FCM:', token);
-                    localStorage.setItem('fcmToken', token);
-                    localStorage.setItem('notificationsEnabled', 'true');
-                    checkNotificationPermissionStatus();
-                    showNotificationStatus('🔔 Notifications activées avec succès', '#28a745');
-                })
-                .catch(err => {
-                    console.error('Erreur lors de l\'obtention du token:', err);
-                    showNotificationStatus('❌ Erreur d\'activation des notifications', '#dc3545');
-                });
-        } else {
-            showNotificationStatus('🔕 Notifications refusées', '#ffc107');
-        }
-    });
-}
+    if (!('serviceWorker' in navigator)) {
+        showToast('❌ Service Worker non supporté', 'error');
+        return;
+    }
 
-function checkNotificationPermissionStatus() {
-    const statusDiv = document.getElementById('notification-status');
-    if (!statusDiv) return;
-    
-    if (Notification.permission === 'granted') {
-        statusDiv.style.display = 'none';
-    } else {
-        statusDiv.style.display = 'flex';
-        statusDiv.textContent = 'OFF';
-        statusDiv.style.background = '#dc3545';
+    try {
+        // 1. Enregistrer le SW
+        const reg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+        await navigator.serviceWorker.ready;
+
+        // 2. Demander la permission
+        const perm = await Notification.requestPermission();
+        if (perm !== 'granted') {
+            showToast('🔕 Notifications refusées', 'warn');
+            return;
+        }
+
+        // 3. Obtenir le token FCM
+        try {
+            const token = await messaging.getToken({
+                vapidKey: VAPID_KEY,
+                serviceWorkerRegistration: reg
+            });
+            if (token) {
+                fcmToken = token;
+                localStorage.setItem('fcmToken', token);
+                // Sauvegarder le token dans Firestore
+                try {
+                    await addDoc(collection(db, 'fcm_tokens'), {
+                        token,
+                        createdAt: new Date().toISOString(),
+                        userAgent: navigator.userAgent.substring(0, 100)
+                    });
+                } catch(fe) { console.log('Token Firestore save:', fe.message); }
+                showToast('🔔 Notifications activées ! Vous recevrez vos confirmations de commande.', 'success');
+                // Mettre à jour l'icône FAB
+                const btn = document.getElementById('fab-notif');
+                if (btn) { btn.textContent = '🔔'; btn.style.background = '#2E7D32'; btn.style.color = 'white'; }
+            }
+        } catch(tokenErr) {
+            console.error('FCM token error:', tokenErr);
+            // Sur localhost/file:// le token FCM ne fonctionne pas mais la permission locale oui
+            showToast('🔔 Notifications locales activées', 'success');
+        }
+    } catch(e) {
+        console.error('SW registration error:', e);
+        showToast('🔔 Activé (mode basique)', 'success');
     }
 }
 
-function showNotificationStatus(message, color) {
-    const notification = document.createElement('div');
-    notification.style.cssText = `
-        position: fixed; top: 80px; right: 20px; z-index: 9999;
-        background: ${color}; color: white; padding: 1rem 1.5rem;
-        border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        font-weight: 600; animation: slideInRight 0.3s ease;
-        max-width: 300px;
-    `;
-    notification.textContent = message;
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-        notification.style.animation = 'slideOutRight 0.3s ease';
-        setTimeout(() => notification.remove(), 300);
-    }, 3000);
+// ===== PWA INSTALLATION — LOGIQUE INTELLIGENTE =====
+let deferredPrompt = null;
+let pwaInstalled = false;
+
+// Détecte si déjà installée (standalone mode)
+function isRunningStandalone() {
+    return window.matchMedia('(display-mode: standalone)').matches
+        || window.navigator.standalone === true
+        || document.referrer.includes('android-app://');
 }
 
-// ===== INSTALLATION PWA =====
-window.addEventListener('beforeinstallprompt', (e) => {
+// Détecte iOS
+function isIOS() {
+    return /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+}
+
+// Détecte Android Chrome
+function isAndroidChrome() {
+    return /android/i.test(navigator.userAgent) && /chrome/i.test(navigator.userAgent);
+}
+
+// Écoute le prompt natif Chrome/Android
+window.addEventListener('beforeinstallprompt', e => {
     e.preventDefault();
     deferredPrompt = e;
-    
-    const installStatus = document.getElementById('install-status');
-    if (installStatus) {
-        installStatus.style.display = 'none';
+    // Montre le FAB avec une animation d'attention
+    const btn = document.getElementById('fab-install');
+    if (btn) {
+        btn.style.animation = 'none';
+        btn.style.background = 'linear-gradient(135deg, #FF5722, #FF8C42)';
+        btn.title = 'Installer l\'app — disponible !';
     }
+});
+
+window.addEventListener('appinstalled', () => {
+    pwaInstalled = true;
+    deferredPrompt = null;
+    const btn = document.getElementById('fab-install');
+    if (btn) {
+        btn.textContent = '✅';
+        btn.title = 'Application installée !';
+        setTimeout(() => { if (btn) btn.style.display = 'none'; }, 3000);
+    }
+    showToast('✅ Application installée avec succès !', 'success');
 });
 
 function triggerInstallPrompt() {
-    if (!deferredPrompt) {
-        showNotificationStatus('📱 Application déjà installée ou non disponible', '#ffc107');
+    // Déjà en mode app installée
+    if (isRunningStandalone()) {
+        showToast('✅ Vous utilisez déjà l\'application installée !', 'success');
         return;
     }
-    
-    deferredPrompt.prompt();
-    deferredPrompt.userChoice.then(choiceResult => {
-        if (choiceResult.outcome === 'accepted') {
-            console.log('Installation acceptée');
-            showNotificationStatus('✅ Application installée avec succès', '#28a745');
-            
-            const installStatus = document.getElementById('install-status');
-            if (installStatus) {
-                installStatus.style.display = 'flex';
+
+    // Chrome/Android — prompt natif disponible
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(r => {
+            if (r.outcome === 'accepted') {
+                showToast('✅ Application installée avec succès !', 'success');
+            } else {
+                showToast('Installation annulée', 'warn');
             }
-        } else {
-            console.log('Installation refusée');
-        }
-        deferredPrompt = null;
+            deferredPrompt = null;
+        });
+        return;
+    }
+
+    // Pas de prompt disponible → afficher les instructions manuelles
+    showInstallInstructions();
+}
+
+function showInstallInstructions() {
+    const body = document.getElementById('install-modal-body');
+    let content = '';
+
+    if (isIOS()) {
+        // Instructions Safari iOS
+        content = `
+        <div style="text-align:center;margin-bottom:20px">
+            <div style="font-size:50px;margin-bottom:8px">🍎</div>
+            <p style="font-size:14px;color:#666;line-height:1.6">Sur iPhone/iPad, suivez ces étapes dans <strong>Safari</strong> :</p>
+        </div>
+        <div class="install-step">
+            <div class="install-step-num">1</div>
+            <div class="install-step-text">
+                <strong>Appuyez sur le bouton Partager</strong>
+                <p>L'icône <span style="font-size:18px">⎙</span> en bas de Safari</p>
+            </div>
+        </div>
+        <div class="install-step">
+            <div class="install-step-num">2</div>
+            <div class="install-step-text">
+                <strong>Défiler et appuyer sur</strong>
+                <p>"Sur l'écran d'accueil" <span style="font-size:18px">➕</span></p>
+            </div>
+        </div>
+        <div class="install-step">
+            <div class="install-step-num">3</div>
+            <div class="install-step-text">
+                <strong>Appuyer sur "Ajouter"</strong>
+                <p>L'icône Groupe Express apparaîtra sur votre écran d'accueil !</p>
+            </div>
+        </div>
+        <div style="background:#FFF5F0;border-radius:12px;padding:14px;margin-top:16px;font-size:13px;color:#888;text-align:center">
+            ⚠️ Fonctionne uniquement avec <strong>Safari</strong> — pas avec Chrome sur iOS
+        </div>`;
+    } else if (isAndroidChrome()) {
+        // Android Chrome — prompt non encore déclenché ou refusé
+        content = `
+        <div style="text-align:center;margin-bottom:20px">
+            <div style="font-size:50px;margin-bottom:8px">🤖</div>
+            <p style="font-size:14px;color:#666;line-height:1.6">Sur Android Chrome, suivez ces étapes :</p>
+        </div>
+        <div class="install-step">
+            <div class="install-step-num">1</div>
+            <div class="install-step-text">
+                <strong>Appuyer sur le menu ⋮</strong>
+                <p>Les 3 points en haut à droite de Chrome</p>
+            </div>
+        </div>
+        <div class="install-step">
+            <div class="install-step-num">2</div>
+            <div class="install-step-text">
+                <strong>Sélectionnez "Ajouter à l'écran d'accueil"</strong>
+                <p>Ou "Installer l'application" selon votre version</p>
+            </div>
+        </div>
+        <div class="install-step">
+            <div class="install-step-num">3</div>
+            <div class="install-step-text">
+                <strong>Confirmer l'installation</strong>
+                <p>Groupe Express sera sur votre écran d'accueil 🎉</p>
+            </div>
+        </div>
+        <div style="margin-top:16px">
+            <button onclick="window.location.reload()" style="width:100%;padding:12px;border-radius:12px;border:none;background:var(--flame);color:white;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit">
+                🔄 Recharger la page pour réessayer
+            </button>
+        </div>`;
+    } else {
+        // Desktop ou autre navigateur
+        content = `
+        <div style="text-align:center;margin-bottom:20px">
+            <div style="font-size:50px;margin-bottom:8px">💻</div>
+            <p style="font-size:14px;color:#666;line-height:1.6">Installez l'application depuis votre navigateur :</p>
+        </div>
+        <div class="install-step">
+            <div class="install-step-num">1</div>
+            <div class="install-step-text">
+                <strong>Chrome / Edge</strong>
+                <p>Cliquez sur l'icône d'installation ⬇ dans la barre d'adresse</p>
+            </div>
+        </div>
+        <div class="install-step">
+            <div class="install-step-num">2</div>
+            <div class="install-step-text">
+                <strong>Menu du navigateur</strong>
+                <p>⋮ → "Installer Groupe Express" ou "Ajouter à l'écran d'accueil"</p>
+            </div>
+        </div>
+        <div class="install-step">
+            <div class="install-step-num">3</div>
+            <div class="install-step-text">
+                <strong>⚠️ Fichier local détecté</strong>
+                <p>Pour une installation complète, hébergez le site sur un serveur HTTPS (Firebase Hosting, Netlify...)</p>
+            </div>
+        </div>
+        <div style="background:#FFF3CD;border-radius:12px;padding:14px;margin-top:16px;font-size:13px;color:#856404;line-height:1.5">
+            💡 <strong>Note :</strong> L'installation PWA nécessite HTTPS. En local (<code>file://</code>), utilisez <code>localhost</code> ou déployez sur un serveur.
+        </div>`;
+    }
+
+    if (body) body.innerHTML = content;
+    openModal('install-modal');
+}
+
+// ===== NEW DISHES FROM FIREBASE =====
+function loadNewDishes() {
+    try {
+        const q = query(collection(db, 'nouveaux_plats'), where('active', '==', true));
+        onSnapshot(q, snap => {
+            const dishes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            const sec = document.getElementById('new-dishes-section');
+            const grid = document.getElementById('new-dishes-grid');
+            const cnt = document.getElementById('new-dishes-count');
+            if (!sec || !grid) return;
+            if (!dishes.length) { sec.style.display = 'none'; return; }
+            sec.style.display = 'block';
+            if (cnt) cnt.textContent = `${dishes.length} plat(s)`;
+            grid.innerHTML = dishes.map(d => `
+                <div class="dish-card">
+                    <div class="dish-image-wrap">
+                        <img src="${d.imageUrl||''}" alt="${d.name||''}" class="dish-image" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🆕</text></svg>'">
+                        <span class="dish-new-tag">🆕 Nouveau</span>
+                    </div>
+                    <div class="dish-body">
+                        <div class="dish-name">${d.name||'Nouveau plat'}</div>
+                        <div class="dish-desc">${d.description||'Découvrez notre nouvelle création'}</div>
+                        <div class="dish-footer">
+                            <span class="dish-price">${d.price||0} FCFA</span>
+                            <button class="add-btn" onclick="promptAddToCart('${(d.name||'').replace(/'/g,"\\'")}', ${d.price||0}, '${d.category||'I'}')">+</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        });
+    } catch(e) { console.error('Firebase dishes error:', e); }
+}
+
+// ===== PROMO SLIDER — touch/swipe + auto =====
+let promoIdx = 0;
+let promoAuto;
+const TOTAL_SLIDES = 3;
+
+function goSlide(i) {
+    promoIdx = (i + TOTAL_SLIDES) % TOTAL_SLIDES;
+    const slides = document.getElementById('promo-slides');
+    if (slides) {
+        slides.style.transition = 'transform 0.42s cubic-bezier(.4,0,.2,1)';
+        slides.style.transform = `translateX(-${promoIdx * 100}%)`;
+    }
+    document.querySelectorAll('.promo-dot').forEach((d, j) => {
+        d.classList.toggle('active', j === promoIdx);
     });
 }
 
-window.addEventListener('appinstalled', () => {
-    console.log('PWA installée');
-    deferredPrompt = null;
-    
-    const installStatus = document.getElementById('install-status');
-    if (installStatus) {
-        installStatus.style.display = 'flex';
-    }
-});
+function startSlider() {
+    clearInterval(promoAuto);
+    promoAuto = setInterval(() => goSlide(promoIdx + 1), 5000);
+}
 
-// ===== INITIALISATION =====
-document.addEventListener('DOMContentLoaded', () => {
-    checkOrderingHours();
-    updateCart();
-    updateCartBadge();
-    updateOrdersList();
-    startAdsAutoPlay();
-    checkNotificationPermissionStatus();
-    
-    // NOUVEAU: Charger les nouveaux plats depuis Firebase
-    loadNewDishesFromFirebase();
-    
-    // Vérifier les horaires toutes les minutes
-    setInterval(checkOrderingHours, 60000);
-    
-    // Écouter les messages FCM en arrière-plan
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.addEventListener('message', (event) => {
-            console.log('Message reçu du Service Worker:', event.data);
-            
-            if (event.data && event.data.type === 'NEW_ORDER') {
-                showNotificationStatus('📦 Nouvelle commande reçue !', '#28a745');
+function initSliderTouch() {
+    const track = document.querySelector('.promo-track');
+    if (!track) return;
+
+    let startX = 0, startY = 0, isDragging = false, hasMoved = false;
+
+    // TOUCH events (mobile)
+    track.addEventListener('touchstart', e => {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        isDragging = true;
+        hasMoved = false;
+        clearInterval(promoAuto); // pause auto on touch
+    }, { passive: true });
+
+    track.addEventListener('touchmove', e => {
+        if (!isDragging) return;
+        const dx = e.touches[0].clientX - startX;
+        const dy = e.touches[0].clientY - startY;
+        if (Math.abs(dx) > Math.abs(dy)) {
+            hasMoved = true;
+            // Live drag feedback
+            const slides = document.getElementById('promo-slides');
+            if (slides) {
+                slides.style.transition = 'none';
+                slides.style.transform = `translateX(calc(-${promoIdx * 100}% + ${dx}px))`;
             }
-        });
-    }
-});
+        }
+    }, { passive: true });
 
-// ===== EXPOSITION GLOBALE DES FONCTIONS =====
-window.db = db;
-window.addToCart = addToCart;
-window.updateCart = updateCart;
-window.updateCartBadge = updateCartBadge;
-window.removeFromCart = removeFromCart;
+    track.addEventListener('touchend', e => {
+        if (!isDragging) return;
+        isDragging = false;
+        const dx = e.changedTouches[0].clientX - startX;
+        const dy = e.changedTouches[0].clientY - startY;
+        if (hasMoved && Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
+            goSlide(dx < 0 ? promoIdx + 1 : promoIdx - 1);
+        } else {
+            // Snap back
+            const slides = document.getElementById('promo-slides');
+            if (slides) {
+                slides.style.transition = 'transform 0.42s cubic-bezier(.4,0,.2,1)';
+                slides.style.transform = `translateX(-${promoIdx * 100}%)`;
+            }
+        }
+        startSlider(); // resume auto
+    }, { passive: true });
+
+    // MOUSE events (desktop drag)
+    track.addEventListener('mousedown', e => {
+        startX = e.clientX;
+        isDragging = true;
+        hasMoved = false;
+        clearInterval(promoAuto);
+        track.style.cursor = 'grabbing';
+    });
+
+    track.addEventListener('mousemove', e => {
+        if (!isDragging) return;
+        const dx = e.clientX - startX;
+        if (Math.abs(dx) > 5) hasMoved = true;
+        const slides = document.getElementById('promo-slides');
+        if (slides) {
+            slides.style.transition = 'none';
+            slides.style.transform = `translateX(calc(-${promoIdx * 100}% + ${dx}px))`;
+        }
+    });
+
+    const endDrag = (e) => {
+        if (!isDragging) return;
+        isDragging = false;
+        track.style.cursor = 'grab';
+        const dx = (e.clientX ?? e.changedTouches?.[0]?.clientX ?? startX) - startX;
+        if (hasMoved && Math.abs(dx) > 40) {
+            goSlide(dx < 0 ? promoIdx + 1 : promoIdx - 1);
+        } else {
+            const slides = document.getElementById('promo-slides');
+            if (slides) {
+                slides.style.transition = 'transform 0.42s cubic-bezier(.4,0,.2,1)';
+                slides.style.transform = `translateX(-${promoIdx * 100}%)`;
+            }
+        }
+        startSlider();
+    };
+
+    track.addEventListener('mouseup', endDrag);
+    track.addEventListener('mouseleave', endDrag);
+}
+
+// ===== HOURS CHECK =====
+function checkHours() {
+    const h = new Date().getHours();
+    const alert = document.getElementById('time-alert');
+    const banner = document.getElementById('status-banner');
+    if (h >= 10 && h < 18) {
+        if (alert) alert.style.display = 'block';
+        if (banner) banner.innerHTML = '🔴 &nbsp;Commandes fermées — Revenez dès 18h00';
+    } else {
+        if (alert) alert.style.display = 'none';
+        if (banner) banner.innerHTML = '🟢 &nbsp;Commandes ouvertes — On prépare pour vous !';
+    }
+}
+
+// ===== TOAST =====
+function showToast(msg, type = 'success') {
+    const t = document.createElement('div');
+    t.className = 'toast';
+    const colors = { success: '#1A1A1A', error: '#E74C3C', warn: '#F39C12' };
+    t.style.background = colors[type] || colors.success;
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => { t.style.animation = 'toastOut 0.3s ease forwards'; setTimeout(() => t.remove(), 300); }, 3000);
+}
+
+// ===== EXPOSE GLOBALS =====
 window.toggleCart = toggleCart;
+window.toggleOrders = toggleOrders;
 window.promptAddToCart = promptAddToCart;
-window.closeQuantityModal = closeQuantityModal;
-window.confirmQuantity = confirmQuantity;
-window.openCustomerModal = openCustomerModal;
-window.closeCustomerModal = closeCustomerModal;
-window.confirmCustomerInfo = confirmCustomerInfo;
+window.changeQty = changeQty;
+window.confirmQty = confirmQty;
+window.startCheckout = startCheckout;
+window.submitOrder = submitOrder;
+window.clearOrders = clearOrders;
 window.selectRice = selectRice;
-window.addRiceToCart = addRiceToCart;
 window.selectTchep = selectTchep;
-window.addTchepToCart = addTchepToCart;
 window.selectPorc = selectPorc;
-window.addPorcToCart = addPorcToCart;
 window.selectAttiekePoisson = selectAttiekePoisson;
 window.selectAttiekePouletAlloko = selectAttiekePouletAlloko;
 window.selectAttiekePoulet = selectAttiekePoulet;
 window.selectGarba = selectGarba;
-window.addAttiekeToCart = addAttiekeToCart;
-window.closeSelectionModal = closeSelectionModal;
-window.showCustomAlert = showCustomAlert;
-window.closeCustomAlert = closeCustomAlert;
-window.toggleOrders = toggleOrders;
-window.clearOrders = clearOrders;
-window.confirmClearOrders = confirmClearOrders;
-window.processOrder = processOrder;
-window.submitOrder = submitOrder;
-window.slideAds = slideAds;
+window.goSlide = goSlide;
 window.requestNotificationPermission = requestNotificationPermission;
 window.triggerInstallPrompt = triggerInstallPrompt;
 
-console.log('✅ Script chargé avec succès');
+// ===== INIT =====
+document.addEventListener('DOMContentLoaded', () => {
+    checkHours();
+    updateCartUI();
+    loadNewDishes();
+    startSlider();
+    setInterval(checkHours, 60000);
+
+    // Init touch swipe on slider
+    initSliderTouch();
+
+    // Register service worker
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/firebase-messaging-sw.js')
+            .then(reg => console.log('SW registered:', reg.scope))
+            .catch(e => console.log('SW registration failed:', e));
+    }
+
+    // Listen for FCM foreground messages
+    try {
+        messaging.onMessage(payload => {
+            console.log('FCM message received:', payload);
+            const { title, body } = payload.notification || {};
+            showToast(`🔔 ${title}: ${body}`);
+        });
+    } catch(e) {}
+});
+// Scroll indicator
+const scrollInd = document.getElementById('scroll-indicator');
+const scrollThumb = document.getElementById('scroll-thumb');
+
+window.addEventListener('scroll', () => {
+    const scrolled = window.scrollY;
+    const total = document.body.scrollHeight - window.innerHeight;
+    const pct = total > 0 ? scrolled / total : 0;
+
+    // Montrer seulement si pas tout en bas
+    if (pct > 0.02 && pct < 0.97) {
+        scrollInd?.classList.add('visible');
+        scrollInd?.classList.remove('hidden');
+    } else {
+        scrollInd?.classList.remove('visible');
+        scrollInd?.classList.add('hidden');
+    }
+
+    // Positionner le thumb
+    if (scrollThumb) {
+        scrollThumb.style.height = `${Math.max(8, pct * 60)}px`;
+        scrollThumb.style.top = `${pct * (60 - Math.max(8, pct * 60))}px`;
+    }
+}, { passive: true });
+
+// Swipe hint sur les pills
+const pillsEl = document.getElementById('nav-pills');
+const swipeHint = document.getElementById('swipe-hint');
+if (pillsEl && swipeHint) {
+    pillsEl.addEventListener('scroll', () => {
+        const atEnd = pillsEl.scrollLeft + pillsEl.clientWidth >= pillsEl.scrollWidth - 10;
+        swipeHint.classList.toggle('hidden', atEnd);
+    }, { passive: true });
+}
+console.log('✅ GROUPE EXPRESS PWA loaded');
