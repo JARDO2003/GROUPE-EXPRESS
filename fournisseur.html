@@ -3,311 +3,913 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GROUPE EXPRESS - Repas Universitaires</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    <title>GROUPE EXPRESS — Accès Fournisseur</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <style>
+        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
         :root {
-            --main-bg: linear-gradient(120deg, #485563 0%, #29323c 100%);
-            --accent1: #667eea;
-            --accent2: #764ba2;
-            --accent3: #f093fb;
-            --card-bg: rgba(255,255,255,0.10);
-            --glass: blur(30px) saturate(1.6);
-            --border-glow: 0 0 0 3px #fff3, 0 2px 16px #764ba245;
+            --lit: 0;
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { height: 100%; }
-        body {
-            font-family: 'Montserrat', sans-serif;
-            min-height: 100vh;
-            background: var(--main-bg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow-x: hidden;
-            position: relative;
+
+        html,body{
+            width:100%;height:100%;
+            overflow:hidden;
+            font-family:'DM Sans',sans-serif;
         }
-        /* Animated, blurred, colored bokeh blobs as background */
-        .bokeh-bg {
-            position: fixed;
-            width: 100vw;
-            height: 100vh;
-            top: 0; left: 0; z-index: 0;
-            pointer-events: none;
-            overflow: hidden;
+
+        /* ===== THE ROOM ===== */
+        .room {
+            width:100vw;height:100vh;
+            position:relative;
+            overflow:hidden;
+            background:#0a0a0c;
+            transition:background 1.2s ease;
         }
-        .bokeh {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(60px);
-            opacity: 0.5;
-            animation: bokehMove 22s infinite alternate cubic-bezier(.5,.1,.1,1.0);
-            mix-blend-mode: lighten;
+
+        .room.lit {
+            background:#1a120a;
         }
-        .bokeh1 { background: #667eea; width: 420px; height: 420px; left: -5vw; top: -7vh; animation-delay: 0s;}
-        .bokeh2 { background: #f093fb; width: 320px; height: 320px; right: -5vw; top: 5vh; animation-delay: 5s;}
-        .bokeh3 { background: #ff9a56; width: 350px; height: 350px; left: 40vw; bottom: -12vh; animation-delay: 10s;}
-        @keyframes bokehMove {
-            0% { transform: scale(1) translateY(0);}
-            100% { transform: scale(1.12) translateY(-40px);}
+
+        /* Ceiling */
+        .ceiling {
+            position:absolute;
+            top:0;left:0;right:0;
+            height:38%;
+            background:linear-gradient(180deg,#0d0d0f 0%,#141210 100%);
+            transition:background 1.2s ease;
         }
-        .container {
-            position: relative;
-            z-index: 1;
-            background: var(--card-bg);
-            -webkit-backdrop-filter: var(--glass);
-            backdrop-filter: var(--glass);
-            border-radius: 32px;
-            box-shadow: var(--border-glow);
-            padding: 54px 40px 44px 40px;
-            text-align: center;
-            max-width: 420px;
-            width: 100%;
-            border: 2px solid rgba(255,255,255,0.13);
-            overflow: hidden;
-            transition: box-shadow 0.4s;
-            margin: 18px 10px;
-            animation: popIn 1.2s cubic-bezier(.5,0,.1,1.0) 0.15s both;
+
+        .room.lit .ceiling {
+            background:linear-gradient(180deg,#2a1f0e 0%,#3a2810 100%);
         }
-        @keyframes popIn {
-            from { opacity: 0; transform: scale(.95) translateY(30px);}
-            to { opacity: 1; transform: scale(1) translateY(0);}
+
+        /* Floor */
+        .floor {
+            position:absolute;
+            bottom:0;left:0;right:0;
+            height:30%;
+            background:linear-gradient(0deg,#0a0808 0%,#161010 100%);
+            transition:background 1.2s ease;
         }
-        .header {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 34px;
-            gap: 22px;
+
+        .room.lit .floor {
+            background:linear-gradient(0deg,#1a1008 0%,#2a1c0a 100%);
         }
-        .header-logo {
-            width: 75px;
-            height: 75px;
-            border-radius: 21px;
-            object-fit: cover;
-            border: 4px solid #fff9;
-            box-shadow: 0 0px 32px #764ba2aa, 0 3px 18px #0002;
-            background: #fff;
-            transition: box-shadow 0.3s, transform 0.2s;
+
+        /* Floor planks */
+        .floor::before {
+            content:'';
+            position:absolute;inset:0;
+            background-image:repeating-linear-gradient(
+                90deg,
+                transparent 0px,
+                transparent 79px,
+                rgba(255,255,255,0.03) 80px
+            );
         }
-        .header-logo:hover {
-            box-shadow: 0 0 0 7px #f093fb66, 0 10px 30px #764ba2aa;
-            transform: scale(1.075) rotate(4deg);
+
+        /* Wall */
+        .wall {
+            position:absolute;
+            top:38%;bottom:30%;left:0;right:0;
+            background:linear-gradient(180deg,#111013 0%,#0e0e11 100%);
+            transition:background 1.2s ease;
         }
-        .header-title {
-            font-size: 2.3rem;
-            font-weight: 900;
-            background: linear-gradient(120deg, #fff 0%, #f093fb 70%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 4px 20px #764ba242, 0 2px 8px #fff7;
-            letter-spacing: -1px;
+
+        .room.lit .wall {
+            background:linear-gradient(180deg,#2d1f0c 0%,#241808 100%);
         }
-        .subtitle {
-            color: #fff;
-            font-size: 1.18rem;
-            font-weight: 400;
-            margin-bottom: 42px;
-            line-height: 1.6;
-            text-shadow: 0 1px 3px #2224;
-            opacity: 0.89;
+
+        /* Wallpaper subtle pattern */
+        .wall::before {
+            content:'';
+            position:absolute;inset:0;
+            background-image:
+                repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(255,255,255,0.012) 40px),
+                repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(255,255,255,0.012) 40px);
+            opacity:1;
+            transition:opacity 1.2s ease;
         }
-        .establishment-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 22px;
-            margin-bottom: 24px;
+
+        .room.lit .wall::before { opacity:1; }
+
+        /* Baseboard */
+        .baseboard {
+            position:absolute;
+            bottom:30%;left:0;right:0;
+            height:6px;
+            background:linear-gradient(90deg,#1a1208,#2a1e0e,#1a1208);
+            transition:background 1.2s ease;
         }
-        .btn {
-            padding: 22px 35px;
-            font-size: 1.18rem;
-            font-weight: 700;
-            border: none;
-            border-radius: 17px;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 0.7px;
-            position: relative;
-            overflow: hidden;
-            background: #fff;
-            color: #222;
-            box-shadow: 0 7px 28px #764ba238;
-            transition: all .35s cubic-bezier(.5,0,.1,1.0);
-            border: 2.5px solid #fff7;
-            outline: none;
+
+        .room.lit .baseboard { background:linear-gradient(90deg,#3a2810,#5a3e18,#3a2810); }
+
+        /* ===== CEILING LAMP ===== */
+        .lamp-wire {
+            position:absolute;
+            top:0;
+            left:50%;
+            transform:translateX(-50%);
+            width:2px;
+            height:80px;
+            background:linear-gradient(180deg,#1a1a1a,#333);
+            z-index:10;
+            transition:background 0.5s;
         }
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 0; left: -100%;
-            width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.38), transparent);
-            transition: left 0.65s cubic-bezier(.5,0,.1,1.0);
-            z-index: 1;
+
+        .room.lit .lamp-wire { background:linear-gradient(180deg,#2a2a2a,#555); }
+
+        .lamp-shade {
+            position:absolute;
+            top:72px;
+            left:50%;
+            transform:translateX(-50%);
+            width:100px;height:60px;
+            background:linear-gradient(180deg,#1c1c1c 0%,#111 100%);
+            clip-path:polygon(15% 0%,85% 0%,100% 100%,0% 100%);
+            z-index:10;
+            border-top:2px solid #2a2a2a;
+            transition:background 0.5s, filter 0.5s;
         }
-        .btn:hover::before { left: 100%; }
-        .btn:active { transform: scale(.97) translateY(2px);}
-        .btn-heges {
-            background: linear-gradient(90deg, #ff8e53 0%, #ff6b6b 90%);
-            color: #fff;
-            border: 2.5px solid #ffb0b0;
-            box-shadow: 0 7px 16px #ff8e532e;
+
+        .room.lit .lamp-shade {
+            background:linear-gradient(180deg,#3a2a1a 0%,#241808 100%);
+            filter:drop-shadow(0 2px 8px rgba(255,160,50,0.3));
         }
-        .btn-heges:hover {
-            transform: scale(1.045) translateY(-6px);
-            box-shadow: 0 13px 38px #ff6b9d56;
-            filter: brightness(1.06);
+
+        /* Bulb glow */
+        .bulb {
+            position:absolute;
+            top:128px;
+            left:50%;
+            transform:translateX(-50%);
+            width:18px;height:18px;
+            border-radius:50%;
+            background:#111;
+            z-index:11;
+            transition:all 0.8s ease;
+            box-shadow:none;
         }
-        .btn-ifsm {
-            background: linear-gradient(90deg, #4ecdc4 0%, #36d1dc 90%);
-            color: #fff;
-            border: 2.5px solid #a3fff7;
-            box-shadow: 0 7px 16px #4ecdc44d;
+
+        .room.lit .bulb {
+            background:#fff8e0;
+            box-shadow:
+                0 0 15px 8px rgba(255,200,80,0.6),
+                0 0 40px 20px rgba(255,160,30,0.3),
+                0 0 100px 50px rgba(255,140,10,0.1);
         }
-        .btn-ifsm:hover {
-            transform: scale(1.045) translateY(-6px);
-            box-shadow: 0 13px 38px #36d1dc56;
-            filter: brightness(1.06);
+
+        /* Light cone */
+        .light-cone {
+            position:absolute;
+            top:146px;
+            left:50%;
+            transform:translateX(-50%);
+            width:0;height:0;
+            border-left:200px solid transparent;
+            border-right:200px solid transparent;
+            border-top:0px solid transparent;
+            z-index:5;
+            opacity:0;
+            transition:all 1s ease;
+            pointer-events:none;
         }
-        .btn-utt {
-            background: linear-gradient(90deg, #667eea 0%, #8e44ad 90%);
-            color: #fff;
-            border: 2.5px solid #d2d0ff;
-            box-shadow: 0 7px 16px #667eea3d;
+
+        .room.lit .light-cone {
+            border-top:400px solid rgba(255,180,40,0.06);
+            opacity:1;
         }
-        .btn-utt:hover {
-            transform: scale(1.045) translateY(-6px);
-            box-shadow: 0 13px 38px #667eea56;
-            filter: brightness(1.06);
+
+        /* Ambient room light overlay */
+        .ambient {
+            position:absolute;inset:0;
+            background:transparent;
+            z-index:3;
+            pointer-events:none;
+            transition:background 1.4s ease;
         }
-        .footer {
-            color: #c1c2e2;
-            font-size: 1.02rem;
-            font-weight: 400;
-            margin-top: 12px;
-            text-shadow: 0 1px 2px #2223;
-            position: relative;
+
+        .room.lit .ambient {
+            background:radial-gradient(
+                ellipse 60% 50% at 50% 20%,
+                rgba(255,160,40,0.12) 0%,
+                transparent 70%
+            );
         }
-        .footer::before {
-            content: '✨';
-            margin-right: 8px;
-            animation: twinkle 2s ease-in-out infinite alternate;
+
+        /* Shadow on floor */
+        .floor-shadow {
+            position:absolute;
+            bottom:30%;left:50%;
+            transform:translateX(-50%);
+            width:300px;height:40px;
+            border-radius:50%;
+            background:transparent;
+            z-index:4;
+            transition:background 1.2s ease;
         }
-        @keyframes twinkle {
-            0% { opacity: 0.5; transform: scale(1);}
-            100% { opacity: 1; transform: scale(1.13);}
+
+        .room.lit .floor-shadow {
+            background:radial-gradient(ellipse,rgba(255,140,0,0.08) 0%,transparent 70%);
         }
+
+        /* ===== SWITCH PLATE ===== */
+        .switch-plate {
+            position:absolute;
+            right:18%;
+            top:52%;
+            transform:translateY(-50%);
+            z-index:20;
+            cursor:pointer;
+        }
+
+        /* Wall plate */
+        .plate {
+            width:58px;height:88px;
+            background:linear-gradient(160deg,#1e1e22,#131316);
+            border-radius:8px;
+            border:1.5px solid #2a2a2f;
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.05),
+                0 4px 16px rgba(0,0,0,0.6);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            position:relative;
+            transition:border-color 0.5s, box-shadow 0.5s;
+        }
+
+        .room.lit .plate {
+            background:linear-gradient(160deg,#2e2820,#231c14);
+            border-color:#4a3a28;
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.08),
+                0 4px 16px rgba(0,0,0,0.5),
+                0 0 8px rgba(255,140,0,0.08);
+        }
+
+        /* Plate screws */
+        .plate::before,.plate::after {
+            content:'';
+            position:absolute;
+            width:5px;height:5px;
+            border-radius:50%;
+            background:#1a1a1e;
+            border:1px solid #2a2a30;
+            left:50%;transform:translateX(-50%);
+        }
+
+        .plate::before { top:8px; }
+        .plate::after { bottom:8px; }
+
+        /* The toggle switch */
+        .toggle {
+            width:22px;height:38px;
+            background:linear-gradient(180deg,#2a2a30,#1a1a1e);
+            border-radius:4px;
+            border:1.5px solid #333340;
+            position:relative;
+            transition:all 0.4s cubic-bezier(.4,0,.2,1);
+            box-shadow:0 2px 8px rgba(0,0,0,0.5);
+        }
+
+        .toggle.on {
+            background:linear-gradient(180deg,#c87a20,#a85c10);
+            border-color:#d4882a;
+            box-shadow:0 0 8px rgba(200,120,32,0.5),0 2px 8px rgba(0,0,0,0.4);
+        }
+
+        /* Toggle nub */
+        .toggle::before {
+            content:'';
+            position:absolute;
+            width:14px;height:14px;
+            background:linear-gradient(135deg,#3a3a42,#252528);
+            border-radius:3px;
+            left:50%;top:4px;
+            transform:translateX(-50%);
+            border:1px solid #444450;
+            transition:all 0.4s cubic-bezier(.4,0,.2,1);
+            box-shadow:inset 0 1px 0 rgba(255,255,255,0.1);
+        }
+
+        .toggle.on::before {
+            top:auto;bottom:4px;
+            background:linear-gradient(135deg,#e8a040,#c87020);
+            border-color:#f0b060;
+            box-shadow:inset 0 1px 0 rgba(255,255,255,0.2);
+        }
+
+        /* Switch label */
+        .switch-label {
+            position:absolute;
+            bottom:-28px;left:50%;
+            transform:translateX(-50%);
+            font-family:'JetBrains Mono',monospace;
+            font-size:0.6rem;
+            color:#2a2a30;
+            white-space:nowrap;
+            letter-spacing:0.1em;
+            transition:color 0.8s;
+        }
+
+        .room.lit .switch-label { color:#5a4a30; }
+
+        /* Hint text dark */
+        .hint-dark {
+            position:absolute;
+            bottom:42%;left:50%;
+            transform:translateX(-50%);
+            font-family:'Syne',sans-serif;
+            font-size:0.75rem;
+            color:rgba(255,255,255,0.08);
+            letter-spacing:0.2em;
+            text-transform:uppercase;
+            white-space:nowrap;
+            z-index:10;
+            transition:opacity 0.8s ease;
+            pointer-events:none;
+        }
+
+        .room.lit .hint-dark { opacity:0; }
+
+        /* ===== PASSWORD PANEL ===== */
+        .pwd-panel {
+            position:absolute;
+            top:50%;left:50%;
+            transform:translate(-50%,-50%) scale(0.85);
+            z-index:50;
+            width:340px;
+            background:rgba(20,14,8,0.95);
+            border:1.5px solid rgba(200,130,40,0.3);
+            border-radius:20px;
+            padding:2rem;
+            box-shadow:
+                0 0 40px rgba(200,120,20,0.15),
+                0 20px 60px rgba(0,0,0,0.7);
+            opacity:0;
+            pointer-events:none;
+            transition:all 0.6s cubic-bezier(.34,1.56,.64,1);
+            backdrop-filter:blur(20px);
+        }
+
+        .pwd-panel.show {
+            opacity:1;
+            pointer-events:all;
+            transform:translate(-50%,-50%) scale(1);
+        }
+
+        .pwd-logo {
+            width:54px;height:54px;
+            border-radius:14px;
+            margin:0 auto 1rem;
+            display:block;
+            border:2px solid rgba(200,130,40,0.4);
+            box-shadow:0 0 16px rgba(200,120,20,0.3);
+            object-fit:cover;
+        }
+
+        .pwd-title {
+            font-family:'Syne',sans-serif;
+            font-size:1.2rem;
+            font-weight:800;
+            text-align:center;
+            color:#f0c060;
+            margin-bottom:0.3rem;
+            letter-spacing:0.05em;
+        }
+
+        .pwd-sub {
+            font-size:0.75rem;
+            text-align:center;
+            color:rgba(255,255,255,0.3);
+            margin-bottom:1.5rem;
+            letter-spacing:0.08em;
+            text-transform:uppercase;
+        }
+
+        .pwd-input-wrap {
+            position:relative;
+            margin-bottom:0.6rem;
+        }
+
+        .pwd-input {
+            width:100%;
+            background:rgba(0,0,0,0.4);
+            border:1.5px solid rgba(200,130,40,0.2);
+            border-radius:12px;
+            padding:0.85rem 3rem 0.85rem 1rem;
+            color:#f0d080;
+            font-family:'JetBrains Mono',monospace;
+            font-size:1rem;
+            letter-spacing:0.15em;
+            transition:all 0.3s;
+        }
+
+        .pwd-input:focus {
+            outline:none;
+            border-color:rgba(200,130,40,0.6);
+            box-shadow:0 0 0 3px rgba(200,120,20,0.1);
+        }
+
+        .pwd-eye {
+            position:absolute;right:1rem;top:50%;
+            transform:translateY(-50%);
+            cursor:pointer;font-size:1rem;
+            color:rgba(255,200,80,0.4);
+            transition:color 0.2s;
+        }
+
+        .pwd-eye:hover { color:rgba(255,200,80,0.8); }
+
+        .pwd-err {
+            font-size:0.75rem;
+            color:#ff6060;
+            text-align:center;
+            min-height:1.1em;
+            margin-bottom:0.6rem;
+            font-family:'JetBrains Mono',monospace;
+        }
+
+        .pwd-btn {
+            width:100%;padding:0.9rem;
+            background:linear-gradient(135deg,#c87a20,#a05010);
+            border:none;border-radius:12px;
+            color:#fff8e0;
+            font-family:'Syne',sans-serif;
+            font-size:0.95rem;font-weight:700;
+            cursor:pointer;
+            letter-spacing:0.05em;
+            transition:all 0.3s;
+            box-shadow:0 4px 16px rgba(200,100,10,0.3);
+        }
+
+        .pwd-btn:hover { transform:translateY(-2px);box-shadow:0 8px 24px rgba(200,100,10,0.4); }
+        .pwd-btn:active { transform:scale(0.98); }
+
+        .pwd-shake { animation:shake 0.4s ease; }
+        @keyframes shake {
+            0%,100%{transform:translate(-50%,-50%) scale(1)}
+            25%{transform:translate(calc(-50% - 8px),-50%) scale(1)}
+            75%{transform:translate(calc(-50% + 8px),-50%) scale(1)}
+        }
+
+        /* ===== MAIN PANEL (after unlock) ===== */
+        .main-panel {
+            position:absolute;
+            top:50%;left:50%;
+            transform:translate(-50%,-50%) scale(0.85);
+            z-index:50;
+            width:min(380px,92vw);
+            opacity:0;
+            pointer-events:none;
+            transition:all 0.7s cubic-bezier(.34,1.56,.64,1);
+        }
+
+        .main-panel.show {
+            opacity:1;
+            pointer-events:all;
+            transform:translate(-50%,-50%) scale(1);
+        }
+
+        .main-header {
+            text-align:center;
+            margin-bottom:1.5rem;
+        }
+
+        .main-logo {
+            width:64px;height:64px;
+            border-radius:18px;
+            margin:0 auto 0.8rem;
+            display:block;
+            border:2px solid rgba(200,130,40,0.5);
+            box-shadow:0 0 20px rgba(200,120,20,0.3);
+            object-fit:cover;
+        }
+
+        .main-title {
+            font-family:'Syne',sans-serif;
+            font-size:1.4rem;font-weight:800;
+            color:#f0c060;
+            letter-spacing:0.04em;
+            margin-bottom:0.2rem;
+        }
+
+        .main-sub {
+            font-size:0.7rem;
+            color:rgba(255,255,255,0.3);
+            text-transform:uppercase;
+            letter-spacing:0.12em;
+        }
+
+        /* Nav buttons */
+        .nav-grid {
+            display:flex;
+            flex-direction:column;
+            gap:0.6rem;
+        }
+
+        .nav-btn {
+            width:100%;padding:1rem 1.2rem;
+            background:rgba(20,14,8,0.8);
+            border:1.5px solid rgba(200,130,40,0.15);
+            border-radius:14px;
+            color:#e0c090;
+            font-family:'DM Sans',sans-serif;
+            font-size:0.95rem;font-weight:500;
+            cursor:pointer;
+            display:flex;align-items:center;gap:0.8rem;
+            text-align:left;
+            transition:all 0.25s ease;
+            backdrop-filter:blur(10px);
+            text-decoration:none;
+        }
+
+        .nav-btn:hover {
+            background:rgba(200,120,20,0.15);
+            border-color:rgba(200,130,40,0.4);
+            transform:translateX(4px);
+            color:#f0d080;
+            box-shadow:0 4px 16px rgba(200,100,10,0.15);
+        }
+
+        .nav-btn:active { transform:scale(0.98); }
+
+        .nav-btn-icon {
+            width:38px;height:38px;
+            background:rgba(200,120,20,0.15);
+            border-radius:10px;
+            display:flex;align-items:center;justify-content:center;
+            font-size:1.1rem;flex-shrink:0;
+            border:1px solid rgba(200,130,40,0.2);
+        }
+
+        .nav-btn-arrow {
+            margin-left:auto;
+            color:rgba(200,130,40,0.4);
+            font-size:0.9rem;
+        }
+
+        .back-btn {
+            display:flex;align-items:center;justify-content:center;gap:0.4rem;
+            margin-top:1rem;
+            color:rgba(255,255,255,0.2);
+            font-size:0.75rem;
+            cursor:pointer;
+            background:none;border:none;
+            font-family:'DM Sans',sans-serif;
+            transition:color 0.2s;
+            text-align:center;
+            width:100%;
+        }
+
+        .back-btn:hover { color:rgba(255,255,255,0.5); }
+
+        /* Particles / dust in light */
+        .dust {
+            position:absolute;
+            top:8%;left:50%;
+            transform:translateX(-50%);
+            width:400px;height:300px;
+            z-index:6;
+            pointer-events:none;
+            opacity:0;
+            transition:opacity 1.5s ease;
+        }
+
+        .room.lit .dust { opacity:1; }
+
+        .dust-particle {
+            position:absolute;
+            width:2px;height:2px;
+            background:rgba(255,200,80,0.6);
+            border-radius:50%;
+            animation:dustFloat linear infinite;
+        }
+
+        @keyframes dustFloat {
+            0%{transform:translate(0,0);opacity:0}
+            10%{opacity:0.6}
+            90%{opacity:0.3}
+            100%{transform:translate(var(--dx),var(--dy));opacity:0}
+        }
+
+        /* Wall picture frame */
+        .frame {
+            position:absolute;
+            top:44%;left:12%;
+            width:90px;height:68px;
+            border:3px solid #1a1a1e;
+            border-radius:4px;
+            background:#0a0a0c;
+            z-index:8;
+            transition:all 1.2s ease;
+            overflow:hidden;
+        }
+
+        .frame::before {
+            content:'';
+            position:absolute;inset:0;
+            background:linear-gradient(135deg,#111 0%,#1a1a1a 100%);
+        }
+
+        .room.lit .frame {
+            border-color:#3a2a18;
+            background:#1a1208;
+            box-shadow:0 2px 12px rgba(0,0,0,0.5);
+        }
+
+        /* Desk / table silhouette */
+        .desk {
+            position:absolute;
+            bottom:30%;left:5%;
+            width:180px;height:12px;
+            background:linear-gradient(90deg,#0f0c08,#1a1410,#0f0c08);
+            z-index:7;
+            border-radius:2px;
+            transition:background 1.2s;
+        }
+
+        .desk::before {
+            content:'';
+            position:absolute;
+            left:10px;bottom:-24px;
+            width:8px;height:24px;
+            background:inherit;border-radius:0 0 2px 2px;
+        }
+
+        .desk::after {
+            content:'';
+            position:absolute;
+            right:10px;bottom:-24px;
+            width:8px;height:24px;
+            background:inherit;border-radius:0 0 2px 2px;
+        }
+
+        .room.lit .desk { background:linear-gradient(90deg,#1a1408,#2a1e10,#1a1408); }
+
         /* Responsive */
-        @media (max-width: 600px) {
-            .container { padding: 32px 6vw 28px 6vw; }
-            .header-title { font-size: 1.35rem; }
-            .header { flex-direction: column; gap: 9px;}
-            .btn { padding: 15px 10px; font-size: 1rem;}
-            .header-logo { width: 48px; height: 48px; }
-        }
-        @media (max-width: 400px) {
-            .container { padding: 10px 2vw; }
-            .header-title { font-size: 1.03rem; }
-        }
-        /* Retour accueil bouton */
-        .btn-retour-bas {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(to right, #ff4e00, #ff9a56);
-            color: white;
-            padding: 14px 28px;
-            font-size: 16px;
-            font-weight: bold;
-            border-radius: 30px;
-            text-decoration: none;
-            box-shadow: 0 5px 12px rgba(0, 0, 0, 0.3);
-            transition: all 0.3s ease;
-            z-index: 1000;
-        }
-        .btn-retour-bas:hover {
-            background: linear-gradient(to right, #e64600, #ff8033);
-            transform: translateX(-50%) scale(1.05);
-            box-shadow: 0 7px 16px rgba(0, 0, 0, 0.4);
-        }
-        @media screen and (max-width: 480px) {
-            .btn-retour-bas {
-              font-size: 14px;
-              padding: 12px 24px;
-            }
+        @media(max-width:480px){
+            .switch-plate { right:12%; }
+            .pwd-panel { width:90vw;padding:1.5rem; }
         }
     </style>
 </head>
 <body>
-    <!-- Bokeh blobs -->
-    <div class="bokeh-bg">
-        <div class="bokeh bokeh1"></div>
-        <div class="bokeh bokeh2"></div>
-        <div class="bokeh bokeh3"></div>
+<div class="room" id="room">
+
+    <!-- Room structure -->
+    <div class="ceiling"></div>
+    <div class="wall"></div>
+    <div class="floor"></div>
+    <div class="baseboard"></div>
+
+    <!-- Ceiling lamp -->
+    <div class="lamp-wire"></div>
+    <div class="lamp-shade"></div>
+    <div class="bulb"></div>
+    <div class="light-cone"></div>
+    <div class="ambient"></div>
+    <div class="floor-shadow"></div>
+
+    <!-- Furniture -->
+    <div class="frame"></div>
+    <div class="desk"></div>
+
+    <!-- Dust particles (generated by JS) -->
+    <div class="dust" id="dust"></div>
+
+    <!-- Hint text -->
+    <div class="hint-dark">Allumez pour entrer</div>
+
+    <!-- Switch -->
+    <div class="switch-plate" id="switch-plate" onclick="toggleLight()">
+        <div class="plate">
+            <div class="toggle" id="toggle"></div>
+        </div>
+        <div class="switch-label">LUMIÈRE</div>
     </div>
-    <div class="container">
-        <div class="header">
-            <img src="image/groupe ex.jpg" alt="Logo KoLo Express" class="header-logo">
-            <div class="header-title">GROUPE EXPRESS</div>
+
+    <!-- Password panel -->
+    <div class="pwd-panel" id="pwd-panel">
+        <img src="image/groupe ex.jpg" alt="Logo" class="pwd-logo"
+            onerror="this.style.display='none'">
+        <div class="pwd-title">GROUPE EXPRESS</div>
+        <div class="pwd-sub">Accès fournisseur</div>
+        <div class="pwd-input-wrap">
+            <input type="password" class="pwd-input" id="pwd-inp"
+                placeholder="Code d'accès"
+                onkeydown="if(event.key==='Enter')checkPwd()">
+            <span class="pwd-eye" id="pwd-eye" onclick="togglePwdEye()">👁</span>
         </div>
-        <p class="subtitle">
-            GROUPE Express, accès reservé aux fournisseurs veillez vous retourner a la page d'acceil
-        </p>
-        <div class="establishment-buttons">
-            
-            <button class="btn btn-utt" onclick="accessSupplier('uttfournisseur.html')">
-                🏛️ UTT LOKO
-            </button>
-            <button class="btn btn-utt" onclick="accessSupplier('LAFONTAINE.html')">
-                🏛️ LA FONTAINE
-            </button>
-             <button class="btn btn-utt" onclick="accessSupplier('admin.html')">
-                @shopping-Admin
-            </button>
-             <button class="btn btn-utt" onclick="accessSupplier('e.html')">
-                @gestion  des commandes
-            </button>
-             <button class="btn btn-utt" onclick="accessSupplier('expressAI.html')">
-                @expressAI
-            </button>
-            <button class="btn btn-utt" onclick="accessSupplier('marcio.html')">
-                @Dashboard pour l'ajout
-            </button>
-        </div>
-        <div class="footer">
-            Sélectionnez un établissement pour continuer
-        </div>
+        <div class="pwd-err" id="pwd-err"></div>
+        <button class="pwd-btn" onclick="checkPwd()">🔓 Déverrouiller</button>
     </div>
-    <a href="index.html" class="btn-retour-bas">⬅ Retour à l'accueil</a>
-    <script>
-        function accessSupplier(destination) {
-            const code = prompt("Veuillez entrer le code d'accès fournisseur :");
-            if (code === "express200@") {
-                // Effet de fondu de sortie
-                document.querySelector('.container').style.opacity = '0';
-                document.querySelector('.container').style.transform = 'translateY(-20px) scale(0.95)';
-                setTimeout(() => {
-                    window.location.href = destination;
-                }, 350);
-            } else if (code !== null) {
-                alert("Code incorrect !");
-            }
+
+    <!-- Main panel (after unlock) -->
+    <div class="main-panel" id="main-panel">
+        <div class="main-header">
+            <img src="image/groupe ex.jpg" alt="Logo" class="main-logo"
+                onerror="this.style.display='none'">
+            <div class="main-title">GROUPE EXPRESS</div>
+            <div class="main-sub">Espace fournisseur & admin</div>
+        </div>
+
+        <div class="nav-grid">
+            <a href="uttfournisseur.html" class="nav-btn">
+                <div class="nav-btn-icon">🏛️</div>
+                <div>
+                    <div style="font-weight:600">UTT LOKO</div>
+                    <div style="font-size:0.72rem;opacity:0.5">Fournisseur UTT LOKO ZONE4C</div>
+                </div>
+                <span class="nav-btn-arrow">›</span>
+            </a>
+
+            <a href="LAFONTAINE.html" class="nav-btn">
+                <div class="nav-btn-icon">🏢</div>
+                <div>
+                    <div style="font-weight:600">LA FONTAINE</div>
+                    <div style="font-size:0.72rem;opacity:0.5">Fournisseur La Fontaine</div>
+                </div>
+                <span class="nav-btn-arrow">›</span>
+            </a>
+
+            <a href="admin.html" class="nav-btn">
+                <div class="nav-btn-icon">🛒</div>
+                <div>
+                    <div style="font-weight:600">Shopping Admin</div>
+                    <div style="font-size:0.72rem;opacity:0.5">Gestion boutique express</div>
+                </div>
+                <span class="nav-btn-arrow">›</span>
+            </a>
+
+            <a href="e.html" class="nav-btn">
+                <div class="nav-btn-icon">📦</div>
+                <div>
+                    <div style="font-weight:600">Gestion des commandes</div>
+                    <div style="font-size:0.72rem;opacity:0.5">Suivi & livraison</div>
+                </div>
+                <span class="nav-btn-arrow">›</span>
+            </a>
+
+            <a href="expressAI.html" class="nav-btn">
+                <div class="nav-btn-icon">🤖</div>
+                <div>
+                    <div style="font-weight:600">Express AI</div>
+                    <div style="font-size:0.72rem;opacity:0.5">Intelligence & comptabilité</div>
+                </div>
+                <span class="nav-btn-arrow">›</span>
+            </a>
+
+            <a href="marcio.html" class="nav-btn">
+                <div class="nav-btn-icon">⚙️</div>
+                <div>
+                    <div style="font-weight:600">Dashboard — Ajout</div>
+                    <div style="font-size:0.72rem;opacity:0.5">Gestion produits & plats</div>
+                </div>
+                <span class="nav-btn-arrow">›</span>
+            </a>
+
+            <a href="index.html" class="nav-btn" style="border-color:rgba(255,80,80,0.15)">
+                <div class="nav-btn-icon" style="background:rgba(255,60,60,0.1)">⬅️</div>
+                <div>
+                    <div style="font-weight:600">Retour à l'accueil</div>
+                    <div style="font-size:0.72rem;opacity:0.5">Page principale</div>
+                </div>
+                <span class="nav-btn-arrow">›</span>
+            </a>
+        </div>
+
+        <button class="back-btn" onclick="lockRoom()">
+            🔒 Verrouiller et éteindre
+        </button>
+    </div>
+
+</div>
+
+<script>
+    let isLit = false;
+    let isUnlocked = false;
+
+    // ---- Generate dust particles ----
+    (function(){
+        const dust = document.getElementById('dust');
+        for(let i=0;i<28;i++){
+            const p = document.createElement('div');
+            p.className='dust-particle';
+            const x=Math.random()*400-200;
+            const y=Math.random()*300;
+            const dx=(Math.random()-0.5)*120;
+            const dy=Math.random()*160+60;
+            const dur=4+Math.random()*8;
+            const delay=Math.random()*6;
+            p.style.cssText=`
+                left:${50+Math.random()*60-30}%;
+                top:${Math.random()*60}%;
+                --dx:${dx}px;
+                --dy:${dy}px;
+                animation-duration:${dur}s;
+                animation-delay:${delay}s;
+                width:${1+Math.random()*2}px;
+                height:${1+Math.random()*2}px;
+                opacity:0.4;
+            `;
+            dust.appendChild(p);
         }
-        // Parallaxe subtil
-        document.addEventListener('mousemove', (e) => {
-            const container = document.querySelector('.container');
-            const x = (e.clientX / window.innerWidth) * 2 - 1;
-            const y = (e.clientY / window.innerHeight) * 2 - 1;
-            container.style.transform = `translate(${x * 3}px, ${y * 3}px)`;
-        });
-    </script>
+    })();
+
+    // ---- Light toggle ----
+    window.toggleLight = function(){
+        if(isUnlocked) return; // don't re-trigger if already unlocked
+        isLit = !isLit;
+        const room = document.getElementById('room');
+        const toggle = document.getElementById('toggle');
+        const pwdPanel = document.getElementById('pwd-panel');
+
+        room.classList.toggle('lit', isLit);
+        toggle.classList.toggle('on', isLit);
+
+        if(isLit){
+            // Show password panel after lamp flicker
+            setTimeout(()=>{
+                pwdPanel.classList.add('show');
+                setTimeout(()=>document.getElementById('pwd-inp').focus(),300);
+            }, 600);
+        } else {
+            pwdPanel.classList.remove('show');
+            document.getElementById('pwd-err').textContent='';
+            document.getElementById('pwd-inp').value='';
+        }
+    };
+
+    // ---- Password ----
+    window.checkPwd = function(){
+        const val = document.getElementById('pwd-inp').value;
+        const panel = document.getElementById('pwd-panel');
+        const err = document.getElementById('pwd-err');
+
+        if(val === 'express200@'){
+            isUnlocked = true;
+            panel.classList.remove('show');
+            setTimeout(()=>{
+                document.getElementById('main-panel').classList.add('show');
+            }, 300);
+        } else {
+            err.textContent = '❌ Code incorrect';
+            panel.classList.add('pwd-shake');
+            setTimeout(()=>panel.classList.remove('pwd-shake'),500);
+            document.getElementById('pwd-inp').value='';
+            // Flicker effect
+            flickerLight();
+        }
+    };
+
+    function flickerLight(){
+        const room=document.getElementById('room');
+        let count=0;
+        const flicker=setInterval(()=>{
+            room.classList.toggle('lit');
+            count++;
+            if(count>=4){
+                clearInterval(flicker);
+                room.classList.add('lit');
+            }
+        },80);
+    }
+
+    window.togglePwdEye = function(){
+        const inp=document.getElementById('pwd-inp');
+        const eye=document.getElementById('pwd-eye');
+        inp.type=inp.type==='password'?'text':'password';
+        eye.textContent=inp.type==='password'?'👁':'🙈';
+    };
+
+    // ---- Lock room ----
+    window.lockRoom = function(){
+        isUnlocked=false;
+        isLit=false;
+        const room=document.getElementById('room');
+        const toggle=document.getElementById('toggle');
+        // Fade out main panel
+        const main=document.getElementById('main-panel');
+        main.classList.remove('show');
+        setTimeout(()=>{
+            room.classList.remove('lit');
+            toggle.classList.remove('on');
+        },400);
+        document.getElementById('pwd-inp').value='';
+        document.getElementById('pwd-err').textContent='';
+    };
+
+    // ---- Subtle parallax on mouse move ----
+    document.addEventListener('mousemove',(e)=>{
+        const x=(e.clientX/window.innerWidth-0.5)*10;
+        const y=(e.clientY/window.innerHeight-0.5)*6;
+        document.querySelector('.lamp-wire').style.transform=`translateX(calc(-50% + ${x*0.3}px))`;
+        document.querySelector('.lamp-shade').style.transform=`translateX(calc(-50% + ${x*0.3}px))`;
+        document.querySelector('.bulb').style.transform=`translateX(calc(-50% + ${x*0.3}px))`;
+    });
+</script>
 </body>
 </html>
-
-
-
-
-
-
