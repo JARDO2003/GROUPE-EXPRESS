@@ -627,22 +627,36 @@ function loadNewDishes() {
             if (!dishes.length) { sec.style.display = 'none'; return; }
             sec.style.display = 'block';
             if (cnt) cnt.textContent = `${dishes.length} plat(s)`;
-            grid.innerHTML = dishes.map(d => `
-                <div class="dish-card">
-                    <div class="dish-image-wrap">
-                        <img src="${d.imageUrl||''}" alt="${d.name||''}" class="dish-image" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🆕</text></svg>'">
-                        <span class="dish-new-tag">🆕 Nouveau</span>
-                    </div>
-                    <div class="dish-body">
-                        <div class="dish-name">${d.name||'Nouveau plat'}</div>
-                        <div class="dish-desc">${d.description||'Découvrez notre nouvelle création'}</div>
-                        <div class="dish-footer">
-                            <span class="dish-price">${d.price||0} FCFA</span>
-                            <button class="add-btn" onclick="promptAddToCart('${(d.name||'').replace(/'/g,"\\'")}', ${d.price||0}, '${d.category||'I'}')">+</button>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
+           grid.innerHTML = dishes.map(d => {
+    const safeName = (d.name||'Nouveau plat').replace(/'/g, "\\'");
+    const safeDesc = (d.description||'Découvrez notre nouvelle création').replace(/'/g, "\\'");
+    const price = d.price || 0;
+    const cat = d.category || 'I';
+    const img = d.imageUrl || '';
+    return `
+    <div class="dish-card">
+        <div class="dish-image-wrap"
+            onclick="openDishPreview(this)"
+            data-img="${img}"
+            data-name="${d.name||'Nouveau plat'}"
+            data-desc="${d.description||'Découvrez notre nouvelle création'}"
+            data-price="${price} FCFA"
+            data-badge="🆕 Nouveau"
+            data-action="promptAddToCart('${safeName}', ${price}, '${cat}')">
+            <img src="${img}" alt="${d.name||''}" class="dish-image"
+                onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🆕</text></svg>'">
+            <span class="dish-new-tag">🆕 Nouveau</span>
+        </div>
+        <div class="dish-body">
+            <div class="dish-name">${d.name||'Nouveau plat'}</div>
+            <div class="dish-desc">${d.description||'Découvrez notre nouvelle création'}</div>
+            <div class="dish-footer">
+                <span class="dish-price">${price} FCFA</span>
+                <button class="add-btn" onclick="promptAddToCart('${safeName}', ${price}, '${cat}')">+</button>
+            </div>
+        </div>
+    </div>
+`}).join('');
         });
     } catch(e) { console.error('Firebase dishes error:', e); }
 }
@@ -784,6 +798,31 @@ function showToast(msg, type = 'success') {
 }
 
 // ===== EXPOSE GLOBALS =====
+// ===== DISH PREVIEW =====
+function openDishPreview(el) {
+    const d = el.dataset;
+    const img = document.getElementById('preview-img');
+    img.src = d.img;
+    img.alt = d.name || '';
+    document.getElementById('preview-name').textContent = d.name || '';
+    document.getElementById('preview-desc').textContent = d.desc || '';
+    document.getElementById('preview-price').textContent = d.price || '';
+    const badge = document.getElementById('preview-badge');
+    if (d.badge) {
+        badge.textContent = d.badge;
+        badge.style.display = 'inline-block';
+    } else {
+        badge.textContent = '';
+        badge.style.display = 'none';
+    }
+    const btn = document.getElementById('preview-order-btn');
+    btn.onclick = () => {
+        closeModal('dish-preview-modal');
+        // Petite pause pour laisser le modal se fermer avant d'ouvrir le suivant
+        setTimeout(() => { eval(d.action); }, 150);
+    };
+    openModal('dish-preview-modal');
+}
 window.toggleCart = toggleCart;
 window.toggleOrders = toggleOrders;
 window.promptAddToCart = promptAddToCart;
@@ -802,6 +841,7 @@ window.selectGarba = selectGarba;
 window.goSlide = goSlide;
 window.requestNotificationPermission = requestNotificationPermission;
 window.triggerInstallPrompt = triggerInstallPrompt;
+window.openDishPreview = openDishPreview;
 
 // ===== INIT =====
 document.addEventListener('DOMContentLoaded', () => {
