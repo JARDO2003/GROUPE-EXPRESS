@@ -147,7 +147,6 @@
             position: relative; overflow: hidden;
         }
 
-        /* Couche image de fond — plat de nourriture */
         .hero::before {
             content: '';
             position: absolute; inset: 0;
@@ -159,7 +158,6 @@
             z-index: 0;
         }
 
-        /* Voile coloré léger par-dessus — laisse voir la photo */
         .hero::after {
             content: '';
             position: absolute; inset: 0;
@@ -172,7 +170,6 @@
             z-index: 0;
         }
 
-        /* Bouton Découvrir */
         .discover-btn {
             display: inline-flex;
             align-items: center;
@@ -192,23 +189,14 @@
             text-decoration: none;
         }
 
-        .discover-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 14px 36px rgba(0,0,0,0.28);
-        }
-
+        .discover-btn:hover { transform: translateY(-3px); box-shadow: 0 14px 36px rgba(0,0,0,0.28); }
         .discover-btn:active { transform: scale(0.97); }
 
-        /* Flèche qui rebondit */
         .discover-arrow {
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
             width: 28px; height: 28px;
-            background: var(--flame);
-            color: white;
-            border-radius: 50%;
-            font-size: 14px;
+            background: var(--flame); color: white;
+            border-radius: 50%; font-size: 14px;
             animation: arrowBounce 1.4s ease-in-out infinite;
         }
 
@@ -231,9 +219,7 @@
             line-height: 1.1; margin-bottom: 12px;
         }
 
-        .hero h1 em {
-            font-style: italic; opacity: 0.85;
-        }
+        .hero h1 em { font-style: italic; opacity: 0.85; }
 
         .hero p {
             color: rgba(255,255,255,0.85);
@@ -241,9 +227,7 @@
             margin-bottom: 28px;
         }
 
-        .hero-stats {
-            display: flex; gap: 28px; flex-wrap: wrap;
-        }
+        .hero-stats { display: flex; gap: 28px; flex-wrap: wrap; }
 
         .hero-stat strong {
             display: block;
@@ -251,21 +235,13 @@
             font-size: 1.8rem; font-weight: 700; color: white;
         }
 
-        .hero-stat span {
-            font-size: 12px; color: rgba(255,255,255,0.8);
-            letter-spacing: 0.5px;
-        }
+        .hero-stat span { font-size: 12px; color: rgba(255,255,255,0.8); letter-spacing: 0.5px; }
 
-        .hero-badge-wrap {
-            display: flex; flex-direction: column;
-            align-items: center; gap: 12px;
-        }
+        .hero-badge-wrap { display: flex; flex-direction: column; align-items: center; gap: 12px; }
 
         .hero-badge {
-            background: white;
-            border-radius: 24px; padding: 20px 24px;
-            text-align: center;
-            box-shadow: var(--shadow-lg);
+            background: white; border-radius: 24px; padding: 20px 24px;
+            text-align: center; box-shadow: var(--shadow-lg);
         }
 
         .hero-badge .big-emoji { font-size: 3rem; display: block; margin-bottom: 6px; }
@@ -280,27 +256,17 @@
         }
 
         /* =================== ADS SLIDER =================== */
-        .promo-section {
-            background: var(--soft); padding: 20px 24px;
-            border-bottom: 1px solid var(--border);
-        }
-
+        .promo-section { background: var(--soft); padding: 20px 24px; border-bottom: 1px solid var(--border); }
         .promo-inner { max-width: 1100px; margin: 0 auto; }
-
         .promo-track { position: relative; overflow: hidden; border-radius: 18px; cursor: grab; user-select: none; -webkit-user-select: none; }
-
-        .promo-slides {
-            display: flex; transition: transform 0.5s cubic-bezier(.4,0,.2,1);
-        }
+        .promo-slides { display: flex; transition: transform 0.5s cubic-bezier(.4,0,.2,1); }
 
         .promo-slide {
             min-width: 100%; height: 180px; position: relative;
             border-radius: 18px; overflow: hidden; cursor: pointer;
         }
 
-        .promo-slide img {
-            width: 100%; height: 100%; object-fit: cover;
-        }
+        .promo-slide img { width: 100%; height: 100%; object-fit: cover; }
 
         .promo-slide-overlay {
             position: absolute; inset: 0;
@@ -309,16 +275,10 @@
             justify-content: flex-end; padding: 20px 24px;
         }
 
-        .promo-slide-overlay h3 {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.4rem; color: white; margin-bottom: 4px;
-        }
-
+        .promo-slide-overlay h3 { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: white; margin-bottom: 4px; }
         .promo-slide-overlay p { font-size: 13px; color: rgba(255,255,255,0.85); }
 
-        .promo-nav {
-            display: flex; justify-content: center; gap: 6px; margin-top: 10px;
-        }
+        .promo-nav { display: flex; justify-content: center; gap: 6px; margin-top: 10px; }
 
         .promo-dot {
             width: 8px; height: 8px; border-radius: 50%;
@@ -329,11 +289,7 @@
         .promo-dot.active { background: var(--flame); width: 22px; border-radius: 4px; }
 
         /* =================== NAV PILLS =================== */
-        .nav-pills-section {
-            padding: 20px 24px;
-            border-bottom: 1px solid var(--border);
-        }
-
+        .nav-pills-section { padding: 20px 24px; border-bottom: 1px solid var(--border); }
         .nav-pills-inner { max-width: 1100px; margin: 0 auto; }
 
         .nav-pills {
@@ -389,57 +345,33 @@
             margin-bottom: 24px; padding-top: 40px;
         }
 
-        .section-header h2 {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.75rem; font-weight: 700;
-            color: var(--charcoal);
-        }
-
+        .section-header h2 { font-family: 'Playfair Display', serif; font-size: 1.75rem; font-weight: 700; color: var(--charcoal); }
         .section-header h2 span { color: var(--flame); }
 
-        .view-all {
-            font-size: 13px; font-weight: 600;
-            color: var(--flame); text-decoration: none;
-            display: flex; align-items: center; gap: 4px;
-        }
+        .view-all { font-size: 13px; font-weight: 600; color: var(--flame); text-decoration: none; display: flex; align-items: center; gap: 4px; }
 
         /* =================== FEATURED DISH =================== */
         .featured-banner {
             background: linear-gradient(135deg, #1A1A1A, #2D2D2D);
             border-radius: var(--radius); overflow: hidden;
             display: grid; grid-template-columns: 1fr 1fr;
-            min-height: 200px; margin-bottom: 40px;
-            margin-top: 24px;
+            min-height: 200px; margin-bottom: 40px; margin-top: 24px;
         }
 
-        .featured-text {
-            padding: 36px 32px;
-            display: flex; flex-direction: column;
-            justify-content: center;
-        }
+        .featured-text { padding: 36px 32px; display: flex; flex-direction: column; justify-content: center; }
 
         .featured-badge {
             display: inline-block; background: var(--flame);
             color: white; border-radius: 50px;
             padding: 4px 14px; font-size: 11px;
             font-weight: 700; letter-spacing: 1px;
-            text-transform: uppercase; margin-bottom: 14px;
-            width: fit-content;
+            text-transform: uppercase; margin-bottom: 14px; width: fit-content;
         }
 
-        .featured-text h3 {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.8rem; font-weight: 700; color: white;
-            margin-bottom: 8px; line-height: 1.2;
-        }
-
+        .featured-text h3 { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 700; color: white; margin-bottom: 8px; line-height: 1.2; }
         .featured-text p { font-size: 14px; color: #999; margin-bottom: 20px; }
 
-        .featured-price {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 2rem; font-weight: 700; color: var(--saffron);
-        }
-
+        .featured-price { font-family: 'Space Grotesk', sans-serif; font-size: 2rem; font-weight: 700; color: var(--saffron); }
         .featured-price span { font-size: 14px; color: #666; font-family: 'DM Sans', sans-serif; }
 
         .featured-img {
@@ -448,9 +380,7 @@
             font-size: 6rem; overflow: hidden;
         }
 
-        .featured-img img {
-            width: 100%; height: 100%; object-fit: cover;
-        }
+        .featured-img img { width: 100%; height: 100%; object-fit: cover; }
 
         /* =================== CATEGORY SECTION =================== */
         .category-section { margin-bottom: 40px; }
@@ -463,24 +393,9 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.04);
         }
 
-        .category-icon {
-            width: 40px; height: 40px;
-            background: var(--soft); border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 20px;
-        }
-
-        .category-header h3 {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.05rem; font-weight: 700;
-            color: var(--charcoal);
-        }
-
-        .category-count {
-            margin-left: auto; background: var(--soft);
-            color: var(--muted); border-radius: 50px;
-            padding: 3px 12px; font-size: 12px; font-weight: 600;
-        }
+        .category-icon { width: 40px; height: 40px; background: var(--soft); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .category-header h3 { font-family: 'Space Grotesk', sans-serif; font-size: 1.05rem; font-weight: 700; color: var(--charcoal); }
+        .category-count { margin-left: auto; background: var(--soft); color: var(--muted); border-radius: 50px; padding: 3px 12px; font-size: 12px; font-weight: 600; }
 
         /* =================== DISH GRID =================== */
         .dishes-grid {
@@ -496,22 +411,22 @@
             position: relative;
         }
 
-        .dish-card:hover {
-            transform: translateY(-6px);
-            box-shadow: var(--card-shadow);
-            border-color: rgba(255,107,53,0.3);
-        }
+        .dish-card:hover { transform: translateY(-6px); box-shadow: var(--card-shadow); border-color: rgba(255,107,53,0.3); }
 
         .dish-image {
             width: 100%; aspect-ratio: 1;
             object-fit: cover; display: block;
             background: var(--soft);
             transition: transform 0.4s ease;
+            cursor: zoom-in;
         }
 
         .dish-card:hover .dish-image { transform: scale(1.05); }
 
-        .dish-image-wrap { overflow: hidden; position: relative; }
+        .dish-image-wrap {
+            overflow: hidden; position: relative;
+            cursor: zoom-in;
+        }
 
         .dish-new-tag {
             position: absolute; top: 10px; left: 10px;
@@ -522,11 +437,7 @@
 
         .dish-body { padding: 14px; }
 
-        .dish-name {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 14px; font-weight: 600; color: var(--charcoal);
-            margin-bottom: 4px; line-height: 1.3;
-        }
+        .dish-name { font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 600; color: var(--charcoal); margin-bottom: 4px; line-height: 1.3; }
 
         .dish-desc {
             font-size: 12px; color: var(--muted);
@@ -537,16 +448,9 @@
             overflow: hidden;
         }
 
-        .dish-footer {
-            display: flex; align-items: center;
-            justify-content: space-between;
-        }
+        .dish-footer { display: flex; align-items: center; justify-content: space-between; }
 
-        .dish-price {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 16px; font-weight: 700;
-            color: var(--flame);
-        }
+        .dish-price { font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 700; color: var(--flame); }
 
         .add-btn {
             width: 36px; height: 36px;
@@ -563,11 +467,7 @@
         /* =================== CHEF SECTION =================== */
         .chefs-section { padding: 60px 0; }
 
-        .chefs-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-            gap: 20px; margin-top: 8px;
-        }
+        .chefs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; margin-top: 8px; }
 
         .chef-card {
             background: white; border-radius: var(--radius);
@@ -588,165 +488,54 @@
         }
 
         .chef-avatar img { width: 100%; height: 100%; object-fit: cover; }
-
-        .chef-name {
-            font-family: 'Space Grotesk', sans-serif;
-            font-weight: 700; font-size: 16px;
-            color: var(--charcoal); margin-bottom: 4px;
-        }
-
+        .chef-name { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 16px; color: var(--charcoal); margin-bottom: 4px; }
         .chef-role { font-size: 13px; color: var(--flame); font-weight: 500; margin-bottom: 10px; }
         .chef-bio { font-size: 13px; color: var(--muted); line-height: 1.5; }
-
-        .chef-stars {
-            display: flex; justify-content: center; gap: 3px;
-            margin-top: 12px; font-size: 14px; color: var(--saffron);
-        }
+        .chef-stars { display: flex; justify-content: center; gap: 3px; margin-top: 12px; font-size: 14px; color: var(--saffron); }
 
         /* =================== TESTIMONIALS =================== */
-        .testimonials-section {
-            background: var(--soft); padding: 60px 24px;
-        }
-
+        .testimonials-section { background: var(--soft); padding: 60px 24px; }
         .testimonials-inner { max-width: 1100px; margin: 0 auto; }
-
         .testimonials-header { text-align: center; margin-bottom: 36px; }
-
-        .testimonials-header h2 {
-            font-family: 'Playfair Display', serif;
-            font-size: 2rem; font-weight: 700; color: var(--charcoal);
-            margin-bottom: 8px;
-        }
-
+        .testimonials-header h2 { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; color: var(--charcoal); margin-bottom: 8px; }
         .testimonials-header p { color: var(--muted); font-size: 15px; }
+        .testimonials-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
 
-        .testimonials-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
-        }
-
-        .testimonial-card {
-            background: white; border-radius: var(--radius);
-            padding: 24px; border: 1px solid var(--border);
-            transition: all 0.3s ease;
-        }
-
+        .testimonial-card { background: white; border-radius: var(--radius); padding: 24px; border: 1px solid var(--border); transition: all 0.3s ease; }
         .testimonial-card:hover { transform: translateY(-4px); box-shadow: var(--card-shadow); }
-
         .testimonial-stars { color: var(--saffron); font-size: 16px; margin-bottom: 12px; }
-
-        .testimonial-text {
-            font-size: 14px; color: var(--ink);
-            line-height: 1.6; font-style: italic;
-            margin-bottom: 16px;
-        }
-
-        .testimonial-author {
-            display: flex; align-items: center; gap: 10px;
-        }
-
-        .testimonial-avatar {
-            width: 40px; height: 40px; border-radius: 50%;
-            background: linear-gradient(135deg, var(--flame), var(--saffron));
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.2rem; font-weight: 700; color: white;
-            font-family: 'Space Grotesk', sans-serif;
-        }
-
-        .testimonial-name {
-            font-family: 'Space Grotesk', sans-serif;
-            font-weight: 600; font-size: 14px; color: var(--charcoal);
-        }
-
+        .testimonial-text { font-size: 14px; color: var(--ink); line-height: 1.6; font-style: italic; margin-bottom: 16px; }
+        .testimonial-author { display: flex; align-items: center; gap: 10px; }
+        .testimonial-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--flame), var(--saffron)); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 700; color: white; font-family: 'Space Grotesk', sans-serif; }
+        .testimonial-name { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 14px; color: var(--charcoal); }
         .testimonial-meta { font-size: 12px; color: var(--muted); }
 
         /* =================== HOW IT WORKS =================== */
         .how-section { padding: 60px 0; }
+        .how-steps { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; margin-top: 8px; }
 
-        .how-steps {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 20px; margin-top: 8px;
-        }
-
-        .how-step {
-            background: white; border-radius: var(--radius);
-            border: 1px solid var(--border);
-            padding: 28px 20px; text-align: center;
-            transition: all 0.3s ease;
-        }
-
+        .how-step { background: white; border-radius: var(--radius); border: 1px solid var(--border); padding: 28px 20px; text-align: center; transition: all 0.3s ease; }
         .how-step:hover { transform: translateY(-4px); box-shadow: var(--card-shadow); }
 
-        .step-number {
-            width: 50px; height: 50px;
-            background: var(--flame); color: white;
-            border-radius: 50%; margin: 0 auto 14px;
-            display: flex; align-items: center; justify-content: center;
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.3rem; font-weight: 700;
-        }
-
+        .step-number { width: 50px; height: 50px; background: var(--flame); color: white; border-radius: 50%; margin: 0 auto 14px; display: flex; align-items: center; justify-content: center; font-family: 'Space Grotesk', sans-serif; font-size: 1.3rem; font-weight: 700; }
         .step-icon { font-size: 1.8rem; margin-bottom: 10px; }
-
-        .how-step h4 {
-            font-family: 'Space Grotesk', sans-serif;
-            font-weight: 700; font-size: 15px;
-            color: var(--charcoal); margin-bottom: 8px;
-        }
-
+        .how-step h4 { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 15px; color: var(--charcoal); margin-bottom: 8px; }
         .how-step p { font-size: 13px; color: var(--muted); line-height: 1.5; }
 
         /* =================== FOOTER =================== */
-        .site-footer {
-            background: var(--charcoal); color: white;
-            padding: 50px 24px 24px;
-        }
+        .site-footer { background: var(--charcoal); color: white; padding: 50px 24px 24px; }
 
-        .footer-inner {
-            max-width: 1100px; margin: 0 auto;
-            display: grid; grid-template-columns: 2fr 1fr 1fr;
-            gap: 40px; margin-bottom: 40px;
-        }
-
+        .footer-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 40px; margin-bottom: 40px; }
         .footer-brand p { font-size: 14px; color: #888; margin-top: 12px; line-height: 1.6; }
-
-        .footer-brand .footer-logo {
-            display: flex; align-items: center; gap: 10px; margin-bottom: 4px;
-        }
-
-        .footer-logo-icon {
-            width: 38px; height: 38px;
-            background: var(--flame); border-radius: 10px;
-            display: flex; align-items: center; justify-content: center; font-size: 18px;
-        }
-
-        .footer-logo-text {
-            font-family: 'Space Grotesk', sans-serif;
-            font-weight: 700; font-size: 16px;
-        }
-
-        .footer-col h4 {
-            font-family: 'Space Grotesk', sans-serif;
-            font-weight: 700; font-size: 13px;
-            text-transform: uppercase; letter-spacing: 1px;
-            color: #888; margin-bottom: 16px;
-        }
-
+        .footer-brand .footer-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+        .footer-logo-icon { width: 38px; height: 38px; background: var(--flame); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .footer-logo-text { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 16px; }
+        .footer-col h4 { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: #888; margin-bottom: 16px; }
         .footer-col ul { list-style: none; }
         .footer-col ul li { margin-bottom: 10px; }
-        .footer-col ul li a {
-            color: #ccc; text-decoration: none;
-            font-size: 14px; transition: color 0.2s;
-        }
+        .footer-col ul li a { color: #ccc; text-decoration: none; font-size: 14px; transition: color 0.2s; }
         .footer-col ul li a:hover { color: var(--flame); }
-
-        .footer-bottom {
-            border-top: 1px solid #333;
-            padding-top: 20px; text-align: center;
-            font-size: 13px; color: #666;
-        }
+        .footer-bottom { border-top: 1px solid #333; padding-top: 20px; text-align: center; font-size: 13px; color: #666; }
 
         /* =================== MODALS =================== */
         .modal-overlay {
@@ -779,11 +568,7 @@
             z-index: 1; border-radius: 24px 24px 0 0;
         }
 
-        .modal-header h3 {
-            font-family: 'Space Grotesk', sans-serif;
-            font-weight: 700; font-size: 1.1rem; color: var(--charcoal);
-        }
-
+        .modal-header h3 { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1.1rem; color: var(--charcoal); }
         .modal-header p { font-size: 13px; color: var(--muted); margin-top: 2px; }
 
         .modal-close {
@@ -795,93 +580,42 @@
         }
 
         .modal-close:hover { background: var(--border); }
-
         .modal-body { padding: 20px 24px 24px; }
 
         /* Options */
         .option-list { display: flex; flex-direction: column; gap: 10px; }
 
         .option-item {
-            display: flex; align-items: center;
-            justify-content: space-between;
+            display: flex; align-items: center; justify-content: space-between;
             padding: 14px 16px; border: 1.5px solid var(--border);
             border-radius: var(--radius-sm); cursor: pointer;
             transition: all 0.2s ease; background: white;
         }
 
-        .option-item:hover {
-            border-color: var(--flame);
-            background: #FFF5F0;
-        }
-
-        .option-item-left {
-            display: flex; align-items: center; gap: 12px;
-        }
-
+        .option-item:hover { border-color: var(--flame); background: #FFF5F0; }
+        .option-item-left { display: flex; align-items: center; gap: 12px; }
         .option-emoji { font-size: 1.5rem; }
-
-        .option-item-left h4 {
-            font-family: 'Space Grotesk', sans-serif;
-            font-weight: 600; font-size: 14px; color: var(--charcoal);
-        }
-
+        .option-item-left h4 { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 14px; color: var(--charcoal); }
         .option-item-left p { font-size: 12px; color: var(--muted); }
-
-        .option-price {
-            font-family: 'Space Grotesk', sans-serif;
-            font-weight: 700; font-size: 15px; color: var(--flame);
-            background: var(--soft); padding: 6px 12px;
-            border-radius: 8px;
-        }
+        .option-price { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 15px; color: var(--flame); background: var(--soft); padding: 6px 12px; border-radius: 8px; }
 
         /* Cart */
-        .cart-item-row {
-            display: flex; align-items: center; gap: 12px;
-            padding: 12px 0; border-bottom: 1px solid var(--border);
-        }
-
+        .cart-item-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
         .cart-item-row:last-child { border-bottom: none; }
-
         .cart-item-info { flex: 1; }
-
-        .cart-item-name {
-            font-weight: 600; font-size: 14px; color: var(--charcoal);
-        }
-
+        .cart-item-name { font-weight: 600; font-size: 14px; color: var(--charcoal); }
         .cart-item-price { font-size: 13px; color: var(--flame); margin-top: 2px; }
-
-        .cart-remove {
-            background: none; border: none; cursor: pointer;
-            color: var(--muted); font-size: 16px; padding: 6px;
-            border-radius: 8px; transition: all 0.2s ease;
-        }
-
+        .cart-remove { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 16px; padding: 6px; border-radius: 8px; transition: all 0.2s ease; }
         .cart-remove:hover { color: var(--red); background: #FFF5F5; }
-
-        .cart-total-row {
-            display: flex; justify-content: space-between;
-            padding: 16px; background: var(--soft);
-            border-radius: var(--radius-sm); margin: 16px 0;
-            font-family: 'Space Grotesk', sans-serif;
-            font-weight: 700; font-size: 16px;
-        }
-
+        .cart-total-row { display: flex; justify-content: space-between; padding: 16px; background: var(--soft); border-radius: var(--radius-sm); margin: 16px 0; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 16px; }
         .cart-total-row span:last-child { color: var(--flame); }
-
-        .empty-cart {
-            text-align: center; padding: 40px 20px;
-        }
-
+        .empty-cart { text-align: center; padding: 40px 20px; }
         .empty-cart .icon { font-size: 3rem; margin-bottom: 12px; }
         .empty-cart p { color: var(--muted); font-size: 14px; }
 
         /* Form elements */
         .form-group { margin-bottom: 16px; }
-
-        .form-group label {
-            display: block; font-weight: 600; font-size: 13px;
-            color: var(--charcoal); margin-bottom: 6px;
-        }
+        .form-group label { display: block; font-weight: 600; font-size: 13px; color: var(--charcoal); margin-bottom: 6px; }
 
         .form-group input,
         .form-group select,
@@ -900,10 +634,7 @@
             box-shadow: 0 0 0 3px rgba(255,107,53,0.1);
         }
 
-        .form-error {
-            font-size: 12px; color: var(--red); margin-top: 4px;
-            display: none;
-        }
+        .form-error { font-size: 12px; color: var(--red); margin-top: 4px; display: none; }
 
         /* Buttons */
         .btn-primary {
@@ -929,15 +660,10 @@
         }
 
         .btn-secondary:hover { background: var(--border); }
-
-        .btn-danger {
-            background: var(--red); color: white;
-        }
+        .btn-danger { background: var(--red); color: white; }
 
         /* =================== SUCCESS MODAL =================== */
-        .success-modal {
-            text-align: center; padding: 32px 24px;
-        }
+        .success-modal { text-align: center; padding: 32px 24px; }
 
         .success-icon {
             width: 80px; height: 80px;
@@ -954,61 +680,26 @@
             to { transform: scale(1); opacity: 1; }
         }
 
-        .success-modal h3 {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.6rem; color: var(--charcoal); margin-bottom: 6px;
-        }
+        .success-modal h3 { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--charcoal); margin-bottom: 6px; }
 
         .success-code {
-            display: inline-block;
-            background: var(--flame); color: white;
+            display: inline-block; background: var(--flame); color: white;
             border-radius: 8px; padding: 8px 20px;
-            font-family: 'Space Grotesk', sans-serif;
-            font-weight: 700; font-size: 1.1rem;
-            margin: 12px 0;
+            font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1.1rem; margin: 12px 0;
         }
 
-        .success-info-list {
-            background: var(--soft); border-radius: var(--radius-sm);
-            padding: 16px; margin: 16px 0;
-            text-align: left;
-        }
-
-        .success-info-item {
-            display: flex; align-items: center; gap: 10px;
-            padding: 8px 0; border-bottom: 1px solid var(--border);
-            font-size: 14px; color: var(--ink);
-        }
-
+        .success-info-list { background: var(--soft); border-radius: var(--radius-sm); padding: 16px; margin: 16px 0; text-align: left; }
+        .success-info-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 14px; color: var(--ink); }
         .success-info-item:last-child { border-bottom: none; }
 
         /* =================== FLOATING BUTTONS =================== */
-        .fab-group {
-            position: fixed; bottom: 24px; right: 20px;
-            z-index: 500; display: flex; flex-direction: column; gap: 10px;
-        }
+        .fab-group { position: fixed; bottom: 24px; right: 20px; z-index: 500; display: flex; flex-direction: column; gap: 10px; }
 
-        .fab {
-            width: 52px; height: 52px; border-radius: 50%;
-            border: none; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 20px; box-shadow: var(--shadow-lg);
-            transition: all 0.2s ease;
-        }
-
+        .fab { width: 52px; height: 52px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: var(--shadow-lg); transition: all 0.2s ease; }
         .fab:hover { transform: scale(1.1); }
-
-        .fab-cart {
-            background: var(--flame); color: white;
-            width: 58px; height: 58px; font-size: 22px;
-            position: relative;
-        }
-
+        .fab-cart { background: var(--flame); color: white; width: 58px; height: 58px; font-size: 22px; position: relative; }
         .fab-notif { background: white; color: var(--ink); border: 1px solid var(--border); }
-
-        .fab-install {
-            background: linear-gradient(135deg, #2ECC71, #27AE60); color: white;
-        }
+        .fab-install { background: linear-gradient(135deg, #2ECC71, #27AE60); color: white; }
 
         /* =================== TOAST =================== */
         .toast {
@@ -1033,43 +724,17 @@
         }
 
         /* =================== QUANTITY MODAL =================== */
-        .qty-controls {
-            display: flex; align-items: center; gap: 16px;
-            justify-content: center; margin: 20px 0;
-        }
+        .qty-controls { display: flex; align-items: center; gap: 16px; justify-content: center; margin: 20px 0; }
 
-        .qty-btn {
-            width: 44px; height: 44px; border-radius: 50%;
-            border: 2px solid var(--border); background: white;
-            cursor: pointer; font-size: 22px;
-            display: flex; align-items: center; justify-content: center;
-            transition: all 0.2s ease; font-weight: 700;
-        }
-
+        .qty-btn { width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--border); background: white; cursor: pointer; font-size: 22px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; font-weight: 700; }
         .qty-btn:hover { border-color: var(--flame); color: var(--flame); }
-
-        .qty-display {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 2rem; font-weight: 700; color: var(--charcoal);
-            min-width: 60px; text-align: center;
-        }
+        .qty-display { font-family: 'Space Grotesk', sans-serif; font-size: 2rem; font-weight: 700; color: var(--charcoal); min-width: 60px; text-align: center; }
 
         /* =================== ORDERS HISTORY =================== */
-        .order-history-item {
-            background: var(--soft); border-radius: var(--radius-sm);
-            padding: 14px 16px; margin-bottom: 10px;
-        }
-
-        .order-history-item .code {
-            font-family: 'Space Grotesk', sans-serif;
-            font-weight: 700; color: var(--flame); font-size: 14px;
-        }
-
+        .order-history-item { background: var(--soft); border-radius: var(--radius-sm); padding: 14px 16px; margin-bottom: 10px; }
+        .order-history-item .code { font-family: 'Space Grotesk', sans-serif; font-weight: 700; color: var(--flame); font-size: 14px; }
         .order-history-item .date { font-size: 12px; color: var(--muted); }
-
-        .order-history-item .summary {
-            font-size: 13px; color: var(--ink); margin-top: 6px;
-        }
+        .order-history-item .summary { font-size: 13px; color: var(--ink); margin-top: 6px; }
 
         /* =================== RESPONSIVE =================== */
         @media (max-width: 768px) {
@@ -1093,40 +758,10 @@
         }
 
         /* =================== INSTALL STEPS =================== */
-        .install-step {
-            display: flex;
-            align-items: flex-start;
-            gap: 14px;
-            padding: 14px;
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            margin-bottom: 10px;
-            background: var(--soft);
-        }
-
-        .install-step-num {
-            width: 32px; height: 32px;
-            border-radius: 50%;
-            background: var(--flame);
-            color: white;
-            font-weight: 700;
-            font-size: 14px;
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .install-step-text strong {
-            display: block;
-            font-size: 14px;
-            color: var(--charcoal);
-            margin-bottom: 3px;
-        }
-
-        .install-step-text p {
-            font-size: 12px;
-            color: var(--muted);
-            margin: 0;
-        }
+        .install-step { display: flex; align-items: flex-start; gap: 14px; padding: 14px; border: 1px solid var(--border); border-radius: 14px; margin-bottom: 10px; background: var(--soft); }
+        .install-step-num { width: 32px; height: 32px; border-radius: 50%; background: var(--flame); color: white; font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .install-step-text strong { display: block; font-size: 14px; color: var(--charcoal); margin-bottom: 3px; }
+        .install-step-text p { font-size: 12px; color: var(--muted); margin: 0; }
 
         /* =================== SCROLLBAR =================== */
         ::-webkit-scrollbar { width: 6px; }
@@ -1135,99 +770,55 @@
         ::-webkit-scrollbar-thumb:hover { background: var(--flame); }
 
         /* =================== SCROLL INDICATOR =================== */
-.scroll-indicator {
-    position: fixed;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 300;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    opacity: 0;
-    transition: opacity 0.4s ease;
-    pointer-events: none;
-}
+        .scroll-indicator { position: fixed; right: 10px; top: 50%; transform: translateY(-50%); z-index: 300; display: flex; flex-direction: column; align-items: center; gap: 4px; opacity: 0; transition: opacity 0.4s ease; pointer-events: none; }
+        .scroll-indicator.visible { opacity: 1; }
+        .scroll-indicator.hidden  { opacity: 0; }
+        .scroll-track { width: 3px; height: 60px; background: rgba(255,107,53,0.15); border-radius: 3px; position: relative; overflow: hidden; }
+        .scroll-thumb { width: 100%; background: var(--flame); border-radius: 3px; position: absolute; top: 0; transition: height 0.1s, top 0.1s; min-height: 8px; }
+        .scroll-arrow-down { width: 20px; height: 20px; background: var(--flame); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; color: white; animation: scrollBounce 1.2s ease-in-out infinite; }
 
-.scroll-indicator.visible { opacity: 1; }
-.scroll-indicator.hidden  { opacity: 0; }
+        @keyframes scrollBounce {
+            0%, 100% { transform: translateY(0); }
+            50%       { transform: translateY(4px); }
+        }
 
-.scroll-track {
-    width: 3px;
-    height: 60px;
-    background: rgba(255,107,53,0.15);
-    border-radius: 3px;
-    position: relative;
-    overflow: hidden;
-}
+        /* =================== SWIPE HINT =================== */
+        .pills-wrapper { position: relative; }
 
-.scroll-thumb {
-    width: 100%;
-    background: var(--flame);
-    border-radius: 3px;
-    position: absolute;
-    top: 0;
-    transition: height 0.1s, top 0.1s;
-    min-height: 8px;
-}
+        .swipe-hint { position: absolute; right: 0; top: 0; bottom: 0; width: 48px; background: linear-gradient(to right, transparent, rgba(255,255,255,0.95)); display: flex; align-items: center; justify-content: flex-end; padding-right: 6px; pointer-events: none; z-index: 2; transition: opacity 0.4s ease; }
 
-.scroll-arrow-down {
-    width: 20px; height: 20px;
-    background: var(--flame);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 10px; color: white;
-    animation: scrollBounce 1.2s ease-in-out infinite;
-}
+        .swipe-hint-arrow { display: flex; flex-direction: column; align-items: center; gap: 1px; }
 
-@keyframes scrollBounce {
-    0%, 100% { transform: translateY(0); }
-    50%       { transform: translateY(4px); }
-}
+        .swipe-hint-arrow span { display: block; width: 6px; height: 6px; border-right: 2px solid var(--flame); border-top: 2px solid var(--flame); transform: rotate(45deg); opacity: 0; animation: swipeChevron 1.4s ease-in-out infinite; }
 
-/* =================== SWIPE HINT (nav pills) =================== */
-.pills-wrapper {
-    position: relative;
-}
+        .swipe-hint-arrow span:nth-child(1) { animation-delay: 0s; }
+        .swipe-hint-arrow span:nth-child(2) { animation-delay: 0.18s; }
+        .swipe-hint-arrow span:nth-child(3) { animation-delay: 0.36s; }
 
-.swipe-hint {
-    position: absolute;
-    right: 0; top: 0; bottom: 0;
-    width: 48px;
-    background: linear-gradient(to right, transparent, rgba(255,255,255,0.95));
-    display: flex; align-items: center; justify-content: flex-end;
-    padding-right: 6px;
-    pointer-events: none;
-    z-index: 2;
-    transition: opacity 0.4s ease;
-}
+        @keyframes swipeChevron {
+            0%   { opacity: 0; transform: rotate(45deg) translate(-2px, -2px); }
+            50%  { opacity: 1; }
+            100% { opacity: 0; transform: rotate(45deg) translate(2px, 2px); }
+        }
 
-.swipe-hint-arrow {
-    display: flex; flex-direction: column; align-items: center; gap: 1px;
-}
+        .swipe-hint.hidden { opacity: 0; }
 
-.swipe-hint-arrow span {
-    display: block;
-    width: 6px; height: 6px;
-    border-right: 2px solid var(--flame);
-    border-top: 2px solid var(--flame);
-    transform: rotate(45deg);
-    opacity: 0;
-    animation: swipeChevron 1.4s ease-in-out infinite;
-}
+        /* =================== DISH PREVIEW MODAL =================== */
+        .dish-preview-img-wrap {
+            overflow: hidden;
+            border-radius: 24px 24px 0 0;
+            max-height: 320px;
+        }
 
-.swipe-hint-arrow span:nth-child(1) { animation-delay: 0s; }
-.swipe-hint-arrow span:nth-child(2) { animation-delay: 0.18s; }
-.swipe-hint-arrow span:nth-child(3) { animation-delay: 0.36s; }
+        #preview-img {
+            width: 100%; height: 320px;
+            object-fit: cover; display: block;
+            transition: transform 0.4s ease;
+        }
 
-@keyframes swipeChevron {
-    0%   { opacity: 0; transform: rotate(45deg) translate(-2px, -2px); }
-    50%  { opacity: 1; }
-    100% { opacity: 0; transform: rotate(45deg) translate(2px, 2px); }
-}
-
-.swipe-hint.hidden { opacity: 0; }
+        #dish-preview-modal .modal-box:hover #preview-img {
+            transform: scale(1.03);
+        }
     </style>
 </head>
 <body>
@@ -1245,9 +836,7 @@
             </div>
         </a>
         <div class="header-actions">
-            <button class="btn-icon" onclick="toggleOrders()" title="Mes commandes">
-                📦
-            </button>
+            <button class="btn-icon" onclick="toggleOrders()" title="Mes commandes">📦</button>
             <button class="btn-icon" onclick="toggleCart()" id="cart-btn" title="Panier">
                 🛒
                 <span class="badge" id="cart-badge" style="display:none">0</span>
@@ -1269,21 +858,10 @@
             <h1 style="margin-top:16px">Mangez bien,<br><em>chaque jour</em> 🔥</h1>
             <p>La meilleure restauration universitaire à Abidjan. Plats frais, livrés ou récupérés en 5 minutes.</p>
             <div class="hero-stats">
-                <div class="hero-stat">
-                    <strong>500+</strong>
-                    <span>Étudiants servis</span>
-                </div>
-                <div class="hero-stat">
-                    <strong>4.8★</strong>
-                    <span>Note moyenne</span>
-                </div>
-                <div class="hero-stat">
-                    <strong>15min</strong>
-                    <span>Délai moyen</span>
-                </div>
+                <div class="hero-stat"><strong>500+</strong><span>Étudiants servis</span></div>
+                <div class="hero-stat"><strong>4.8★</strong><span>Note moyenne</span></div>
+                <div class="hero-stat"><strong>15min</strong><span>Délai moyen</span></div>
             </div>
-
-            <!-- Bouton Découvrir animé -->
             <a href="#menu-start" class="discover-btn" onclick="document.getElementById('menu-start').scrollIntoView({behavior:'smooth'});return false;">
                 Découvrir le menu
                 <span class="discover-arrow">↓</span>
@@ -1304,7 +882,6 @@
     </div>
 </section>
 
-<!-- =================== SCROLL ANCHOR =================== -->
 <div id="menu-start"></div>
 
 <!-- =================== TIME ALERT =================== -->
@@ -1351,20 +928,21 @@
 <!-- =================== NAV PILLS =================== -->
 <section class="nav-pills-section">
     <div class="nav-pills-inner">
-    <div class="pills-wrapper">
-    <div class="swipe-hint" id="swipe-hint">
-        <div class="swipe-hint-arrow">
-            <span></span><span></span><span></span>
-        </div>
-    </div>
-    <div class="nav-pills" id="nav-pills">
-            <a href="shopping.html" class="pill">🛍️ Express Shopping</a>
-            <button onclick="toggleOrders()" class="pill">📦 Mes commandes</button>
-            <a href="actualité.html" class="pill">📱 Réseau Social</a>
-            <a href="merlin.html" class="pill">🎮 Gagner un Plat</a>
-            <a href="annonce.html" class="pill">📢 Annonces <span class="pill-badge">7</span></a>
-            <a href="fournisseur.html" class="pill">👨‍🍳 Fournisseur</a>
-            <a href="apropos.html" class="pill">ℹ️ À propos</a>
+        <div class="pills-wrapper">
+            <div class="swipe-hint" id="swipe-hint">
+                <div class="swipe-hint-arrow">
+                    <span></span><span></span><span></span>
+                </div>
+            </div>
+            <div class="nav-pills" id="nav-pills">
+                <a href="shopping.html" class="pill">🛍️ Express Shopping</a>
+                <button onclick="toggleOrders()" class="pill">📦 Mes commandes</button>
+                <a href="actualité.html" class="pill">📱 Réseau Social</a>
+                <a href="merlin.html" class="pill">🎮 Gagner un Plat</a>
+                <a href="annonce.html" class="pill">📢 Annonces <span class="pill-badge">7</span></a>
+                <a href="fournisseur.html" class="pill">👨‍🍳 Fournisseur</a>
+                <a href="apropos.html" class="pill">ℹ️ À propos</a>
+            </div>
         </div>
     </div>
 </section>
@@ -1388,7 +966,7 @@
         </div>
     </div>
 
-    <!-- PÂTES & PETIT POIS -->
+    <!-- =================== PÂTES & PETIT POIS =================== -->
     <div class="category-section">
         <div class="category-header">
             <div class="category-icon">🍝</div>
@@ -1396,51 +974,85 @@
             <span class="category-count">10 plats</span>
         </div>
         <div class="dishes-grid">
+
+            <!-- Spaghetti rognon -->
             <div class="dish-card">
-                <div class="dish-image-wrap">
-                    <img src="image/spa.jpg" alt="Spaghetti rognon" class="dish-image" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🍝</text></svg>'">
+                <div class="dish-image-wrap"
+                    onclick="openDishPreview(this)"
+                    data-img="image/spa.jpg"
+                    data-name="Spaghetti rognon"
+                    data-desc="Spaghetti préparé avec du rognon tendre"
+                    data-price="600 FCFA"
+                    data-action="promptAddToCart('Spaghetti rognon',600,'A')">
+                    <img src="image/spa.jpg" alt="Spaghetti rognon" class="dish-image"
+                        onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🍝</text></svg>'">
                 </div>
                 <div class="dish-body">
                     <div class="dish-name">Spaghetti rognon</div>
                     <div class="dish-desc">Spaghetti préparé avec du rognon tendre</div>
                     <div class="dish-footer">
                         <span class="dish-price">600 FCFA</span>
-                        <button class="add-btn" onclick="promptAddToCart('Spaghetti rognon', 600, 'A')">+</button>
+                        <button class="add-btn" onclick="promptAddToCart('Spaghetti rognon',600,'A')">+</button>
                     </div>
                 </div>
             </div>
 
+            <!-- Spaghetti foie -->
             <div class="dish-card">
-                <div class="dish-image-wrap">
-                    <img src="image/spaghetti nouv.jpg" alt="Spaghetti foi" class="dish-image" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🍝</text></svg>'">
+                <div class="dish-image-wrap"
+                    onclick="openDishPreview(this)"
+                    data-img="image/spaghetti nouv.jpg"
+                    data-name="Spaghetti foie"
+                    data-desc="Spaghetti préparé avec du foie savoureux"
+                    data-price="600 FCFA"
+                    data-action="promptAddToCart('Spaghetti foi',600,'A')">
+                    <img src="image/spaghetti nouv.jpg" alt="Spaghetti foie" class="dish-image"
+                        onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🍝</text></svg>'">
                 </div>
                 <div class="dish-body">
                     <div class="dish-name">Spaghetti foie</div>
                     <div class="dish-desc">Spaghetti préparé avec du foie savoureux</div>
                     <div class="dish-footer">
                         <span class="dish-price">600 FCFA</span>
-                        <button class="add-btn" onclick="promptAddToCart('Spaghetti foi', 600, 'A')">+</button>
+                        <button class="add-btn" onclick="promptAddToCart('Spaghetti foi',600,'A')">+</button>
                     </div>
                 </div>
             </div>
 
+            <!-- Spaghetti viande -->
             <div class="dish-card">
-                <div class="dish-image-wrap">
-                    <img src="image/vi.jpg" alt="Spaghetti viande" class="dish-image" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🍝</text></svg>'">
+                <div class="dish-image-wrap"
+                    onclick="openDishPreview(this)"
+                    data-img="image/vi.jpg"
+                    data-name="Spaghetti viande"
+                    data-desc="Spaghetti avec viande hachée épicée"
+                    data-price="800 FCFA"
+                    data-action="promptAddToCart('Spaghetti à la viande',800,'A')">
+                    <img src="image/vi.jpg" alt="Spaghetti viande" class="dish-image"
+                        onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🍝</text></svg>'">
                 </div>
                 <div class="dish-body">
                     <div class="dish-name">Spaghetti viande</div>
                     <div class="dish-desc">Spaghetti avec viande hachée épicée</div>
                     <div class="dish-footer">
                         <span class="dish-price">800 FCFA</span>
-                        <button class="add-btn" onclick="promptAddToCart('Spaghetti à la viande', 800, 'A')">+</button>
+                        <button class="add-btn" onclick="promptAddToCart('Spaghetti à la viande',800,'A')">+</button>
                     </div>
                 </div>
             </div>
 
+            <!-- Spagh. rognon + oeuf -->
             <div class="dish-card">
-                <div class="dish-image-wrap">
-                    <img src="image/SPAHRA .jpg" alt="Spaghetti rognon oeuf" class="dish-image" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🥚</text></svg>'">
+                <div class="dish-image-wrap"
+                    onclick="openDishPreview(this)"
+                    data-img="image/SPAHRA .jpg"
+                    data-name="Spagh. rognon + oeuf"
+                    data-desc="Spaghetti rognon avec oeuf grillé"
+                    data-price="700 FCFA"
+                    data-badge="⭐ Top"
+                    data-action="promptAddToCart('Spaghetti ROGNON + oeuf grillé',700,'A')">
+                    <img src="image/SPAHRA .jpg" alt="Spaghetti rognon oeuf" class="dish-image"
+                        onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🥚</text></svg>'">
                     <span class="dish-new-tag">⭐ Top</span>
                 </div>
                 <div class="dish-body">
@@ -1448,98 +1060,147 @@
                     <div class="dish-desc">Spaghetti rognon avec oeuf grillé</div>
                     <div class="dish-footer">
                         <span class="dish-price">700 FCFA</span>
-                        <button class="add-btn" onclick="promptAddToCart('Spaghetti ROGNON + oeuf grillé', 700, 'A')">+</button>
+                        <button class="add-btn" onclick="promptAddToCart('Spaghetti ROGNON + oeuf grillé',700,'A')">+</button>
                     </div>
                 </div>
             </div>
 
+            <!-- Spagh. foie + oeuf -->
             <div class="dish-card">
-                <div class="dish-image-wrap">
-                    <img src="image/spagh oeuf.jpg" alt="Spaghetti foi oeuf" class="dish-image" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🥚</text></svg>'">
+                <div class="dish-image-wrap"
+                    onclick="openDishPreview(this)"
+                    data-img="image/spagh oeuf.jpg"
+                    data-name="Spagh. foie + oeuf"
+                    data-desc="Spaghetti foie avec oeuf grillé"
+                    data-price="700 FCFA"
+                    data-action="promptAddToCart('Spaghetti foi + oeuf grillé',700,'A')">
+                    <img src="image/spagh oeuf.jpg" alt="Spaghetti foie oeuf" class="dish-image"
+                        onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🥚</text></svg>'">
                 </div>
                 <div class="dish-body">
                     <div class="dish-name">Spagh. foie + oeuf</div>
                     <div class="dish-desc">Spaghetti foie avec oeuf grillé</div>
                     <div class="dish-footer">
                         <span class="dish-price">700 FCFA</span>
-                        <button class="add-btn" onclick="promptAddToCart('Spaghetti foi + oeuf grillé', 700, 'A')">+</button>
+                        <button class="add-btn" onclick="promptAddToCart('Spaghetti foi + oeuf grillé',700,'A')">+</button>
                     </div>
                 </div>
             </div>
 
+            <!-- Sauté revenir foie -->
             <div class="dish-card">
-                <div class="dish-image-wrap">
-                    <img src="image/foi.jpg" alt="Sauter foie" class="dish-image" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🍖</text></svg>'">
+                <div class="dish-image-wrap"
+                    onclick="openDishPreview(this)"
+                    data-img="image/foi.jpg"
+                    data-name="Sauté revenir foie"
+                    data-desc="Foie sauté revenu aux épices"
+                    data-price="1500 FCFA"
+                    data-action="promptAddToCart('Sauter revenir au foie',1500,'A')">
+                    <img src="image/foi.jpg" alt="Sauté foie" class="dish-image"
+                        onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🍖</text></svg>'">
                 </div>
                 <div class="dish-body">
                     <div class="dish-name">Sauté revenir foie</div>
                     <div class="dish-desc">Foie sauté revenu aux épices</div>
                     <div class="dish-footer">
                         <span class="dish-price">1500 FCFA</span>
-                        <button class="add-btn" onclick="promptAddToCart('Sauter revenir au foie', 1500, 'A')">+</button>
+                        <button class="add-btn" onclick="promptAddToCart('Sauter revenir au foie',1500,'A')">+</button>
                     </div>
                 </div>
             </div>
 
+            <!-- Sauté rognon -->
             <div class="dish-card">
-                <div class="dish-image-wrap">
-                    <img src="image/rognon.jpg" alt="Sauter rognon" class="dish-image" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🍖</text></svg>'">
+                <div class="dish-image-wrap"
+                    onclick="openDishPreview(this)"
+                    data-img="image/rognon.jpg"
+                    data-name="Sauté rognon"
+                    data-desc="Rognon sauté revenu fondant"
+                    data-price="1500 FCFA"
+                    data-action="promptAddToCart('Sauter revenir au rognon',1500,'A')">
+                    <img src="image/rognon.jpg" alt="Sauté rognon" class="dish-image"
+                        onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🍖</text></svg>'">
                 </div>
                 <div class="dish-body">
                     <div class="dish-name">Sauté rognon</div>
                     <div class="dish-desc">Rognon sauté revenu fondant</div>
                     <div class="dish-footer">
                         <span class="dish-price">1500 FCFA</span>
-                        <button class="add-btn" onclick="promptAddToCart('Sauter revenir au rognon', 1500, 'A')">+</button>
+                        <button class="add-btn" onclick="promptAddToCart('Sauter revenir au rognon',1500,'A')">+</button>
                     </div>
                 </div>
             </div>
 
+            <!-- Sauté viande -->
             <div class="dish-card">
-                <div class="dish-image-wrap">
-                    <img src="image/viande.jpg" alt="Sauter viande" class="dish-image" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🥩</text></svg>'">
+                <div class="dish-image-wrap"
+                    onclick="openDishPreview(this)"
+                    data-img="image/viande.jpg"
+                    data-name="Sauté viande"
+                    data-desc="Viande sautée revenue tendre"
+                    data-price="1500 FCFA"
+                    data-action="promptAddToCart('Sauter revenir viande',1500,'A')">
+                    <img src="image/viande.jpg" alt="Sauté viande" class="dish-image"
+                        onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🥩</text></svg>'">
                 </div>
                 <div class="dish-body">
                     <div class="dish-name">Sauté viande</div>
                     <div class="dish-desc">Viande sautée revenue tendre</div>
                     <div class="dish-footer">
                         <span class="dish-price">1500 FCFA</span>
-                        <button class="add-btn" onclick="promptAddToCart('Sauter revenir viande', 1500, 'A')">+</button>
+                        <button class="add-btn" onclick="promptAddToCart('Sauter revenir viande',1500,'A')">+</button>
                     </div>
                 </div>
             </div>
 
+            <!-- Petit pois rognon -->
             <div class="dish-card">
-                <div class="dish-image-wrap">
-                    <img src="image/petit poid.jpg" alt="Petit pois rognon" class="dish-image" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🫛</text></svg>'">
+                <div class="dish-image-wrap"
+                    onclick="openDishPreview(this)"
+                    data-img="image/petit poid.jpg"
+                    data-name="Petit pois rognon"
+                    data-desc="Petit pois accompagné de rognon"
+                    data-price="1000 FCFA"
+                    data-action="promptAddToCart('Petit pois rognon',1000,'A')">
+                    <img src="image/petit poid.jpg" alt="Petit pois rognon" class="dish-image"
+                        onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🫛</text></svg>'">
                 </div>
                 <div class="dish-body">
                     <div class="dish-name">Petit pois rognon</div>
                     <div class="dish-desc">Petit pois accompagné de rognon</div>
                     <div class="dish-footer">
                         <span class="dish-price">1000 FCFA</span>
-                        <button class="add-btn" onclick="promptAddToCart('Petit pois rognon', 1000, 'A')">+</button>
+                        <button class="add-btn" onclick="promptAddToCart('Petit pois rognon',1000,'A')">+</button>
                     </div>
                 </div>
             </div>
 
+            <!-- Petit pois viande -->
             <div class="dish-card">
-                <div class="dish-image-wrap">
-                    <img src="image/petit poid rogno,.jpg" alt="Petit pois viande" class="dish-image" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🫛</text></svg>'">
+                <div class="dish-image-wrap"
+                    onclick="openDishPreview(this)"
+                    data-img="image/petit poid rogno,.jpg"
+                    data-name="Petit pois viande"
+                    data-desc="Petit pois à la viande mijotée"
+                    data-price="1500 FCFA"
+                    data-action="promptAddToCart('Petit pois à la viande',1500,'A')">
+                    <img src="image/petit poid rogno,.jpg" alt="Petit pois viande" class="dish-image"
+                        onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🫛</text></svg>'">
                 </div>
                 <div class="dish-body">
                     <div class="dish-name">Petit pois viande</div>
                     <div class="dish-desc">Petit pois à la viande mijotée</div>
                     <div class="dish-footer">
                         <span class="dish-price">1500 FCFA</span>
-                        <button class="add-btn" onclick="promptAddToCart('Petit pois à la viande', 1500, 'A')">+</button>
+                        <button class="add-btn" onclick="promptAddToCart('Petit pois à la viande',1500,'A')">+</button>
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 
-    <!-- TCHÈPES -->
+    <!-- =================== TCHÈPES =================== -->
     <div class="category-section">
         <div class="category-header">
             <div class="category-icon">🍚</div>
@@ -1547,37 +1208,63 @@
             <span class="category-count">4 plats</span>
         </div>
         <div class="dishes-grid">
+
+            <!-- Tchèpe poisson -->
             <div class="dish-card">
-                <div class="dish-image-wrap">
-                    <img src="image/tcheo poi.jpg" alt="Tchèpe poisson" class="dish-image" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🍚</text></svg>'">
+                <div class="dish-image-wrap"
+                    onclick="openDishPreview(this)"
+                    data-img="image/tcheo poi.jpg"
+                    data-name="Tchèpe poisson"
+                    data-desc="Riz sénégalais au poisson frais"
+                    data-price="500 FCFA"
+                    data-action="selectTchep('Tchèpe au poisson',500)">
+                    <img src="image/tcheo poi.jpg" alt="Tchèpe poisson" class="dish-image"
+                        onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🍚</text></svg>'">
                 </div>
                 <div class="dish-body">
                     <div class="dish-name">Tchèpe poisson</div>
                     <div class="dish-desc">Riz sénégalais au poisson frais</div>
                     <div class="dish-footer">
                         <span class="dish-price">500 FCFA</span>
-                        <button class="add-btn" onclick="selectTchep('Tchèpe au poisson', 500)">📋</button>
+                        <button class="add-btn" onclick="selectTchep('Tchèpe au poisson',500)">📋</button>
                     </div>
                 </div>
             </div>
 
+            <!-- Tchèpe poulet -->
             <div class="dish-card">
-                <div class="dish-image-wrap">
-                    <img src="image/tcheo.jpg" alt="Tchèpe poulet" class="dish-image" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🍗</text></svg>'">
+                <div class="dish-image-wrap"
+                    onclick="openDishPreview(this)"
+                    data-img="image/tcheo.jpg"
+                    data-name="Tchèpe poulet"
+                    data-desc="Riz sénégalais au poulet doré"
+                    data-price="1000 FCFA"
+                    data-action="selectTchep('Tchèpe au poulet',1000)">
+                    <img src="image/tcheo.jpg" alt="Tchèpe poulet" class="dish-image"
+                        onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🍗</text></svg>'">
                 </div>
                 <div class="dish-body">
                     <div class="dish-name">Tchèpe poulet</div>
                     <div class="dish-desc">Riz sénégalais au poulet doré</div>
                     <div class="dish-footer">
                         <span class="dish-price">1000 FCFA</span>
-                        <button class="add-btn" onclick="selectTchep('Tchèpe au poulet', 1000)">📋</button>
+                        <button class="add-btn" onclick="selectTchep('Tchèpe au poulet',1000)">📋</button>
                     </div>
                 </div>
             </div>
 
+            <!-- Tchèpe poulet XXL -->
             <div class="dish-card">
-                <div class="dish-image-wrap">
-                    <img src="image/tchep poulet.jpg" alt="Tchèpe poulet XXL" class="dish-image" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🍗</text></svg>'">
+                <div class="dish-image-wrap"
+                    onclick="openDishPreview(this)"
+                    data-img="image/tchep poulet.jpg"
+                    data-name="Tchèpe poulet XXL"
+                    data-desc="Portion généreuse pour les grands appétits"
+                    data-price="2000 FCFA"
+                    data-badge="XXL"
+                    data-action="selectTchep('Tchèpe au poulet XXL',2000)">
+                    <img src="image/tchep poulet.jpg" alt="Tchèpe poulet XXL" class="dish-image"
+                        onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🍗</text></svg>'">
                     <span class="dish-new-tag">XXL</span>
                 </div>
                 <div class="dish-body">
@@ -1585,14 +1272,23 @@
                     <div class="dish-desc">Portion généreuse pour les grands appétits</div>
                     <div class="dish-footer">
                         <span class="dish-price">2000 FCFA</span>
-                        <button class="add-btn" onclick="selectTchep('Tchèpe au poulet XXL', 2000)">📋</button>
+                        <button class="add-btn" onclick="selectTchep('Tchèpe au poulet XXL',2000)">📋</button>
                     </div>
                 </div>
             </div>
 
+            <!-- Tchèpe viande XXL -->
             <div class="dish-card">
-                <div class="dish-image-wrap">
-                    <img src="image/tchep ara.jpg" alt="Tchèpe viande XXL" class="dish-image" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🥩</text></svg>'">
+                <div class="dish-image-wrap"
+                    onclick="openDishPreview(this)"
+                    data-img="image/tchep ara.jpg"
+                    data-name="Tchèpe viande XXL"
+                    data-desc="Riz sénégalais à la viande tendre"
+                    data-price="2000 FCFA"
+                    data-badge="XXL"
+                    data-action="selectTchep('Tchèpe viande XXL',2000)">
+                    <img src="image/tchep ara.jpg" alt="Tchèpe viande XXL" class="dish-image"
+                        onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🥩</text></svg>'">
                     <span class="dish-new-tag">XXL</span>
                 </div>
                 <div class="dish-body">
@@ -1600,14 +1296,15 @@
                     <div class="dish-desc">Riz sénégalais à la viande tendre</div>
                     <div class="dish-footer">
                         <span class="dish-price">2000 FCFA</span>
-                        <button class="add-btn" onclick="selectTchep('Tchèpe viande XXL', 2000)">📋</button>
+                        <button class="add-btn" onclick="selectTchep('Tchèpe viande XXL',2000)">📋</button>
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 
-    <!-- RIZ -->
+    <!-- =================== RIZ AUX SAUCES =================== -->
     <div class="category-section">
         <div class="category-header">
             <div class="category-icon">🍛</div>
@@ -1615,9 +1312,18 @@
             <span class="category-count">3 plats</span>
         </div>
         <div class="dishes-grid">
+
+            <!-- Riz sauce arachide -->
             <div class="dish-card">
-                <div class="dish-image-wrap">
-                    <img src="image/sauce arrrrachide.jpg" alt="Riz sauce arachide" class="dish-image" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🍛</text></svg>'">
+                <div class="dish-image-wrap"
+                    onclick="openDishPreview(this)"
+                    data-img="image/sauce arrrrachide.jpg"
+                    data-name="Riz sauce arachide"
+                    data-desc="Sauce arachide onctueuse maison"
+                    data-price="dès 500 FCFA"
+                    data-action="selectRice('Riz sauce arachide')">
+                    <img src="image/sauce arrrrachide.jpg" alt="Riz sauce arachide" class="dish-image"
+                        onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🍛</text></svg>'">
                 </div>
                 <div class="dish-body">
                     <div class="dish-name">Riz sauce arachide</div>
@@ -1629,9 +1335,17 @@
                 </div>
             </div>
 
+            <!-- Riz sauce feuille -->
             <div class="dish-card">
-                <div class="dish-image-wrap">
-                    <img src="image/riz nouv.jpg" alt="Riz sauce feuille" class="dish-image" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🍃</text></svg>'">
+                <div class="dish-image-wrap"
+                    onclick="openDishPreview(this)"
+                    data-img="image/riz nouv.jpg"
+                    data-name="Riz sauce feuille"
+                    data-desc="Sauce aux feuilles fraîches du marché"
+                    data-price="dès 500 FCFA"
+                    data-action="selectRice('Riz sauce feuille')">
+                    <img src="image/riz nouv.jpg" alt="Riz sauce feuille" class="dish-image"
+                        onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🍃</text></svg>'">
                 </div>
                 <div class="dish-body">
                     <div class="dish-name">Riz sauce feuille</div>
@@ -1643,9 +1357,17 @@
                 </div>
             </div>
 
+            <!-- Riz sauce tomate -->
             <div class="dish-card">
-                <div class="dish-image-wrap">
-                    <img src="image/RIZ SA TOMA.jpg" alt="Riz sauce tomate" class="dish-image" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🍅</text></svg>'">
+                <div class="dish-image-wrap"
+                    onclick="openDishPreview(this)"
+                    data-img="image/RIZ SA TOMA.jpg"
+                    data-name="Riz sauce tomate"
+                    data-desc="Sauce tomate relevée aux herbes"
+                    data-price="dès 500 FCFA"
+                    data-action="selectRice('Riz sauce tomate')">
+                    <img src="image/RIZ SA TOMA.jpg" alt="Riz sauce tomate" class="dish-image"
+                        onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🍅</text></svg>'">
                 </div>
                 <div class="dish-body">
                     <div class="dish-name">Riz sauce tomate</div>
@@ -1656,10 +1378,11 @@
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 
-    <!-- PORC AU FOUR -->
+    <!-- =================== PORC AU FOUR =================== -->
     <div class="category-section">
         <div class="category-header">
             <div class="category-icon">🐷</div>
@@ -1667,23 +1390,41 @@
             <span class="category-count">2 plats</span>
         </div>
         <div class="dishes-grid">
+
+            <!-- Porc 2 boules -->
             <div class="dish-card">
-                <div class="dish-image-wrap">
-                    <img src="image/PORC1.jpg" alt="Porc 2 boules" class="dish-image" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🐷</text></svg>'">
+                <div class="dish-image-wrap"
+                    onclick="openDishPreview(this)"
+                    data-img="image/PORC1.jpg"
+                    data-name="Porc four (2 boules)"
+                    data-desc="Porc au four avec 2 boules d'attiékè"
+                    data-price="1200 FCFA"
+                    data-action="selectPorc(1200,'2 boules')">
+                    <img src="image/PORC1.jpg" alt="Porc 2 boules" class="dish-image"
+                        onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🐷</text></svg>'">
                 </div>
                 <div class="dish-body">
                     <div class="dish-name">Porc four (2 boules)</div>
                     <div class="dish-desc">Porc au four avec 2 boules d'attiékè</div>
                     <div class="dish-footer">
                         <span class="dish-price">1200 FCFA</span>
-                        <button class="add-btn" onclick="selectPorc(1200, '2 boules')">📋</button>
+                        <button class="add-btn" onclick="selectPorc(1200,'2 boules')">📋</button>
                     </div>
                 </div>
             </div>
 
+            <!-- Porc XXL -->
             <div class="dish-card">
-                <div class="dish-image-wrap">
-                    <img src="image/PORC2.jpg" alt="Porc XXL" class="dish-image" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🐷</text></svg>'">
+                <div class="dish-image-wrap"
+                    onclick="openDishPreview(this)"
+                    data-img="image/PORC2.jpg"
+                    data-name="Porc au four XXL"
+                    data-desc="Portion XXL généreuse avec attiékè"
+                    data-price="2000 FCFA"
+                    data-badge="XXL"
+                    data-action="selectPorc(2000,'XXL')">
+                    <img src="image/PORC2.jpg" alt="Porc XXL" class="dish-image"
+                        onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🐷</text></svg>'">
                     <span class="dish-new-tag">XXL</span>
                 </div>
                 <div class="dish-body">
@@ -1691,14 +1432,15 @@
                     <div class="dish-desc">Portion XXL généreuse avec attiékè</div>
                     <div class="dish-footer">
                         <span class="dish-price">2000 FCFA</span>
-                        <button class="add-btn" onclick="selectPorc(2000, 'XXL')">📋</button>
+                        <button class="add-btn" onclick="selectPorc(2000,'XXL')">📋</button>
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 
-    <!-- ATTIÉKÉ SPÉCIALITÉS -->
+    <!-- =================== ATTIÉKÉ SPÉCIALITÉS =================== -->
     <div class="category-section">
         <div class="category-header">
             <div class="category-icon">🌾</div>
@@ -1706,9 +1448,19 @@
             <span class="category-count">5 plats</span>
         </div>
         <div class="dishes-grid">
+
+            <!-- Attiékè poisson alloko -->
             <div class="dish-card">
-                <div class="dish-image-wrap">
-                    <img src="image/ChatGPT Image 21 sept. 2025, 17_49_08.png" alt="Attiékè poisson alloko" class="dish-image" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🌾</text></svg>'">
+                <div class="dish-image-wrap"
+                    onclick="openDishPreview(this)"
+                    data-img="image/ChatGPT Image 21 sept. 2025, 17_49_08.png"
+                    data-name="Attiékè poisson alloko"
+                    data-desc="Attiékè + poisson + alloko + condiment"
+                    data-price="dès 1000 FCFA"
+                    data-badge="⭐ Top"
+                    data-action="selectAttiekePoisson()">
+                    <img src="image/ChatGPT Image 21 sept. 2025, 17_49_08.png" alt="Attiékè poisson alloko" class="dish-image"
+                        onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🌾</text></svg>'">
                     <span class="dish-new-tag">⭐ Top</span>
                 </div>
                 <div class="dish-body">
@@ -1721,9 +1473,17 @@
                 </div>
             </div>
 
+            <!-- Attiékè poulet alloko -->
             <div class="dish-card">
-                <div class="dish-image-wrap">
-                    <img src="image/20250921_1803_Qualité Image Améliorée_remix_01k5pg4v3weeea02t6htn46kjd.png" alt="Attiékè poulet alloko" class="dish-image" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🍗</text></svg>'">
+                <div class="dish-image-wrap"
+                    onclick="openDishPreview(this)"
+                    data-img="image/20250921_1803_Qualité Image Améliorée_remix_01k5pg4v3weeea02t6htn46kjd.png"
+                    data-name="Attiékè poulet alloko"
+                    data-desc="Attiékè + poulet + alloko + condiment"
+                    data-price="dès 1500 FCFA"
+                    data-action="selectAttiekePouletAlloko()">
+                    <img src="image/20250921_1803_Qualité Image Améliorée_remix_01k5pg4v3weeea02t6htn46kjd.png" alt="Attiékè poulet alloko" class="dish-image"
+                        onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🍗</text></svg>'">
                 </div>
                 <div class="dish-body">
                     <div class="dish-name">Attiékè poulet alloko</div>
@@ -1735,9 +1495,17 @@
                 </div>
             </div>
 
+            <!-- Attiékè poulet -->
             <div class="dish-card">
-                <div class="dish-image-wrap">
-                    <img src="image/ATIEKEPOULET.jpg" alt="Attiékè poulet" class="dish-image" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🍗</text></svg>'">
+                <div class="dish-image-wrap"
+                    onclick="openDishPreview(this)"
+                    data-img="image/ATIEKEPOULET.jpg"
+                    data-name="Attiékè poulet"
+                    data-desc="Attiékè + poulet + condiment maison"
+                    data-price="dès 1000 FCFA"
+                    data-action="selectAttiekePoulet()">
+                    <img src="image/ATIEKEPOULET.jpg" alt="Attiékè poulet" class="dish-image"
+                        onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🍗</text></svg>'">
                 </div>
                 <div class="dish-body">
                     <div class="dish-name">Attiékè poulet</div>
@@ -1749,9 +1517,17 @@
                 </div>
             </div>
 
+            <!-- Garba -->
             <div class="dish-card">
-                <div class="dish-image-wrap">
-                    <img src="image/garba.jpg" alt="Garba" class="dish-image" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🌾</text></svg>'">
+                <div class="dish-image-wrap"
+                    onclick="openDishPreview(this)"
+                    data-img="image/garba.jpg"
+                    data-name="Spécialité Garba"
+                    data-desc="Le Garba authentique d'Abidjan"
+                    data-price="dès 500 FCFA"
+                    data-action="selectGarba()">
+                    <img src="image/garba.jpg" alt="Garba" class="dish-image"
+                        onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🌾</text></svg>'">
                 </div>
                 <div class="dish-body">
                     <div class="dish-name">Spécialité Garba</div>
@@ -1763,23 +1539,32 @@
                 </div>
             </div>
 
+            <!-- Attiékè poisson classique -->
             <div class="dish-card">
-                <div class="dish-image-wrap">
-                    <img src="image/at.jpg" alt="Attiékè poisson" class="dish-image" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🐟</text></svg>'">
+                <div class="dish-image-wrap"
+                    onclick="openDishPreview(this)"
+                    data-img="image/at.jpg"
+                    data-name="Attiékè poisson"
+                    data-desc="Attiékè classique avec poisson grillé"
+                    data-price="1000 FCFA"
+                    data-action="promptAddToCart('ATTIEKE POISSON',1000,'E')">
+                    <img src="image/at.jpg" alt="Attiékè poisson" class="dish-image"
+                        onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🐟</text></svg>'">
                 </div>
                 <div class="dish-body">
                     <div class="dish-name">Attiékè poisson</div>
                     <div class="dish-desc">Attiékè classique avec poisson grillé</div>
                     <div class="dish-footer">
                         <span class="dish-price">1000 FCFA</span>
-                        <button class="add-btn" onclick="promptAddToCart('ATTIEKE POISSON', 1000, 'E')">+</button>
+                        <button class="add-btn" onclick="promptAddToCart('ATTIEKE POISSON',1000,'E')">+</button>
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 
-    <!-- BOISSONS -->
+    <!-- =================== BOISSONS & SUCRERIES =================== -->
     <div class="category-section">
         <div class="category-header">
             <div class="category-icon">🍹</div>
@@ -1787,75 +1572,117 @@
             <span class="category-count">5 articles</span>
         </div>
         <div class="dishes-grid">
+
+            <!-- Orangina -->
             <div class="dish-card">
-                <div class="dish-image-wrap">
-                    <img src="image/orangina.jpg" alt="Orangina" class="dish-image" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23FFF5F0%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🍊</text></svg>'">
+                <div class="dish-image-wrap"
+                    onclick="openDishPreview(this)"
+                    data-img="image/orangina.jpg"
+                    data-name="Orangina"
+                    data-desc="Boisson pétillante à l'orange"
+                    data-price="500 FCFA"
+                    data-action="promptAddToCart('Orangina',500,'I')">
+                    <img src="image/orangina.jpg" alt="Orangina" class="dish-image"
+                        onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23FFF5F0%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🍊</text></svg>'">
                 </div>
                 <div class="dish-body">
                     <div class="dish-name">Orangina</div>
                     <div class="dish-desc">Boisson pétillante à l'orange</div>
                     <div class="dish-footer">
                         <span class="dish-price">500 FCFA</span>
-                        <button class="add-btn" onclick="promptAddToCart('Orangina', 500, 'I')">+</button>
+                        <button class="add-btn" onclick="promptAddToCart('Orangina',500,'I')">+</button>
                     </div>
                 </div>
             </div>
 
+            <!-- Kapa -->
             <div class="dish-card">
-                <div class="dish-image-wrap">
-                    <img src="image/kapa300.jpg" alt="Kapa" class="dish-image" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23FFF5F0%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🥤</text></svg>'">
+                <div class="dish-image-wrap"
+                    onclick="openDishPreview(this)"
+                    data-img="image/kapa300.jpg"
+                    data-name="Kapa"
+                    data-desc="Jus de fruits rafraîchissant"
+                    data-price="300 FCFA"
+                    data-action="promptAddToCart('Kapa',300,'I')">
+                    <img src="image/kapa300.jpg" alt="Kapa" class="dish-image"
+                        onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23FFF5F0%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🥤</text></svg>'">
                 </div>
                 <div class="dish-body">
                     <div class="dish-name">Kapa</div>
                     <div class="dish-desc">Jus de fruits rafraîchissant</div>
                     <div class="dish-footer">
                         <span class="dish-price">300 FCFA</span>
-                        <button class="add-btn" onclick="promptAddToCart('Kapa', 300, 'I')">+</button>
+                        <button class="add-btn" onclick="promptAddToCart('Kapa',300,'I')">+</button>
                     </div>
                 </div>
             </div>
 
+            <!-- Cody's -->
             <div class="dish-card">
-                <div class="dish-image-wrap">
-                    <img src="image/codys.jpg" alt="Codys" class="dish-image" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23FFF5F0%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🥤</text></svg>'">
+                <div class="dish-image-wrap"
+                    onclick="openDishPreview(this)"
+                    data-img="image/codys.jpg"
+                    data-name="Cody's"
+                    data-desc="Boisson fruitée et désaltérante"
+                    data-price="500 FCFA"
+                    data-action="promptAddToCart('Codys',500,'I')">
+                    <img src="image/codys.jpg" alt="Codys" class="dish-image"
+                        onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23FFF5F0%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🥤</text></svg>'">
                 </div>
                 <div class="dish-body">
                     <div class="dish-name">Cody's</div>
                     <div class="dish-desc">Boisson fruitée et désaltérante</div>
                     <div class="dish-footer">
                         <span class="dish-price">500 FCFA</span>
-                        <button class="add-btn" onclick="promptAddToCart('Codys', 500, 'I')">+</button>
+                        <button class="add-btn" onclick="promptAddToCart('Codys',500,'I')">+</button>
                     </div>
                 </div>
             </div>
 
+            <!-- Coca 50cl -->
             <div class="dish-card">
-                <div class="dish-image-wrap">
-                    <img src="image/koka.jpg" alt="Coca 50cl" class="dish-image" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23FFF5F0%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🥤</text></svg>'">
+                <div class="dish-image-wrap"
+                    onclick="openDishPreview(this)"
+                    data-img="image/koka.jpg"
+                    data-name="Coca-Cola 50cl"
+                    data-desc="Coca-Cola classique bien frais"
+                    data-price="500 FCFA"
+                    data-action="promptAddToCart('Coca cola 50cl',500,'I')">
+                    <img src="image/koka.jpg" alt="Coca 50cl" class="dish-image"
+                        onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23FFF5F0%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🥤</text></svg>'">
                 </div>
                 <div class="dish-body">
                     <div class="dish-name">Coca-Cola 50cl</div>
                     <div class="dish-desc">Coca-Cola classique bien frais</div>
                     <div class="dish-footer">
                         <span class="dish-price">500 FCFA</span>
-                        <button class="add-btn" onclick="promptAddToCart('Coca cola 50cl', 500, 'I')">+</button>
+                        <button class="add-btn" onclick="promptAddToCart('Coca cola 50cl',500,'I')">+</button>
                     </div>
                 </div>
             </div>
 
+            <!-- Coca 33cl -->
             <div class="dish-card">
-                <div class="dish-image-wrap">
-                    <img src="image/cook300.jpg" alt="Coca 33cl" class="dish-image" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23FFF5F0%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🥤</text></svg>'">
+                <div class="dish-image-wrap"
+                    onclick="openDishPreview(this)"
+                    data-img="image/cook300.jpg"
+                    data-name="Coca-Cola 33cl"
+                    data-desc="Format canette bien frais"
+                    data-price="300 FCFA"
+                    data-action="promptAddToCart('Coca cola 33cl',300,'I')">
+                    <img src="image/cook300.jpg" alt="Coca 33cl" class="dish-image"
+                        onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23FFF5F0%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🥤</text></svg>'">
                 </div>
                 <div class="dish-body">
                     <div class="dish-name">Coca-Cola 33cl</div>
                     <div class="dish-desc">Format canette bien frais</div>
                     <div class="dish-footer">
                         <span class="dish-price">300 FCFA</span>
-                        <button class="add-btn" onclick="promptAddToCart('Coca cola 33cl', 300, 'I')">+</button>
+                        <button class="add-btn" onclick="promptAddToCart('Coca cola 33cl',300,'I')">+</button>
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 
@@ -1960,7 +1787,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="testimonial-card">
                 <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
                 <p class="testimonial-text">"Le Tchèpe au poulet de Chef Fatou est le meilleur que j'ai mangé à Abidjan. La notification push m'a prévenu quand c'était prêt. Top service !"</p>
@@ -1972,7 +1798,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="testimonial-card">
                 <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
                 <p class="testimonial-text">"Depuis que j'ai installé l'appli, je ne mange plus à la cafétéria. Les spaghetti rognon + oeuf grillé sont incroyables. Prix imbattable !"</p>
@@ -1984,7 +1809,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="testimonial-card">
                 <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
                 <p class="testimonial-text">"Le petit pois à la viande de Chef Kouamé... c'est la cuisine de ma maman. Je recommande à toute la promo. Service rapide et toujours chaud !"</p>
@@ -1996,7 +1820,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="testimonial-card">
                 <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
                 <p class="testimonial-text">"J'utilise l'app depuis le Ramadan. Le menu Iftar est parfait, j'ai reçu une notification même hors ligne pour me prévenir. Excellent travail !"</p>
@@ -2008,7 +1831,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="testimonial-card">
                 <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
                 <p class="testimonial-text">"Le garba est authentique, le porc au four est une vraie tuerie. Les prix sont accessibles pour les étudiants. Bravo Groupe Express !"</p>
@@ -2068,11 +1890,11 @@
             <h3>📲 Installer l'application</h3>
             <p>Accédez à Groupe Express depuis votre écran d'accueil</p>
         </div>
-        <div class="modal-body" id="install-modal-body">
-            <!-- rempli dynamiquement selon la plateforme -->
-        </div>
+        <div class="modal-body" id="install-modal-body"></div>
     </div>
 </div>
+
+<!-- =================== FAB GROUP =================== -->
 <div class="fab-group">
     <button class="fab fab-notif" onclick="requestNotificationPermission()" title="Notifications">🔔</button>
     <button class="fab fab-install" onclick="triggerInstallPrompt()" id="fab-install" title="Installer l'app">📲</button>
@@ -2082,9 +1904,36 @@
     </button>
 </div>
 
-<!-- =================== MODALS =================== -->
+<!-- =================== MODAL APERÇU PLAT =================== -->
+<div class="modal-overlay" id="dish-preview-modal" onclick="if(event.target===this)closeModal('dish-preview-modal')">
+    <div class="modal-box" style="max-width:520px">
+        <button class="modal-close" onclick="closeModal('dish-preview-modal')" style="position:absolute;top:16px;right:16px;z-index:10">✕</button>
+        <div class="dish-preview-img-wrap">
+            <img id="preview-img" src="" alt="">
+        </div>
+        <div class="modal-body" style="padding:24px">
+            <div style="margin-bottom:8px">
+                <span id="preview-badge" style="background:var(--flame);color:white;border-radius:50px;padding:3px 12px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;display:none"></span>
+            </div>
+            <h3 id="preview-name" style="font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:var(--charcoal);margin-bottom:8px;line-height:1.2"></h3>
+            <p id="preview-desc" style="font-size:14px;color:var(--muted);margin-bottom:20px;line-height:1.6"></p>
+            <div style="display:flex;align-items:center;justify-content:space-between;background:var(--soft);border-radius:var(--radius-sm);padding:16px">
+                <div>
+                    <div style="font-size:12px;color:var(--muted);margin-bottom:2px">Prix</div>
+                    <div id="preview-price" style="font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:700;color:var(--flame)"></div>
+                </div>
+                <button id="preview-order-btn"
+                    style="background:var(--flame);color:white;border:none;border-radius:14px;padding:14px 28px;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.2s ease;display:flex;align-items:center;gap:8px"
+                    onmouseover="this.style.background='var(--flame-deep)'"
+                    onmouseout="this.style.background='var(--flame)'">
+                    🛒 Commander
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
-<!-- Selection Modal -->
+<!-- =================== SELECTION MODAL =================== -->
 <div class="modal-overlay" id="selection-modal">
     <div class="modal-box">
         <div class="modal-header">
@@ -2100,7 +1949,7 @@
     </div>
 </div>
 
-<!-- Quantity Modal -->
+<!-- =================== QUANTITY MODAL =================== -->
 <div class="modal-overlay" id="qty-modal">
     <div class="modal-box">
         <div class="modal-header">
@@ -2121,7 +1970,7 @@
     </div>
 </div>
 
-<!-- Cart Modal -->
+<!-- =================== CART MODAL =================== -->
 <div class="modal-overlay" id="cart-modal">
     <div class="modal-box">
         <div class="modal-header">
@@ -2146,7 +1995,7 @@
     </div>
 </div>
 
-<!-- Customer Info Modal -->
+<!-- =================== CUSTOMER INFO MODAL =================== -->
 <div class="modal-overlay" id="customer-modal">
     <div class="modal-box">
         <div class="modal-header">
@@ -2180,10 +2029,10 @@
     </div>
 </div>
 
-<!-- Success Modal -->
+<!-- =================== SUCCESS MODAL =================== -->
 <div class="modal-overlay" id="success-modal">
     <div class="modal-box">
-        <div class="modal-close" onclick="closeModal('success-modal')" style="position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:50%;background:#F5EDE3;border:none;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center">✕</div>
+        <button onclick="closeModal('success-modal')" style="position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:50%;background:#F5EDE3;border:none;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center">✕</button>
         <div class="success-modal">
             <div class="success-icon">✅</div>
             <h3>Commande confirmée !</h3>
@@ -2200,7 +2049,7 @@
     </div>
 </div>
 
-<!-- Orders History Modal -->
+<!-- =================== ORDERS HISTORY MODAL =================== -->
 <div class="modal-overlay" id="orders-modal">
     <div class="modal-box">
         <div class="modal-header">
@@ -2220,12 +2069,10 @@
     </div>
 </div>
 
+<!-- =================== SCROLL INDICATOR =================== -->
 <div class="scroll-indicator" id="scroll-indicator">
     <div class="scroll-track">
         <div class="scroll-thumb" id="scroll-thumb"></div>
     </div>
     <div class="scroll-arrow-down">↓</div>
 </div>
-    <script type="module" src="suite.js"></script>
-</body>
-</html>
