@@ -1,10 +1,4 @@
-/**
- * server.js — Serveur Express pour envoyer des notifications FCM
- * Utilise Firebase Admin SDK (OAuth2 / access token — nouvelle API)
- *
- * Installation : npm install express cors firebase-admin
- * Lancement    : node server.js
- */
+
 
 const express = require('express');
 const cors    = require('cors');
@@ -118,3 +112,15 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Serveur FCM démarré sur http://localhost:${PORT}`);
 });
+
+
+webpush: {
+  headers: { Urgency: 'high' },
+  notification: {
+    title,
+    body,
+    icon: '/image/GE.jpg',   // ← logo de l'entreprise
+    badge: '/image/GE.jpg',  // ← aussi dans la barre de notif
+    requireInteraction: true,
+  },
+},
