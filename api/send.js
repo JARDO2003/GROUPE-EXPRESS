@@ -17,6 +17,8 @@ if (!admin.apps.length) {
   });
 }
 
+const LOGO = 'https://groupe-express.vercel.app/image/GE.jpg';
+
 const messaging = admin.messaging();
 
 module.exports = async (req, res) => {
@@ -38,16 +40,24 @@ module.exports = async (req, res) => {
   // Envoi multicast
   const message = {
     tokens,
-    notification: { title, body },
+    notification: {
+      title,
+      body,
+      imageUrl: LOGO,
+    },
     data: data || {},
     webpush: {
       headers: { Urgency: 'high' },
       notification: {
         title,
         body,
-        icon: 'https://groupe-express.vercel.app/image/GE.jpg',
-        badge: 'https://groupe-express.vercel.app/image/GE.jpg',
+        icon: LOGO,
+        badge: LOGO,
+        image: LOGO,
         requireInteraction: true,
+      },
+      fcmOptions: {
+        link: (data && data.url) ? data.url : '/',
       },
     },
   };
