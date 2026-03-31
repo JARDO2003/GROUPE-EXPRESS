@@ -1176,10 +1176,11 @@ body::after{
 <!-- TOAST -->
 <div class="toast" id="toast"><span id="toast-icon">✅</span><span id="toast-msg">–</span></div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-import { getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
-import { getDatabase, ref as dbRef, onValue } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-database.js";
+<!-- Firebase compat SDKs (accès global, pas de module) -->
+<script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-database-compat.js"></script>
+<script>
 
 /* ── Firebase configs ── */
 const fsConfig = {
@@ -1210,10 +1211,10 @@ let nSentTotal = 0, nOkTotal = 0, nFailTotal = 0;
 const POINTS = ['Restaurant A','Restaurant B','Restaurant C','Restaurant D','Restaurant E','Restaurant F','Restaurant G'];
 
 try {
-  const app1 = initializeApp(fsConfig, 'main');
-  db = getFirestore(app1);
-  const app2 = initializeApp(rtConfig, 'rtdb');
-  rtdb = getDatabase(app2);
+  const app1 = firebase.initializeApp(fsConfig, 'main');
+  db = app1.firestore();
+  const app2 = firebase.initializeApp(rtConfig, 'rtdb');
+  rtdb = app2.database();
 } catch(e) { console.error(e) }
 
 document.getElementById('acc-date').value = new Date().toISOString().split('T')[0];
@@ -1257,7 +1258,7 @@ window.showView = (v, btn) => {
 /* ── Orders ── */
 function loadOrders() {
   if(!db) return;
-  onSnapshot(collection(db, 'orders'), snap => {
+  db.collection('orders').onSnapshot(snap => {
     allOrders = [];
     snap.forEach(d => {
       const data = d.data();
@@ -1271,7 +1272,7 @@ function loadOrders() {
 function loadDeletedOrders() {
   if(!db) return;
   try {
-    onSnapshot(collection(db, 'deleted_orders'), snap => {
+    db.collection('deleted_orders').onSnapshot(snap => {
       deletedOrders = [];
       snap.forEach(d => deletedOrders.push({id:d.id,...d.data()}));
       deletedOrders.sort((a,b) => new Date(b.deletedAt||0) - new Date(a.deletedAt||0));
@@ -1357,7 +1358,7 @@ function updateStats() {
 window.markDelivered = async(id) => {
   if(!confirm('Confirmer la livraison ?')) return;
   try {
-    await updateDoc(doc(db,'orders',id), {status:'livre', deliveredAt:new Date().toISOString()});
+    await db.collection('orders').doc(id).update({status:'livre', deliveredAt:new Date().toISOString()});
     showToast('✅ Commande livrée !', 'ok');
   } catch(e) { showToast('❌ Erreur', 'err'); }
 };
@@ -1370,14 +1371,14 @@ window.removeOrder = async(id) => {
   const order = allOrders.find(o => o.id === id);
   try {
     if(db && order) {
-      await addDoc(collection(db,'deleted_orders'), {
+      await db.collection('deleted_orders').add({
         originalId:order.id, customerName:order.customerName||'',
         whatsappNumber:order.whatsappNumber||'', establishment:order.establishment||'',
         items:order.items||[], total:order.total||0, status:order.status||'',
         createdAt:order.createdAt||'', deletedAt:new Date().toISOString(), deletedBy:'admin'
       });
     }
-    await deleteDoc(doc(db,'orders',id));
+    await db.collection('orders').doc(id).delete();
     showToast('📁 Commande archivée', 'ok');
   } catch(e) { console.error(e); showToast('❌ Erreur', 'err'); }
 };
@@ -1554,7 +1555,7 @@ window.calculate = async() => {
   document.getElementById('final-val').textContent = `${final>=0?'':'-'}${Math.abs(final).toLocaleString()} FCFA`;
   document.getElementById('final-val').style.color = final>=0?'var(--green)':'var(--red)';
   document.getElementById('results-section').style.display = 'block';
-  if(db) { try { await addDoc(collection(db,'accounting'),{date:document.getElementById('acc-date').value,rows,expenses:{distributor:e1,tax:e2,other:e3},totals:{gross,taxTotal,net,expenses:totalExp,final},createdAt:new Date().toISOString(),establishment:selectedEst}); } catch(e){} }
+  if(db) { try { await db.collection('accounting').add({date:document.getElementById('acc-date').value,rows,expenses:{distributor:e1,tax:e2,other:e3},totals:{gross,taxTotal,net,expenses:totalExp,final},createdAt:new Date().toISOString(),establishment:selectedEst}); } catch(e){} }
   showToast('✅ Calcul terminé !', 'ok');
   document.getElementById('results-section').scrollIntoView({behavior:'smooth'});
 };
@@ -1571,7 +1572,7 @@ window.loadNotifRecipients = function() {
   if(!rtdb) return;
   const btn = document.getElementById('n-refresh-btn');
   btn.style.animation = 'spin 0.7s linear infinite';
-  onValue(dbRef(rtdb,'fcm_tokens'), snap => {
+  rtdb.ref('fcm_tokens').on('value', snap => {
     btn.style.animation = '';
     allRecipients = snap.val() || {};
     renderRecipients();
@@ -1582,7 +1583,7 @@ window.loadNotifRecipients = function() {
     if(count>0 && document.getElementById('view-notif').style.display==='none') {
       badge.textContent = count; badge.style.display = 'flex';
     }
-  }, {onlyOnce:false});
+  });
 };
 
 function renderRecipients() {
