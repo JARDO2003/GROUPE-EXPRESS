@@ -38,3 +38,10 @@ self.addEventListener('notificationclick', (event) => {
   const url = event.notification.data?.url || '/';
   event.waitUntil(clients.openWindow(url));
 });
+
+const notificationOptions = {
+  body: body || '',
+  icon: icon || '/image/GE.jpg',   // ← remplace /icon.png
+  badge: '/image/GE.jpg',
+  ...
+};
