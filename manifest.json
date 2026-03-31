@@ -1,11 +1,22 @@
 {
-  "name": "Push Demo",
-  "short_name": "PushDemo",
+  "name": "Groupe Express",
+  "short_name": "GroupeExpress",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#ffffff",
   "icons": [
-  { "src": "image/GE.jpg", "sizes": "192x192", "type": "image/jpeg" },
-  { "src": "image/GE.jpg", "sizes": "512x512", "type": "image/jpeg" }
-]
+    {
+      "src": "image/GE.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "image/GE.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}
