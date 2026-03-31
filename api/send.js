@@ -80,3 +80,14 @@ module.exports = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+webpush: {
+  headers: { Urgency: 'high' },
+  notification: {
+    title,
+    body,
+    icon: '/image/GE.jpg',   // ← logo de l'entreprise
+    badge: '/image/GE.jpg',  // ← aussi dans la barre de notif
+    requireInteraction: true,
+  },
+},
