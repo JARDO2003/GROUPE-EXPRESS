@@ -42,7 +42,13 @@ module.exports = async (req, res) => {
     data: data || {},
     webpush: {
       headers: { Urgency: 'high' },
-      notification: { title, body, icon: '/icon.png', requireInteraction: true },
+      notification: {
+        title,
+        body,
+        icon: 'https://groupe-express.vercel.app/image/GE.jpg',
+        badge: 'https://groupe-express.vercel.app/image/GE.jpg',
+        requireInteraction: true,
+      },
     },
   };
 
@@ -80,14 +86,3 @@ module.exports = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
-webpush: {
-  headers: { Urgency: 'high' },
-  notification: {
-    title,
-    body,
-    icon: '/image/GE.jpg',   // ← logo de l'entreprise
-    badge: '/image/GE.jpg',  // ← aussi dans la barre de notif
-    requireInteraction: true,
-  },
-},
