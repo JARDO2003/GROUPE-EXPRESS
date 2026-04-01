@@ -32,7 +32,6 @@
     overflow-x: hidden;
   }
 
-  /* Background grid */
   body::before {
     content: '';
     position: fixed;
@@ -45,7 +44,6 @@
     z-index: 0;
   }
 
-  /* Glow orb */
   body::after {
     content: '';
     position: fixed;
@@ -58,7 +56,6 @@
     z-index: 0;
   }
 
-  /* ─── Header ─── */
   header {
     position: relative;
     z-index: 20;
@@ -108,7 +105,6 @@
 
   @keyframes blink { 0%,100%{opacity:1}50%{opacity:0.3} }
 
-  /* ─── Layout ─── */
   main {
     position: relative;
     z-index: 10;
@@ -120,7 +116,6 @@
     margin: 0 auto;
   }
 
-  /* ─── Cards ─── */
   .card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -156,7 +151,6 @@
 
   .card-body { padding: 20px; }
 
-  /* ─── Stats row ─── */
   .stats-row {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -189,6 +183,127 @@
     color: var(--muted);
     letter-spacing: 0.1em;
     text-transform: uppercase;
+  }
+
+  /* ─── Site Selector ─── */
+  .site-selector {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .site-option {
+    position: relative;
+    cursor: pointer;
+  }
+
+  .site-option input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .site-option-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+
+  .site-option-label:hover {
+    border-color: var(--border2);
+  }
+
+  .site-option input:checked + .site-option-label {
+    border-color: var(--accent);
+    background: rgba(59,130,246,0.08);
+    box-shadow: 0 0 0 1px var(--accent);
+  }
+
+  .site-icon {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+
+  .site-icon.loko {
+    background: linear-gradient(135deg, #ec4899, #f97316);
+  }
+
+  .site-icon.groupe {
+    background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+  }
+
+  .site-icon.both {
+    background: linear-gradient(135deg, #10b981, #06b6d4);
+  }
+
+  .site-name {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+  }
+
+  .site-url {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.56rem;
+    color: var(--muted);
+    word-break: break-all;
+    line-height: 1.4;
+  }
+
+  .site-check {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.55rem;
+    color: #fff;
+    margin-top: 2px;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  .site-option input:checked + .site-option-label .site-check {
+    opacity: 1;
+  }
+
+  .selected-urls-preview {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--accent2);
+    line-height: 1.8;
+    min-height: 38px;
+  }
+
+  .selected-urls-preview .preview-label {
+    color: var(--muted);
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 4px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
   }
 
   /* ─── Recipients ─── */
@@ -451,19 +566,36 @@
   #toast.error   { border-color: var(--red); color: var(--red); }
   #toast.info    { border-color: var(--accent); color: var(--accent); }
 
-  /* ─── Select all / refresh bar ─── */
-  .action-bar {
-    display: flex;
-    gap: 8px;
-  }
+  .action-bar { display: flex; gap: 8px; }
 
   .spin { animation: spin 0.7s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Section divider */
+  .section-divider {
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted2);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
 
   @media (max-width: 900px) {
     main { grid-template-columns: 1fr; }
     header { padding: 16px 20px; }
     main { padding: 16px 20px; }
+    .site-selector { grid-template-columns: repeat(3, 1fr); }
   }
 </style>
 </head>
@@ -505,6 +637,53 @@
         <div class="card-title"><div class="dot"></div>Composer le message</div>
       </div>
       <div class="card-body">
+
+        <!-- ─── Site Selector ─── -->
+        <div class="section-divider">🌐 Destination du lien</div>
+
+        <div class="site-selector">
+          <!-- Loko Blush -->
+          <label class="site-option">
+            <input type="checkbox" id="site-loko" value="https://loko-blush.vercel.app/" onchange="updateUrlPreview()"/>
+            <div class="site-option-label">
+              <div class="site-icon loko">💄</div>
+              <div class="site-name">Loko Blush</div>
+              <div class="site-url">loko-blush.vercel.app</div>
+              <div class="site-check">✓</div>
+            </div>
+          </label>
+
+          <!-- Groupe Express -->
+          <label class="site-option">
+            <input type="checkbox" id="site-groupe" value="https://groupe-express.vercel.app/" onchange="updateUrlPreview()"/>
+            <div class="site-option-label">
+              <div class="site-icon groupe">🚀</div>
+              <div class="site-name">Groupe Express</div>
+              <div class="site-url">groupe-express.vercel.app</div>
+              <div class="site-check">✓</div>
+            </div>
+          </label>
+
+          <!-- Les deux -->
+          <label class="site-option">
+            <input type="checkbox" id="site-both" onchange="toggleBoth(this)"/>
+            <div class="site-option-label">
+              <div class="site-icon both">🌍</div>
+              <div class="site-name">Les deux</div>
+              <div class="site-url">Tous les sites</div>
+              <div class="site-check">✓</div>
+            </div>
+          </label>
+        </div>
+
+        <!-- URL preview -->
+        <div class="selected-urls-preview" id="url-preview">
+          <div class="preview-label">URLs sélectionnées</div>
+          <span style="color:var(--muted);font-style:italic">Aucun site sélectionné</span>
+        </div>
+
+        <div class="section-divider" style="margin-top:4px">✏️ Contenu</div>
+
         <div class="field">
           <label>Titre de la notification</label>
           <input type="text" id="notif-title" placeholder="Ex : Nouvelle offre disponible !" maxlength="80"
@@ -516,10 +695,6 @@
           <textarea id="notif-body" placeholder="Votre message ici…" maxlength="300"
                     oninput="document.getElementById('body-count').textContent=this.value.length+'/300'"></textarea>
           <div class="char-count" id="body-count">0/300</div>
-        </div>
-        <div class="field">
-          <label>URL de redirection (optionnel)</label>
-          <input type="text" id="notif-url" placeholder="https://votre-site.com/page"/>
         </div>
 
         <button class="send-btn" id="send-btn" onclick="sendNotification()">
@@ -593,10 +768,51 @@ let allRecipients = {};
 let selected = new Set();
 let sentTotal=0, okTotal=0, failTotal=0;
 
+// ─── Site selector logic ───
+const SITES = {
+  loko:   'https://loko-blush.vercel.app/',
+  groupe: 'https://groupe-express.vercel.app/',
+};
+
+window.updateUrlPreview = function() {
+  const lokoChecked   = document.getElementById('site-loko').checked;
+  const groupeChecked = document.getElementById('site-groupe').checked;
+  const preview       = document.getElementById('url-preview');
+
+  const urls = [];
+  if (lokoChecked)   urls.push('💄 ' + SITES.loko);
+  if (groupeChecked) urls.push('🚀 ' + SITES.groupe);
+
+  if (!urls.length) {
+    preview.innerHTML = `<div class="preview-label">URLs sélectionnées</div><span style="color:var(--muted);font-style:italic">Aucun site sélectionné</span>`;
+  } else {
+    preview.innerHTML = `<div class="preview-label">URLs sélectionnées (${urls.length})</div>` + urls.join('<br/>');
+  }
+
+  // Sync "les deux" checkbox
+  const bothBox = document.getElementById('site-both');
+  bothBox.checked = lokoChecked && groupeChecked;
+};
+
+window.toggleBoth = function(bothCheckbox) {
+  const checked = bothCheckbox.checked;
+  document.getElementById('site-loko').checked   = checked;
+  document.getElementById('site-groupe').checked = checked;
+  updateUrlPreview();
+};
+
+function getSelectedUrls() {
+  const urls = [];
+  if (document.getElementById('site-loko').checked)   urls.push(SITES.loko);
+  if (document.getElementById('site-groupe').checked) urls.push(SITES.groupe);
+  return urls;
+}
+
+// ─── Helpers ───
 function relativeTime(ts) {
   const diff = Math.floor((Date.now() - ts) / 1000);
-  if (diff < 60)  return `il y a ${diff}s`;
-  if (diff < 3600) return `il y a ${Math.floor(diff/60)}min`;
+  if (diff < 60)   return `il y a ${diff}s`;
+  if (diff < 3600)  return `il y a ${Math.floor(diff/60)}min`;
   if (diff < 86400) return `il y a ${Math.floor(diff/3600)}h`;
   return `il y a ${Math.floor(diff/86400)}j`;
 }
@@ -695,42 +911,56 @@ function toast(m, t='info') {
 window.sendNotification = async function() {
   const title = document.getElementById('notif-title').value.trim();
   const body  = document.getElementById('notif-body').value.trim();
-  const url   = document.getElementById('notif-url').value.trim();
+  const urls  = getSelectedUrls();
   const btn   = document.getElementById('send-btn');
 
-  if (!title || !body) { toast('Titre et message requis','error'); return; }
-  if (!selected.size)  { toast('Sélectionnez au moins un destinataire','error'); return; }
+  if (!title || !body)  { toast('Titre et message requis','error'); return; }
+  if (!selected.size)   { toast('Sélectionnez au moins un destinataire','error'); return; }
+  if (!urls.length)     { toast('Sélectionnez au moins un site de destination','error'); return; }
 
   const tokens = [...selected].map(k => allRecipients[k]?.token).filter(Boolean);
   if (!tokens.length) { toast('Tokens introuvables','error'); return; }
 
   btn.disabled = true; btn.textContent = '⏳ Envoi en cours…';
-  log(`Envoi à ${tokens.length} abonné(s) : "${title}"`, 'pending');
+
+  // Send one batch per URL (or combined if API supports multiple)
+  const urlLabel = urls.length > 1 ? 'les deux sites' : urls[0];
+  log(`Envoi à ${tokens.length} abonné(s) → ${urlLabel} : "${title}"`, 'pending');
+
+  let totalSent=0, totalOk=0, totalFail=0;
 
   try {
-    const payload = { tokens, title, body };
-    if (url) payload.data = { url };
+    for (const url of urls) {
+      const payload = { tokens, title, body, data: { url } };
 
-    const res  = await fetch('/api/send', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify(payload),
-    });
-    const json = await res.json();
+      const res  = await fetch('/api/send', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(payload),
+      });
+      const json = await res.json();
 
-    if (json.success) {
-      sentTotal += tokens.length;
-      okTotal   += json.successCount;
-      failTotal += json.failureCount;
-      document.getElementById('s-sent').textContent = sentTotal;
-      document.getElementById('s-ok').textContent   = okTotal;
-      document.getElementById('s-fail').textContent = failTotal;
-      log(`✅ ${json.successCount} notification(s) envoyée(s) avec succès — ${json.failureCount} échec(s)`, 'success');
-      toast(`Envoyé à ${json.successCount} abonné(s) !`, 'success');
-    } else {
-      log(`❌ Erreur serveur : ${json.error}`, 'error');
-      toast('Erreur : ' + json.error, 'error');
+      if (json.success) {
+        totalSent += tokens.length;
+        totalOk   += json.successCount;
+        totalFail += json.failureCount;
+        log(`✅ [${url}] ${json.successCount} envoyé(s) — ${json.failureCount} échec(s)`, 'success');
+      } else {
+        log(`❌ [${url}] Erreur : ${json.error}`, 'error');
+        totalFail += tokens.length;
+      }
     }
+
+    sentTotal += totalSent;
+    okTotal   += totalOk;
+    failTotal += totalFail;
+
+    document.getElementById('s-sent').textContent = sentTotal;
+    document.getElementById('s-ok').textContent   = okTotal;
+    document.getElementById('s-fail').textContent = failTotal;
+
+    toast(`Envoyé à ${totalOk} abonné(s) sur ${urls.length} site(s) !`, 'success');
+
   } catch(e) {
     log(`❌ Erreur réseau : ${e.message}`, 'error');
     toast('Erreur réseau', 'error');
