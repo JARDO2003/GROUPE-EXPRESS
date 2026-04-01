@@ -545,16 +545,6 @@
                     oninput="document.getElementById('body-count').textContent=this.value.length+'/300'"></textarea>
           <div class="char-count" id="body-count">0/300</div>
         </div>
-        <div class="field">
-          <label>URL de redirection</label>
-          <input type="text" id="notif-url" placeholder="Sera défini automatiquement selon le site sélectionné" readonly
-                 style="cursor:default; opacity:0.7"/>
-          <div class="url-notice">
-            <div class="dot-sm"></div>
-            L'URL est automatiquement définie selon le(s) site(s) sélectionné(s)
-          </div>
-        </div>
-
         <button class="send-btn" id="send-btn" onclick="sendNotification()">
           🚀 Envoyer aux sites sélectionnés
         </button>
@@ -610,24 +600,7 @@
 
         </div>
 
-        <div class="select-all-row">
-          <div class="sel-info">Sélectionnés : <span id="sel-count">0</span> / 2</div>
-          <button class="btn-sm btn-ghost" onclick="selectAll()">Tout sélectionner</button>
-        </div>
 
-        <!-- Info block -->
-        <div style="margin-top:16px; padding:14px; background:var(--surface2); border:1px solid var(--border); border-radius:10px;">
-          <div style="font-size:0.68rem; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted2); margin-bottom:8px;">
-            📋 URLs configurées
-          </div>
-          <div style="font-family:'JetBrains Mono',monospace; font-size:0.63rem; color:var(--muted2); line-height:2;">
-            <div>🟣 <span style="color:var(--text)">https://loko-blush.vercel.app/</span></div>
-            <div>🔴 <span style="color:var(--text)">https://groupe-express.vercel.app/</span></div>
-          </div>
-          <div style="margin-top:10px; font-size:0.65rem; color:var(--muted); line-height:1.6;">
-            Si les deux sites sont sélectionnés, deux notifications distinctes seront envoyées, chacune avec l'URL correspondante.
-          </div>
-        </div>
 
       </div>
     </div>
@@ -668,22 +641,7 @@
     updateUI();
   }
 
-  function updateUI() {
-    document.getElementById('sel-count').textContent = selected.size;
-
-    // Update URL preview
-    const urlInput = document.getElementById('notif-url');
-    if (selected.size === 0) {
-      urlInput.value = '';
-      urlInput.placeholder = 'Sélectionnez un site pour voir l\'URL';
-    } else if (selected.size === 1) {
-      const key = [...selected][0];
-      urlInput.value = SITES[key].url;
-    } else {
-      urlInput.value = '';
-      urlInput.placeholder = 'URLs multiples — chaque site reçoit la sienne';
-    }
-  }
+  function updateUI() {}
 
   function log(msg, type='info') {
     const feed = document.getElementById('log-feed');
@@ -771,6 +729,11 @@
     btn.textContent = '🚀 Envoyer aux sites sélectionnés';
   };
 
+  // Sélectionner les deux sites par défaut
+  ['loko','express'].forEach(k => {
+    selected.add(k);
+    document.getElementById('card-'+k).classList.add('selected');
+  });
   updateUI();
 </script>
 </body>
