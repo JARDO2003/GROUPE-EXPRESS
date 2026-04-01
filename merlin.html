@@ -1,256 +1,618 @@
-<!-- ============================================================
-     BOUTON "ACTIVER LES NOTIFICATIONS" — À COLLER SUR VOTRE SITE
-     ============================================================
-     Instructions :
-     1. Copiez le bloc <style> dans votre CSS (ou dans le <head>)
-     2. Copiez le bloc HTML là où vous voulez le bouton
-     3. Copiez le bloc <script> juste avant </body>
-     4. Copiez firebase-messaging-sw.js à la racine de votre site
-     ============================================================ -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bouton Notifications — Groupe Express</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: #0a0a14;
+    }
 
+    /* ════════════════════════════════════════
+       SCÈNE PRINCIPALE
+    ════════════════════════════════════════ */
+    #notif-scene {
+      width: 100%;
+      max-width: 600px;
+      min-height: 520px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 30px 40px;
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      border-radius: 28px;
+      box-shadow: 0 40px 120px rgba(108,99,255,0.25);
+    }
 
-<!-- ── 1. STYLES DU BOUTON (à mettre dans votre CSS ou <head>) ── -->
-<style>
-  .notif-btn-wrapper {
-    display: inline-flex;
-    align-items: center;
-  }
+    /* ─── Étoiles ─── */
+    .stars { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+    .star {
+      position: absolute;
+      width: 2px; height: 2px;
+      background: #fff;
+      border-radius: 50%;
+      animation: twinkle var(--d, 3s) ease-in-out infinite var(--delay, 0s);
+      opacity: 0;
+    }
+    @keyframes twinkle {
+      0%, 100% { opacity: 0; transform: scale(0.5); }
+      50% { opacity: 1; transform: scale(1.4); }
+    }
 
-  #notif-subscribe-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 9px;
-    padding: 12px 22px;
-    background: linear-gradient(135deg, #1d4ed8, #0891b2);
-    color: #fff;
-    font-family: inherit;
-    font-size: 0.9rem;
-    font-weight: 600;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.25s ease;
-    position: relative;
-    overflow: hidden;
-    letter-spacing: 0.01em;
-    box-shadow: 0 4px 14px rgba(29,78,216,0.35);
-  }
+    /* ─── Anneaux ─── */
+    .ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.06);
+      animation: pulse-ring var(--rd, 6s) ease-in-out infinite var(--rdelay, 0s);
+    }
+    @keyframes pulse-ring {
+      0%, 100% { transform: translate(-50%,-50%) scale(1); opacity: 0.4; }
+      50%       { transform: translate(-50%,-50%) scale(1.08); opacity: 0.08; }
+    }
 
-  #notif-subscribe-btn:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(29,78,216,0.45);
-  }
+    /* ─── Titre / Sous-titre ─── */
+    .notif-title {
+      color: #fff;
+      font-size: 1.6rem;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 10px;
+      z-index: 10;
+      position: relative;
+      letter-spacing: 0.02em;
+    }
+    .notif-subtitle {
+      color: rgba(255,255,255,0.5);
+      font-size: 0.82rem;
+      text-align: center;
+      margin-bottom: 38px;
+      z-index: 10;
+      position: relative;
+    }
 
-  #notif-subscribe-btn:active:not(:disabled) {
-    transform: translateY(0);
-  }
+    /* ─── Bouton principal ─── */
+    #notif-subscribe-btn {
+      font-family: 'Poppins', sans-serif;
+      position: relative;
+      z-index: 10;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 18px 48px;
+      background: linear-gradient(135deg, #6c63ff, #3ec6e0, #ff6584);
+      background-size: 200% 200%;
+      animation: gradient-shift 4s ease infinite;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 0 40px rgba(108,99,255,0.6), 0 0 80px rgba(62,198,224,0.2);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      overflow: hidden;
+    }
+    #notif-subscribe-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+      border-radius: 50px;
+    }
+    #notif-subscribe-btn:hover:not(:disabled) {
+      transform: translateY(-4px) scale(1.04);
+      box-shadow: 0 0 60px rgba(108,99,255,0.9), 0 0 120px rgba(62,198,224,0.4);
+    }
+    #notif-subscribe-btn:active:not(:disabled) { transform: scale(0.97); }
+    #notif-subscribe-btn:disabled { cursor: not-allowed; }
+    #notif-subscribe-btn.success-state {
+      background: linear-gradient(135deg, #00c9a7, #00e676);
+      background-size: 200% 200%;
+      box-shadow: 0 0 40px rgba(0,201,167,0.6), 0 0 80px rgba(0,230,118,0.3);
+    }
+    @keyframes gradient-shift {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
 
-  #notif-subscribe-btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
+    .bell-icon {
+      font-size: 1.3rem;
+      animation: bell-shake 2.5s ease infinite;
+      display: inline-block;
+    }
+    @keyframes bell-shake {
+      0%, 80%, 100% { transform: rotate(0); }
+      85%  { transform: rotate(18deg); }
+      90%  { transform: rotate(-16deg); }
+      95%  { transform: rotate(12deg); }
+      98%  { transform: rotate(-8deg); }
+    }
 
-  #notif-subscribe-btn.active {
-    background: linear-gradient(135deg, #059669, #10b981);
-    box-shadow: 0 4px 14px rgba(5,150,105,0.35);
-  }
+    /* ─── Spinner ─── */
+    .notif-spinner {
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-  #notif-subscribe-btn.active:hover:not(:disabled) {
-    box-shadow: 0 8px 24px rgba(5,150,105,0.45);
-  }
+    /* ─── Ripple ─── */
+    .ripple {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.35);
+      transform: scale(0);
+      animation: ripple-out 0.7s ease-out forwards;
+      pointer-events: none;
+    }
+    @keyframes ripple-out { to { transform: scale(6); opacity: 0; } }
 
-  .notif-btn-icon {
-    font-size: 1rem;
-    line-height: 1;
-  }
+    /* ─── Particules ─── */
+    .particle {
+      position: absolute;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 30;
+      animation: particle-fly var(--dur, 1s) ease-out forwards;
+    }
+    @keyframes particle-fly {
+      0%   { transform: translate(0,0) scale(1); opacity: 1; }
+      100% { transform: translate(var(--tx,60px), var(--ty,-80px)) scale(0); opacity: 0; }
+    }
 
-  .notif-btn-spinner {
-    width: 16px; height: 16px;
-    border: 2px solid rgba(255,255,255,0.3);
-    border-top-color: #fff;
-    border-radius: 50%;
-    animation: _notif_spin 0.7s linear infinite;
-    flex-shrink: 0;
-  }
+    /* ─── Statut ─── */
+    #notif-status {
+      margin-top: 20px;
+      z-index: 10;
+      position: relative;
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.4);
+      min-height: 20px;
+      text-align: center;
+      transition: all 0.4s ease;
+    }
 
-  @keyframes _notif_spin { to { transform: rotate(360deg); } }
+    /* ─── Personnage petite fille ─── */
+    #girl-container {
+      position: absolute;
+      bottom: -200px;
+      right: 36px;
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: bottom 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+      pointer-events: none;
+    }
+    #girl-container.show { bottom: 8px; }
 
-  /* Mini toast de feedback */
-  #notif-toast {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    background: #111827;
-    border: 1px solid #1f2d45;
-    border-radius: 12px;
-    padding: 12px 18px;
-    font-size: 0.82rem;
-    font-weight: 500;
-    color: #e2e8f0;
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    transform: translateY(80px);
-    opacity: 0;
-    transition: all 0.35s cubic-bezier(0.22,1,0.36,1);
-    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
-    max-width: 320px;
-  }
+    /* ─── Bulle de dialogue ─── */
+    #speech-bubble {
+      background: rgba(255,255,255,0.97);
+      border-radius: 20px 20px 4px 20px;
+      padding: 14px 18px;
+      max-width: 230px;
+      font-size: 0.72rem;
+      line-height: 1.55;
+      color: #2d2d2d;
+      margin-bottom: 10px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.35);
+      opacity: 0;
+      transform: scale(0.7) translateY(12px);
+      transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.35s;
+    }
+    #speech-bubble.show { opacity: 1; transform: scale(1) translateY(0); }
+    #speech-bubble .bubble-name {
+      font-weight: 700;
+      font-size: 0.78rem;
+      color: #6c63ff;
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
 
-  #notif-toast.show { transform: translateY(0); opacity: 1; }
-  #notif-toast.success { border-color: #10b981; color: #10b981; }
-  #notif-toast.error   { border-color: #ef4444; color: #ef4444; }
-  #notif-toast.info    { border-color: #3b82f6; color: #3b82f6; }
-</style>
+    /* ─── Barres audio ─── */
+    .wave-bars {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      vertical-align: middle;
+      margin-left: 4px;
+    }
+    .wave-bar {
+      width: 2px; height: 3px;
+      border-radius: 2px;
+      background: #6c63ff;
+      animation: wave-bounce 0.7s ease-in-out infinite;
+      animation-play-state: paused;
+    }
+    .wave-bar:nth-child(2) { animation-delay: 0.1s; }
+    .wave-bar:nth-child(3) { animation-delay: 0.2s; }
+    .wave-bar:nth-child(4) { animation-delay: 0.15s; }
+    @keyframes wave-bounce {
+      0%, 100% { height: 3px; }
+      50%       { height: 10px; }
+    }
+    .wave-bars.speaking .wave-bar { animation-play-state: running; }
 
+    /* ─── SVG fille ─── */
+    #girl-svg {
+      filter: drop-shadow(0 8px 24px rgba(0,0,0,0.5));
+      animation: girl-float 3s ease-in-out infinite;
+    }
+    @keyframes girl-float {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-6px); }
+    }
 
-<!-- ── 2. HTML DU BOUTON (collez-le là où vous voulez l'afficher) ── -->
-<div class="notif-btn-wrapper">
-  <button id="notif-subscribe-btn" onclick="notifSubscribe()">
-    <span class="notif-btn-icon">🔔</span>
+    /* ─── Toast ─── */
+    #notif-toast {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%) translateY(60px);
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 50px;
+      padding: 10px 24px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #fff;
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.22,1,0.36,1);
+      white-space: nowrap;
+    }
+    #notif-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  </style>
+</head>
+<body>
+
+<div id="notif-scene">
+
+  <!-- Étoiles -->
+  <div class="stars" id="stars-bg"></div>
+
+  <!-- Anneaux décoratifs -->
+  <div class="ring" style="width:300px;height:300px;left:50%;top:50%;--rd:7s;--rdelay:0s;transform:translate(-50%,-50%);"></div>
+  <div class="ring" style="width:450px;height:450px;left:50%;top:50%;--rd:9s;--rdelay:1.5s;transform:translate(-50%,-50%);"></div>
+  <div class="ring" style="width:600px;height:600px;left:50%;top:50%;--rd:12s;--rdelay:3s;transform:translate(-50%,-50%);"></div>
+
+  <!-- Texte -->
+  <p class="notif-title">✨ Restez dans la boucle</p>
+  <p class="notif-subtitle">Recevez les dernières actus de Groupe Express en temps réel</p>
+
+  <!-- Bouton -->
+  <button id="notif-subscribe-btn" onclick="notifSubscribeWow(event)">
+    <span class="bell-icon">🔔</span>
     <span id="notif-btn-label">Activer les notifications</span>
   </button>
+
+  <div id="notif-status">Rejoignez des milliers d'abonnés</div>
+
+  <!-- Personnage robot petite fille -->
+  <div id="girl-container">
+    <div id="speech-bubble">
+      <div class="bubble-name">
+        🤖 Robot de Groupe Express
+        <span class="wave-bars" id="wave-bars">
+          <span class="wave-bar"></span>
+          <span class="wave-bar"></span>
+          <span class="wave-bar"></span>
+          <span class="wave-bar"></span>
+        </span>
+      </div>
+      <span id="bubble-text"></span>
+    </div>
+    <!-- SVG petite fille -->
+    <svg id="girl-svg" width="110" height="172" viewBox="0 0 110 172" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="55" cy="167" rx="30" ry="5.5" fill="rgba(108,99,255,0.22)"/>
+      <path d="M30 100 Q20 133 22 160 Q55 168 88 160 Q90 133 80 100 Z" fill="#6c63ff"/>
+      <path d="M35 105 Q32 128 33 152 Q42 156 50 155 Q42 132 40 105 Z" fill="rgba(255,255,255,0.1)"/>
+      <path d="M30 105 Q12 116 10 130 Q14 137 20 135 Q24 122 34 113 Z" fill="#f9c784"/>
+      <path d="M80 105 Q98 116 100 130 Q96 137 90 135 Q86 122 76 113 Z" fill="#f9c784"/>
+      <ellipse cx="12" cy="133" rx="7" ry="5.5" fill="#f9c784" transform="rotate(-20 12 133)"/>
+      <ellipse cx="98" cy="133" rx="7" ry="5.5" fill="#f9c784" transform="rotate(20 98 133)"/>
+      <rect x="47" y="76" width="16" height="16" rx="4" fill="#f9c784"/>
+      <ellipse cx="55" cy="58" rx="28" ry="28" fill="#f9c784"/>
+      <ellipse cx="43" cy="46" rx="8" ry="6" fill="rgba(255,255,255,0.2)" transform="rotate(-20 43 46)"/>
+      <path d="M27 54 Q28 25 55 22 Q82 25 83 54 Q78 28 55 26 Q32 28 27 54 Z" fill="#3d2e1e"/>
+      <path d="M27 54 Q24 46 26 38 Q30 28 38 26 Q32 36 27 54 Z" fill="#5a4232"/>
+      <path d="M83 54 Q86 46 84 38 Q80 28 72 26 Q78 36 83 54 Z" fill="#5a4232"/>
+      <ellipse cx="27" cy="60" rx="9" ry="12" fill="#3d2e1e" transform="rotate(-15 27 60)"/>
+      <ellipse cx="83" cy="60" rx="9" ry="12" fill="#3d2e1e" transform="rotate(15 83 60)"/>
+      <ellipse cx="27" cy="54" rx="5" ry="3.5" fill="#ff6584"/>
+      <ellipse cx="83" cy="54" rx="5" ry="3.5" fill="#ff6584"/>
+      <ellipse cx="43" cy="58" rx="6" ry="7" fill="#fff"/>
+      <ellipse cx="67" cy="58" rx="6" ry="7" fill="#fff"/>
+      <ellipse cx="44" cy="59" rx="4" ry="4.5" fill="#3d2e1e"/>
+      <ellipse cx="68" cy="59" rx="4" ry="4.5" fill="#3d2e1e"/>
+      <ellipse cx="45" cy="58" rx="1.5" ry="1.5" fill="#fff"/>
+      <ellipse cx="69" cy="58" rx="1.5" ry="1.5" fill="#fff"/>
+      <line x1="38" y1="52" x2="39" y2="49" stroke="#3d2e1e" stroke-width="1.2" stroke-linecap="round"/>
+      <line x1="43" y1="51" x2="43" y2="48" stroke="#3d2e1e" stroke-width="1.2" stroke-linecap="round"/>
+      <line x1="48" y1="52" x2="49" y2="49" stroke="#3d2e1e" stroke-width="1.2" stroke-linecap="round"/>
+      <line x1="63" y1="52" x2="62" y2="49" stroke="#3d2e1e" stroke-width="1.2" stroke-linecap="round"/>
+      <line x1="68" y1="51" x2="68" y2="48" stroke="#3d2e1e" stroke-width="1.2" stroke-linecap="round"/>
+      <line x1="73" y1="52" x2="74" y2="49" stroke="#3d2e1e" stroke-width="1.2" stroke-linecap="round"/>
+      <ellipse cx="34" cy="67" rx="6" ry="4" fill="rgba(255,150,150,0.35)"/>
+      <ellipse cx="76" cy="67" rx="6" ry="4" fill="rgba(255,150,150,0.35)"/>
+      <ellipse cx="55" cy="66" rx="2.5" ry="1.5" fill="rgba(200,130,100,0.35)"/>
+      <path d="M47 74 Q55 81 63 74" stroke="#c47b5a" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <rect x="42" y="108" width="26" height="18" rx="4" fill="rgba(255,255,255,0.18)" stroke="rgba(255,255,255,0.4)" stroke-width="0.8"/>
+      <text x="55" y="121" text-anchor="middle" fill="white" font-size="8" font-weight="700" font-family="Poppins,sans-serif">GE BOT</text>
+      <rect x="38" y="153" width="12" height="14" rx="4" fill="#5448cc"/>
+      <rect x="60" y="153" width="12" height="14" rx="4" fill="#5448cc"/>
+      <ellipse cx="44" cy="167" rx="9" ry="5" fill="#3d2e1e"/>
+      <ellipse cx="66" cy="167" rx="9" ry="5" fill="#3d2e1e"/>
+    </svg>
+  </div>
+
+  <div id="notif-toast"></div>
 </div>
 
-<!-- Toast feedback -->
-<div id="notif-toast"></div>
+<!-- ════════════════════════════════════════
+     SCRIPT
+════════════════════════════════════════ -->
+<script>
+(function () {
 
+  /* ── Génération des étoiles ── */
+  var starsEl = document.getElementById('stars-bg');
+  for (var i = 0; i < 70; i++) {
+    var s = document.createElement('div');
+    s.className = 'star';
+    s.style.left = Math.random() * 100 + '%';
+    s.style.top = Math.random() * 100 + '%';
+    s.style.setProperty('--d', (2 + Math.random() * 4) + 's');
+    s.style.setProperty('--delay', (Math.random() * 5) + 's');
+    starsEl.appendChild(s);
+  }
 
-<!-- ── 3. SCRIPT (à coller juste avant </body>) ── -->
-<script type="module">
-  import { initializeApp }  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-  import { getMessaging, getToken } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js';
-  import { getDatabase, ref, set }  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
-
-  /* ─── CONFIG FIREBASE ─── */
-  const firebaseConfig = {
+  /* ── Configuration Firebase ── */
+  var firebaseConfig = {
     apiKey: "AIzaSyCPGgtXoDUycykLaTSee0S0yY0tkeJpqKI",
     authDomain: "data-com-a94a8.firebaseapp.com",
     databaseURL: "https://data-com-a94a8-default-rtdb.firebaseio.com",
     projectId: "data-com-a94a8",
     storageBucket: "data-com-a94a8.firebasestorage.app",
     messagingSenderId: "276904640935",
-    appId: "1:276904640935:web:9cd805aeba6c34c767f682",
+    appId: "1:276904640935:web:9cd805aeba6c34c767f682"
   };
+  var VAPID_KEY = "BLrbso554YWcAd7-QPbzRFMUpJ9obsdJitRiFtzr-VU4GArr8ariq1l9klHxFUjSzASpkoelaTDAzcvI7UIWLZ8";
 
-  /* Clé VAPID de votre projet Firebase */
-  const VAPID_KEY = "BLrbso554YWcAd7-QPbzRFMUpJ9obsdJitRiFtzr-VU4GArr8ariq1l9klHxFUjSzASpkoelaTDAzcvI7UIWLZ8";
+  var fbLoaded = false;
+  var messaging, db;
 
-  /* ─── INIT ─── */
-  const fbApp = initializeApp(firebaseConfig);
-  const messaging = getMessaging(fbApp);
-  const db = getDatabase(fbApp);
+  function loadFirebase(cb) {
+    if (fbLoaded) { cb(); return; }
+    function loadScript(src, next) {
+      var s = document.createElement('script');
+      s.src = src;
+      s.onload = next;
+      document.head.appendChild(s);
+    }
+    loadScript('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js', function () {
+      loadScript('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js', function () {
+        loadScript('https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js', function () {
+          if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+          messaging = firebase.messaging();
+          db = firebase.database();
+          fbLoaded = true;
+          cb();
+        });
+      });
+    });
+  }
 
-  /* ─── HELPERS UI ─── */
+  /* ── Helpers UI ── */
   function setBtn(state) {
-    const btn   = document.getElementById('notif-subscribe-btn');
-    const label = document.getElementById('notif-btn-label');
-
+    var btn = document.getElementById('notif-subscribe-btn');
     if (state === 'loading') {
       btn.disabled = true;
-      btn.innerHTML = '<div class="notif-btn-spinner"></div><span>Activation…</span>';
+      btn.innerHTML = '<div class="notif-spinner"></div><span>Activation en cours…</span>';
     } else if (state === 'active') {
       btn.disabled = true;
-      btn.classList.add('active');
-      btn.innerHTML = '<span class="notif-btn-icon">✅</span><span id="notif-btn-label">Notifications activées</span>';
+      btn.classList.add('success-state');
+      btn.innerHTML = '<span style="font-size:1.3rem">✅</span><span>Notifications activées !</span>';
+      document.getElementById('notif-status').textContent = 'Parfait ! Vous êtes maintenant abonné(e).';
+      document.getElementById('notif-status').style.color = '#00e676';
     } else if (state === 'denied') {
       btn.disabled = true;
-      btn.style.background = '#374151';
+      btn.style.background = 'rgba(255,255,255,0.08)';
       btn.style.boxShadow = 'none';
-      btn.innerHTML = '<span class="notif-btn-icon">🔕</span><span>Notifications bloquées</span>';
+      btn.innerHTML = '<span style="font-size:1.3rem">🔕</span><span>Notifications bloquées</span>';
     } else {
-      // idle
       btn.disabled = false;
-      btn.innerHTML = '<span class="notif-btn-icon">🔔</span><span id="notif-btn-label">Activer les notifications</span>';
+      btn.innerHTML = '<span class="bell-icon">🔔</span><span id="notif-btn-label">Activer les notifications</span>';
     }
   }
 
-  function showToast(message, type = 'info') {
-    const el = document.getElementById('notif-toast');
-    const icons = { success: '✅', error: '❌', info: 'ℹ️' };
-    el.innerHTML = `<span>${icons[type]}</span><span>${message}</span>`;
-    el.className = `show ${type}`;
-    setTimeout(() => { el.className = ''; }, 4000);
+  function showToast(msg, type) {
+    var el = document.getElementById('notif-toast');
+    var ico = { success: '🎉', error: '❌', info: 'ℹ️' }[type] || 'ℹ️';
+    el.innerHTML = '<span>' + ico + '</span><span>' + msg + '</span>';
+    el.className = 'show';
+    el.style.borderColor = type === 'success' ? 'rgba(0,230,118,0.5)' : type === 'error' ? 'rgba(255,82,82,0.5)' : 'rgba(255,255,255,0.18)';
+    setTimeout(function () { el.className = ''; }, 4500);
   }
 
-  /* ─── FONCTION PRINCIPALE ─── */
-  window.notifSubscribe = async function() {
+  function burstParticles(btn) {
+    var colors = ['#6c63ff', '#ff6584', '#3ec6e0', '#f9c784', '#00e676'];
+    var scene = document.getElementById('notif-scene');
+    var rect = btn.getBoundingClientRect();
+    var sr = scene.getBoundingClientRect();
+    var cx = rect.left - sr.left + rect.width / 2;
+    var cy = rect.top - sr.top + rect.height / 2;
+    for (var i = 0; i < 20; i++) {
+      var p = document.createElement('div');
+      p.className = 'particle';
+      var angle = (i / 20) * 2 * Math.PI;
+      var dist = 60 + Math.random() * 70;
+      p.style.left = cx + 'px';
+      p.style.top = cy + 'px';
+      p.style.background = colors[i % colors.length];
+      p.style.setProperty('--tx', (Math.cos(angle) * dist) + 'px');
+      p.style.setProperty('--ty', (Math.sin(angle) * dist - 50) + 'px');
+      p.style.setProperty('--dur', (0.7 + Math.random() * 0.6) + 's');
+      scene.appendChild(p);
+      (function (el) { setTimeout(function () { el.remove(); }, 1400); })(p);
+    }
+  }
+
+  function rippleEffect(e, btn) {
+    var r = document.createElement('span');
+    r.className = 'ripple';
+    var rect = btn.getBoundingClientRect();
+    var size = Math.max(rect.width, rect.height) * 0.5;
+    r.style.width = r.style.height = size + 'px';
+    r.style.left = (e.clientX - rect.left - size / 2) + 'px';
+    r.style.top = (e.clientY - rect.top - size / 2) + 'px';
+    btn.appendChild(r);
+    setTimeout(function () { r.remove(); }, 700);
+  }
+
+  /* ── Petite fille + voix ── */
+  var girlMsg = "Bonjour ! 💜 Je suis le robot de Groupe Express. Comment trouvez-vous notre plateforme ? Avec vos notifications activées, vous ne raterez plus aucune de nos actualités en temps réel. Merci et bienvenue !";
+  var typeTimer = null;
+
+  function showGirl() {
+    var gc = document.getElementById('girl-container');
+    var bubble = document.getElementById('speech-bubble');
+    var textEl = document.getElementById('bubble-text');
+    var waveBars = document.getElementById('wave-bars');
+
+    gc.classList.add('show');
+    setTimeout(function () {
+      bubble.classList.add('show');
+      waveBars.classList.add('speaking');
+      speakText();
+      var i = 0;
+      textEl.textContent = '';
+      clearInterval(typeTimer);
+      typeTimer = setInterval(function () {
+        if (i < girlMsg.length) { textEl.textContent += girlMsg[i]; i++; }
+        else { clearInterval(typeTimer); setTimeout(function () { waveBars.classList.remove('speaking'); }, 600); }
+      }, 34);
+    }, 520);
+  }
+
+  function speakText() {
+    if (!window.speechSynthesis) return;
+    speechSynthesis.cancel();
+    var utt = new SpeechSynthesisUtterance(girlMsg);
+    utt.lang = 'fr-FR';
+    utt.pitch = 1.85;
+    utt.rate = 0.9;
+    utt.volume = 1;
+    var voices = speechSynthesis.getVoices();
+    var preferred = voices.find(function (v) {
+      return v.lang === 'fr-FR' && /amelie|marie|celine|audrey|juliette|alice|sophie|camille/i.test(v.name);
+    }) || voices.find(function (v) { return v.lang === 'fr-FR'; })
+      || voices.find(function (v) { return v.lang.startsWith('fr'); });
+    if (preferred) utt.voice = preferred;
+    utt.onend = function () { document.getElementById('wave-bars').classList.remove('speaking'); };
+    speechSynthesis.speak(utt);
+  }
+
+  if (window.speechSynthesis && 'onvoiceschanged' in speechSynthesis) {
+    speechSynthesis.onvoiceschanged = function () {};
+  }
+
+  /* ── Fonction principale ── */
+  window.notifSubscribeWow = function (e) {
+    var btn = document.getElementById('notif-subscribe-btn');
+    rippleEffect(e, btn);
     setBtn('loading');
 
-    /* 1. Service Worker */
     if (!('serviceWorker' in navigator)) {
       showToast('Votre navigateur ne supporte pas les notifications.', 'error');
-      setBtn('idle');
-      return;
+      setBtn('idle'); return;
     }
 
-    try {
-      await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-    } catch(e) {
-      showToast('Erreur d\'installation du service worker.', 'error');
-      setBtn('idle');
-      return;
-    }
+    navigator.serviceWorker.register('/firebase-messaging-sw.js')
+      .then(function () { return Notification.requestPermission(); })
+      .then(function (permission) {
+        if (permission === 'denied') { showToast('Notifications bloquées dans le navigateur.', 'error'); setBtn('denied'); return; }
+        if (permission !== 'granted') { showToast('Permission non accordée.', 'error'); setBtn('idle'); return; }
 
-    /* 2. Demande de permission */
-    const permission = await Notification.requestPermission();
-
-    if (permission === 'denied') {
-      showToast('Notifications bloquées. Modifiez les paramètres de votre navigateur.', 'error');
-      setBtn('denied');
-      return;
-    }
-
-    if (permission !== 'granted') {
-      showToast('Permission non accordée.', 'error');
-      setBtn('idle');
-      return;
-    }
-
-    /* 3. Récupération du token FCM */
-    try {
-      const token = await getToken(messaging, { vapidKey: VAPID_KEY });
-      if (!token) throw new Error('Token vide');
-
-      /* 4. Enregistrement en base de données */
-      const key = token.slice(-24);
-      await set(ref(db, `fcm_tokens/${key}`), {
-        token,
-        name: 'Visiteur ' + new Date().toLocaleDateString('fr-FR'),
-        ua: navigator.userAgent.slice(0, 80),
-        updatedAt: Date.now(),
+        loadFirebase(function () {
+          messaging.getToken({ vapidKey: VAPID_KEY }).then(function (token) {
+            if (!token) throw new Error('Token vide');
+            var key = token.slice(-24);
+            db.ref('fcm_tokens/' + key).set({
+              token: token,
+              name: 'Visiteur ' + new Date().toLocaleDateString('fr-FR'),
+              ua: navigator.userAgent.slice(0, 80),
+              updatedAt: Date.now()
+            });
+            burstParticles(btn);
+            setBtn('active');
+            showToast('Bienvenue ! Vous recevrez nos notifications.', 'success');
+            setTimeout(showGirl, 700);
+          }).catch(function (err) {
+            console.error('[Notif]', err);
+            showToast('Erreur lors de l\'activation. Réessayez.', 'error');
+            setBtn('idle');
+          });
+        });
+      }).catch(function () {
+        showToast('Erreur du service worker.', 'error');
+        setBtn('idle');
       });
-
-      setBtn('active');
-      showToast('Vous recevrez désormais nos notifications !', 'success');
-
-    } catch(e) {
-      console.error('[Notif] Erreur :', e);
-      showToast('Une erreur est survenue. Réessayez.', 'error');
-      setBtn('idle');
-    }
   };
 
-  /* ─── ÉTAT INITIAL ─── */
-  // Si déjà accordé, on tente de récupérer le token silencieusement
-  if (Notification.permission === 'granted') {
-    navigator.serviceWorker.register('/firebase-messaging-sw.js').then(async () => {
-      try {
-        const token = await getToken(messaging, { vapidKey: VAPID_KEY });
-        if (token) {
-          const key = token.slice(-24);
-          await set(ref(db, `fcm_tokens/${key}`), {
-            token,
-            name: 'Visiteur ' + new Date().toLocaleDateString('fr-FR'),
-            ua: navigator.userAgent.slice(0, 80),
-            updatedAt: Date.now(),
-          });
-          setBtn('active');
-        }
-      } catch(_) {}
-    }).catch(() => {});
-  } else if (Notification.permission === 'denied') {
-    setBtn('denied');
+  /* ── État initial (déjà accordé) ── */
+  if (typeof Notification !== 'undefined') {
+    if (Notification.permission === 'denied') {
+      setBtn('denied');
+      document.getElementById('notif-status').textContent = 'Notifications bloquées dans les paramètres du navigateur.';
+    } else if (Notification.permission === 'granted') {
+      loadFirebase(function () {
+        navigator.serviceWorker.register('/firebase-messaging-sw.js').then(function () {
+          return messaging.getToken({ vapidKey: VAPID_KEY });
+        }).then(function (token) {
+          if (token) {
+            var key = token.slice(-24);
+            db.ref('fcm_tokens/' + key).set({
+              token: token,
+              name: 'Visiteur ' + new Date().toLocaleDateString('fr-FR'),
+              ua: navigator.userAgent.slice(0, 80),
+              updatedAt: Date.now()
+            });
+            setBtn('active');
+            setTimeout(showGirl, 900);
+          }
+        }).catch(function () {});
+      });
+    }
   }
+
+})();
 </script>
+</body>
+</html>
