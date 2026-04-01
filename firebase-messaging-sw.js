@@ -14,16 +14,16 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// Gestion des notifications en arrière-plan
 messaging.onBackgroundMessage((payload) => {
   console.log('[SW] Message reçu en arrière-plan:', payload);
 
   const { title, body, icon } = payload.notification || {};
+
   const notificationTitle = title || 'Nouvelle notification';
   const notificationOptions = {
     body: body || '',
-    icon: icon || '/icon.png',
-    badge: '/badge.png',
+    icon: icon || '/image/GE.jpg',   // ✅ updated icon
+    badge: '/image/GE.jpg',          // ✅ updated badge
     data: payload.data || {},
     vibrate: [200, 100, 200],
     tag: 'fcm-notification',
@@ -38,10 +38,3 @@ self.addEventListener('notificationclick', (event) => {
   const url = event.notification.data?.url || '/';
   event.waitUntil(clients.openWindow(url));
 });
-
-const notificationOptions = {
-  body: body || '',
-  icon: icon || '/image/GE.jpg',   // ← remplace /icon.png
-  badge: '/image/GE.jpg',
-  ...
-};
