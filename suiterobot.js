@@ -1,0 +1,235 @@
+
+    (function () {
+
+  /* ── Génération des étoiles ── */
+  var starsEl = document.getElementById('stars-bg');
+  for (var i = 0; i < 70; i++) {
+    var s = document.createElement('div');
+    s.className = 'star';
+    s.style.left = Math.random() * 100 + '%';
+    s.style.top = Math.random() * 100 + '%';
+    s.style.setProperty('--d', (2 + Math.random() * 4) + 's');
+    s.style.setProperty('--delay', (Math.random() * 5) + 's');
+    starsEl.appendChild(s);
+  }
+
+  /* ── Configuration Firebase ── */
+  var firebaseConfig = {
+    apiKey: "AIzaSyCPGgtXoDUycykLaTSee0S0yY0tkeJpqKI",
+    authDomain: "data-com-a94a8.firebaseapp.com",
+    databaseURL: "https://data-com-a94a8-default-rtdb.firebaseio.com",
+    projectId: "data-com-a94a8",
+    storageBucket: "data-com-a94a8.firebasestorage.app",
+    messagingSenderId: "276904640935",
+    appId: "1:276904640935:web:9cd805aeba6c34c767f682"
+  };
+  var VAPID_KEY = "BLrbso554YWcAd7-QPbzRFMUpJ9obsdJitRiFtzr-VU4GArr8ariq1l9klHxFUjSzASpkoelaTDAzcvI7UIWLZ8";
+
+  var fbLoaded = false;
+  var messaging, db;
+
+  function loadFirebase(cb) {
+    if (fbLoaded) { cb(); return; }
+    function loadScript(src, next) {
+      var s = document.createElement('script');
+      s.src = src;
+      s.onload = next;
+      document.head.appendChild(s);
+    }
+    loadScript('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js', function () {
+      loadScript('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js', function () {
+        loadScript('https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js', function () {
+          if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+          messaging = firebase.messaging();
+          db = firebase.database();
+          fbLoaded = true;
+          cb();
+        });
+      });
+    });
+  }
+
+  /* ── Helpers UI ── */
+  function setBtn(state) {
+    var btn = document.getElementById('notif-subscribe-btn');
+    if (state === 'loading') {
+      btn.disabled = true;
+      btn.innerHTML = '<div class="notif-spinner"></div><span>Activation en cours…</span>';
+    } else if (state === 'active') {
+      btn.disabled = true;
+      btn.classList.add('success-state');
+      btn.innerHTML = '<span style="font-size:1.3rem">✅</span><span>Notifications activées !</span>';
+      document.getElementById('notif-status').textContent = 'Parfait ! Vous êtes maintenant abonné(e).';
+      document.getElementById('notif-status').style.color = '#00e676';
+    } else if (state === 'denied') {
+      btn.disabled = true;
+      btn.style.background = 'rgba(255,255,255,0.08)';
+      btn.style.boxShadow = 'none';
+      btn.innerHTML = '<span style="font-size:1.3rem">🔕</span><span>Notifications bloquées</span>';
+    } else {
+      btn.disabled = false;
+      btn.innerHTML = '<span class="bell-icon">🔔</span><span id="notif-btn-label">Activer les notifications</span>';
+    }
+  }
+
+  function showToast(msg, type) {
+    var el = document.getElementById('notif-toast');
+    var ico = { success: '🎉', error: '❌', info: 'ℹ️' }[type] || 'ℹ️';
+    el.innerHTML = '<span>' + ico + '</span><span>' + msg + '</span>';
+    el.className = 'show';
+    el.style.borderColor = type === 'success' ? 'rgba(0,230,118,0.5)' : type === 'error' ? 'rgba(255,82,82,0.5)' : 'rgba(255,255,255,0.18)';
+    setTimeout(function () { el.className = ''; }, 4500);
+  }
+
+  function burstParticles(btn) {
+    var colors = ['#6c63ff', '#ff6584', '#3ec6e0', '#f9c784', '#00e676'];
+    var scene = document.getElementById('notif-scene');
+    var rect = btn.getBoundingClientRect();
+    var sr = scene.getBoundingClientRect();
+    var cx = rect.left - sr.left + rect.width / 2;
+    var cy = rect.top - sr.top + rect.height / 2;
+    for (var i = 0; i < 20; i++) {
+      var p = document.createElement('div');
+      p.className = 'particle';
+      var angle = (i / 20) * 2 * Math.PI;
+      var dist = 60 + Math.random() * 70;
+      p.style.left = cx + 'px';
+      p.style.top = cy + 'px';
+      p.style.background = colors[i % colors.length];
+      p.style.setProperty('--tx', (Math.cos(angle) * dist) + 'px');
+      p.style.setProperty('--ty', (Math.sin(angle) * dist - 50) + 'px');
+      p.style.setProperty('--dur', (0.7 + Math.random() * 0.6) + 's');
+      scene.appendChild(p);
+      (function (el) { setTimeout(function () { el.remove(); }, 1400); })(p);
+    }
+  }
+
+  function rippleEffect(e, btn) {
+    var r = document.createElement('span');
+    r.className = 'ripple';
+    var rect = btn.getBoundingClientRect();
+    var size = Math.max(rect.width, rect.height) * 0.5;
+    r.style.width = r.style.height = size + 'px';
+    r.style.left = (e.clientX - rect.left - size / 2) + 'px';
+    r.style.top = (e.clientY - rect.top - size / 2) + 'px';
+    btn.appendChild(r);
+    setTimeout(function () { r.remove(); }, 700);
+  }
+
+  /* ── Petite fille + voix ── */
+  var girlMsg = "Bonjour ! 💜 Je suis le robot de Groupe Express. Comment trouvez-vous notre plateforme ? Avec vos notifications activées, vous ne raterez plus aucune de nos actualités en temps réel. Merci et bienvenue !";
+  var typeTimer = null;
+
+  function showGirl() {
+    var gc = document.getElementById('girl-container');
+    var bubble = document.getElementById('speech-bubble');
+    var textEl = document.getElementById('bubble-text');
+    var waveBars = document.getElementById('wave-bars');
+
+    gc.classList.add('show');
+    setTimeout(function () {
+      bubble.classList.add('show');
+      waveBars.classList.add('speaking');
+      speakText();
+      var i = 0;
+      textEl.textContent = '';
+      clearInterval(typeTimer);
+      typeTimer = setInterval(function () {
+        if (i < girlMsg.length) { textEl.textContent += girlMsg[i]; i++; }
+        else { clearInterval(typeTimer); setTimeout(function () { waveBars.classList.remove('speaking'); }, 600); }
+      }, 34);
+    }, 520);
+  }
+
+  function speakText() {
+    if (!window.speechSynthesis) return;
+    speechSynthesis.cancel();
+    var utt = new SpeechSynthesisUtterance(girlMsg);
+    utt.lang = 'fr-FR';
+    utt.pitch = 1.85;
+    utt.rate = 0.9;
+    utt.volume = 1;
+    var voices = speechSynthesis.getVoices();
+    var preferred = voices.find(function (v) {
+      return v.lang === 'fr-FR' && /amelie|marie|celine|audrey|juliette|alice|sophie|camille/i.test(v.name);
+    }) || voices.find(function (v) { return v.lang === 'fr-FR'; })
+      || voices.find(function (v) { return v.lang.startsWith('fr'); });
+    if (preferred) utt.voice = preferred;
+    utt.onend = function () { document.getElementById('wave-bars').classList.remove('speaking'); };
+    speechSynthesis.speak(utt);
+  }
+
+  if (window.speechSynthesis && 'onvoiceschanged' in speechSynthesis) {
+    speechSynthesis.onvoiceschanged = function () {};
+  }
+
+  /* ── Fonction principale ── */
+  window.notifSubscribeWow = function (e) {
+    var btn = document.getElementById('notif-subscribe-btn');
+    rippleEffect(e, btn);
+    setBtn('loading');
+
+    if (!('serviceWorker' in navigator)) {
+      showToast('Votre navigateur ne supporte pas les notifications.', 'error');
+      setBtn('idle'); return;
+    }
+
+    navigator.serviceWorker.register('/firebase-messaging-sw.js')
+      .then(function () { return Notification.requestPermission(); })
+      .then(function (permission) {
+        if (permission === 'denied') { showToast('Notifications bloquées dans le navigateur.', 'error'); setBtn('denied'); return; }
+        if (permission !== 'granted') { showToast('Permission non accordée.', 'error'); setBtn('idle'); return; }
+
+        loadFirebase(function () {
+          messaging.getToken({ vapidKey: VAPID_KEY }).then(function (token) {
+            if (!token) throw new Error('Token vide');
+            var key = token.slice(-24);
+            db.ref('fcm_tokens/' + key).set({
+              token: token,
+              name: 'Visiteur ' + new Date().toLocaleDateString('fr-FR'),
+              ua: navigator.userAgent.slice(0, 80),
+              updatedAt: Date.now()
+            });
+            burstParticles(btn);
+            setBtn('active');
+            showToast('Bienvenue ! Vous recevrez nos notifications.', 'success');
+            setTimeout(showGirl, 700);
+          }).catch(function (err) {
+            console.error('[Notif]', err);
+            showToast('Erreur lors de l\'activation. Réessayez.', 'error');
+            setBtn('idle');
+          });
+        });
+      }).catch(function () {
+        showToast('Erreur du service worker.', 'error');
+        setBtn('idle');
+      });
+  };
+
+  /* ── État initial (déjà accordé) ── */
+  if (typeof Notification !== 'undefined') {
+    if (Notification.permission === 'denied') {
+      setBtn('denied');
+      document.getElementById('notif-status').textContent = 'Notifications bloquées dans les paramètres du navigateur.';
+    } else if (Notification.permission === 'granted') {
+      loadFirebase(function () {
+        navigator.serviceWorker.register('/firebase-messaging-sw.js').then(function () {
+          return messaging.getToken({ vapidKey: VAPID_KEY });
+        }).then(function (token) {
+          if (token) {
+            var key = token.slice(-24);
+            db.ref('fcm_tokens/' + key).set({
+              token: token,
+              name: 'Visiteur ' + new Date().toLocaleDateString('fr-FR'),
+              ua: navigator.userAgent.slice(0, 80),
+              updatedAt: Date.now()
+            });
+            setBtn('active');
+            setTimeout(showGirl, 900);
+          }
+        }).catch(function () {});
+      });
+    }
+  }
+
+})();
