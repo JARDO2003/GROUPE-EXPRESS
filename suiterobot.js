@@ -117,7 +117,7 @@
   }
 
   /* ── Petite fille + voix ── */
-  var girlMsg = "Bonjour ! 💜 Je suis le robot de Groupe Express. Comment trouvez-vous notre plateforme ? Avec vos notifications activées, vous ne raterez plus aucune de nos actualités en temps réel. Merci et bienvenue !";
+  var girlMsg = "Bonjour !  Je suis  Express AI. Comment trouvez-vous notre plateforme ? Avec vos notifications activées, vous ne raterez plus aucune de nos actualités en temps réel. Merci et bienvenue !";
   var typeTimer = null;
 
   function showGirl() {
