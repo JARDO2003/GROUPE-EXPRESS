@@ -32,6 +32,7 @@
     overflow-x: hidden;
   }
 
+  /* Background grid */
   body::before {
     content: '';
     position: fixed;
@@ -44,6 +45,7 @@
     z-index: 0;
   }
 
+  /* Glow orb */
   body::after {
     content: '';
     position: fixed;
@@ -56,6 +58,7 @@
     z-index: 0;
   }
 
+  /* ─── Header ─── */
   header {
     position: relative;
     z-index: 20;
@@ -105,6 +108,7 @@
 
   @keyframes blink { 0%,100%{opacity:1}50%{opacity:0.3} }
 
+  /* ─── Layout ─── */
   main {
     position: relative;
     z-index: 10;
@@ -116,6 +120,7 @@
     margin: 0 auto;
   }
 
+  /* ─── Cards ─── */
   .card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -151,6 +156,7 @@
 
   .card-body { padding: 20px; }
 
+  /* ─── Stats row ─── */
   .stats-row {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -174,9 +180,9 @@
     margin-bottom: 5px;
   }
 
-  .stat-num.blue  { color: var(--accent); }
+  .stat-num.blue { color: var(--accent); }
   .stat-num.green { color: var(--green); }
-  .stat-num.red   { color: var(--red); }
+  .stat-num.red { color: var(--red); }
 
   .stat-label {
     font-size: 0.64rem;
@@ -185,124 +191,117 @@
     text-transform: uppercase;
   }
 
-  /* ─── Site destination cards ─── */
-  .sites-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .site-card {
-    background: var(--surface2);
-    border: 2px solid var(--border);
-    border-radius: 12px;
-    padding: 16px 18px;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    user-select: none;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .site-card::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(59,130,246,0.06), transparent);
-    opacity: 0;
-    transition: opacity 0.2s;
-  }
-
-  .site-card:hover { border-color: var(--border2); }
-  .site-card:hover::before { opacity: 1; }
-
-  .site-card.selected {
-    border-color: var(--accent);
-    background: rgba(59,130,246,0.08);
-  }
-
-  .site-card.selected::before { opacity: 1; }
-
-  .site-icon {
-    width: 44px; height: 44px;
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.3rem;
-    flex-shrink: 0;
-  }
-
-  .site-icon.loko    { background: linear-gradient(135deg, #be185d, #9333ea); }
-  .site-icon.express { background: linear-gradient(135deg, #b45309, #dc2626); }
-
-  .site-info { flex: 1; min-width: 0; }
-
-  .site-name {
-    font-size: 0.9rem;
-    font-weight: 600;
-    margin-bottom: 3px;
-  }
-
-  .site-url {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.62rem;
-    color: var(--muted2);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .site-badge {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.62rem;
-    padding: 3px 8px;
-    border-radius: 20px;
-    border: 1px solid var(--border2);
-    color: var(--muted2);
-    flex-shrink: 0;
-    transition: all 0.2s;
-  }
-
-  .site-card.selected .site-badge {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #fff;
-  }
-
-  .site-check {
-    width: 22px; height: 22px;
-    border-radius: 50%;
-    border: 2px solid var(--border2);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 0.65rem;
-    color: #fff;
-    flex-shrink: 0;
-    transition: all 0.2s;
-  }
-
-  .site-card.selected .site-check {
-    background: var(--accent);
-    border-color: var(--accent);
-  }
-
-  .select-all-row {
+  /* ─── Recipients ─── */
+  .recipients-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-top: 14px;
-    padding-top: 14px;
-    border-top: 1px solid var(--border);
+    margin-bottom: 12px;
   }
 
-  .sel-info {
-    font-size: 0.7rem;
+  .section-tag {
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
     color: var(--muted2);
-    font-family: 'JetBrains Mono', monospace;
   }
 
-  .sel-info span { color: var(--accent); font-weight: 600; }
+  .section-tag span { color: var(--accent); }
+
+  .btn-sm {
+    padding: 5px 12px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.04em;
+  }
+
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border2);
+    color: var(--muted2);
+  }
+
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+  .recipients-list {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    max-height: 280px;
+    overflow-y: auto;
+    margin-bottom: 14px;
+  }
+
+  .recipients-list::-webkit-scrollbar { width: 3px; }
+  .recipients-list::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+  .recipient {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 11px 14px;
+    cursor: pointer;
+    transition: all 0.18s;
+    user-select: none;
+  }
+
+  .recipient:hover { border-color: var(--border2); }
+  .recipient.selected { border-color: var(--accent); background: rgba(59,130,246,0.07); }
+
+  .r-avatar {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #1d4ed8, #0891b2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    color: #fff;
+  }
+
+  .r-info { flex: 1; min-width: 0; }
+  .r-name { font-size: 0.82rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .r-time { font-size: 0.62rem; color: var(--muted); margin-top: 1px; font-family: 'JetBrains Mono', monospace; }
+
+  .r-check {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+    color: #fff;
+    opacity: 0;
+    transition: opacity 0.15s;
+    flex-shrink: 0;
+  }
+
+  .recipient.selected .r-check { opacity: 1; }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--muted);
+    font-size: 0.78rem;
+    line-height: 1.8;
+    margin-bottom: 14px;
+  }
+
+  .empty-state .big { font-size: 2rem; margin-bottom: 10px; opacity: 0.4; }
 
   /* ─── Form ─── */
   .field { margin-bottom: 16px; }
@@ -350,24 +349,7 @@
     margin-top: 4px;
   }
 
-  /* URL preview auto-fill notice */
-  .url-notice {
-    font-size: 0.64rem;
-    color: var(--muted2);
-    margin-top: 5px;
-    font-family: 'JetBrains Mono', monospace;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-  }
-
-  .url-notice .dot-sm {
-    width: 5px; height: 5px;
-    border-radius: 50%;
-    background: var(--orange);
-    flex-shrink: 0;
-  }
-
+  /* ─── Send button ─── */
   .send-btn {
     width: 100%;
     padding: 14px;
@@ -469,24 +451,14 @@
   #toast.error   { border-color: var(--red); color: var(--red); }
   #toast.info    { border-color: var(--accent); color: var(--accent); }
 
-  .btn-sm {
-    padding: 5px 12px;
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 0.7rem;
-    font-weight: 500;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.2s;
-    letter-spacing: 0.04em;
+  /* ─── Select all / refresh bar ─── */
+  .action-bar {
+    display: flex;
+    gap: 8px;
   }
 
-  .btn-ghost {
-    background: transparent;
-    border: 1px solid var(--border2);
-    color: var(--muted2);
-  }
-
-  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .spin { animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
   @media (max-width: 900px) {
     main { grid-template-columns: 1fr; }
@@ -504,7 +476,7 @@
   </div>
   <div class="header-meta">
     <div class="live-dot"></div>
-    <span>2 sites configurés</span>
+    <span id="header-sub-count">Chargement…</span>
   </div>
 </header>
 
@@ -545,8 +517,13 @@
                     oninput="document.getElementById('body-count').textContent=this.value.length+'/300'"></textarea>
           <div class="char-count" id="body-count">0/300</div>
         </div>
+        <div class="field">
+          <label>URL de redirection (optionnel)</label>
+          <input type="text" id="notif-url" placeholder="https://votre-site.com/page"/>
+        </div>
+
         <button class="send-btn" id="send-btn" onclick="sendNotification()">
-          🚀 Envoyer aux sites sélectionnés
+          🚀 Envoyer aux destinataires sélectionnés
         </button>
       </div>
     </div>
@@ -558,50 +535,36 @@
         <button class="btn-sm btn-ghost" onclick="document.getElementById('log-feed').innerHTML=''">Effacer</button>
       </div>
       <div id="log-feed">
-        <div class="log-entry info"><span class="log-time">--:--:--</span>Prêt. Sélectionnez un ou deux sites et composez votre message.</div>
+        <div class="log-entry info"><span class="log-time">--:--:--</span>Prêt. Sélectionnez des destinataires et composez votre message.</div>
       </div>
     </div>
   </div>
 
-  <!-- ─── Droite : sélection des sites ─── -->
+  <!-- ─── Droite : destinataires ─── -->
   <div>
     <div class="card">
       <div class="card-header">
         <div class="card-title">
           <div class="dot"></div>
-          Sites destinataires
+          Abonnés <span id="rec-count" style="color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:0.75rem;margin-left:4px"></span>
+        </div>
+        <div class="action-bar">
+          <button class="btn-sm btn-ghost" onclick="selectAll()">Tout sélect.</button>
+          <button class="btn-sm btn-ghost" id="refresh-btn" onclick="loadRecipients()" style="font-size:0.8rem">↻</button>
         </div>
       </div>
-      <div class="card-body">
-
-        <div class="sites-grid">
-
-          <!-- Site 1 : Loko -->
-          <div class="site-card" id="card-loko" onclick="toggleSite('loko')">
-            <div class="site-icon loko">👗</div>
-            <div class="site-info">
-              <div class="site-name">Loko</div>
-              <div class="site-url">loko-blush.vercel.app</div>
-            </div>
-            <div class="site-badge" id="badge-loko">Mode / Boutique</div>
-            <div class="site-check" id="check-loko">✓</div>
-          </div>
-
-          <!-- Site 2 : Groupe Express -->
-          <div class="site-card" id="card-express" onclick="toggleSite('express')">
-            <div class="site-icon express">🚚</div>
-            <div class="site-info">
-              <div class="site-name">Groupe Express</div>
-              <div class="site-url">groupe-express.vercel.app</div>
-            </div>
-            <div class="site-badge" id="badge-express">Livraison / Services</div>
-            <div class="site-check" id="check-express">✓</div>
-          </div>
-
+      <div class="card-body" style="padding-bottom:8px">
+        <div class="recipients-header">
+          <div class="section-tag">Sélectionnés : <span id="sel-count">0</span></div>
         </div>
-
-
-
+        <div class="recipients-list" id="recipients-grid">
+          <div class="empty-state"><div class="big">📡</div>Chargement des abonnés…</div>
+        </div>
+        <div style="padding-bottom:12px">
+          <div style="font-size:0.65rem;color:var(--muted);text-align:center;line-height:1.7">
+            Les abonnés apparaissent automatiquement dès qu'ils activent les notifications sur votre site.
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -609,132 +572,175 @@
 
 <div id="toast"></div>
 
-<script>
-  const SITES = {
-    loko:    { name: 'Loko',          url: 'https://loko-blush.vercel.app/' },
-    express: { name: 'Groupe Express', url: 'https://groupe-express.vercel.app/' },
-  };
+<script type="module">
+import { initializeApp }   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 
-  const selected = new Set();
-  let sentTotal=0, okTotal=0, failTotal=0;
+const cfg = {
+  apiKey:"AIzaSyCPGgtXoDUycykLaTSee0S0yY0tkeJpqKI",
+  authDomain:"data-com-a94a8.firebaseapp.com",
+  databaseURL:"https://data-com-a94a8-default-rtdb.firebaseio.com",
+  projectId:"data-com-a94a8",
+  storageBucket:"data-com-a94a8.firebasestorage.app",
+  messagingSenderId:"276904640935",
+  appId:"1:276904640935:web:9cd805aeba6c34c767f682",
+};
 
-  function toggleSite(key) {
-    const card  = document.getElementById('card-' + key);
-    const badge = document.getElementById('badge-' + key);
-    if (selected.has(key)) {
-      selected.delete(key);
-      card.classList.remove('selected');
-    } else {
-      selected.add(key);
-      card.classList.add('selected');
-    }
-    updateUI();
+const app = initializeApp(cfg);
+const db  = getDatabase(app);
+
+let allRecipients = {};
+let selected = new Set();
+let sentTotal=0, okTotal=0, failTotal=0;
+
+function relativeTime(ts) {
+  const diff = Math.floor((Date.now() - ts) / 1000);
+  if (diff < 60)  return `il y a ${diff}s`;
+  if (diff < 3600) return `il y a ${Math.floor(diff/60)}min`;
+  if (diff < 86400) return `il y a ${Math.floor(diff/3600)}h`;
+  return `il y a ${Math.floor(diff/86400)}j`;
+}
+
+function initials(name) {
+  return name.split(/\s+/).slice(0,2).map(w=>w[0]?.toUpperCase()||'').join('') || '?';
+}
+
+function updateSelCount() {
+  document.getElementById('sel-count').textContent = selected.size;
+}
+
+window.loadRecipients = function() {
+  const rbtn = document.getElementById('refresh-btn');
+  rbtn.classList.add('spin');
+
+  onValue(ref(db, 'fcm_tokens'), (snapshot) => {
+    rbtn.classList.remove('spin');
+    allRecipients = snapshot.val() || {};
+    renderRecipients();
+    const count = Object.keys(allRecipients).length;
+    document.getElementById('header-sub-count').textContent = count + ' abonné' + (count>1?'s':'') + ' connecté' + (count>1?'s':'');
+    log(`${count} abonné(s) en ligne`, 'info');
+  }, { onlyOnce: false });
+};
+
+function renderRecipients() {
+  const grid = document.getElementById('recipients-grid');
+  const keys = Object.keys(allRecipients);
+
+  document.getElementById('rec-count').textContent = keys.length ? `(${keys.length})` : '';
+
+  if (!keys.length) {
+    grid.innerHTML = `<div class="empty-state">
+      <div class="big">📭</div>
+      Aucun abonné pour l'instant.<br/>
+      Intégrez le bouton sur votre site pour commencer à collecter des abonnés.
+    </div>`;
+    return;
   }
 
-  function selectAll() {
-    if (selected.size === 2) {
-      selected.clear();
-      ['loko','express'].forEach(k => document.getElementById('card-'+k).classList.remove('selected'));
-    } else {
-      ['loko','express'].forEach(k => { selected.add(k); document.getElementById('card-'+k).classList.add('selected'); });
-    }
-    updateUI();
-  }
+  keys.sort((a,b) => (allRecipients[b].updatedAt||0) - (allRecipients[a].updatedAt||0));
 
-  function updateUI() {}
-
-  function log(msg, type='info') {
-    const feed = document.getElementById('log-feed');
-    const el   = document.createElement('div');
-    el.className = 'log-entry ' + type;
-    el.innerHTML = `<span class="log-time">${new Date().toLocaleTimeString('fr-FR')}</span>${msg}`;
-    feed.insertBefore(el, feed.firstChild);
-  }
-
-  function toast(m, t='info') {
-    const el = document.getElementById('toast');
-    el.innerHTML = `<span>${{success:'✅',error:'❌',info:'ℹ️'}[t]}</span><span>${m}</span>`;
-    el.className = 'show ' + t;
-    setTimeout(() => el.className = '', 3500);
-  }
-
-  async function sendToSite(siteKey, title, body) {
-    const site = SITES[siteKey];
-    log(`⏳ Envoi vers <strong>${site.name}</strong> : "${title}"`, 'pending');
-
-    try {
-      const payload = {
-        // Adapter selon votre API
-        title,
-        body,
-        data: { url: site.url },
-        target: siteKey,   // identifiant du site côté serveur si nécessaire
-      };
-
-      const res  = await fetch('/api/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      const json = await res.json();
-
-      if (json.success) {
-        okTotal   += json.successCount || 1;
-        failTotal += json.failureCount || 0;
-        log(`✅ <strong>${site.name}</strong> : ${json.successCount} envoi(s) réussi(s) — ${json.failureCount || 0} échec(s)`, 'success');
-        return true;
-      } else {
-        failTotal++;
-        log(`❌ <strong>${site.name}</strong> : ${json.error}`, 'error');
-        return false;
-      }
-    } catch(e) {
-      failTotal++;
-      log(`❌ <strong>${site.name}</strong> erreur réseau : ${e.message}`, 'error');
-      return false;
-    }
-  }
-
-  window.sendNotification = async function() {
-    const title = document.getElementById('notif-title').value.trim();
-    const body  = document.getElementById('notif-body').value.trim();
-    const btn   = document.getElementById('send-btn');
-
-    if (!title || !body) { toast('Titre et message requis', 'error'); return; }
-    if (!selected.size)  { toast('Sélectionnez au moins un site', 'error'); return; }
-
-    btn.disabled = true;
-    btn.textContent = '⏳ Envoi en cours…';
-
-    const sites = [...selected];
-    sentTotal += sites.length;
-    document.getElementById('s-sent').textContent = sentTotal;
-
-    let allOk = true;
-    for (const key of sites) {
-      const ok = await sendToSite(key, title, body);
-      if (!ok) allOk = false;
-    }
-
-    document.getElementById('s-ok').textContent   = okTotal;
-    document.getElementById('s-fail').textContent = failTotal;
-
-    if (allOk) {
-      toast(`Notification envoyée à ${sites.length} site(s) !`, 'success');
-    } else {
-      toast('Envoi partiel — vérifiez le journal', 'error');
-    }
-
-    btn.disabled = false;
-    btn.textContent = '🚀 Envoyer aux sites sélectionnés';
-  };
-
-  // Sélectionner les deux sites par défaut
-  ['loko','express'].forEach(k => {
-    selected.add(k);
-    document.getElementById('card-'+k).classList.add('selected');
+  grid.innerHTML = '';
+  keys.forEach(key => {
+    const r = allRecipients[key];
+    const isSelected = selected.has(key);
+    const div = document.createElement('div');
+    div.className = `recipient${isSelected?' selected':''}`;
+    div.dataset.key = key;
+    div.innerHTML = `
+      <div class="r-avatar">${initials(r.name||'Visiteur')}</div>
+      <div class="r-info">
+        <div class="r-name">${r.name || 'Visiteur anonyme'}</div>
+        <div class="r-time">${r.updatedAt ? relativeTime(r.updatedAt) : '–'}</div>
+      </div>
+      <div class="r-check">✓</div>
+    `;
+    div.onclick = () => {
+      if (selected.has(key)) { selected.delete(key); div.classList.remove('selected'); }
+      else { selected.add(key); div.classList.add('selected'); }
+      updateSelCount();
+    };
+    grid.appendChild(div);
   });
-  updateUI();
+  updateSelCount();
+}
+
+window.selectAll = function() {
+  const allKeys = Object.keys(allRecipients);
+  const grid    = document.getElementById('recipients-grid');
+  if (selected.size === allKeys.length) {
+    selected.clear();
+    grid.querySelectorAll('.recipient').forEach(el => el.classList.remove('selected'));
+  } else {
+    allKeys.forEach(k => selected.add(k));
+    grid.querySelectorAll('.recipient').forEach(el => el.classList.add('selected'));
+  }
+  updateSelCount();
+};
+
+window.log = function(msg, type='info') {
+  const feed = document.getElementById('log-feed');
+  const el   = document.createElement('div');
+  el.className = `log-entry ${type}`;
+  el.innerHTML = `<span class="log-time">${new Date().toLocaleTimeString('fr-FR')}</span>${msg}`;
+  feed.insertBefore(el, feed.firstChild);
+};
+
+function toast(m, t='info') {
+  const el = document.getElementById('toast');
+  el.innerHTML = `<span>${{success:'✅',error:'❌',info:'ℹ️'}[t]}</span><span>${m}</span>`;
+  el.className = `show ${t}`; setTimeout(()=>el.className='',3500);
+}
+
+window.sendNotification = async function() {
+  const title = document.getElementById('notif-title').value.trim();
+  const body  = document.getElementById('notif-body').value.trim();
+  const url   = document.getElementById('notif-url').value.trim();
+  const btn   = document.getElementById('send-btn');
+
+  if (!title || !body) { toast('Titre et message requis','error'); return; }
+  if (!selected.size)  { toast('Sélectionnez au moins un destinataire','error'); return; }
+
+  const tokens = [...selected].map(k => allRecipients[k]?.token).filter(Boolean);
+  if (!tokens.length) { toast('Tokens introuvables','error'); return; }
+
+  btn.disabled = true; btn.textContent = '⏳ Envoi en cours…';
+  log(`Envoi à ${tokens.length} abonné(s) : "${title}"`, 'pending');
+
+  try {
+    const payload = { tokens, title, body };
+    if (url) payload.data = { url };
+
+    const res  = await fetch('/api/send', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(payload),
+    });
+    const json = await res.json();
+
+    if (json.success) {
+      sentTotal += tokens.length;
+      okTotal   += json.successCount;
+      failTotal += json.failureCount;
+      document.getElementById('s-sent').textContent = sentTotal;
+      document.getElementById('s-ok').textContent   = okTotal;
+      document.getElementById('s-fail').textContent = failTotal;
+      log(`✅ ${json.successCount} notification(s) envoyée(s) avec succès — ${json.failureCount} échec(s)`, 'success');
+      toast(`Envoyé à ${json.successCount} abonné(s) !`, 'success');
+    } else {
+      log(`❌ Erreur serveur : ${json.error}`, 'error');
+      toast('Erreur : ' + json.error, 'error');
+    }
+  } catch(e) {
+    log(`❌ Erreur réseau : ${e.message}`, 'error');
+    toast('Erreur réseau', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🚀 Envoyer aux destinataires sélectionnés';
+  }
+};
+
+loadRecipients();
 </script>
 </body>
 </html>
