@@ -66,7 +66,6 @@ function updateCartUI() {
     total = cart.reduce((s, i) => s + i.price * i.qty, 0);
     const count = cart.reduce((s, i) => s + i.qty, 0);
 
-    // Badge
     ['cart-badge', 'fab-badge'].forEach(id => {
         const el = document.getElementById(id);
         if (!el) return;
@@ -74,11 +73,9 @@ function updateCartUI() {
         el.style.display = count > 0 ? 'flex' : 'none';
     });
 
-    // Cart count text
     const cct = document.getElementById('cart-count-text');
     if (cct) cct.textContent = count > 0 ? `${count} article(s) dans le panier` : 'Votre commande';
 
-    // Cart list
     const list = document.getElementById('cart-items-list');
     if (!list) return;
 
@@ -246,12 +243,164 @@ function startCheckout() {
         return;
     }
     closeModal('cart-modal');
-    // Reset form
     ['inp-name','inp-phone'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
     const et = document.getElementById('inp-etab'); if (et) et.value = '';
     ['err-name','err-phone','err-etab'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
     openModal('customer-modal');
 }
+
+// =============================================================
+// =================== NOTIFICATIONS ===========================
+// =============================================================
+
+// ─── ANCIEN CODE (commenté pour référence) ───────────────────
+/*
+// AVANT : L'utilisateur devait cliquer sur le bouton 🔔 FAB
+// pour accorder la permission de notification MANUELLEMENT.
+// Le bouton appelait requestNotificationPermission() et demandait
+// le consentement explicite via Notification.requestPermission().
+//
+// async function requestNotificationPermission() {
+//     if (!('Notification' in window)) {
+//         showToast('❌ Notifications non supportées sur ce navigateur', 'error');
+//         return;
+//     }
+//     if (!('serviceWorker' in navigator)) {
+//         showToast('❌ Service Worker non supporté', 'error');
+//         return;
+//     }
+//     try {
+//         const reg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+//         await navigator.serviceWorker.ready;
+//         const perm = await Notification.requestPermission(); // <-- demande manuelle
+//         if (perm !== 'granted') {
+//             showToast('🔕 Notifications refusées', 'warn');
+//             return;
+//         }
+//         try {
+//             const token = await messaging.getToken({ vapidKey: VAPID_KEY, serviceWorkerRegistration: reg });
+//             if (token) {
+//                 fcmToken = token;
+//                 localStorage.setItem('fcmToken', token);
+//                 await addDoc(collection(db, 'fcm_tokens'), { token, createdAt: new Date().toISOString(), userAgent: navigator.userAgent.substring(0, 100) });
+//                 showToast('🔔 Notifications activées !', 'success');
+//             }
+//         } catch(tokenErr) {
+//             showToast('🔔 Notifications locales activées', 'success');
+//         }
+//     } catch(e) {
+//         showToast('🔔 Activé (mode basique)', 'success');
+//     }
+// }
+//
+// Dans submitOrder(), la notification n'était envoyée que
+// si fcmToken existait déjà (donc si l'user avait cliqué 🔔).
+// if (fcmToken) { sendOrderNotification(name, code, orderData.total, fcmToken); }
+*/
+
+// ─── NOUVEAU CODE ─────────────────────────────────────────────
+// Désormais : dès que l'utilisateur passe une commande,
+// on lui demande silencieusement la permission (si pas encore accordée)
+// PUIS on envoie immédiatement la notification de confirmation.
+// Le bouton 🔔 FAB n'est plus nécessaire mais reste pour compatibilité.
+
+async function ensureNotificationReady() {
+    // Déjà prêt
+    if (Notification.permission === 'granted' && fcmToken) return true;
+
+    if (!('Notification' in window) || !('serviceWorker' in navigator)) return false;
+
+    try {
+        // Enregistrer le SW avec le bon fichier qui gère FCM + logo GE
+        const reg = await navigator.serviceWorker.register('/firebase-messaging-sw.js', { scope: '/' });
+        await navigator.serviceWorker.ready;
+
+        // Demander la permission si pas encore accordée
+        // (Le navigateur n'affiche le popup que si l'état est 'default')
+        if (Notification.permission !== 'granted') {
+            const perm = await Notification.requestPermission();
+            if (perm !== 'granted') return false;
+        }
+
+        // Obtenir le token FCM
+        if (!fcmToken) {
+            try {
+                const token = await messaging.getToken({
+                    vapidKey: VAPID_KEY,
+                    serviceWorkerRegistration: reg
+                });
+                if (token) {
+                    fcmToken = token;
+                    localStorage.setItem('fcmToken', token);
+                    // Sauvegarder en Firestore pour les notifications admin
+                    try {
+                        await addDoc(collection(db, 'fcm_tokens'), {
+                            token,
+                            createdAt: new Date().toISOString(),
+                            userAgent: navigator.userAgent.substring(0, 100)
+                        });
+                    } catch(fe) { console.log('Token save:', fe.message); }
+                    // Mettre à jour l'icône FAB
+                    const btn = document.getElementById('fab-notif');
+                    if (btn) { btn.textContent = '🔔'; btn.style.background = '#2E7D32'; btn.style.color = 'white'; }
+                }
+            } catch(te) {
+                console.log('FCM token error (localhost?):', te.message);
+                // Sur localhost, le token FCM ne marche pas mais les notifs locales oui
+                return Notification.permission === 'granted';
+            }
+        }
+        return true;
+    } catch(e) {
+        console.error('SW/Notification setup error:', e);
+        return false;
+    }
+}
+
+// Notification de confirmation de commande avec logo Groupe Express
+async function sendOrderNotification(name, code, amount) {
+    try {
+        if (Notification.permission !== 'granted') return;
+
+        const reg = await navigator.serviceWorker.ready;
+
+        // Notification riche via Service Worker (logo + actions)
+        await reg.showNotification('✅ Commande confirmée — Groupe Express', {
+            body: `Bonjour ${name} ! Commande ${code} (${amount} FCFA) enregistrée. Retrait à 12h00 au rez-de-chaussée 🍽️`,
+            icon: '/image/GE.jpg',          // Logo Groupe Express
+            badge: '/image/GE.jpg',         // Icône badge (Android)
+            image: '/image/at.jpg',          // Image riche optionnelle
+            tag: 'order-' + code,
+            data: { url: '/', code },
+            actions: [
+                { action: 'view', title: '📦 Mes commandes' },
+                { action: 'dismiss', title: '✕ Fermer' }
+            ],
+            requireInteraction: true,        // Reste visible jusqu'au clic
+            vibrate: [200, 100, 300, 100, 200],
+            silent: false,
+            timestamp: Date.now()
+        });
+
+        // Si FCM token dispo, la Cloud Function notifie aussi en background
+    } catch(e) {
+        console.error('Notification error:', e);
+    }
+}
+
+// Bouton FAB 🔔 — reste fonctionnel pour activer manuellement
+async function requestNotificationPermission() {
+    const ready = await ensureNotificationReady();
+    if (ready) {
+        showToast('🔔 Notifications déjà activées !', 'success');
+        const btn = document.getElementById('fab-notif');
+        if (btn) { btn.textContent = '🔔'; btn.style.background = '#2E7D32'; btn.style.color = 'white'; }
+    } else {
+        showToast('❌ Notifications non disponibles sur ce navigateur', 'error');
+    }
+}
+
+// =============================================================
 
 async function submitOrder() {
     const name = document.getElementById('inp-name')?.value.trim() || '';
@@ -276,6 +425,10 @@ async function submitOrder() {
     if (btn) { btn.disabled = true; btn.textContent = '⏳ Envoi en cours...'; }
 
     try {
+        // ✅ NOUVEAU : Activer les notifications automatiquement à la commande
+        // (remplace l'ancien système de consentement manuel)
+        await ensureNotificationReady();
+
         const orderData = {
             customerName: name,
             whatsappNumber: phone,
@@ -290,67 +443,32 @@ async function submitOrder() {
         const docRef = await addDoc(collection(db, 'orders'), orderData);
         const code = `#GEC${docRef.id.substring(0,6).toUpperCase()}`;
 
-        // Save locally
+        // Sauvegarder localement
         customerOrders.push({ ...orderData, code, timestamp: new Date().toISOString() });
         localStorage.setItem('ge_orders', JSON.stringify(customerOrders));
 
-        // Clear cart
+        // Vider le panier
         cart = [];
         total = 0;
         updateCartUI();
 
-        // Show success
+        // Afficher le succès
         closeModal('customer-modal');
         document.getElementById('success-code').textContent = code;
         document.getElementById('success-name').textContent = name;
         document.getElementById('success-total').textContent = `Total payé : ${orderData.total} FCFA`;
         openModal('success-modal');
 
-        // Send push notification via FCM (if token exists)
-        if (fcmToken) {
-            sendOrderNotification(name, code, orderData.total, fcmToken);
-        }
+        // ✅ NOUVEAU : Envoyer la notification immédiatement sans condition de fcmToken préalable
+        // L'ancien code faisait : if (fcmToken) { sendOrderNotification(...) }
+        // Le nouveau envoie toujours (ensureNotificationReady a déjà obtenu la permission)
+        await sendOrderNotification(name, code, orderData.total);
 
     } catch (e) {
         console.error('Order error:', e);
         showToast('❌ Erreur lors de l\'envoi. Réessayez.', 'error');
     } finally {
         if (btn) { btn.disabled = false; btn.textContent = '✅ Valider ma commande'; }
-    }
-}
-
-// =====================================================
-// La notification push est envoyée AUTOMATIQUEMENT
-// par la Cloud Function "notifyOnNewOrder" dans
-// functions/index.js dès qu'une commande est créée
-// dans Firestore — même si le client a fermé l'app.
-//
-// En fallback (si pas de Cloud Function), on utilise
-// la notification locale via Service Worker.
-// =====================================================
-async function sendOrderNotification(name, code, amount, token) {
-    try {
-        // Notification locale immédiate (fallback)
-        if (Notification.permission === 'granted' && 'serviceWorker' in navigator) {
-            const reg = await navigator.serviceWorker.ready;
-            await reg.showNotification(`✅ Commande ${code} confirmée !`, {
-                body: `Bonjour ${name} ! Votre commande est enregistrée. Retrait à 12h00 au stand Groupe Express 🍽️`,
-                icon: '/image/GE.jpg',
-                badge: '/image/GE.jpg',
-                tag: 'order-' + code,
-                data: { url: '/', code },
-                actions: [
-                    { action: 'view', title: '📦 Voir ma commande' },
-                    { action: 'dismiss', title: 'Fermer' }
-                ],
-                requireInteraction: true,
-                vibrate: [200, 100, 300, 100, 200]
-            });
-        }
-        // Note: la Cloud Function envoie aussi automatiquement via FCM
-        // dès que la commande apparaît dans Firestore (même hors ligne)
-    } catch(e) {
-        console.log('Local notification error:', e);
     }
 }
 
@@ -382,98 +500,34 @@ function clearOrders() {
     }
 }
 
-// ===== NOTIFICATIONS — Vraie logique FCM =====
-async function requestNotificationPermission() {
-    if (!('Notification' in window)) {
-        showToast('❌ Notifications non supportées sur ce navigateur', 'error');
-        return;
-    }
-    if (!('serviceWorker' in navigator)) {
-        showToast('❌ Service Worker non supporté', 'error');
-        return;
-    }
-
-    try {
-        // 1. Enregistrer le SW
-        const reg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
-        await navigator.serviceWorker.ready;
-
-        // 2. Demander la permission
-        const perm = await Notification.requestPermission();
-        if (perm !== 'granted') {
-            showToast('🔕 Notifications refusées', 'warn');
-            return;
-        }
-
-        // 3. Obtenir le token FCM
-        try {
-            const token = await messaging.getToken({
-                vapidKey: VAPID_KEY,
-                serviceWorkerRegistration: reg
-            });
-            if (token) {
-                fcmToken = token;
-                localStorage.setItem('fcmToken', token);
-                // Sauvegarder le token dans Firestore
-                try {
-                    await addDoc(collection(db, 'fcm_tokens'), {
-                        token,
-                        createdAt: new Date().toISOString(),
-                        userAgent: navigator.userAgent.substring(0, 100)
-                    });
-                } catch(fe) { console.log('Token Firestore save:', fe.message); }
-                showToast('🔔 Notifications activées ! Vous recevrez vos confirmations de commande.', 'success');
-                // Mettre à jour l'icône FAB
-                const btn = document.getElementById('fab-notif');
-                if (btn) { btn.textContent = '🔔'; btn.style.background = '#2E7D32'; btn.style.color = 'white'; }
-            }
-        } catch(tokenErr) {
-            console.error('FCM token error:', tokenErr);
-            // Sur localhost/file:// le token FCM ne fonctionne pas mais la permission locale oui
-            showToast('🔔 Notifications locales activées', 'success');
-        }
-    } catch(e) {
-        console.error('SW registration error:', e);
-        showToast('🔔 Activé (mode basique)', 'success');
-    }
-}
-
-// ===== PWA INSTALLATION — LOGIQUE INTELLIGENTE =====
+// ===== PWA INSTALLATION =====
 let deferredPrompt = null;
-let pwaInstalled = false;
 
-// Détecte si déjà installée (standalone mode)
 function isRunningStandalone() {
     return window.matchMedia('(display-mode: standalone)').matches
         || window.navigator.standalone === true
         || document.referrer.includes('android-app://');
 }
 
-// Détecte iOS
 function isIOS() {
     return /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
 }
 
-// Détecte Android Chrome
 function isAndroidChrome() {
     return /android/i.test(navigator.userAgent) && /chrome/i.test(navigator.userAgent);
 }
 
-// Écoute le prompt natif Chrome/Android
 window.addEventListener('beforeinstallprompt', e => {
     e.preventDefault();
     deferredPrompt = e;
-    // Montre le FAB avec une animation d'attention
     const btn = document.getElementById('fab-install');
     if (btn) {
-        btn.style.animation = 'none';
         btn.style.background = 'linear-gradient(135deg, #FF5722, #FF8C42)';
         btn.title = 'Installer l\'app — disponible !';
     }
 });
 
 window.addEventListener('appinstalled', () => {
-    pwaInstalled = true;
     deferredPrompt = null;
     const btn = document.getElementById('fab-install');
     if (btn) {
@@ -485,131 +539,41 @@ window.addEventListener('appinstalled', () => {
 });
 
 function triggerInstallPrompt() {
-    // Déjà en mode app installée
     if (isRunningStandalone()) {
         showToast('✅ Vous utilisez déjà l\'application installée !', 'success');
         return;
     }
-
-    // Chrome/Android — prompt natif disponible
     if (deferredPrompt) {
         deferredPrompt.prompt();
         deferredPrompt.userChoice.then(r => {
-            if (r.outcome === 'accepted') {
-                showToast('✅ Application installée avec succès !', 'success');
-            } else {
-                showToast('Installation annulée', 'warn');
-            }
+            if (r.outcome === 'accepted') showToast('✅ Application installée !', 'success');
+            else showToast('Installation annulée', 'warn');
             deferredPrompt = null;
         });
         return;
     }
-
-    // Pas de prompt disponible → afficher les instructions manuelles
     showInstallInstructions();
 }
 
 function showInstallInstructions() {
     const body = document.getElementById('install-modal-body');
     let content = '';
-
     if (isIOS()) {
-        // Instructions Safari iOS
         content = `
         <div style="text-align:center;margin-bottom:20px">
             <div style="font-size:50px;margin-bottom:8px">🍎</div>
             <p style="font-size:14px;color:#666;line-height:1.6">Sur iPhone/iPad, suivez ces étapes dans <strong>Safari</strong> :</p>
         </div>
-        <div class="install-step">
-            <div class="install-step-num">1</div>
-            <div class="install-step-text">
-                <strong>Appuyez sur le bouton Partager</strong>
-                <p>L'icône <span style="font-size:18px">⎙</span> en bas de Safari</p>
-            </div>
-        </div>
-        <div class="install-step">
-            <div class="install-step-num">2</div>
-            <div class="install-step-text">
-                <strong>Défiler et appuyer sur</strong>
-                <p>"Sur l'écran d'accueil" <span style="font-size:18px">➕</span></p>
-            </div>
-        </div>
-        <div class="install-step">
-            <div class="install-step-num">3</div>
-            <div class="install-step-text">
-                <strong>Appuyer sur "Ajouter"</strong>
-                <p>L'icône Groupe Express apparaîtra sur votre écran d'accueil !</p>
-            </div>
-        </div>
-        <div style="background:#FFF5F0;border-radius:12px;padding:14px;margin-top:16px;font-size:13px;color:#888;text-align:center">
-            ⚠️ Fonctionne uniquement avec <strong>Safari</strong> — pas avec Chrome sur iOS
-        </div>`;
-    } else if (isAndroidChrome()) {
-        // Android Chrome — prompt non encore déclenché ou refusé
-        content = `
-        <div style="text-align:center;margin-bottom:20px">
-            <div style="font-size:50px;margin-bottom:8px">🤖</div>
-            <p style="font-size:14px;color:#666;line-height:1.6">Sur Android Chrome, suivez ces étapes :</p>
-        </div>
-        <div class="install-step">
-            <div class="install-step-num">1</div>
-            <div class="install-step-text">
-                <strong>Appuyer sur le menu ⋮</strong>
-                <p>Les 3 points en haut à droite de Chrome</p>
-            </div>
-        </div>
-        <div class="install-step">
-            <div class="install-step-num">2</div>
-            <div class="install-step-text">
-                <strong>Sélectionnez "Ajouter à l'écran d'accueil"</strong>
-                <p>Ou "Installer l'application" selon votre version</p>
-            </div>
-        </div>
-        <div class="install-step">
-            <div class="install-step-num">3</div>
-            <div class="install-step-text">
-                <strong>Confirmer l'installation</strong>
-                <p>Groupe Express sera sur votre écran d'accueil 🎉</p>
-            </div>
-        </div>
-        <div style="margin-top:16px">
-            <button onclick="window.location.reload()" style="width:100%;padding:12px;border-radius:12px;border:none;background:var(--flame);color:white;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit">
-                🔄 Recharger la page pour réessayer
-            </button>
-        </div>`;
+        <div class="install-step"><div class="install-step-num">1</div><div class="install-step-text"><strong>Appuyez sur le bouton Partager</strong><p>L'icône ⎙ en bas de Safari</p></div></div>
+        <div class="install-step"><div class="install-step-num">2</div><div class="install-step-text"><strong>Défiler et appuyer sur</strong><p>"Sur l'écran d'accueil" ➕</p></div></div>
+        <div class="install-step"><div class="install-step-num">3</div><div class="install-step-text"><strong>Appuyer sur "Ajouter"</strong><p>L'icône Groupe Express apparaîtra !</p></div></div>`;
     } else {
-        // Desktop ou autre navigateur
         content = `
         <div style="text-align:center;margin-bottom:20px">
-            <div style="font-size:50px;margin-bottom:8px">💻</div>
-            <p style="font-size:14px;color:#666;line-height:1.6">Installez l'application depuis votre navigateur :</p>
-        </div>
-        <div class="install-step">
-            <div class="install-step-num">1</div>
-            <div class="install-step-text">
-                <strong>Chrome / Edge</strong>
-                <p>Cliquez sur l'icône d'installation ⬇ dans la barre d'adresse</p>
-            </div>
-        </div>
-        <div class="install-step">
-            <div class="install-step-num">2</div>
-            <div class="install-step-text">
-                <strong>Menu du navigateur</strong>
-                <p>⋮ → "Installer Groupe Express" ou "Ajouter à l'écran d'accueil"</p>
-            </div>
-        </div>
-        <div class="install-step">
-            <div class="install-step-num">3</div>
-            <div class="install-step-text">
-                <strong>⚠️ Fichier local détecté</strong>
-                <p>Pour une installation complète, hébergez le site sur un serveur HTTPS (Firebase Hosting, Netlify...)</p>
-            </div>
-        </div>
-        <div style="background:#FFF3CD;border-radius:12px;padding:14px;margin-top:16px;font-size:13px;color:#856404;line-height:1.5">
-            💡 <strong>Note :</strong> L'installation PWA nécessite HTTPS. En local (<code>file://</code>), utilisez <code>localhost</code> ou déployez sur un serveur.
+            <div style="font-size:50px;margin-bottom:8px">📲</div>
+            <p style="font-size:14px;color:#666;line-height:1.6">Menu ⋮ → "Ajouter à l'écran d'accueil"</p>
         </div>`;
     }
-
     if (body) body.innerHTML = content;
     openModal('install-modal');
 }
@@ -627,41 +591,40 @@ function loadNewDishes() {
             if (!dishes.length) { sec.style.display = 'none'; return; }
             sec.style.display = 'block';
             if (cnt) cnt.textContent = `${dishes.length} plat(s)`;
-           grid.innerHTML = dishes.map(d => {
-    const safeName = (d.name||'Nouveau plat').replace(/'/g, "\\'");
-    const safeDesc = (d.description||'Découvrez notre nouvelle création').replace(/'/g, "\\'");
-    const price = d.price || 0;
-    const cat = d.category || 'I';
-    const img = d.imageUrl || '';
-    return `
-    <div class="dish-card">
-        <div class="dish-image-wrap"
-            onclick="openDishPreview(this)"
-            data-img="${img}"
-            data-name="${d.name||'Nouveau plat'}"
-            data-desc="${d.description||'Découvrez notre nouvelle création'}"
-            data-price="${price} FCFA"
-            data-badge="🆕 Nouveau"
-            data-action="promptAddToCart('${safeName}', ${price}, '${cat}')">
-            <img src="${img}" alt="${d.name||''}" class="dish-image"
-                onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🆕</text></svg>'">
-            <span class="dish-new-tag">🆕 Nouveau</span>
-        </div>
-        <div class="dish-body">
-            <div class="dish-name">${d.name||'Nouveau plat'}</div>
-            <div class="dish-desc">${d.description||'Découvrez notre nouvelle création'}</div>
-            <div class="dish-footer">
-                <span class="dish-price">${price} FCFA</span>
-                <button class="add-btn" onclick="promptAddToCart('${safeName}', ${price}, '${cat}')">+</button>
-            </div>
-        </div>
-    </div>
-`}).join('');
+            grid.innerHTML = dishes.map(d => {
+                const safeName = (d.name||'Nouveau plat').replace(/'/g, "\\'");
+                const price = d.price || 0;
+                const cat = d.category || 'I';
+                const img = d.imageUrl || '';
+                return `
+                <div class="dish-card">
+                    <div class="dish-image-wrap"
+                        onclick="openDishPreview(this)"
+                        data-img="${img}"
+                        data-name="${d.name||'Nouveau plat'}"
+                        data-desc="${d.description||'Découvrez notre nouvelle création'}"
+                        data-price="${price} FCFA"
+                        data-badge="🆕 Nouveau"
+                        data-action="promptAddToCart('${safeName}', ${price}, '${cat}')">
+                        <img src="${img}" alt="${d.name||''}" class="dish-image"
+                            onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🆕</text></svg>'">
+                        <span class="dish-new-tag">🆕 Nouveau</span>
+                    </div>
+                    <div class="dish-body">
+                        <div class="dish-name">${d.name||'Nouveau plat'}</div>
+                        <div class="dish-desc">${d.description||''}</div>
+                        <div class="dish-footer">
+                            <span class="dish-price">${price} FCFA</span>
+                            <button class="add-btn" onclick="promptAddToCart('${safeName}', ${price}, '${cat}')">+</button>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
         });
     } catch(e) { console.error('Firebase dishes error:', e); }
 }
 
-// ===== PROMO SLIDER — touch/swipe + auto =====
+// ===== PROMO SLIDER =====
 let promoIdx = 0;
 let promoAuto;
 const TOTAL_SLIDES = 3;
@@ -673,9 +636,7 @@ function goSlide(i) {
         slides.style.transition = 'transform 0.42s cubic-bezier(.4,0,.2,1)';
         slides.style.transform = `translateX(-${promoIdx * 100}%)`;
     }
-    document.querySelectorAll('.promo-dot').forEach((d, j) => {
-        d.classList.toggle('active', j === promoIdx);
-    });
+    document.querySelectorAll('.promo-dot').forEach((d, j) => d.classList.toggle('active', j === promoIdx));
 }
 
 function startSlider() {
@@ -686,88 +647,27 @@ function startSlider() {
 function initSliderTouch() {
     const track = document.querySelector('.promo-track');
     if (!track) return;
-
     let startX = 0, startY = 0, isDragging = false, hasMoved = false;
 
-    // TOUCH events (mobile)
-    track.addEventListener('touchstart', e => {
-        startX = e.touches[0].clientX;
-        startY = e.touches[0].clientY;
-        isDragging = true;
-        hasMoved = false;
-        clearInterval(promoAuto); // pause auto on touch
-    }, { passive: true });
-
+    track.addEventListener('touchstart', e => { startX = e.touches[0].clientX; startY = e.touches[0].clientY; isDragging = true; hasMoved = false; clearInterval(promoAuto); }, { passive: true });
     track.addEventListener('touchmove', e => {
         if (!isDragging) return;
         const dx = e.touches[0].clientX - startX;
         const dy = e.touches[0].clientY - startY;
-        if (Math.abs(dx) > Math.abs(dy)) {
-            hasMoved = true;
-            // Live drag feedback
-            const slides = document.getElementById('promo-slides');
-            if (slides) {
-                slides.style.transition = 'none';
-                slides.style.transform = `translateX(calc(-${promoIdx * 100}% + ${dx}px))`;
-            }
-        }
+        if (Math.abs(dx) > Math.abs(dy)) { hasMoved = true; const slides = document.getElementById('promo-slides'); if (slides) { slides.style.transition = 'none'; slides.style.transform = `translateX(calc(-${promoIdx * 100}% + ${dx}px))`; } }
     }, { passive: true });
-
     track.addEventListener('touchend', e => {
-        if (!isDragging) return;
-        isDragging = false;
+        if (!isDragging) return; isDragging = false;
         const dx = e.changedTouches[0].clientX - startX;
         const dy = e.changedTouches[0].clientY - startY;
-        if (hasMoved && Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
-            goSlide(dx < 0 ? promoIdx + 1 : promoIdx - 1);
-        } else {
-            // Snap back
-            const slides = document.getElementById('promo-slides');
-            if (slides) {
-                slides.style.transition = 'transform 0.42s cubic-bezier(.4,0,.2,1)';
-                slides.style.transform = `translateX(-${promoIdx * 100}%)`;
-            }
-        }
-        startSlider(); // resume auto
+        if (hasMoved && Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) goSlide(dx < 0 ? promoIdx + 1 : promoIdx - 1);
+        else { const slides = document.getElementById('promo-slides'); if (slides) { slides.style.transition = 'transform 0.42s cubic-bezier(.4,0,.2,1)'; slides.style.transform = `translateX(-${promoIdx * 100}%)`; } }
+        startSlider();
     }, { passive: true });
 
-    // MOUSE events (desktop drag)
-    track.addEventListener('mousedown', e => {
-        startX = e.clientX;
-        isDragging = true;
-        hasMoved = false;
-        clearInterval(promoAuto);
-        track.style.cursor = 'grabbing';
-    });
-
-    track.addEventListener('mousemove', e => {
-        if (!isDragging) return;
-        const dx = e.clientX - startX;
-        if (Math.abs(dx) > 5) hasMoved = true;
-        const slides = document.getElementById('promo-slides');
-        if (slides) {
-            slides.style.transition = 'none';
-            slides.style.transform = `translateX(calc(-${promoIdx * 100}% + ${dx}px))`;
-        }
-    });
-
-    const endDrag = (e) => {
-        if (!isDragging) return;
-        isDragging = false;
-        track.style.cursor = 'grab';
-        const dx = (e.clientX ?? e.changedTouches?.[0]?.clientX ?? startX) - startX;
-        if (hasMoved && Math.abs(dx) > 40) {
-            goSlide(dx < 0 ? promoIdx + 1 : promoIdx - 1);
-        } else {
-            const slides = document.getElementById('promo-slides');
-            if (slides) {
-                slides.style.transition = 'transform 0.42s cubic-bezier(.4,0,.2,1)';
-                slides.style.transform = `translateX(-${promoIdx * 100}%)`;
-            }
-        }
-        startSlider();
-    };
-
+    track.addEventListener('mousedown', e => { startX = e.clientX; isDragging = true; hasMoved = false; clearInterval(promoAuto); track.style.cursor = 'grabbing'; });
+    track.addEventListener('mousemove', e => { if (!isDragging) return; const dx = e.clientX - startX; if (Math.abs(dx) > 5) hasMoved = true; const slides = document.getElementById('promo-slides'); if (slides) { slides.style.transition = 'none'; slides.style.transform = `translateX(calc(-${promoIdx * 100}% + ${dx}px))`; } });
+    const endDrag = e => { if (!isDragging) return; isDragging = false; track.style.cursor = 'grab'; const dx = (e.clientX ?? startX) - startX; if (hasMoved && Math.abs(dx) > 40) goSlide(dx < 0 ? promoIdx + 1 : promoIdx - 1); else { const slides = document.getElementById('promo-slides'); if (slides) { slides.style.transition = 'transform 0.42s cubic-bezier(.4,0,.2,1)'; slides.style.transform = `translateX(-${promoIdx * 100}%)`; } } startSlider(); };
     track.addEventListener('mouseup', endDrag);
     track.addEventListener('mouseleave', endDrag);
 }
@@ -797,32 +697,23 @@ function showToast(msg, type = 'success') {
     setTimeout(() => { t.style.animation = 'toastOut 0.3s ease forwards'; setTimeout(() => t.remove(), 300); }, 3000);
 }
 
-// ===== EXPOSE GLOBALS =====
 // ===== DISH PREVIEW =====
 function openDishPreview(el) {
     const d = el.dataset;
     const img = document.getElementById('preview-img');
-    img.src = d.img;
-    img.alt = d.name || '';
+    img.src = d.img; img.alt = d.name || '';
     document.getElementById('preview-name').textContent = d.name || '';
     document.getElementById('preview-desc').textContent = d.desc || '';
     document.getElementById('preview-price').textContent = d.price || '';
     const badge = document.getElementById('preview-badge');
-    if (d.badge) {
-        badge.textContent = d.badge;
-        badge.style.display = 'inline-block';
-    } else {
-        badge.textContent = '';
-        badge.style.display = 'none';
-    }
+    if (d.badge) { badge.textContent = d.badge; badge.style.display = 'inline-block'; }
+    else { badge.textContent = ''; badge.style.display = 'none'; }
     const btn = document.getElementById('preview-order-btn');
-    btn.onclick = () => {
-        closeModal('dish-preview-modal');
-        // Petite pause pour laisser le modal se fermer avant d'ouvrir le suivant
-        setTimeout(() => { eval(d.action); }, 150);
-    };
+    btn.onclick = () => { closeModal('dish-preview-modal'); setTimeout(() => { eval(d.action); }, 150); };
     openModal('dish-preview-modal');
 }
+
+// ===== EXPOSE GLOBALS =====
 window.toggleCart = toggleCart;
 window.toggleOrders = toggleOrders;
 window.promptAddToCart = promptAddToCart;
@@ -850,52 +741,45 @@ document.addEventListener('DOMContentLoaded', () => {
     loadNewDishes();
     startSlider();
     setInterval(checkHours, 60000);
-
-    // Init touch swipe on slider
     initSliderTouch();
 
-    // Register service worker
+    // Enregistrer le Service Worker FCM (avec logo GE)
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/firebase-messaging-sw.js')
-            .then(reg => console.log('SW registered:', reg.scope))
+        navigator.serviceWorker.register('/firebase-messaging-sw.js', { scope: '/' })
+            .then(reg => {
+                console.log('✅ SW registered:', reg.scope);
+                // Vérifier si permission déjà accordée au chargement
+                if (Notification.permission === 'granted') {
+                    const btn = document.getElementById('fab-notif');
+                    if (btn) { btn.textContent = '🔔'; btn.style.background = '#2E7D32'; btn.style.color = 'white'; }
+                }
+            })
             .catch(e => console.log('SW registration failed:', e));
     }
 
-    // Listen for FCM foreground messages
+    // Écouter les messages FCM en foreground
     try {
         messaging.onMessage(payload => {
-            console.log('FCM message received:', payload);
+            console.log('FCM foreground message:', payload);
             const { title, body } = payload.notification || {};
-            showToast(`🔔 ${title}: ${body}`);
+            if (title) showToast(`🔔 ${title}: ${body}`);
         });
     } catch(e) {}
 });
-// Scroll indicator
+
+// ===== SCROLL INDICATOR =====
 const scrollInd = document.getElementById('scroll-indicator');
 const scrollThumb = document.getElementById('scroll-thumb');
-
 window.addEventListener('scroll', () => {
     const scrolled = window.scrollY;
-    const total = document.body.scrollHeight - window.innerHeight;
-    const pct = total > 0 ? scrolled / total : 0;
-
-    // Montrer seulement si pas tout en bas
-    if (pct > 0.02 && pct < 0.97) {
-        scrollInd?.classList.add('visible');
-        scrollInd?.classList.remove('hidden');
-    } else {
-        scrollInd?.classList.remove('visible');
-        scrollInd?.classList.add('hidden');
-    }
-
-    // Positionner le thumb
-    if (scrollThumb) {
-        scrollThumb.style.height = `${Math.max(8, pct * 60)}px`;
-        scrollThumb.style.top = `${pct * (60 - Math.max(8, pct * 60))}px`;
-    }
+    const tot = document.body.scrollHeight - window.innerHeight;
+    const pct = tot > 0 ? scrolled / tot : 0;
+    if (pct > 0.02 && pct < 0.97) { scrollInd?.classList.add('visible'); scrollInd?.classList.remove('hidden'); }
+    else { scrollInd?.classList.remove('visible'); scrollInd?.classList.add('hidden'); }
+    if (scrollThumb) { scrollThumb.style.height = `${Math.max(8, pct * 60)}px`; scrollThumb.style.top = `${pct * (60 - Math.max(8, pct * 60))}px`; }
 }, { passive: true });
 
-// Swipe hint sur les pills
+// ===== SWIPE HINT PILLS =====
 const pillsEl = document.getElementById('nav-pills');
 const swipeHint = document.getElementById('swipe-hint');
 if (pillsEl && swipeHint) {
@@ -904,4 +788,5 @@ if (pillsEl && swipeHint) {
         swipeHint.classList.toggle('hidden', atEnd);
     }, { passive: true });
 }
-console.log('✅ GROUPE EXPRESS PWA loaded');
+
+console.log('✅ GROUPE EXPRESS PWA loaded — Notifications auto à la commande activées');
