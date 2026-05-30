@@ -1,796 +1,378 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Activer les notifications — Groupe Express</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
-<style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bouton Notifications — Groupe Express</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: #0a0a14;
+    }
 
-:root {
-  --bg: #04080f;
-  --ink: #e8f0fe;
-  --muted: #6b7a99;
-  --accent: #4f8cff;
-  --accent2: #00e5c3;
-  --glow: rgba(79,140,255,0.22);
-  --card: rgba(12,20,38,0.85);
-  --border: rgba(79,140,255,0.13);
-  --success: #00e676;
-  --danger: #ff5252;
-}
+    /* ════════════════════════════════════════
+       SCÈNE PRINCIPALE
+    ════════════════════════════════════════ */
+    #notif-scene {
+      width: 100%;
+      max-width: 600px;
+      min-height: 520px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 30px 40px;
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      border-radius: 28px;
+      box-shadow: 0 40px 120px rgba(108,99,255,0.25);
+    }
 
-html, body {
-  height: 100%;
-  background: var(--bg);
-  color: var(--ink);
-  font-family: 'DM Sans', sans-serif;
-  overflow: hidden;
-}
+    /* ─── Étoiles ─── */
+    .stars { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+    .star {
+      position: absolute;
+      width: 2px; height: 2px;
+      background: #fff;
+      border-radius: 50%;
+      animation: twinkle var(--d, 3s) ease-in-out infinite var(--delay, 0s);
+      opacity: 0;
+    }
+    @keyframes twinkle {
+      0%, 100% { opacity: 0; transform: scale(0.5); }
+      50% { opacity: 1; transform: scale(1.4); }
+    }
 
-/* ── Canvas bg ── */
-#stars-bg {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  overflow: hidden;
-}
+    /* ─── Anneaux ─── */
+    .ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.06);
+      animation: pulse-ring var(--rd, 6s) ease-in-out infinite var(--rdelay, 0s);
+    }
+    @keyframes pulse-ring {
+      0%, 100% { transform: translate(-50%,-50%) scale(1); opacity: 0.4; }
+      50%       { transform: translate(-50%,-50%) scale(1.08); opacity: 0.08; }
+    }
 
-.star {
-  position: absolute;
-  width: 2px; height: 2px;
-  border-radius: 50%;
-  background: #fff;
-  opacity: 0;
-  animation: twinkle var(--d, 3s) ease-in-out var(--delay, 0s) infinite;
-}
+    /* ─── Titre / Sous-titre ─── */
+    .notif-title {
+      color: #fff;
+      font-size: 1.6rem;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 10px;
+      z-index: 10;
+      position: relative;
+      letter-spacing: 0.02em;
+    }
+    .notif-subtitle {
+      color: rgba(255,255,255,0.5);
+      font-size: 0.82rem;
+      text-align: center;
+      margin-bottom: 38px;
+      z-index: 10;
+      position: relative;
+    }
 
-@keyframes twinkle {
-  0%, 100% { opacity: 0; transform: scale(1); }
-  50%       { opacity: 0.85; transform: scale(1.6); }
-}
+    /* ─── Bouton principal ─── */
+    #notif-subscribe-btn {
+      font-family: 'Poppins', sans-serif;
+      position: relative;
+      z-index: 10;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 18px 48px;
+      background: linear-gradient(135deg, #6c63ff, #3ec6e0, #ff6584);
+      background-size: 200% 200%;
+      animation: gradient-shift 4s ease infinite;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 0 40px rgba(108,99,255,0.6), 0 0 80px rgba(62,198,224,0.2);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      overflow: hidden;
+    }
+    #notif-subscribe-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+      border-radius: 50px;
+    }
+    #notif-subscribe-btn:hover:not(:disabled) {
+      transform: translateY(-4px) scale(1.04);
+      box-shadow: 0 0 60px rgba(108,99,255,0.9), 0 0 120px rgba(62,198,224,0.4);
+    }
+    #notif-subscribe-btn:active:not(:disabled) { transform: scale(0.97); }
+    #notif-subscribe-btn:disabled { cursor: not-allowed; }
+    #notif-subscribe-btn.success-state {
+      background: linear-gradient(135deg, #00c9a7, #00e676);
+      background-size: 200% 200%;
+      box-shadow: 0 0 40px rgba(0,201,167,0.6), 0 0 80px rgba(0,230,118,0.3);
+    }
+    @keyframes gradient-shift {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
 
-/* Nebula blobs */
-.nebula {
-  position: fixed;
-  border-radius: 50%;
-  filter: blur(80px);
-  pointer-events: none;
-  z-index: 0;
-}
-.nebula-1 {
-  width: 600px; height: 600px;
-  background: radial-gradient(circle, rgba(79,140,255,0.12), transparent 70%);
-  top: -150px; left: -100px;
-}
-.nebula-2 {
-  width: 500px; height: 500px;
-  background: radial-gradient(circle, rgba(0,229,195,0.09), transparent 70%);
-  bottom: -100px; right: -80px;
-}
-.nebula-3 {
-  width: 350px; height: 350px;
-  background: radial-gradient(circle, rgba(120,60,255,0.08), transparent 70%);
-  top: 40%; left: 50%;
-  transform: translate(-50%, -50%);
-}
+    .bell-icon {
+      font-size: 1.3rem;
+      animation: bell-shake 2.5s ease infinite;
+      display: inline-block;
+    }
+    @keyframes bell-shake {
+      0%, 80%, 100% { transform: rotate(0); }
+      85%  { transform: rotate(18deg); }
+      90%  { transform: rotate(-16deg); }
+      95%  { transform: rotate(12deg); }
+      98%  { transform: rotate(-8deg); }
+    }
 
-/* ── Scene wrapper ── */
-#notif-scene {
-  position: relative;
-  z-index: 10;
-  width: 100%;
-  height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+    /* ─── Spinner ─── */
+    .notif-spinner {
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ── Card ── */
-.notif-card {
-  position: relative;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 28px;
-  padding: 52px 44px 44px;
-  width: 100%;
-  max-width: 480px;
-  backdrop-filter: blur(24px);
-  box-shadow:
-    0 0 0 1px rgba(79,140,255,0.07),
-    0 30px 80px rgba(0,0,0,0.55),
-    0 0 60px rgba(79,140,255,0.06) inset;
-  animation: cardIn 0.7s cubic-bezier(0.22,1,0.36,1) both;
-}
+    /* ─── Ripple ─── */
+    .ripple {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.35);
+      transform: scale(0);
+      animation: ripple-out 0.7s ease-out forwards;
+      pointer-events: none;
+    }
+    @keyframes ripple-out { to { transform: scale(6); opacity: 0; } }
 
-@keyframes cardIn {
-  from { opacity: 0; transform: translateY(32px) scale(0.97); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
-}
+    /* ─── Particules ─── */
+    .particle {
+      position: absolute;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 30;
+      animation: particle-fly var(--dur, 1s) ease-out forwards;
+    }
+    @keyframes particle-fly {
+      0%   { transform: translate(0,0) scale(1); opacity: 1; }
+      100% { transform: translate(var(--tx,60px), var(--ty,-80px)) scale(0); opacity: 0; }
+    }
 
-/* Scanning line */
-.notif-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--accent), var(--accent2), transparent);
-  border-radius: 28px 28px 0 0;
-  opacity: 0.7;
-}
+    /* ─── Statut ─── */
+    #notif-status {
+      margin-top: 20px;
+      z-index: 10;
+      position: relative;
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.4);
+      min-height: 20px;
+      text-align: center;
+      transition: all 0.4s ease;
+    }
 
-/* ── Logo zone ── */
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 36px;
-}
+    /* ─── Personnage petite fille ─── */
+    #girl-container {
+      position: absolute;
+      bottom: -200px;
+      right: 36px;
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: bottom 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+      pointer-events: none;
+    }
+    #girl-container.show { bottom: 8px; }
 
-.brand-logo {
-  width: 44px; height: 44px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.3rem;
-  flex-shrink: 0;
-  box-shadow: 0 0 20px rgba(79,140,255,0.35);
-}
+    /* ─── Bulle de dialogue ─── */
+    #speech-bubble {
+      background: rgba(255,255,255,0.97);
+      border-radius: 20px 20px 4px 20px;
+      padding: 14px 18px;
+      max-width: 230px;
+      font-size: 0.72rem;
+      line-height: 1.55;
+      color: #2d2d2d;
+      margin-bottom: 10px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.35);
+      opacity: 0;
+      transform: scale(0.7) translateY(12px);
+      transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.35s;
+    }
+    #speech-bubble.show { opacity: 1; transform: scale(1) translateY(0); }
+    #speech-bubble .bubble-name {
+      font-weight: 700;
+      font-size: 0.78rem;
+      color: #6c63ff;
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
 
-.brand-name {
-  font-family: 'Syne', sans-serif;
-  font-weight: 800;
-  font-size: 1.05rem;
-  letter-spacing: -0.01em;
-  color: var(--ink);
-}
+    /* ─── Barres audio ─── */
+    .wave-bars {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      vertical-align: middle;
+      margin-left: 4px;
+    }
+    .wave-bar {
+      width: 2px; height: 3px;
+      border-radius: 2px;
+      background: #6c63ff;
+      animation: wave-bounce 0.7s ease-in-out infinite;
+      animation-play-state: paused;
+    }
+    .wave-bar:nth-child(2) { animation-delay: 0.1s; }
+    .wave-bar:nth-child(3) { animation-delay: 0.2s; }
+    .wave-bar:nth-child(4) { animation-delay: 0.15s; }
+    @keyframes wave-bounce {
+      0%, 100% { height: 3px; }
+      50%       { height: 10px; }
+    }
+    .wave-bars.speaking .wave-bar { animation-play-state: running; }
 
-.brand-sub {
-  font-size: 0.7rem;
-  color: var(--muted);
-  margin-top: 1px;
-  font-weight: 300;
-}
+    /* ─── SVG fille ─── */
+    #girl-svg {
+      filter: drop-shadow(0 8px 24px rgba(0,0,0,0.5));
+      animation: girl-float 3s ease-in-out infinite;
+    }
+    @keyframes girl-float {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-6px); }
+    }
 
-/* ── Pulse icon ── */
-.pulse-wrap {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 28px;
-}
-
-.pulse-ring {
-  position: relative;
-  width: 80px; height: 80px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.pulse-ring::before,
-.pulse-ring::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  border: 1.5px solid var(--accent);
-  animation: pulse-out 2.2s ease-out infinite;
-}
-
-.pulse-ring::after {
-  animation-delay: 1.1s;
-  border-color: var(--accent2);
-}
-
-@keyframes pulse-out {
-  0%   { transform: scale(0.7); opacity: 0.8; }
-  100% { transform: scale(1.7); opacity: 0; }
-}
-
-.bell-wrap {
-  width: 58px; height: 58px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, rgba(79,140,255,0.18), rgba(0,229,195,0.12));
-  border: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.6rem;
-  position: relative;
-  z-index: 2;
-  animation: bellShake 4s ease-in-out 1.5s infinite;
-}
-
-@keyframes bellShake {
-  0%,90%,100% { transform: rotate(0); }
-  92%          { transform: rotate(-12deg); }
-  94%          { transform: rotate(12deg); }
-  96%          { transform: rotate(-8deg); }
-  98%          { transform: rotate(8deg); }
-}
-
-/* ── Text ── */
-.notif-headline {
-  font-family: 'Syne', sans-serif;
-  font-weight: 800;
-  font-size: 1.65rem;
-  line-height: 1.15;
-  letter-spacing: -0.03em;
-  text-align: center;
-  margin-bottom: 10px;
-  background: linear-gradient(120deg, var(--ink) 40%, var(--accent2));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.notif-sub {
-  text-align: center;
-  font-size: 0.85rem;
-  color: var(--muted);
-  line-height: 1.65;
-  margin-bottom: 32px;
-  font-weight: 300;
-}
-
-/* ── Perks list ── */
-.perks {
-  display: flex;
-  flex-direction: column;
-  gap: 9px;
-  margin-bottom: 32px;
-}
-
-.perk {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 11px 16px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 12px;
-  font-size: 0.82rem;
-  color: rgba(232,240,254,0.8);
-  transition: border-color 0.2s;
-}
-
-.perk:hover { border-color: var(--border); }
-
-.perk-icon {
-  width: 30px; height: 30px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.95rem;
-  flex-shrink: 0;
-}
-
-.perk-icon.blue  { background: rgba(79,140,255,0.15); }
-.perk-icon.teal  { background: rgba(0,229,195,0.12); }
-.perk-icon.pink  { background: rgba(255,82,144,0.12); }
-
-/* ── Button ── */
-#notif-subscribe-btn {
-  position: relative;
-  width: 100%;
-  padding: 16px 24px;
-  border: none;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #2563eb, #0891b2);
-  color: #fff;
-  font-family: 'Syne', sans-serif;
-  font-weight: 700;
-  font-size: 0.95rem;
-  letter-spacing: 0.04em;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  overflow: hidden;
-  transition: transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 8px 28px rgba(37,99,235,0.38), 0 0 0 1px rgba(255,255,255,0.08) inset;
-  margin-bottom: 14px;
-}
-
-#notif-subscribe-btn::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
-  transform: translateX(-100%);
-  transition: transform 0.55s;
-}
-
-#notif-subscribe-btn:hover:not(:disabled)::before { transform: translateX(100%); }
-#notif-subscribe-btn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 14px 36px rgba(37,99,235,0.45), 0 0 0 1px rgba(255,255,255,0.1) inset;
-}
-
-#notif-subscribe-btn:active:not(:disabled) { transform: translateY(0); }
-#notif-subscribe-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-#notif-subscribe-btn.success-state {
-  background: linear-gradient(135deg, #059669, #0d9488);
-  box-shadow: 0 8px 28px rgba(5,150,105,0.38);
-}
-
-.notif-spinner {
-  width: 18px; height: 18px;
-  border: 2px solid rgba(255,255,255,0.3);
-  border-top-color: #fff;
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-  flex-shrink: 0;
-}
-
-@keyframes spin { to { transform: rotate(360deg); } }
-
-.bell-icon { font-size: 1.1rem; }
-
-/* ── Status ── */
-#notif-status {
-  text-align: center;
-  font-size: 0.75rem;
-  color: var(--muted);
-  min-height: 18px;
-  transition: color 0.3s;
-}
-
-/* ── Ripple ── */
-.ripple {
-  position: absolute;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.25);
-  transform: scale(0);
-  animation: rippleAnim 0.7s linear;
-  pointer-events: none;
-}
-
-@keyframes rippleAnim {
-  to { transform: scale(4); opacity: 0; }
-}
-
-/* ── Particles ── */
-.particle {
-  position: absolute;
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  pointer-events: none;
-  animation: particleFly var(--dur, 1s) ease-out forwards;
-}
-
-@keyframes particleFly {
-  0%   { transform: translate(0,0) scale(1); opacity: 1; }
-  100% { transform: translate(var(--tx,0), var(--ty,-80px)) scale(0); opacity: 0; }
-}
-
-/* ── Toast ── */
-#notif-toast {
-  position: fixed;
-  bottom: 28px; left: 50%;
-  transform: translateX(-50%) translateY(70px);
-  background: rgba(12,20,38,0.95);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 14px;
-  padding: 13px 22px;
-  font-size: 0.8rem;
-  font-weight: 500;
-  z-index: 9999;
-  opacity: 0;
-  transition: all 0.38s cubic-bezier(0.22,1,0.36,1);
-  display: flex; align-items: center; gap: 10px;
-  white-space: nowrap;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-  backdrop-filter: blur(16px);
-}
-
-#notif-toast.show {
-  transform: translateX(-50%) translateY(0);
-  opacity: 1;
-}
-
-/* ── Girl / avatar ── */
-#girl-container {
-  position: fixed;
-  bottom: -160px; right: 32px;
-  z-index: 200;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 10px;
-  transition: bottom 0.7s cubic-bezier(0.22,1,0.36,1);
-}
-
-#girl-container.show { bottom: 20px; }
-
-.girl-avatar {
-  width: 90px; height: 90px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #4f8cff, #00e5c3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 3rem;
-  box-shadow: 0 8px 30px rgba(79,140,255,0.35);
-  border: 3px solid rgba(255,255,255,0.12);
-  flex-shrink: 0;
-}
-
-#speech-bubble {
-  position: absolute;
-  bottom: 100px; right: 0;
-  background: rgba(12,20,38,0.96);
-  border: 1px solid var(--border);
-  border-radius: 18px 18px 4px 18px;
-  padding: 14px 18px;
-  max-width: 280px;
-  font-size: 0.78rem;
-  line-height: 1.7;
-  color: var(--ink);
-  box-shadow: 0 12px 40px rgba(0,0,0,0.45);
-  backdrop-filter: blur(16px);
-  opacity: 0;
-  transform: translateY(10px) scale(0.95);
-  transition: all 0.4s cubic-bezier(0.22,1,0.36,1);
-}
-
-#speech-bubble.show { opacity: 1; transform: translateY(0) scale(1); }
-
-#bubble-text { min-height: 20px; }
-
-#wave-bars {
-  display: flex;
-  align-items: center;
-  gap: 3px;
-  margin-top: 10px;
-  height: 16px;
-}
-
-#wave-bars span {
-  display: block;
-  width: 3px;
-  border-radius: 2px;
-  background: var(--accent);
-  height: 4px;
-  transition: height 0.2s;
-}
-
-#wave-bars.speaking span:nth-child(1) { animation: waveBar 0.8s 0.0s ease-in-out infinite; }
-#wave-bars.speaking span:nth-child(2) { animation: waveBar 0.8s 0.1s ease-in-out infinite; }
-#wave-bars.speaking span:nth-child(3) { animation: waveBar 0.8s 0.2s ease-in-out infinite; }
-#wave-bars.speaking span:nth-child(4) { animation: waveBar 0.8s 0.15s ease-in-out infinite; }
-#wave-bars.speaking span:nth-child(5) { animation: waveBar 0.8s 0.05s ease-in-out infinite; }
-
-@keyframes waveBar {
-  0%, 100% { height: 4px; }
-  50%       { height: 14px; }
-}
-
-@media (max-width: 520px) {
-  .notif-card { padding: 36px 24px 30px; margin: 16px; border-radius: 22px; }
-  .notif-headline { font-size: 1.35rem; }
-  #girl-container { right: 12px; }
-  #speech-bubble { max-width: 220px; font-size: 0.72rem; }
-}
-</style>
+    /* ─── Toast ─── */
+    #notif-toast {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%) translateY(60px);
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 50px;
+      padding: 10px 24px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #fff;
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.22,1,0.36,1);
+      white-space: nowrap;
+    }
+    #notif-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  </style>
 </head>
 <body>
 
-<!-- Fond étoilé -->
-<div id="stars-bg"></div>
-<div class="nebula nebula-1"></div>
-<div class="nebula nebula-2"></div>
-<div class="nebula nebula-3"></div>
-
-<!-- Scène principale -->
 <div id="notif-scene">
-  <div class="notif-card">
 
-    <!-- Brand -->
-    <div class="brand">
-      <div class="brand-logo">🚀</div>
-      <div>
-        <div class="brand-name">Groupe Express</div>
-        <div class="brand-sub">Notifications en temps réel</div>
+  <!-- Étoiles -->
+  <div class="stars" id="stars-bg"></div>
+
+  <!-- Anneaux décoratifs -->
+  <div class="ring" style="width:300px;height:300px;left:50%;top:50%;--rd:7s;--rdelay:0s;transform:translate(-50%,-50%);"></div>
+  <div class="ring" style="width:450px;height:450px;left:50%;top:50%;--rd:9s;--rdelay:1.5s;transform:translate(-50%,-50%);"></div>
+  <div class="ring" style="width:600px;height:600px;left:50%;top:50%;--rd:12s;--rdelay:3s;transform:translate(-50%,-50%);"></div>
+
+  <!-- Texte -->
+  <p class="notif-title">✨ Restez dans la boucle</p>
+  <p class="notif-subtitle">Recevez les dernières actus de Groupe Express en temps réel</p>
+
+  <!-- Bouton -->
+  <button id="notif-subscribe-btn" onclick="notifSubscribeWow(event)">
+    <span class="bell-icon">🔔</span>
+    <span id="notif-btn-label">Activer les notifications</span>
+  </button>
+
+  <div id="notif-status">Rejoignez des milliers d'abonnés</div>
+
+  <!-- Personnage robot petite fille -->
+  <div id="girl-container">
+    <div id="speech-bubble">
+      <div class="bubble-name">
+        🤖Express AI
+        <span class="wave-bars" id="wave-bars">
+          <span class="wave-bar"></span>
+          <span class="wave-bar"></span>
+          <span class="wave-bar"></span>
+          <span class="wave-bar"></span>
+        </span>
       </div>
+      <span id="bubble-text"></span>
     </div>
-
-    <!-- Icône pulsante -->
-    <div class="pulse-wrap">
-      <div class="pulse-ring">
-        <div class="bell-wrap">🔔</div>
-      </div>
-    </div>
-
-    <!-- Titre -->
-    <h1 class="notif-headline">Restez toujours<br/>informé(e)</h1>
-    <p class="notif-sub">
-      Activez les notifications pour recevoir nos offres,<br/>
-      mises à jour et actualités instantanément.
-    </p>
-
-    <!-- Avantages -->
-    <div class="perks">
-      <div class="perk">
-        <div class="perk-icon blue">⚡</div>
-        Alertes instantanées sur vos commandes
-      </div>
-      <div class="perk">
-        <div class="perk-icon teal">🎁</div>
-        Offres exclusives et promotions
-      </div>
-      <div class="perk">
-        <div class="perk-icon pink">📍</div>
-        Suivi en temps réel de vos livraisons
-      </div>
-    </div>
-
-    <!-- Bouton -->
-    <button id="notif-subscribe-btn" onclick="notifSubscribeWow(event)">
-      <span class="bell-icon">🔔</span>
-      <span id="notif-btn-label">Activer les notifications</span>
-    </button>
-
-    <!-- Statut -->
-    <p id="notif-status">Gratuit · Désactivable à tout moment</p>
-
+    <!-- SVG petite fille -->
+    <svg id="girl-svg" width="110" height="172" viewBox="0 0 110 172" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="55" cy="167" rx="30" ry="5.5" fill="rgba(108,99,255,0.22)"/>
+      <path d="M30 100 Q20 133 22 160 Q55 168 88 160 Q90 133 80 100 Z" fill="#6c63ff"/>
+      <path d="M35 105 Q32 128 33 152 Q42 156 50 155 Q42 132 40 105 Z" fill="rgba(255,255,255,0.1)"/>
+      <path d="M30 105 Q12 116 10 130 Q14 137 20 135 Q24 122 34 113 Z" fill="#f9c784"/>
+      <path d="M80 105 Q98 116 100 130 Q96 137 90 135 Q86 122 76 113 Z" fill="#f9c784"/>
+      <ellipse cx="12" cy="133" rx="7" ry="5.5" fill="#f9c784" transform="rotate(-20 12 133)"/>
+      <ellipse cx="98" cy="133" rx="7" ry="5.5" fill="#f9c784" transform="rotate(20 98 133)"/>
+      <rect x="47" y="76" width="16" height="16" rx="4" fill="#f9c784"/>
+      <ellipse cx="55" cy="58" rx="28" ry="28" fill="#f9c784"/>
+      <ellipse cx="43" cy="46" rx="8" ry="6" fill="rgba(255,255,255,0.2)" transform="rotate(-20 43 46)"/>
+      <path d="M27 54 Q28 25 55 22 Q82 25 83 54 Q78 28 55 26 Q32 28 27 54 Z" fill="#3d2e1e"/>
+      <path d="M27 54 Q24 46 26 38 Q30 28 38 26 Q32 36 27 54 Z" fill="#5a4232"/>
+      <path d="M83 54 Q86 46 84 38 Q80 28 72 26 Q78 36 83 54 Z" fill="#5a4232"/>
+      <ellipse cx="27" cy="60" rx="9" ry="12" fill="#3d2e1e" transform="rotate(-15 27 60)"/>
+      <ellipse cx="83" cy="60" rx="9" ry="12" fill="#3d2e1e" transform="rotate(15 83 60)"/>
+      <ellipse cx="27" cy="54" rx="5" ry="3.5" fill="#ff6584"/>
+      <ellipse cx="83" cy="54" rx="5" ry="3.5" fill="#ff6584"/>
+      <ellipse cx="43" cy="58" rx="6" ry="7" fill="#fff"/>
+      <ellipse cx="67" cy="58" rx="6" ry="7" fill="#fff"/>
+      <ellipse cx="44" cy="59" rx="4" ry="4.5" fill="#3d2e1e"/>
+      <ellipse cx="68" cy="59" rx="4" ry="4.5" fill="#3d2e1e"/>
+      <ellipse cx="45" cy="58" rx="1.5" ry="1.5" fill="#fff"/>
+      <ellipse cx="69" cy="58" rx="1.5" ry="1.5" fill="#fff"/>
+      <line x1="38" y1="52" x2="39" y2="49" stroke="#3d2e1e" stroke-width="1.2" stroke-linecap="round"/>
+      <line x1="43" y1="51" x2="43" y2="48" stroke="#3d2e1e" stroke-width="1.2" stroke-linecap="round"/>
+      <line x1="48" y1="52" x2="49" y2="49" stroke="#3d2e1e" stroke-width="1.2" stroke-linecap="round"/>
+      <line x1="63" y1="52" x2="62" y2="49" stroke="#3d2e1e" stroke-width="1.2" stroke-linecap="round"/>
+      <line x1="68" y1="51" x2="68" y2="48" stroke="#3d2e1e" stroke-width="1.2" stroke-linecap="round"/>
+      <line x1="73" y1="52" x2="74" y2="49" stroke="#3d2e1e" stroke-width="1.2" stroke-linecap="round"/>
+      <ellipse cx="34" cy="67" rx="6" ry="4" fill="rgba(255,150,150,0.35)"/>
+      <ellipse cx="76" cy="67" rx="6" ry="4" fill="rgba(255,150,150,0.35)"/>
+      <ellipse cx="55" cy="66" rx="2.5" ry="1.5" fill="rgba(200,130,100,0.35)"/>
+      <path d="M47 74 Q55 81 63 74" stroke="#c47b5a" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <rect x="42" y="108" width="26" height="18" rx="4" fill="rgba(255,255,255,0.18)" stroke="rgba(255,255,255,0.4)" stroke-width="0.8"/>
+      <text x="55" y="121" text-anchor="middle" fill="white" font-size="8" font-weight="700" font-family="Poppins,sans-serif">GE BOT</text>
+      <rect x="38" y="153" width="12" height="14" rx="4" fill="#5448cc"/>
+      <rect x="60" y="153" width="12" height="14" rx="4" fill="#5448cc"/>
+      <ellipse cx="44" cy="167" rx="9" ry="5" fill="#3d2e1e"/>
+      <ellipse cx="66" cy="167" rx="9" ry="5" fill="#3d2e1e"/>
+    </svg>
   </div>
+
+  <div id="notif-toast"></div>
 </div>
 
-<!-- Avatar IA -->
-<div id="girl-container">
-  <div id="speech-bubble">
-    <div id="bubble-text"></div>
-    <div id="wave-bars">
-      <span></span><span></span><span></span><span></span><span></span>
-    </div>
-  </div>
-  <div class="girl-avatar">🤖</div>
-</div>
-
-<!-- Toast -->
-<div id="notif-toast"></div>
-
-<!-- ✅ Script widget (config livraison-c8498) -->
-<script>
-(function () {
-
-  /* ── Génération des étoiles ── */
-  var starsEl = document.getElementById('stars-bg');
-  for (var i = 0; i < 70; i++) {
-    var s = document.createElement('div');
-    s.className = 'star';
-    s.style.left = Math.random() * 100 + '%';
-    s.style.top = Math.random() * 100 + '%';
-    s.style.setProperty('--d', (2 + Math.random() * 4) + 's');
-    s.style.setProperty('--delay', (Math.random() * 5) + 's');
-    starsEl.appendChild(s);
-  }
-
-  /* ── Configuration Firebase ── */
-  var firebaseConfig = {
-    apiKey:            "AIzaSyBsGrY-AqYMoI70kT3WMxLgW0HwYA4KyaQ",
-    authDomain:        "livraison-c8498.firebaseapp.com",
-    databaseURL:       "https://livraison-c8498-default-rtdb.firebaseio.com",
-    projectId:         "livraison-c8498",
-    storageBucket:     "livraison-c8498.firebasestorage.app",
-    messagingSenderId: "403240604780",
-    appId:             "1:403240604780:web:77d84ad03d68bdaddfb449"
-  };
-
-  var VAPID_KEY = "BGL6IVuJSbQjI69fot6FvfGEBmq1t4_hPP1Dhx_KYiIEFCrOLjtYFWjID_MlteNgJtm7FFbdIfBygdRi_IF-qng";
-
-  var fbLoaded = false;
-  var messaging, db;
-
-  function loadFirebase(cb) {
-    if (fbLoaded) { cb(); return; }
-    function loadScript(src, next) {
-      var s = document.createElement('script');
-      s.src = src;
-      s.onload = next;
-      document.head.appendChild(s);
-    }
-    loadScript('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js', function () {
-      loadScript('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js', function () {
-        loadScript('https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js', function () {
-          if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-          messaging = firebase.messaging();
-          db = firebase.database();
-          fbLoaded = true;
-          cb();
-        });
-      });
-    });
-  }
-
-  /* ── Helpers UI ── */
-  function setBtn(state) {
-    var btn = document.getElementById('notif-subscribe-btn');
-    if (state === 'loading') {
-      btn.disabled = true;
-      btn.innerHTML = '<div class="notif-spinner"></div><span>Activation en cours…</span>';
-    } else if (state === 'active') {
-      btn.disabled = true;
-      btn.classList.add('success-state');
-      btn.innerHTML = '<span style="font-size:1.3rem">✅</span><span>Notifications activées !</span>';
-      document.getElementById('notif-status').textContent = 'Parfait ! Vous êtes maintenant abonné(e).';
-      document.getElementById('notif-status').style.color = '#00e676';
-    } else if (state === 'denied') {
-      btn.disabled = true;
-      btn.style.background = 'rgba(255,255,255,0.08)';
-      btn.style.boxShadow = 'none';
-      btn.innerHTML = '<span style="font-size:1.3rem">🔕</span><span>Notifications bloquées</span>';
-    } else {
-      btn.disabled = false;
-      btn.innerHTML = '<span class="bell-icon">🔔</span><span id="notif-btn-label">Activer les notifications</span>';
-    }
-  }
-
-  function showToast(msg, type) {
-    var el = document.getElementById('notif-toast');
-    var ico = { success: '🎉', error: '❌', info: 'ℹ️' }[type] || 'ℹ️';
-    el.innerHTML = '<span>' + ico + '</span><span>' + msg + '</span>';
-    el.className = 'show';
-    el.style.borderColor = type === 'success' ? 'rgba(0,230,118,0.5)' : type === 'error' ? 'rgba(255,82,82,0.5)' : 'rgba(255,255,255,0.18)';
-    setTimeout(function () { el.className = ''; }, 4500);
-  }
-
-  function burstParticles(btn) {
-    var colors = ['#4f8cff', '#00e5c3', '#ff6584', '#f9c784', '#00e676'];
-    var scene = document.getElementById('notif-scene');
-    var rect = btn.getBoundingClientRect();
-    var sr = scene.getBoundingClientRect();
-    var cx = rect.left - sr.left + rect.width / 2;
-    var cy = rect.top - sr.top + rect.height / 2;
-    for (var i = 0; i < 20; i++) {
-      var p = document.createElement('div');
-      p.className = 'particle';
-      var angle = (i / 20) * 2 * Math.PI;
-      var dist = 60 + Math.random() * 70;
-      p.style.left = cx + 'px';
-      p.style.top = cy + 'px';
-      p.style.background = colors[i % colors.length];
-      p.style.setProperty('--tx', (Math.cos(angle) * dist) + 'px');
-      p.style.setProperty('--ty', (Math.sin(angle) * dist - 50) + 'px');
-      p.style.setProperty('--dur', (0.7 + Math.random() * 0.6) + 's');
-      scene.appendChild(p);
-      (function (el) { setTimeout(function () { el.remove(); }, 1400); })(p);
-    }
-  }
-
-  function rippleEffect(e, btn) {
-    var r = document.createElement('span');
-    r.className = 'ripple';
-    var rect = btn.getBoundingClientRect();
-    var size = Math.max(rect.width, rect.height) * 0.5;
-    r.style.width = r.style.height = size + 'px';
-    r.style.left = (e.clientX - rect.left - size / 2) + 'px';
-    r.style.top = (e.clientY - rect.top - size / 2) + 'px';
-    btn.appendChild(r);
-    setTimeout(function () { r.remove(); }, 700);
-  }
-
-  /* ── Avatar IA + voix ── */
-  var girlMsg = "Bonjour ! Je suis Express AI. Comment trouvez-vous notre plateforme ? Avec vos notifications activées, vous ne raterez plus aucune de nos actualités en temps réel. Merci et bienvenue !";
-  var typeTimer = null;
-
-  function showGirl() {
-    var gc = document.getElementById('girl-container');
-    var bubble = document.getElementById('speech-bubble');
-    var textEl = document.getElementById('bubble-text');
-    var waveBars = document.getElementById('wave-bars');
-    gc.classList.add('show');
-    setTimeout(function () {
-      bubble.classList.add('show');
-      waveBars.classList.add('speaking');
-      speakText();
-      var i = 0;
-      textEl.textContent = '';
-      clearInterval(typeTimer);
-      typeTimer = setInterval(function () {
-        if (i < girlMsg.length) { textEl.textContent += girlMsg[i]; i++; }
-        else { clearInterval(typeTimer); setTimeout(function () { waveBars.classList.remove('speaking'); }, 600); }
-      }, 34);
-    }, 520);
-  }
-
-  function speakText() {
-    if (!window.speechSynthesis) return;
-    speechSynthesis.cancel();
-    var utt = new SpeechSynthesisUtterance(girlMsg);
-    utt.lang = 'fr-FR'; utt.pitch = 1.85; utt.rate = 0.9; utt.volume = 1;
-    var voices = speechSynthesis.getVoices();
-    var preferred = voices.find(function (v) {
-      return v.lang === 'fr-FR' && /amelie|marie|celine|audrey|juliette|alice|sophie|camille/i.test(v.name);
-    }) || voices.find(function (v) { return v.lang === 'fr-FR'; })
-      || voices.find(function (v) { return v.lang.startsWith('fr'); });
-    if (preferred) utt.voice = preferred;
-    utt.onend = function () { document.getElementById('wave-bars').classList.remove('speaking'); };
-    speechSynthesis.speak(utt);
-  }
-
-  if (window.speechSynthesis && 'onvoiceschanged' in speechSynthesis) {
-    speechSynthesis.onvoiceschanged = function () {};
-  }
-
-  /* ── Fonction principale ── */
-  window.notifSubscribeWow = function (e) {
-    var btn = document.getElementById('notif-subscribe-btn');
-    rippleEffect(e, btn);
-    setBtn('loading');
-
-    if (!('serviceWorker' in navigator)) {
-      showToast('Votre navigateur ne supporte pas les notifications.', 'error');
-      setBtn('idle'); return;
-    }
-
-    navigator.serviceWorker.register('/firebase-messaging-sw.js')
-      .then(function () { return Notification.requestPermission(); })
-      .then(function (permission) {
-        if (permission === 'denied')  { showToast('Notifications bloquées dans le navigateur.', 'error'); setBtn('denied'); return; }
-        if (permission !== 'granted') { showToast('Permission non accordée.', 'error'); setBtn('idle'); return; }
-
-        loadFirebase(function () {
-          messaging.getToken({ vapidKey: VAPID_KEY }).then(function (token) {
-            if (!token) throw new Error('Token vide');
-            var key = token.slice(-24);
-            db.ref('fcm_tokens/' + key).set({
-              token: token,
-              name: 'Visiteur ' + new Date().toLocaleDateString('fr-FR'),
-              ua: navigator.userAgent.slice(0, 80),
-              updatedAt: Date.now()
-            });
-            burstParticles(btn);
-            setBtn('active');
-            showToast('Bienvenue ! Vous recevrez nos notifications.', 'success');
-            setTimeout(showGirl, 700);
-          }).catch(function (err) {
-            console.error('[Notif]', err);
-            showToast("Erreur lors de l'activation. Réessayez.", 'error');
-            setBtn('idle');
-          });
-        });
-      }).catch(function () {
-        showToast('Erreur du service worker.', 'error');
-        setBtn('idle');
-      });
-  };
-
-  /* ── État initial (permission déjà accordée) ── */
-  if (typeof Notification !== 'undefined') {
-    if (Notification.permission === 'denied') {
-      setBtn('denied');
-      document.getElementById('notif-status').textContent = 'Notifications bloquées dans les paramètres du navigateur.';
-    } else if (Notification.permission === 'granted') {
-      loadFirebase(function () {
-        navigator.serviceWorker.register('/firebase-messaging-sw.js').then(function () {
-          return messaging.getToken({ vapidKey: VAPID_KEY });
-        }).then(function (token) {
-          if (token) {
-            var key = token.slice(-24);
-            db.ref('fcm_tokens/' + key).set({
-              token: token,
-              name: 'Visiteur ' + new Date().toLocaleDateString('fr-FR'),
-              ua: navigator.userAgent.slice(0, 80),
-              updatedAt: Date.now()
-            });
-            setBtn('active');
-            setTimeout(showGirl, 900);
-          }
-        }).catch(function () {});
-      });
-    }
-  }
-
-})();
-</script>
-
-</body>
-</html>
+    <script type="module" src="suiterobot.js"></script>
