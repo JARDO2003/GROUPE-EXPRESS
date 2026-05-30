@@ -233,5 +233,3 @@
   }
 
 })();
-fbLoaded = true;
-alert('Firebase projet: ' + firebaseConfig.projectId + ' | VAPID: ' + VAPID_KEY.slice(0,10));
