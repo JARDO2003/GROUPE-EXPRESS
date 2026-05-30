@@ -23,8 +23,6 @@
     appId:             "1:403240604780:web:77d84ad03d68bdaddfb449"
   };
 
-  // ✅ VAPID key du projet livraison-c8498
-  // À récupérer dans : Console Firebase → Project Settings → Cloud Messaging → Web Push certificates
   var VAPID_KEY = "BGL6IVuJSbQjI69fot6FvfGEBmq1t4_hPP1Dhx_KYiIEFCrOLjtYFWjID_MlteNgJtm7FFbdIfBygdRi_IF-qng";
 
   var fbLoaded = false;
