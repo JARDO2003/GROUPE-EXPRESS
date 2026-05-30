@@ -1,5 +1,4 @@
-
-    (function () {
+(function () {
 
   /* ── Génération des étoiles ── */
   var starsEl = document.getElementById('stars-bg');
@@ -15,14 +14,17 @@
 
   /* ── Configuration Firebase ── */
   var firebaseConfig = {
-    apiKey: "AIzaSyCPGgtXoDUycykLaTSee0S0yY0tkeJpqKI",
-    authDomain: "data-com-a94a8.firebaseapp.com",
-    databaseURL: "https://data-com-a94a8-default-rtdb.firebaseio.com",
-    projectId: "data-com-a94a8",
-    storageBucket: "data-com-a94a8.firebasestorage.app",
-    messagingSenderId: "276904640935",
-    appId: "1:276904640935:web:9cd805aeba6c34c767f682"
+    apiKey:            "AIzaSyBsGrY-AqYMoI70kT3WMxLgW0HwYA4KyaQ",
+    authDomain:        "livraison-c8498.firebaseapp.com",
+    databaseURL:       "https://livraison-c8498-default-rtdb.firebaseio.com",
+    projectId:         "livraison-c8498",
+    storageBucket:     "livraison-c8498.firebasestorage.app",
+    messagingSenderId: "403240604780",
+    appId:             "1:403240604780:web:77d84ad03d68bdaddfb449"
   };
+
+  // ✅ VAPID key du projet livraison-c8498
+  // À récupérer dans : Console Firebase → Project Settings → Cloud Messaging → Web Push certificates
   var VAPID_KEY = "BLrbso554YWcAd7-QPbzRFMUpJ9obsdJitRiFtzr-VU4GArr8ariq1l9klHxFUjSzASpkoelaTDAzcvI7UIWLZ8";
 
   var fbLoaded = false;
