@@ -807,6 +807,8 @@ function openDishPreview(el) {
     document.getElementById('preview-name').textContent = d.name || '';
     document.getElementById('preview-desc').textContent = d.desc || '';
     document.getElementById('preview-price').textContent = d.price || '';
+    const price2 = document.getElementById('preview-price-2');
+    if (price2) price2.textContent = d.price || '';
     const badge = document.getElementById('preview-badge');
     if (d.badge) {
         badge.textContent = d.badge;
@@ -823,6 +825,89 @@ function openDishPreview(el) {
     };
     openModal('dish-preview-modal');
 }
+// ===== SEARCH OVERLAY (style Chicken Nation) =====
+let searchDishIndex = null;
+let searchActiveFilter = 'all';
+
+function buildSearchIndex() {
+    if (searchDishIndex) return searchDishIndex;
+    const nodes = document.querySelectorAll('.dish-image-wrap[data-name]');
+    searchDishIndex = Array.from(nodes).map(el => {
+        const section = el.closest('.category-section');
+        return {
+            name: el.dataset.name || '',
+            desc: el.dataset.desc || '',
+            price: el.dataset.price || '',
+            img: el.dataset.img || '',
+            badge: el.dataset.badge || '',
+            action: el.dataset.action || '',
+            categoryId: section ? section.id : ''
+        };
+    });
+    return searchDishIndex;
+}
+
+function renderSearchResults(list) {
+    const container = document.getElementById('search-results-list');
+    if (!container) return;
+    if (list.length === 0) {
+        container.innerHTML = `<div class="search-empty">Aucun plat trouvé 😕</div>`;
+        return;
+    }
+    container.innerHTML = list.map(d => `
+        <div class="search-result-row" onclick="closeSearch();window._openSearchResult(${JSON.stringify(d.name).replace(/"/g, '&quot;')})">
+            <img class="search-result-thumb" src="${d.img}" alt="${d.name}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2264%22 height=%2264%22><rect fill=%22%23F5EDE3%22 width=%2264%22 height=%2264%22/></svg>'">
+            <div class="search-result-info">
+                <h4>${d.name}</h4>
+                <p>${d.desc}</p>
+                <div class="search-result-price-row">
+                    <span class="search-result-price">${d.price}</span>
+                    ${d.badge ? `<span class="search-result-badge">${d.badge}</span>` : ''}
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+window._openSearchResult = function(name) {
+    const el = Array.from(document.querySelectorAll('.dish-image-wrap[data-name]')).find(n => n.dataset.name === name);
+    if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); openDishPreview(el); }
+};
+
+function filterSearchResults() {
+    const q = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
+    const index = buildSearchIndex();
+    const filtered = index.filter(d => {
+        const matchesFilter = searchActiveFilter === 'all' || d.categoryId === searchActiveFilter;
+        const matchesQuery = !q || d.name.toLowerCase().includes(q) || d.desc.toLowerCase().includes(q);
+        return matchesFilter && matchesQuery;
+    });
+    renderSearchResults(filtered);
+}
+
+function setSearchFilter(filter, btn) {
+    searchActiveFilter = filter;
+    document.querySelectorAll('.search-filter-pill').forEach(p => p.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    filterSearchResults();
+}
+
+function openSearch() {
+    buildSearchIndex();
+    document.getElementById('search-overlay')?.classList.add('show');
+    filterSearchResults();
+    setTimeout(() => document.getElementById('search-input')?.focus(), 100);
+}
+
+function closeSearch() {
+    document.getElementById('search-overlay')?.classList.remove('show');
+}
+
+window.openSearch = openSearch;
+window.closeSearch = closeSearch;
+window.setSearchFilter = setSearchFilter;
+window.filterSearchResults = filterSearchResults;
+
 window.toggleCart = toggleCart;
 window.toggleOrders = toggleOrders;
 window.promptAddToCart = promptAddToCart;
