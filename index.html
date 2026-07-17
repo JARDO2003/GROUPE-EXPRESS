@@ -350,37 +350,16 @@
 
         .view-all { font-size: 13px; font-weight: 600; color: var(--flame); text-decoration: none; display: flex; align-items: center; gap: 4px; }
 
-        /* =================== FEATURED DISH =================== */
-        .featured-banner {
-            background: linear-gradient(135deg, #1A1A1A, #2D2D2D);
-            border-radius: var(--radius); overflow: hidden;
-            display: grid; grid-template-columns: 1fr 1fr;
-            min-height: 200px; margin-bottom: 40px; margin-top: 24px;
+        /* =================== NOUVEAU AU MENU (bande horizontale, réutilise .dish-card) =================== */
+        .new-menu-section { padding: 24px 20px 4px; max-width: 1100px; margin: 0 auto; }
+        .new-menu-section > h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1.15rem; font-weight: 700; color: var(--charcoal); margin-bottom: 14px; }
+        .new-menu-scroll {
+            display: flex; gap: 14px; overflow-x: auto;
+            scrollbar-width: none; padding-bottom: 6px;
         }
+        .new-menu-scroll::-webkit-scrollbar { display: none; }
+        .new-menu-scroll .dish-card { flex-shrink: 0; width: 160px; }
 
-        .featured-text { padding: 36px 32px; display: flex; flex-direction: column; justify-content: center; }
-
-        .featured-badge {
-            display: inline-block; background: var(--flame);
-            color: white; border-radius: 50px;
-            padding: 4px 14px; font-size: 11px;
-            font-weight: 700; letter-spacing: 1px;
-            text-transform: uppercase; margin-bottom: 14px; width: fit-content;
-        }
-
-        .featured-text h3 { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 700; color: white; margin-bottom: 8px; line-height: 1.2; }
-        .featured-text p { font-size: 14px; color: #999; margin-bottom: 20px; }
-
-        .featured-price { font-family: 'Space Grotesk', sans-serif; font-size: 2rem; font-weight: 700; color: var(--saffron); }
-        .featured-price span { font-size: 14px; color: #666; font-family: 'DM Sans', sans-serif; }
-
-        .featured-img {
-            background: linear-gradient(135deg, #FF6B35, #FFA726);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 6rem; overflow: hidden;
-        }
-
-        .featured-img img { width: 100%; height: 100%; object-fit: cover; }
 
         /* =================== CATEGORY SECTION =================== */
         .category-section { margin-bottom: 40px; }
@@ -453,15 +432,15 @@
         .dish-price { font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 700; color: var(--flame); }
 
         .add-btn {
-            width: 36px; height: 36px;
-            background: var(--flame); color: white;
-            border: none; border-radius: 10px;
-            cursor: pointer; font-size: 18px;
+            width: 34px; height: 34px;
+            background: #FFC531; color: #4A2E00;
+            border: none; border-radius: 50%;
+            cursor: pointer; font-size: 18px; font-weight: 700;
             display: flex; align-items: center; justify-content: center;
             transition: all 0.2s ease;
         }
 
-        .add-btn:hover { background: var(--flame-deep); transform: scale(1.1); }
+        .add-btn:hover { background: #FFB300; transform: scale(1.1); }
         .add-btn:active { transform: scale(0.95); }
 
         /* =================== CHEF SECTION =================== */
@@ -740,7 +719,6 @@
         @media (max-width: 768px) {
             .hero-inner { grid-template-columns: 1fr; gap: 24px; }
             .hero-badge-wrap { display: none; }
-            .featured-banner { grid-template-columns: 1fr; }
             .featured-img { height: 160px; }
             .footer-inner { grid-template-columns: 1fr; gap: 24px; }
             .dishes-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
@@ -803,11 +781,12 @@
 
         .swipe-hint.hidden { opacity: 0; }
 
-        /* =================== DISH PREVIEW MODAL =================== */
+        /* =================== DISH PREVIEW MODAL (style Chicken Nation) =================== */
         .dish-preview-img-wrap {
             overflow: hidden;
             border-radius: 24px 24px 0 0;
             max-height: 320px;
+            position: relative;
         }
 
         #preview-img {
@@ -819,68 +798,255 @@
         #dish-preview-modal .modal-box:hover #preview-img {
             transform: scale(1.03);
         }
+
+        .preview-top-actions {
+            position: absolute; top: 16px; left: 16px; right: 16px;
+            display: flex; align-items: center; justify-content: space-between;
+            z-index: 10;
+        }
+        .preview-icon-btn {
+            width: 38px; height: 38px; border-radius: 50%;
+            background: white; border: none; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+        }
+        .preview-icon-actions { display: flex; gap: 8px; }
+        .preview-price-pill {
+            display: inline-flex; align-items: baseline; gap: 8px;
+            background: #FFC531; color: #4A2E00;
+            border-radius: 50px; padding: 8px 18px;
+            font-family: 'Space Grotesk', sans-serif; font-weight: 700;
+            margin-top: -22px; position: relative; z-index: 5;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+        }
+        .preview-price-old { font-size: 12px; text-decoration: line-through; opacity: 0.6; font-weight: 500; }
+        .preview-badges-row { display: flex; gap: 8px; margin: 12px 0 8px; }
+        .preview-badge-pill {
+            background: var(--soft); color: var(--flame);
+            border-radius: 50px; padding: 4px 12px;
+            font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px;
+        }
+        .preview-sticky-bar {
+            display: flex; align-items: center; gap: 14px;
+            padding: 14px; background: white;
+            position: sticky; bottom: 0; border-top: 1px solid var(--border);
+        }
+        .preview-sticky-bar .price-block { flex: 1; }
+        .preview-sticky-bar .price-block .label { font-size: 11px; color: var(--muted); }
+        .preview-sticky-bar .price-block .value { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1.3rem; color: var(--flame); }
+        .preview-add-btn {
+            background: var(--flame); color: white; border: none;
+            border-radius: 50px; padding: 14px 28px;
+            font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 700;
+            cursor: pointer; display: flex; align-items: center; gap: 8px;
+            transition: all 0.2s ease;
+        }
+        .preview-add-btn:hover { background: var(--flame-deep); }
+
+        /* =================== CHICKEN-NATION-STYLE TOPBAR =================== */
+        .ge-topbar {
+            position: sticky; top: 0; z-index: 200;
+            background: linear-gradient(160deg, #FF9A2E 0%, #FF7A1A 55%, #FF6600 100%);
+            padding: 14px 20px 0;
+            overflow: visible;
+        }
+        .ge-topbar-row {
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 12px; max-width: 1100px; margin: 0 auto;
+        }
+        .ge-location-pill {
+            display: flex; align-items: center; gap: 8px;
+            background: rgba(255,255,255,0.22);
+            border: none; border-radius: 50px;
+            padding: 9px 16px; cursor: pointer;
+            color: white; font-family: 'DM Sans', sans-serif;
+            font-size: 13px; font-weight: 600;
+            max-width: 70%;
+        }
+        .ge-location-pill .loc-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .ge-location-pill .loc-chevron { font-size: 12px; opacity: 0.85; }
+        .ge-topbar-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+        .ge-points-badge {
+            display: flex; align-items: center; gap: 6px;
+            background: rgba(255,255,255,0.22); border: none;
+            border-radius: 50px; padding: 8px 12px; cursor: pointer;
+            color: white; font-size: 12px; font-weight: 700;
+        }
+        .ge-bell-btn, .ge-call-btn {
+            width: 38px; height: 38px; border-radius: 50%;
+            background: rgba(255,255,255,0.22); border: none;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px; cursor: pointer; color: white;
+            text-decoration: none; position: relative;
+        }
+        .ge-stand-tabs {
+            display: flex; align-items: center; gap: 10px;
+            max-width: 1100px; margin: 18px auto 0;
+            overflow-x: auto; scrollbar-width: none; padding-bottom: 4px;
+        }
+        .ge-stand-tabs::-webkit-scrollbar { display: none; }
+        .ge-stand-tab {
+            display: flex; align-items: center; gap: 8px;
+            background: transparent; border: none; cursor: pointer;
+            font-family: 'Space Grotesk', sans-serif; font-weight: 700;
+            font-size: 14px; color: rgba(255,255,255,0.75);
+            white-space: nowrap; padding: 4px 2px;
+        }
+        .ge-stand-tab.active { color: white; }
+        .ge-open-dot {
+            display: inline-flex; align-items: center; gap: 4px;
+            background: var(--green); color: white;
+            border-radius: 50px; padding: 3px 10px;
+            font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
+        }
+        .ge-drip {
+            position: relative; height: 34px; margin-top: 12px;
+            background: #FF7A1A;
+            -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 60' preserveAspectRatio='none'><path d='M0,0 H500 V25 C480,25 470,60 450,60 C430,60 425,30 405,30 C385,30 380,55 360,55 C340,55 335,20 315,20 C295,20 290,45 270,45 C250,45 248,15 228,15 C208,15 205,50 185,50 C165,50 162,22 142,22 C122,22 118,48 98,48 C78,48 76,18 56,18 C36,18 30,40 12,40 C6,40 0,30 0,25 Z'/></svg>");
+            mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 60' preserveAspectRatio='none'><path d='M0,0 H500 V25 C480,25 470,60 450,60 C430,60 425,30 405,30 C385,30 380,55 360,55 C340,55 335,20 315,20 C295,20 290,45 270,45 C250,45 248,15 228,15 C208,15 205,50 185,50 C165,50 162,22 142,22 C122,22 118,48 98,48 C78,48 76,18 56,18 C36,18 30,40 12,40 C6,40 0,30 0,25 Z'/></svg>");
+            -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
+            -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+        }
+
+        /* =================== CATEGORY CIRCLES =================== */
+        .cat-circles-section { padding: 22px 20px 4px; max-width: 1100px; margin: 0 auto; }
+        .cat-circles-title-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+        .cat-circles-title-row h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1.15rem; font-weight: 700; color: var(--charcoal); }
+        .cat-circles-title-row a { font-size: 13px; font-weight: 600; color: var(--flame); text-decoration: none; }
+        .cat-circles {
+            display: flex; gap: 22px; overflow-x: auto;
+            scrollbar-width: none; padding-bottom: 4px;
+        }
+        .cat-circles::-webkit-scrollbar { display: none; }
+        .cat-circle {
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
+            background: none; border: none; cursor: pointer; flex-shrink: 0;
+            text-decoration: none;
+        }
+        .cat-circle-icon {
+            width: 56px; height: 56px; border-radius: 50%;
+            background: var(--soft);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; transition: all 0.2s ease;
+        }
+        .cat-circle.active .cat-circle-icon { background: #FFE3D2; box-shadow: 0 0 0 2px var(--flame) inset; }
+        .cat-circle span.cat-circle-label {
+            font-size: 10.5px; font-weight: 700; letter-spacing: 0.3px;
+            color: var(--muted); text-transform: uppercase; white-space: nowrap;
+        }
+        .cat-circle.active span.cat-circle-label { color: var(--flame); }
+
+        /* =================== PROMO / NEW BADGES ON DISH CARD =================== */
+        .dish-promo-ribbon {
+            position: absolute; top: 10px; left: 10px;
+            background: var(--red); color: white;
+            border-radius: 6px; padding: 3px 9px;
+            font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .dish-price-old {
+            font-size: 11.5px; color: var(--muted);
+            text-decoration: line-through; margin-bottom: 1px;
+        }
+
+        /* =================== BOTTOM NAV =================== */
+        .ge-bottom-nav {
+            position: fixed; left: 0; right: 0; bottom: 0; z-index: 300;
+            background: white; border-top: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-around;
+            padding: 10px 8px calc(10px + env(safe-area-inset-bottom));
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
+        }
+        .ge-bottom-nav-item {
+            display: flex; flex-direction: column; align-items: center; gap: 3px;
+            background: none; border: none; cursor: pointer;
+            font-size: 20px; color: var(--muted); position: relative;
+            padding: 2px 10px;
+        }
+        .ge-bottom-nav-item.active { color: var(--flame); }
+        .ge-bottom-nav-item .ge-nav-badge {
+            position: absolute; top: -4px; right: 0;
+            background: var(--flame); color: white;
+            border-radius: 50%; width: 16px; height: 16px;
+            font-size: 9px; font-weight: 700;
+            display: none; align-items: center; justify-content: center;
+            border: 2px solid white;
+        }
+        body { padding-bottom: 76px; }
+
+        /* =================== SEARCH OVERLAY (style Chicken Nation) =================== */
+        .search-overlay {
+            display: none; position: fixed; inset: 0; z-index: 900;
+            background: var(--warm-white); flex-direction: column;
+        }
+        .search-overlay.show { display: flex; }
+        .search-overlay-header { padding: 18px 20px 12px; border-bottom: 1px solid var(--border); }
+        .search-overlay-title {
+            text-align: center; font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700; color: var(--flame); letter-spacing: 1px;
+            margin-bottom: 14px; font-size: 15px;
+        }
+        .search-input-wrap {
+            display: flex; align-items: center; gap: 10px;
+            background: var(--soft); border-radius: 50px;
+            padding: 12px 18px;
+        }
+        .search-input-wrap input {
+            border: none; background: none; outline: none;
+            flex: 1; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--ink);
+        }
+        .search-close-btn { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--muted); }
+        .search-filter-pills {
+            display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none;
+            padding: 14px 20px 0;
+        }
+        .search-filter-pills::-webkit-scrollbar { display: none; }
+        .search-filter-pill {
+            flex-shrink: 0; padding: 9px 16px; border-radius: 50px;
+            border: 1.5px solid var(--border); background: white;
+            font-family: 'DM Sans', sans-serif; font-size: 12.5px; font-weight: 700;
+            color: var(--ink); cursor: pointer; white-space: nowrap;
+            text-transform: uppercase;
+        }
+        .search-filter-pill.active { background: var(--flame); border-color: var(--flame); color: white; }
+        .search-results-list { flex: 1; overflow-y: auto; padding: 8px 20px 20px; }
+        .search-result-row {
+            display: flex; align-items: center; gap: 14px;
+            padding: 16px 0; border-bottom: 1px solid var(--border);
+            cursor: pointer;
+        }
+        .search-result-thumb { width: 64px; height: 64px; border-radius: 12px; object-fit: cover; background: var(--soft); flex-shrink: 0; }
+        .search-result-info { flex: 1; min-width: 0; }
+        .search-result-info h4 { font-family: 'Space Grotesk', sans-serif; font-size: 14.5px; font-weight: 700; color: var(--charcoal); margin-bottom: 3px; }
+        .search-result-info p { font-size: 12px; color: var(--muted); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .search-result-price-row { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+        .search-result-price { font-family: 'Space Grotesk', sans-serif; font-weight: 700; color: var(--flame); font-size: 14px; }
+        .search-result-badge { background: var(--red); color: white; font-size: 10px; font-weight: 700; border-radius: 6px; padding: 2px 8px; text-transform: uppercase; }
+        .search-empty { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 14px; }
     </style>
 </head>
 <body>
 
-<!-- =================== HEADER =================== -->
-<header class="site-header">
-    <div class="header-inner">
-        <a href="#" class="brand">
-            <div class="brand-logo">
-                <img src="image/GE.jpg" alt="Groupe Express" onerror="this.style.display='none';this.parentElement.innerHTML='🍽️'">
-            </div>
-            <div class="brand-text">
-                <div class="name">GROUPE EXPRESS</div>
-                <div class="tagline">Restauration Universitaire • Abidjan</div>
-            </div>
-        </a>
-        <div class="header-actions">
-            <button class="btn-icon" onclick="toggleOrders()" title="Mes commandes">📦</button>
-            <button class="btn-icon" onclick="toggleCart()" id="cart-btn" title="Panier">
-                🛒
-                <span class="badge" id="cart-badge" style="display:none">0</span>
-            </button>
-            <a href="tel:+2250564061004" class="btn-whatsapp" title="Appeler">
-                📞 <span class="hide-sm">Appeler</span>
-            </a>
+<!-- =================== TOPBAR (style Chicken Nation) =================== -->
+<header class="ge-topbar">
+    <div class="ge-topbar-row">
+        <button class="ge-location-pill" onclick="toggleOrders()">
+            <span class="loc-pin">📍</span>
+            <span class="loc-text">Localisation actuelle</span>
+            <span class="loc-chevron">⌄</span>
+        </button>
+        <div class="ge-topbar-actions">
+            <button class="ge-points-badge" title="Mes points">⭐ <span>0 pts</span></button>
+            <button class="ge-bell-btn" onclick="requestNotificationPermission()" title="Notifications">🔔</button>
+            <a href="tel:+2250564061004" class="ge-call-btn" title="Appeler">📞</a>
         </div>
     </div>
+    <div class="ge-stand-tabs">
+        <button class="ge-stand-tab active">GROUPE EXPRESS UTT LOKO</button>
+        <button class="ge-stand-tab"><span class="ge-open-dot">OUVERT</span>&nbsp;GROUPE EXPRESS FONTAINE</button>
+    </div>
+    <div class="ge-drip" aria-hidden="true"></div>
 </header>
-
-<!-- =================== HERO =================== -->
-<section class="hero">
-    <div class="hero-inner">
-        <div>
-            <div class="time-banner" id="status-banner">
-                🟢 &nbsp;Commandes ouvertes — On prépare pour vous !
-            </div>
-            <h1 style="margin-top:16px">Mangez bien,<br><em>chaque jour</em> 🔥</h1>
-            <p>La meilleure restauration universitaire à Abidjan. Plats frais, livrés ou récupérés en 5 minutes.</p>
-            <div class="hero-stats">
-                <div class="hero-stat"><strong>500+</strong><span>Étudiants servis</span></div>
-                <div class="hero-stat"><strong>4.8★</strong><span>Note moyenne</span></div>
-                <div class="hero-stat"><strong>15min</strong><span>Délai moyen</span></div>
-            </div>
-            <a href="#menu-start" class="discover-btn" onclick="document.getElementById('menu-start').scrollIntoView({behavior:'smooth'});return false;">
-                Découvrir le menu
-                <span class="discover-arrow">↓</span>
-            </a>
-        </div>
-        <div class="hero-badge-wrap">
-            <div class="hero-badge">
-                <span class="big-emoji">👨‍🍳</span>
-                <div class="label">Cuisiniers pros</div>
-                <div class="sub">Cuisiniers certifiés</div>
-            </div>
-            <div class="hero-badge">
-                <span class="big-emoji">🌙</span>
-                <div class="label">Ramadan Kareem</div>
-                <div class="sub">Menu Iftar disponible</div>
-            </div>
-        </div>
-    </div>
-</section>
 
 <div id="menu-start"></div>
 
@@ -888,6 +1054,44 @@
 <div class="time-alert" id="time-alert">
     ⚠️ Les commandes sont fermées entre 10h00 et 18h00. Revenez ce soir !
 </div>
+
+<!-- =================== CATÉGORIES (cercles, style Chicken Nation) =================== -->
+<section class="cat-circles-section">
+    <div class="cat-circles-title-row">
+        <h2>Nos Catégories</h2>
+        <a href="#new-dishes-section" onclick="document.getElementById('new-dishes-section').style.display='';document.getElementById('new-dishes-section').scrollIntoView({behavior:'smooth'});return false;">Voir tout</a>
+    </div>
+    <div class="cat-circles">
+        <a href="#new-menu-strip" class="cat-circle active" onclick="document.getElementById('new-menu-strip').scrollIntoView({behavior:'smooth'});return false;">
+            <div class="cat-circle-icon">🔥</div>
+            <span class="cat-circle-label">Promotions</span>
+        </a>
+        <a href="#cat-pates" class="cat-circle" onclick="document.getElementById('cat-pates').scrollIntoView({behavior:'smooth'});return false;">
+            <div class="cat-circle-icon">🍝</div>
+            <span class="cat-circle-label">Pâtes</span>
+        </a>
+        <a href="#cat-tcheps" class="cat-circle" onclick="document.getElementById('cat-tcheps').scrollIntoView({behavior:'smooth'});return false;">
+            <div class="cat-circle-icon">🍚</div>
+            <span class="cat-circle-label">Tchèpes</span>
+        </a>
+        <a href="#cat-riz" class="cat-circle" onclick="document.getElementById('cat-riz').scrollIntoView({behavior:'smooth'});return false;">
+            <div class="cat-circle-icon">🍛</div>
+            <span class="cat-circle-label">Riz sauces</span>
+        </a>
+        <a href="#cat-porc" class="cat-circle" onclick="document.getElementById('cat-porc').scrollIntoView({behavior:'smooth'});return false;">
+            <div class="cat-circle-icon">🐷</div>
+            <span class="cat-circle-label">Porc</span>
+        </a>
+        <a href="#cat-attieke" class="cat-circle" onclick="document.getElementById('cat-attieke').scrollIntoView({behavior:'smooth'});return false;">
+            <div class="cat-circle-icon">🌾</div>
+            <span class="cat-circle-label">Attiéké</span>
+        </a>
+        <a href="#cat-boissons" class="cat-circle" onclick="document.getElementById('cat-boissons').scrollIntoView({behavior:'smooth'});return false;">
+            <div class="cat-circle-icon">🍹</div>
+            <span class="cat-circle-label">Boissons</span>
+        </a>
+    </div>
+</section>
 
 <!-- =================== PROMO SLIDER =================== -->
 <section class="promo-section">
@@ -947,27 +1151,102 @@
     </div>
 </section>
 
-<!-- =================== MAIN CONTENT =================== -->
-<div class="container">
+<!-- =================== NOUVEAU AU MENU (compact, structure dish-card exacte) =================== -->
+<section class="new-menu-section" id="new-menu-strip">
+    <h2>Nouveau au menu</h2>
+    <div class="new-menu-scroll">
 
-    <!-- Featured Banner -->
-    <div class="featured-banner">
-        <div class="featured-text">
-            <span class="featured-badge">⭐ Le plus commandé</span>
-            <h3>Attiékè Poisson<br>Alloko</h3>
-            <p>Le classique ivoirien revisité avec amour par nos chefs</p>
-            <div class="dish-footer" style="margin-top:0">
-                <div class="featured-price">1000 <span>FCFA</span></div>
-                <button class="add-btn" style="width:44px;height:44px;font-size:20px" onclick="selectAttiekePoisson()">+</button>
+        <div class="dish-card">
+            <div class="dish-image-wrap"
+                onclick="openDishPreview(this)"
+                data-img="image/at.jpg"
+                data-name="Attiékè poisson"
+                data-desc="Attiékè classique avec poisson grillé"
+                data-price="1000 FCFA"
+                data-action="promptAddToCart('ATTIEKE POISSON',1000,'E')">
+                <img src="image/at.jpg" alt="Attiékè poisson" class="dish-image"
+                    onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🐟</text></svg>'">
+            </div>
+            <div class="dish-body">
+                <div class="dish-name">Attiékè poisson</div>
+                <div class="dish-desc">Attiékè classique avec poisson grillé</div>
+                <div class="dish-footer">
+                    <span class="dish-price">1000 FCFA</span>
+                    <button class="add-btn" onclick="promptAddToCart('ATTIEKE POISSON',1000,'E')">+</button>
+                </div>
             </div>
         </div>
-        <div class="featured-img">
-            <img src="image/at.jpg" alt="Attiékè poisson" onerror="this.style.display='none';this.parentElement.innerHTML='🍽️'">
+
+        <div class="dish-card">
+            <div class="dish-image-wrap"
+                onclick="openDishPreview(this)"
+                data-img="image/garba.jpg"
+                data-name="Spécialité Garba"
+                data-desc="Le Garba authentique d'Abidjan"
+                data-price="dès 500 FCFA"
+                data-action="selectGarba()">
+                <img src="image/garba.jpg" alt="Garba" class="dish-image"
+                    onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🌾</text></svg>'">
+            </div>
+            <div class="dish-body">
+                <div class="dish-name">Spécialité Garba</div>
+                <div class="dish-desc">Le Garba authentique d'Abidjan</div>
+                <div class="dish-footer">
+                    <span class="dish-price">dès 500 FCFA</span>
+                    <button class="add-btn" onclick="selectGarba()">+</button>
+                </div>
+            </div>
         </div>
+
+        <div class="dish-card">
+            <div class="dish-image-wrap"
+                onclick="openDishPreview(this)"
+                data-img="image/ATIEKEPOULET.jpg"
+                data-name="Attiékè poulet"
+                data-desc="Attiékè + poulet + condiment maison"
+                data-price="dès 1000 FCFA"
+                data-action="selectAttiekePoulet()">
+                <img src="image/ATIEKEPOULET.jpg" alt="Attiékè poulet" class="dish-image"
+                    onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🍗</text></svg>'">
+            </div>
+            <div class="dish-body">
+                <div class="dish-name">Attiékè poulet</div>
+                <div class="dish-desc">Attiékè + poulet + condiment maison</div>
+                <div class="dish-footer">
+                    <span class="dish-price">dès 1000 FCFA</span>
+                    <button class="add-btn" onclick="selectAttiekePoulet()">+</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="dish-card">
+            <div class="dish-image-wrap"
+                onclick="openDishPreview(this)"
+                data-img="image/PORC1.jpg"
+                data-name="Porc four (2 boules)"
+                data-desc="Porc au four avec 2 boules d'attiékè"
+                data-price="1200 FCFA"
+                data-action="selectPorc(1200,'2 boules')">
+                <img src="image/PORC1.jpg" alt="Porc 2 boules" class="dish-image"
+                    onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🐷</text></svg>'">
+            </div>
+            <div class="dish-body">
+                <div class="dish-name">Porc four (2 boules)</div>
+                <div class="dish-desc">Porc au four avec 2 boules d'attiékè</div>
+                <div class="dish-footer">
+                    <span class="dish-price">1200 FCFA</span>
+                    <button class="add-btn" onclick="selectPorc(1200,'2 boules')">+</button>
+                </div>
+            </div>
+        </div>
+
     </div>
+</section>
+
+<div class="container">
 
     <!-- =================== PÂTES & PETIT POIS =================== -->
-    <div class="category-section">
+    <div class="category-section" id="cat-pates">
         <div class="category-header">
             <div class="category-icon">🍝</div>
             <h3>Pâtes & Petit pois</h3>
@@ -1201,7 +1480,7 @@
     </div>
 
     <!-- =================== TCHÈPES =================== -->
-    <div class="category-section">
+    <div class="category-section" id="cat-tcheps">
         <div class="category-header">
             <div class="category-icon">🍚</div>
             <h3>Tchèpes</h3>
@@ -1305,7 +1584,7 @@
     </div>
 
     <!-- =================== RIZ AUX SAUCES =================== -->
-    <div class="category-section">
+    <div class="category-section" id="cat-riz">
         <div class="category-header">
             <div class="category-icon">🍛</div>
             <h3>Riz aux sauces</h3>
@@ -1383,7 +1662,7 @@
     </div>
 
     <!-- =================== PORC AU FOUR =================== -->
-    <div class="category-section">
+    <div class="category-section" id="cat-porc">
         <div class="category-header">
             <div class="category-icon">🐷</div>
             <h3>Porc au four</h3>
@@ -1441,7 +1720,7 @@
     </div>
 
     <!-- =================== ATTIÉKÉ SPÉCIALITÉS =================== -->
-    <div class="category-section">
+    <div class="category-section" id="cat-attieke">
         <div class="category-header">
             <div class="category-icon">🌾</div>
             <h3>Attiékè spécialités</h3>
@@ -1565,7 +1844,7 @@
     </div>
 
     <!-- =================== BOISSONS & SUCRERIES =================== -->
-    <div class="category-section">
+    <div class="category-section" id="cat-boissons">
         <div class="category-header">
             <div class="category-icon">🍹</div>
             <h3>Boissons & Sucreries</h3>
@@ -1889,41 +2168,76 @@
     </div>
 </div>
 
-<!-- =================== FAB GROUP =================== -->
-<div class="fab-group">
-    <button class="fab fab-notif" onclick="requestNotificationPermission()" title="Notifications">🔔</button>
-    <button class="fab fab-install" onclick="triggerInstallPrompt()" id="fab-install" title="Installer l'app">📲</button>
-    <button class="fab fab-cart" onclick="toggleCart()" title="Panier">
-        🛒
-        <span class="badge" id="fab-badge" style="display:none">0</span>
-    </button>
+<!-- =================== SEARCH OVERLAY (style Chicken Nation) =================== -->
+<div class="search-overlay" id="search-overlay">
+    <div class="search-overlay-header">
+        <div class="search-overlay-title">★ GROUPE EXPRESS</div>
+        <div class="search-input-wrap">
+            🔍
+            <input type="text" id="search-input" placeholder="Trouver un truc à grignoter" oninput="filterSearchResults()">
+            <button class="search-close-btn" onclick="closeSearch()">✕</button>
+        </div>
+    </div>
+    <div class="search-filter-pills" id="search-filter-pills">
+        <button class="search-filter-pill active" data-filter="all" onclick="setSearchFilter('all',this)">Tout</button>
+        <button class="search-filter-pill" data-filter="cat-pates" onclick="setSearchFilter('cat-pates',this)">Pâtes</button>
+        <button class="search-filter-pill" data-filter="cat-tcheps" onclick="setSearchFilter('cat-tcheps',this)">Tchèpes</button>
+        <button class="search-filter-pill" data-filter="cat-riz" onclick="setSearchFilter('cat-riz',this)">Riz sauces</button>
+        <button class="search-filter-pill" data-filter="cat-porc" onclick="setSearchFilter('cat-porc',this)">Porc</button>
+        <button class="search-filter-pill" data-filter="cat-attieke" onclick="setSearchFilter('cat-attieke',this)">Attiéké</button>
+        <button class="search-filter-pill" data-filter="cat-boissons" onclick="setSearchFilter('cat-boissons',this)">Boissons</button>
+    </div>
+    <div class="search-results-list" id="search-results-list"></div>
 </div>
+
+<!-- =================== FAB (install PWA uniquement) =================== -->
+<div class="fab-group" style="bottom:92px">
+    <button class="fab fab-install" onclick="triggerInstallPrompt()" id="fab-install" title="Installer l'app">📲</button>
+</div>
+
+<!-- =================== BOTTOM NAV (style Chicken Nation) =================== -->
+<nav class="ge-bottom-nav">
+    <button class="ge-bottom-nav-item active" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Accueil">🏠</button>
+    <button class="ge-bottom-nav-item" onclick="openSearch()" title="Rechercher">🔍</button>
+    <button class="ge-bottom-nav-item" onclick="toggleCart()" title="Panier">
+        🛒
+        <span class="ge-nav-badge" id="fab-badge">0</span>
+    </button>
+    <button class="ge-bottom-nav-item" onclick="toggleOrders()" title="Mes commandes">🧾</button>
+    <button class="ge-bottom-nav-item" onclick="toggleOrders()" title="Profil">👤</button>
+</nav>
 
 <!-- =================== MODAL APERÇU PLAT =================== -->
 <div class="modal-overlay" id="dish-preview-modal" onclick="if(event.target===this)closeModal('dish-preview-modal')">
-    <div class="modal-box" style="max-width:520px">
-        <button class="modal-close" onclick="closeModal('dish-preview-modal')" style="position:absolute;top:16px;right:16px;z-index:10">✕</button>
+    <div class="modal-box" style="max-width:520px;padding-bottom:0">
         <div class="dish-preview-img-wrap">
+            <div class="preview-top-actions">
+                <button class="preview-icon-btn" onclick="closeModal('dish-preview-modal')" title="Retour">←</button>
+                <div class="preview-icon-actions">
+                    <button class="preview-icon-btn" onclick="if(navigator.share){navigator.share({title:document.getElementById('preview-name').textContent,text:document.getElementById('preview-desc').textContent})}" title="Partager">📤</button>
+                    <button class="preview-icon-btn" onclick="this.classList.toggle('liked');this.textContent=this.classList.contains('liked')?'❤️':'🤍'" title="Favori">🤍</button>
+                </div>
+            </div>
             <img id="preview-img" src="" alt="">
         </div>
-        <div class="modal-body" style="padding:24px">
-            <div style="margin-bottom:8px">
-                <span id="preview-badge" style="background:var(--flame);color:white;border-radius:50px;padding:3px 12px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;display:none"></span>
+        <div class="modal-body" style="padding:0 24px 20px">
+            <div class="preview-price-pill" id="preview-price-pill">
+                <span id="preview-price"></span>
             </div>
-            <h3 id="preview-name" style="font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:var(--charcoal);margin-bottom:8px;line-height:1.2"></h3>
-            <p id="preview-desc" style="font-size:14px;color:var(--muted);margin-bottom:20px;line-height:1.6"></p>
-            <div style="display:flex;align-items:center;justify-content:space-between;background:var(--soft);border-radius:var(--radius-sm);padding:16px">
-                <div>
-                    <div style="font-size:12px;color:var(--muted);margin-bottom:2px">Prix</div>
-                    <div id="preview-price" style="font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:700;color:var(--flame)"></div>
-                </div>
-                <button id="preview-order-btn"
-                    style="background:var(--flame);color:white;border:none;border-radius:14px;padding:14px 28px;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.2s ease;display:flex;align-items:center;gap:8px"
-                    onmouseover="this.style.background='var(--flame-deep)'"
-                    onmouseout="this.style.background='var(--flame)'">
-                    🛒 Commander
-                </button>
+            <h3 id="preview-name" style="font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:var(--charcoal);margin:14px 0 6px;line-height:1.2"></h3>
+            <div class="preview-badges-row">
+                <span class="preview-badge-pill" id="preview-badge" style="display:none"></span>
             </div>
+            <p id="preview-desc" style="font-size:14px;color:var(--muted);line-height:1.6"></p>
+        </div>
+        <div class="preview-sticky-bar">
+            <div class="price-block">
+                <div class="label">Prix</div>
+                <div class="value" id="preview-price-2"></div>
+            </div>
+            <button id="preview-order-btn" class="preview-add-btn">
+                🛒 Ajouter
+            </button>
         </div>
     </div>
 </div>
