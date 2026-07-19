@@ -936,6 +936,15 @@ document.addEventListener('DOMContentLoaded', () => {
     startSlider();
     setInterval(checkHours, 60000);
 
+    // Forcer la lecture de la vidéo de fond (certains navigateurs mobiles
+    // bloquent l'autoplay tant qu'il n'y a pas eu d'interaction/JS explicite)
+    const bgVideo = document.getElementById('ge-bg-video');
+    if (bgVideo) {
+        bgVideo.play().catch(err => {
+            console.error('❌ La vidéo de fond n\'a pas pu démarrer automatiquement :', err);
+        });
+    }
+
     // Init touch swipe on slider
     initSliderTouch();
 
