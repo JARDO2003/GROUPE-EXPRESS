@@ -936,12 +936,45 @@ document.addEventListener('DOMContentLoaded', () => {
     startSlider();
     setInterval(checkHours, 60000);
 
-    // Forcer la lecture de la vidéo de fond (certains navigateurs mobiles
-    // bloquent l'autoplay tant qu'il n'y a pas eu d'interaction/JS explicite)
+    // Forcer la lecture EN BOUCLE de la vidéo de fond, y compris dans les
+    // navigateurs intégrés (WhatsApp, Facebook, Messenger...) qui bloquent
+    // souvent l'autoplay tant qu'il n'y a pas eu un premier tap sur l'écran.
     const bgVideo = document.getElementById('ge-bg-video');
     if (bgVideo) {
-        bgVideo.play().catch(err => {
-            console.error('❌ La vidéo de fond n\'a pas pu démarrer automatiquement :', err);
+        bgVideo.muted = true;
+        bgVideo.playsInline = true;
+
+        const tryPlayVideo = () => {
+            const p = bgVideo.play();
+            if (p && p.catch) {
+                p.catch(err => console.warn('⏸️ Lecture vidéo différée (bloquée par le navigateur) :', err.message));
+            }
+        };
+
+        tryPlayVideo();
+        bgVideo.addEventListener('loadeddata', tryPlayVideo);
+        bgVideo.addEventListener('canplay', tryPlayVideo);
+
+        // Si la vidéo se met en pause pour une raison quelconque, on relance
+        bgVideo.addEventListener('pause', () => {
+            if (!document.hidden) tryPlayVideo();
+        });
+
+        // Filet de sécurité : au tout premier effleurement/clic de l'utilisateur
+        // (même juste pour scroller), on relance la vidéo une bonne fois pour toutes.
+        const resumeOnFirstInteraction = () => {
+            tryPlayVideo();
+            document.removeEventListener('touchstart', resumeOnFirstInteraction);
+            document.removeEventListener('click', resumeOnFirstInteraction);
+            document.removeEventListener('scroll', resumeOnFirstInteraction);
+        };
+        document.addEventListener('touchstart', resumeOnFirstInteraction, { once: true, passive: true });
+        document.addEventListener('click', resumeOnFirstInteraction, { once: true });
+        document.addEventListener('scroll', resumeOnFirstInteraction, { once: true, passive: true });
+
+        // Quand l'onglet redevient visible (retour depuis une autre app), on relance aussi
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) tryPlayVideo();
         });
     }
 
