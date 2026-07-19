@@ -915,6 +915,7 @@
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
+            background: linear-gradient(160deg, #FF9A2E 0%, #FF7A1A 55%, #FF6600 100%);
         }
         .ge-video-hero .ge-bg-video {
             position: absolute; inset: 0;
@@ -1063,8 +1064,10 @@
 
 <!-- =================== TOPBAR (style Chicken Nation) =================== -->
 <div class="ge-video-hero">
-    <video class="ge-bg-video" autoplay muted loop playsinline preload="auto" poster="image/spa.jpg">
+    <video class="ge-bg-video" id="ge-bg-video" autoplay muted loop playsinline preload="auto"
+        onerror="console.error('❌ Vidéo introuvable ou format non supporté : video/hero-loop.mp4')">
         <source src="video/hero-loop.mp4" type="video/mp4">
+        Votre navigateur ne supporte pas la vidéo HTML5.
     </video>
     <div class="ge-bg-overlay"></div>
     <header class="ge-topbar">
