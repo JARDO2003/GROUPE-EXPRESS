@@ -289,7 +289,7 @@
         .promo-dot.active { background: var(--flame); width: 22px; border-radius: 4px; }
 
         /* =================== NAV PILLS =================== */
-        .nav-pills-section { padding: 20px 24px; border-bottom: 1px solid var(--border); }
+        .nav-pills-section { padding: 12px 24px; border-bottom: 1px solid var(--border); }
         .nav-pills-inner { max-width: 1100px; margin: 0 auto; }
 
         .nav-pills {
@@ -351,7 +351,7 @@
         .view-all { font-size: 13px; font-weight: 600; color: var(--flame); text-decoration: none; display: flex; align-items: center; gap: 4px; }
 
         /* =================== NOUVEAU AU MENU (bande horizontale, réutilise .dish-card) =================== */
-        .new-menu-section { padding: 24px 20px 4px; max-width: 1100px; margin: 0 auto; }
+        .new-menu-section { padding: 10px 20px 4px; max-width: 1100px; margin: 0 auto; }
         .new-menu-section > h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1.15rem; font-weight: 700; color: var(--charcoal); margin-bottom: 14px; }
         .new-menu-scroll {
             display: flex; gap: 14px; overflow-x: auto;
@@ -908,10 +908,10 @@
             -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
         }
 
-        /* =================== VIDEO HERO (fond vidéo topbar + catégories) =================== */
+        /* =================== VIDEO HERO (fond vidéo topbar + annonces) =================== */
         .ge-video-hero {
             position: relative;
-            min-height: 560px;
+            min-height: 380px;
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
@@ -927,9 +927,9 @@
         .ge-video-hero .ge-bg-overlay {
             position: absolute; inset: 0;
             background: linear-gradient(165deg,
-                rgba(200,60,10,0.60) 0%,
-                rgba(255,140,40,0.42) 45%,
-                rgba(255,253,249,0.90) 100%);
+                rgba(180,50,10,0.28) 0%,
+                rgba(255,140,40,0.14) 45%,
+                rgba(255,253,249,0.06) 100%);
             z-index: 1;
             pointer-events: none;
         }
@@ -937,11 +937,12 @@
             background: transparent;
             z-index: 2;
         }
-        .ge-video-hero .cat-circles-section {
+        .ge-video-hero .promo-section {
             position: relative; z-index: 2;
+            background: transparent;
+            border-bottom: none;
             padding-top: 14px;
         }
-        .ge-video-hero .cat-circles-title-row h2 { color: var(--charcoal); }
 
         /* =================== CATEGORY CIRCLES =================== */
         .cat-circles-section { padding: 22px 20px 4px; max-width: 1100px; margin: 0 auto; }
@@ -1097,41 +1098,39 @@
     ⚠️ Les commandes sont fermées entre 10h00 et 18h00. Revenez ce soir !
 </div>
 
-<!-- =================== CATÉGORIES (cercles, style Chicken Nation) =================== -->
-<section class="cat-circles-section">
-    <div class="cat-circles-title-row">
-        <h2>Nos Catégories</h2>
-        <a href="#new-dishes-section" onclick="document.getElementById('new-dishes-section').style.display='';document.getElementById('new-dishes-section').scrollIntoView({behavior:'smooth'});return false;">Voir tout</a>
-    </div>
-    <div class="cat-circles">
-        <a href="#new-menu-strip" class="cat-circle active" onclick="document.getElementById('new-menu-strip').scrollIntoView({behavior:'smooth'});return false;">
-            <div class="cat-circle-icon">🔥</div>
-            <span class="cat-circle-label">Promotions</span>
-        </a>
-        <a href="#cat-pates" class="cat-circle" onclick="document.getElementById('cat-pates').scrollIntoView({behavior:'smooth'});return false;">
-            <div class="cat-circle-icon">🍝</div>
-            <span class="cat-circle-label">Pâtes</span>
-        </a>
-        <a href="#cat-tcheps" class="cat-circle" onclick="document.getElementById('cat-tcheps').scrollIntoView({behavior:'smooth'});return false;">
-            <div class="cat-circle-icon">🍚</div>
-            <span class="cat-circle-label">Tchèpes</span>
-        </a>
-        <a href="#cat-riz" class="cat-circle" onclick="document.getElementById('cat-riz').scrollIntoView({behavior:'smooth'});return false;">
-            <div class="cat-circle-icon">🍛</div>
-            <span class="cat-circle-label">Riz sauces</span>
-        </a>
-        <a href="#cat-porc" class="cat-circle" onclick="document.getElementById('cat-porc').scrollIntoView({behavior:'smooth'});return false;">
-            <div class="cat-circle-icon">🐷</div>
-            <span class="cat-circle-label">Porc</span>
-        </a>
-        <a href="#cat-attieke" class="cat-circle" onclick="document.getElementById('cat-attieke').scrollIntoView({behavior:'smooth'});return false;">
-            <div class="cat-circle-icon">🌾</div>
-            <span class="cat-circle-label">Attiéké</span>
-        </a>
-        <a href="#cat-boissons" class="cat-circle" onclick="document.getElementById('cat-boissons').scrollIntoView({behavior:'smooth'});return false;">
-            <div class="cat-circle-icon">🍹</div>
-            <span class="cat-circle-label">Boissons</span>
-        </a>
+<!-- =================== ANNONCES (slider auto-défilant) =================== -->
+<section class="promo-section">
+    <div class="promo-inner">
+        <div class="promo-track">
+            <div class="promo-slides" id="promo-slides">
+                <div class="promo-slide" onclick="window.open('annonce.html','_blank')">
+                    <img src="image/imn1.jpeg" alt="Promotion" onerror="this.style.background='linear-gradient(135deg,#FF6B35,#FFA726)';this.style.minHeight='120px'">
+                    <div class="promo-slide-overlay">
+                        <h3>🔥 Promotion Spéciale</h3>
+                        <p>3 Plats pour 1500 FCFA — Commandez maintenant</p>
+                    </div>
+                </div>
+                <div class="promo-slide" onclick="window.open('annonce.html','_blank')">
+                    <img src="image/imn2.jpeg" alt="Nouveau Menu" onerror="this.style.background='linear-gradient(135deg,#FF8C42,#FFB300)'">
+                    <div class="promo-slide-overlay">
+                        <h3>🆕 Nouveau Menu</h3>
+                        <p>Retrait au rez-de-chaussée — Rapide et frais</p>
+                    </div>
+                </div>
+                <div class="promo-slide" onclick="window.open('annonce.html','_blank')">
+                    <img src="image/imn3.jpeg" alt="Livraison Express" onerror="this.style.background='linear-gradient(135deg,#FFA726,#FF6B35)'">
+                    <div class="promo-slide-overlay">
+                        <h3>⚡ Bientôt disponible</h3>
+                        <p>De nouvelles fonctionnalités arrivent pour vous</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="promo-nav">
+            <button class="promo-dot active" onclick="goSlide(0)"></button>
+            <button class="promo-dot" onclick="goSlide(1)"></button>
+            <button class="promo-dot" onclick="goSlide(2)"></button>
+        </div>
     </div>
 </section>
 </div><!-- /ge-video-hero -->
