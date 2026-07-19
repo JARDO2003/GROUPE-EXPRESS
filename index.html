@@ -925,10 +925,10 @@
         }
         .ge-video-hero .ge-bg-overlay {
             position: absolute; inset: 0;
-            background: linear-gradient(165deg,
-                rgba(180,50,10,0.28) 0%,
-                rgba(255,140,40,0.14) 45%,
-                rgba(255,253,249,0.06) 100%);
+            background: linear-gradient(180deg,
+                rgba(180,50,10,0.30) 0%,
+                rgba(255,140,40,0.16) 45%,
+                rgba(255,253,249,0.65) 100%);
             z-index: 1;
             pointer-events: none;
         }
@@ -941,6 +941,17 @@
             background: transparent;
             border-bottom: none;
             padding-top: 0;
+        }
+        .ge-video-hero .nav-pills-section {
+            position: relative; z-index: 2;
+            background: transparent;
+            border-bottom: none;
+        }
+        .ge-video-hero .new-menu-section {
+            position: relative; z-index: 2;
+        }
+        .ge-video-hero .new-menu-section > h2 {
+            color: var(--charcoal);
         }
 
         /* =================== CATEGORY CIRCLES =================== */
@@ -1131,7 +1142,6 @@
         </div>
     </div>
 </section>
-</div><!-- /ge-video-hero -->
 
 <!-- =================== NAV PILLS =================== -->
 <section class="nav-pills-section">
@@ -1155,9 +1165,14 @@
     </div>
 </section>
 
-<!-- =================== NOUVEAU AU MENU (compact, structure dish-card exacte) =================== -->
-<section class="new-menu-section" id="new-menu-strip">
+<!-- Titre "Nouveau au menu" — reste dans la zone vidéo -->
+<div class="new-menu-section" style="padding-bottom:0">
     <h2>Nouveau au menu</h2>
+</div>
+</div><!-- /ge-video-hero -->
+
+<!-- =================== NOUVEAU AU MENU (compact, structure dish-card exacte) =================== -->
+<section class="new-menu-section" id="new-menu-strip" style="padding-top:0">
     <div class="new-menu-scroll">
 
         <div class="dish-card">
