@@ -358,7 +358,7 @@
             scrollbar-width: none; padding-bottom: 6px;
         }
         .new-menu-scroll::-webkit-scrollbar { display: none; }
-        .new-menu-scroll .dish-card { flex-shrink: 0; width: 160px; }
+        .new-menu-scroll .dish-card { flex-shrink: 0; width: 118px; }
 
 
         /* =================== CATEGORY SECTION =================== */
@@ -379,8 +379,8 @@
         /* =================== DISH GRID =================== */
         .dishes-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 16px;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 10px;
         }
 
         .dish-card {
@@ -721,7 +721,7 @@
             .hero-badge-wrap { display: none; }
             .featured-img { height: 160px; }
             .footer-inner { grid-template-columns: 1fr; gap: 24px; }
-            .dishes-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .dishes-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; }
             .dish-body { padding: 10px; }
             .section-header { padding-top: 28px; }
             .site-header { padding: 0 16px; }
@@ -911,6 +911,10 @@
         /* =================== VIDEO HERO (fond vidéo topbar + catégories) =================== */
         .ge-video-hero {
             position: relative;
+            min-height: 560px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
         }
         .ge-video-hero .ge-bg-video {
             position: absolute; inset: 0;
@@ -1128,42 +1132,6 @@
     </div>
 </section>
 </div><!-- /ge-video-hero -->
-
-<!-- =================== PROMO SLIDER =================== -->
-<section class="promo-section">
-    <div class="promo-inner">
-        <div class="promo-track">
-            <div class="promo-slides" id="promo-slides">
-                <div class="promo-slide" onclick="window.open('annonce.html','_blank')">
-                    <img src="image/imn1.jpeg" alt="Promotion" onerror="this.style.background='linear-gradient(135deg,#FF6B35,#FFA726)';this.style.minHeight='180px'">
-                    <div class="promo-slide-overlay">
-                        <h3>🔥 Promotion Spéciale</h3>
-                        <p>3 Plats pour 1500 FCFA — Commandez maintenant</p>
-                    </div>
-                </div>
-                <div class="promo-slide" onclick="window.open('annonce.html','_blank')">
-                    <img src="image/imn2.jpeg" alt="Nouveau Menu" onerror="this.style.background='linear-gradient(135deg,#FF8C42,#FFB300)'">
-                    <div class="promo-slide-overlay">
-                        <h3>🆕 Nouveau Menu</h3>
-                        <p>Retrait au rez-de-chaussée — Rapide et frais</p>
-                    </div>
-                </div>
-                <div class="promo-slide" onclick="window.open('annonce.html','_blank')">
-                    <img src="image/imn3.jpeg" alt="Livraison Express" onerror="this.style.background='linear-gradient(135deg,#FFA726,#FF6B35)'">
-                    <div class="promo-slide-overlay">
-                        <h3>⚡ Bientôt disponible</h3>
-                        <p>De nouvelles fonctionnalités arrivent pour vous</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="promo-nav">
-            <button class="promo-dot active" onclick="goSlide(0)"></button>
-            <button class="promo-dot" onclick="goSlide(1)"></button>
-            <button class="promo-dot" onclick="goSlide(2)"></button>
-        </div>
-    </div>
-</section>
 
 <!-- =================== NAV PILLS =================== -->
 <section class="nav-pills-section">
