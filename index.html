@@ -843,116 +843,110 @@
         }
         .preview-add-btn:hover { background: var(--flame-deep); }
 
-        /* =================== CHICKEN-NATION-STYLE TOPBAR =================== */
+        /* =================== TOPBAR (nouveau design, fond clair) =================== */
         .ge-topbar {
             position: sticky; top: 0; z-index: 200;
-            background: linear-gradient(160deg, #FF9A2E 0%, #FF7A1A 55%, #FF6600 100%);
-            padding: 14px 20px 0;
+            background: var(--warm-white);
+            padding: 16px 20px 14px;
             overflow: visible;
         }
         .ge-topbar-row {
             display: flex; align-items: center; justify-content: space-between;
-            gap: 12px; max-width: 1100px; margin: 0 auto;
+            gap: 10px; max-width: 1100px; margin: 0 auto;
         }
         .ge-location-pill {
             display: flex; align-items: center; gap: 8px;
-            background: rgba(255,255,255,0.22);
+            background: white;
             border: none; border-radius: 50px;
-            padding: 9px 16px; cursor: pointer;
-            color: white; font-family: 'DM Sans', sans-serif;
+            padding: 11px 16px; cursor: pointer;
+            color: var(--charcoal); font-family: 'DM Sans', sans-serif;
             font-size: 13px; font-weight: 600;
-            max-width: 70%;
+            max-width: 58%;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
         }
+        .ge-location-pill .loc-pin { color: var(--flame); }
         .ge-location-pill .loc-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .ge-location-pill .loc-chevron { font-size: 12px; opacity: 0.85; }
+        .ge-location-pill .loc-chevron { font-size: 12px; opacity: 0.6; }
         .ge-topbar-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
         .ge-points-badge {
             display: flex; align-items: center; gap: 6px;
-            background: rgba(255,255,255,0.22); border: none;
-            border-radius: 50px; padding: 8px 12px; cursor: pointer;
-            color: white; font-size: 12px; font-weight: 700;
+            background: white; border: none;
+            border-radius: 50px; padding: 10px 14px; cursor: pointer;
+            color: var(--charcoal); font-size: 12px; font-weight: 700;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
         }
         .ge-bell-btn, .ge-call-btn {
-            width: 38px; height: 38px; border-radius: 50%;
-            background: rgba(255,255,255,0.22); border: none;
+            width: 42px; height: 42px; border-radius: 50%;
+            background: white; border: none;
             display: flex; align-items: center; justify-content: center;
-            font-size: 16px; cursor: pointer; color: white;
+            font-size: 17px; cursor: pointer; color: var(--flame);
             text-decoration: none; position: relative;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
         }
+        .ge-call-btn { background: var(--flame); color: white; }
         .ge-stand-tabs {
-            display: flex; align-items: center; gap: 10px;
-            max-width: 1100px; margin: 18px auto 0;
-            overflow-x: auto; scrollbar-width: none; padding-bottom: 4px;
+            display: flex; align-items: center; gap: 4px;
+            max-width: 1100px; margin: 14px auto 0;
+            overflow-x: auto; scrollbar-width: none;
+            background: white; border-radius: 50px;
+            padding: 6px; box-shadow: 0 2px 10px rgba(0,0,0,0.06);
         }
         .ge-stand-tabs::-webkit-scrollbar { display: none; }
         .ge-stand-tab {
             display: flex; align-items: center; gap: 8px;
             background: transparent; border: none; cursor: pointer;
             font-family: 'Space Grotesk', sans-serif; font-weight: 700;
-            font-size: 14px; color: rgba(255,255,255,0.75);
-            white-space: nowrap; padding: 4px 2px;
+            font-size: 12.5px; color: var(--muted);
+            white-space: nowrap; padding: 9px 16px;
+            border-radius: 50px; flex-shrink: 0;
         }
-        .ge-stand-tab.active { color: white; }
+        .ge-stand-tab.active { color: white; background: var(--flame); }
         .ge-open-dot {
             display: inline-flex; align-items: center; gap: 4px;
             background: var(--green); color: white;
             border-radius: 50px; padding: 3px 10px;
             font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
         }
-        .ge-drip {
-            position: relative; height: 34px; margin-top: 12px;
-            background: #FF7A1A;
-            -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 60' preserveAspectRatio='none'><path d='M0,0 H500 V25 C480,25 470,60 450,60 C430,60 425,30 405,30 C385,30 380,55 360,55 C340,55 335,20 315,20 C295,20 290,45 270,45 C250,45 248,15 228,15 C208,15 205,50 185,50 C165,50 162,22 142,22 C122,22 118,48 98,48 C78,48 76,18 56,18 C36,18 30,40 12,40 C6,40 0,30 0,25 Z'/></svg>");
-            mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 60' preserveAspectRatio='none'><path d='M0,0 H500 V25 C480,25 470,60 450,60 C430,60 425,30 405,30 C385,30 380,55 360,55 C340,55 335,20 315,20 C295,20 290,45 270,45 C250,45 248,15 228,15 C208,15 205,50 185,50 C165,50 162,22 142,22 C122,22 118,48 98,48 C78,48 76,18 56,18 C36,18 30,40 12,40 C6,40 0,30 0,25 Z'/></svg>");
-            -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
-            -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
-        }
 
-        /* =================== VIDEO HERO (fond vidéo topbar + annonces) =================== */
-        .ge-video-hero {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            background: linear-gradient(160deg, #FF9A2E 0%, #FF7A1A 55%, #FF6600 100%);
+        /* =================== PROMO CARD (fond vidéo, style "Promotion Spéciale") =================== */
+        .ge-promo-wrap { padding: 16px 20px 0; max-width: 1100px; margin: 0 auto; }
+        .promo-section { padding: 0; border-bottom: none; background: transparent; }
+        .promo-inner { max-width: none; }
+        .promo-track { border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.10); }
+        .promo-slide {
+            min-width: 100%; height: 280px; position: relative;
+            border-radius: 24px; overflow: hidden; cursor: pointer;
         }
-        .ge-video-hero .ge-bg-video {
+        .promo-slide .ge-bg-video {
             position: absolute; inset: 0;
-            width: 100%; height: 100%;
-            object-fit: cover;
-            z-index: 0;
-            pointer-events: none;
+            width: 100%; height: 100%; object-fit: cover;
         }
-        .ge-video-hero .ge-bg-overlay {
+        .promo-slide-overlay {
             position: absolute; inset: 0;
-            background: linear-gradient(180deg,
-                rgba(180,50,10,0.30) 0%,
-                rgba(255,140,40,0.16) 45%,
-                rgba(255,253,249,0.65) 100%);
-            z-index: 1;
-            pointer-events: none;
+            background: linear-gradient(0deg, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.15) 55%, transparent 100%);
+            display: flex; flex-direction: column;
+            justify-content: flex-end; padding: 22px 24px 26px;
         }
-        .ge-video-hero .ge-topbar {
-            background: transparent;
-            z-index: 2;
+        .promo-badge-pill {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: white; color: var(--flame);
+            border-radius: 50px; padding: 6px 14px;
+            font-size: 12px; font-weight: 700;
+            width: fit-content; margin-bottom: 14px;
+            text-transform: uppercase; letter-spacing: 0.3px;
         }
-        .ge-video-hero .promo-section {
-            position: relative; z-index: 2;
-            background: transparent;
-            border-bottom: none;
-            padding-top: 0;
+        .promo-slide-overlay h3 { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1.55rem; color: white; margin-bottom: 6px; line-height: 1.15; }
+        .promo-slide-overlay p { font-size: 13.5px; color: rgba(255,255,255,0.88); margin-bottom: 16px; }
+        .promo-cta-btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: white; color: var(--flame);
+            border-radius: 50px; padding: 11px 20px;
+            font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 13.5px;
+            width: fit-content; border: none; cursor: pointer;
         }
-        .ge-video-hero .nav-pills-section {
-            position: relative; z-index: 2;
-            background: transparent;
-            border-bottom: none;
-        }
-        .ge-video-hero .new-menu-section {
-            position: relative; z-index: 2;
-        }
-        .ge-video-hero .new-menu-section > h2 {
-            color: var(--charcoal);
-        }
+        .promo-nav { margin-top: 12px; }
+        .promo-dot { background: var(--border); }
+        .promo-dot.active { background: var(--flame); }
 
         /* =================== CATEGORY CIRCLES =================== */
         .cat-circles-section { padding: 22px 20px 4px; max-width: 1100px; margin: 0 auto; }
