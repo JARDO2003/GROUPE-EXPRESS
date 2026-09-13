@@ -318,6 +318,24 @@
             box-shadow: 0 4px 12px rgba(255,107,53,0.3);
         }
 
+        .pill-main {
+            gap: 10px; padding: 7px 16px 7px 7px;
+            font-family: 'Space Grotesk', sans-serif; font-weight: 700;
+            font-size: 13.5px; color: var(--charcoal);
+        }
+        .pill-main:hover { background: white; color: var(--charcoal); border-color: var(--border); box-shadow: none; }
+        .pill-icon-circle {
+            width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+            background: #FFE3D2; display: flex; align-items: center; justify-content: center;
+            font-size: 16px;
+        }
+        .pill-chevron { color: var(--muted); font-size: 15px; margin-left: 2px; }
+        .pill-icon {
+            width: 44px; height: 44px; padding: 0; flex-shrink: 0;
+            justify-content: center; border-radius: 50%; font-size: 17px; color: var(--flame);
+        }
+        .pill-icon:hover { background: var(--flame); color: white; }
+
         .pill-badge {
             background: var(--red); color: white;
             border-radius: 50%; width: 18px; height: 18px;
@@ -352,13 +370,20 @@
 
         /* =================== NOUVEAU AU MENU (bande horizontale, réutilise .dish-card) =================== */
         .new-menu-section { padding: 10px 20px 4px; max-width: 1100px; margin: 0 auto; }
-        .new-menu-section > h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1.15rem; font-weight: 700; color: var(--charcoal); margin-bottom: 14px; }
+        .new-menu-section .nm-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+        .new-menu-section > h2, .new-menu-section .nm-header h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1.15rem; font-weight: 700; color: var(--charcoal); margin-bottom: 0; }
         .new-menu-scroll {
-            display: flex; gap: 14px; overflow-x: auto;
-            scrollbar-width: none; padding-bottom: 6px;
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
         }
-        .new-menu-scroll::-webkit-scrollbar { display: none; }
-        .new-menu-scroll .dish-card { flex-shrink: 0; width: 118px; }
+        .new-menu-scroll .dish-card { width: auto; }
+        .dish-fav-btn {
+            position: absolute; top: 8px; right: 8px; z-index: 2;
+            width: 28px; height: 28px; border-radius: 50%;
+            background: rgba(255,255,255,0.92); border: none; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; box-shadow: 0 2px 6px rgba(0,0,0,0.14);
+        }
 
 
         /* =================== CATEGORY SECTION =================== */
@@ -885,27 +910,24 @@
         }
         .ge-call-btn { background: var(--flame); color: white; }
         .ge-stand-tabs {
-            display: flex; align-items: center; gap: 4px;
-            max-width: 1100px; margin: 14px auto 0;
-            overflow-x: auto; scrollbar-width: none;
-            background: white; border-radius: 50px;
-            padding: 6px; box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+            display: flex; align-items: center; justify-content: space-between;
+            max-width: 1100px; margin: 16px auto 0;
+            padding: 0 4px; gap: 10px;
         }
-        .ge-stand-tabs::-webkit-scrollbar { display: none; }
         .ge-stand-tab {
-            display: flex; align-items: center; gap: 8px;
             background: transparent; border: none; cursor: pointer;
-            font-family: 'Space Grotesk', sans-serif; font-weight: 700;
-            font-size: 12.5px; color: var(--muted);
-            white-space: nowrap; padding: 9px 16px;
-            border-radius: 50px; flex-shrink: 0;
+            font-family: 'DM Sans', sans-serif; font-weight: 700;
+            font-size: 12px; letter-spacing: 0.4px;
+            color: var(--muted); text-transform: uppercase;
+            white-space: nowrap; padding: 6px 2px; flex-shrink: 0;
         }
-        .ge-stand-tab.active { color: white; background: var(--flame); }
+        .ge-stand-tab.active { color: var(--charcoal); }
         .ge-open-dot {
-            display: inline-flex; align-items: center; gap: 4px;
+            display: inline-flex; align-items: center; justify-content: center;
             background: var(--green); color: white;
-            border-radius: 50px; padding: 3px 10px;
-            font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
+            border-radius: 50px; padding: 6px 18px;
+            font-size: 11px; font-weight: 700; letter-spacing: 0.6px;
+            flex-shrink: 0; box-shadow: 0 2px 8px rgba(46,204,113,0.3);
         }
 
         /* =================== PROMO CARD (fond vidéo, style "Promotion Spéciale") =================== */
@@ -1090,7 +1112,8 @@
     </div>
     <div class="ge-stand-tabs">
         <button class="ge-stand-tab active">GROUPE EXPRESS UTT LOKO</button>
-        <button class="ge-stand-tab"><span class="ge-open-dot">OUVERT</span>&nbsp;GROUPE EXPRESS FONTAINE</button>
+        <span class="ge-open-dot">OUVERT</span>
+        <button class="ge-stand-tab">GROUPE EXPRESS</button>
     </div>
     </header>
 
@@ -1109,8 +1132,10 @@
                 <div class="promo-slide" onclick="window.open('annonce.html','_blank')">
                     <img src="image/imn1.jpeg" alt="Promotion" onerror="this.style.background='linear-gradient(135deg,#FF6B35,#FFA726)';this.style.minHeight='120px'">
                     <div class="promo-slide-overlay">
-                        <h3>🔥 Promotion Spéciale</h3>
-                        <p>3 Plats pour 1500 FCFA — Commandez maintenant</p>
+                        <span class="promo-badge-pill">🔥 PROMOTION SPÉCIALE</span>
+                        <h3>3 Plats pour 1500 FCFA</h3>
+                        <p>Commande maintenant</p>
+                        <button class="promo-cta-btn" onclick="event.stopPropagation();window.open('annonce.html','_blank')">Voir l'offre <span>›</span></button>
                     </div>
                 </div>
                 <div class="promo-slide" onclick="window.open('annonce.html','_blank')">
@@ -1147,8 +1172,17 @@
                 </div>
             </div>
             <div class="nav-pills" id="nav-pills">
-                <a href="shopping.html" class="pill">🛍️ Express Shopping</a>
-                <button onclick="toggleOrders()" class="pill">📦 Mes commandes</button>
+                <a href="shopping.html" class="pill pill-main">
+                    <span class="pill-icon-circle">🛍️</span>
+                    <span>Express Shopping</span>
+                    <span class="pill-chevron">›</span>
+                </a>
+                <button onclick="toggleOrders()" class="pill pill-main">
+                    <span class="pill-icon-circle" style="background:#F1DFC9">📦</span>
+                    <span>Mes commandes</span>
+                    <span class="pill-chevron">›</span>
+                </button>
+                <a href="annonce.html" class="pill pill-icon" title="Promotions">🏷️</a>
                 <a href="actualité.html" class="pill">📱 Réseau Social</a>
                 <a href="annonce.html" class="pill">📢 Annonces <span class="pill-badge">7</span></a>
                 <a href="fournisseur.html" class="pill">👨‍🍳fournisseurs</a>
@@ -1162,7 +1196,10 @@
 
 <!-- =================== NOUVEAU AU MENU (compact, structure dish-card exacte) =================== -->
 <section class="new-menu-section" id="new-menu-strip">
-    <h2>Nouveau au menu</h2>
+    <div class="nm-header">
+        <h2>Nouveau au menu</h2>
+        <a href="#" class="view-all">Tout voir <span>›</span></a>
+    </div>
     <div class="new-menu-scroll">
 
         <div class="dish-card">
@@ -1173,6 +1210,7 @@
                 data-desc="Attiékè classique avec poisson grillé"
                 data-price="1000 FCFA"
                 data-action="promptAddToCart('ATTIEKE POISSON',1000,'E')">
+                <button class="dish-fav-btn" onclick="event.stopPropagation();this.classList.toggle('liked');this.textContent=this.classList.contains('liked')?'❤️':'🤍'">🤍</button>
                 <img src="image/at.jpg" alt="Attiékè poisson" class="dish-image"
                     onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🐟</text></svg>'">
             </div>
@@ -1194,6 +1232,7 @@
                 data-desc="Le Garba authentique d'Abidjan"
                 data-price="dès 500 FCFA"
                 data-action="selectGarba()">
+                <button class="dish-fav-btn" onclick="event.stopPropagation();this.classList.toggle('liked');this.textContent=this.classList.contains('liked')?'❤️':'🤍'">🤍</button>
                 <img src="image/garba.jpg" alt="Garba" class="dish-image"
                     onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🌾</text></svg>'">
             </div>
@@ -1215,6 +1254,7 @@
                 data-desc="Attiékè + poulet + condiment maison"
                 data-price="dès 1000 FCFA"
                 data-action="selectAttiekePoulet()">
+                <button class="dish-fav-btn" onclick="event.stopPropagation();this.classList.toggle('liked');this.textContent=this.classList.contains('liked')?'❤️':'🤍'">🤍</button>
                 <img src="image/ATIEKEPOULET.jpg" alt="Attiékè poulet" class="dish-image"
                     onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🍗</text></svg>'">
             </div>
@@ -1236,6 +1276,7 @@
                 data-desc="Porc au four avec 2 boules d'attiékè"
                 data-price="1200 FCFA"
                 data-action="selectPorc(1200,'2 boules')">
+                <button class="dish-fav-btn" onclick="event.stopPropagation();this.classList.toggle('liked');this.textContent=this.classList.contains('liked')?'❤️':'🤍'">🤍</button>
                 <img src="image/PORC1.jpg" alt="Porc 2 boules" class="dish-image"
                     onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23F5EDE3%22 width=%22200%22 height=%22200%22/><text y=%22110%22 x=%22100%22 text-anchor=%22middle%22 font-size=%2250%22>🐷</text></svg>'">
             </div>
@@ -1257,9 +1298,12 @@
     <!-- =================== PÂTES & PETIT POIS =================== -->
     <div class="category-section" id="cat-pates">
         <div class="category-header">
-            <div class="category-icon">🍝</div>
-            <h3>Pâtes & Petit pois</h3>
-            <span class="category-count">10 plats</span>
+            <div class="category-icon" style="border-radius:50%;background:#FFE3D2">🍩</div>
+            <div style="display:flex;flex-direction:column;gap:2px">
+                <h3>Pâtes & Petit pois</h3>
+                <span class="category-count" style="background:none;color:var(--flame);padding:0;font-weight:700">10 plats</span>
+            </div>
+            <span style="margin-left:auto;color:var(--muted);font-size:18px">›</span>
         </div>
         <div class="dishes-grid">
 
