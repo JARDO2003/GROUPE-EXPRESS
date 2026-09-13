@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-import { getFirestore, collection, addDoc, onSnapshot, query, where } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, onSnapshot, query, where, doc, getDoc, setDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyBsGrY-AqYMoI70kT3WMxLgW0HwYA4KyaQ",
@@ -33,6 +33,12 @@ let pendingItem = null;
 let pendingQty = 1;
 let customerOrders = JSON.parse(localStorage.getItem('ge_orders') || '[]');
 let fcmToken = localStorage.getItem('fcmToken') || null;
+
+// ===== EXPRESSGIFT (fidélité) =====
+const GIFT_TARGET = 15;
+let giftAccount = JSON.parse(localStorage.getItem('ge_gift_account') || 'null'); // {id, firstName, lastName, phone}
+let giftUnsubDoc = null;
+let giftUnsubOrders = null;
 
 // Rice options
 const riceOpts = [
@@ -294,6 +300,16 @@ async function submitOrder() {
         customerOrders.push({ ...orderData, code, timestamp: new Date().toISOString() });
         localStorage.setItem('ge_orders', JSON.stringify(customerOrders));
 
+        // ExpressGift : +1 point par commande (si un compte est connecté)
+        if (giftAccount && giftAccount.id) {
+            try {
+                await updateDoc(doc(db, 'expressgift_users', giftAccount.id), {
+                    points: increment(1),
+                    totalOrders: increment(1)
+                });
+            } catch (e) { console.warn('Gift points update failed:', e); }
+        }
+
         // Clear cart
         cart = [];
         total = 0;
@@ -380,6 +396,206 @@ function clearOrders() {
         renderOrders();
         showToast('🗑️ Historique vidé');
     }
+}
+
+// ===== EXPRESSGIFT (fidélité) =====
+function sanitizePhone(p) { return (p || '').replace(/\D/g, ''); }
+
+function toggleAccount() {
+    openModal('account-modal');
+    if (giftAccount && giftAccount.id) {
+        showGiftView('dashboard');
+        if (!giftUnsubDoc) subscribeGiftAccount(giftAccount.id);
+        if (!giftUnsubOrders) subscribeGiftOrders(giftAccount.phone);
+    } else {
+        showGiftView('register');
+    }
+}
+
+function showGiftView(view) {
+    const reg = document.getElementById('gift-view-register');
+    const dash = document.getElementById('gift-view-dashboard');
+    if (reg) reg.style.display = view === 'register' ? 'block' : 'none';
+    if (dash) dash.style.display = view === 'dashboard' ? 'block' : 'none';
+}
+
+async function submitGiftAccount() {
+    const firstName = document.getElementById('gift-inp-firstname')?.value.trim() || '';
+    const lastName = document.getElementById('gift-inp-lastname')?.value.trim() || '';
+    const phone = sanitizePhone(document.getElementById('gift-inp-phone')?.value.trim() || '');
+
+    let err = false;
+    const showErr = (id, msg) => { const el = document.getElementById(id); if (el) { el.textContent = msg; el.style.display = 'block'; } err = true; };
+    const hideErr = id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; };
+
+    if (!firstName || firstName.length < 2) showErr('gift-err-firstname', '❌ Entrez votre prénom'); else hideErr('gift-err-firstname');
+    if (!lastName || lastName.length < 2) showErr('gift-err-lastname', '❌ Entrez votre nom'); else hideErr('gift-err-lastname');
+    if (!phone || phone.length < 8) showErr('gift-err-phone', '❌ Numéro invalide (min. 8 chiffres)'); else hideErr('gift-err-phone');
+    if (err) return;
+
+    const btn = document.querySelector('#gift-view-register .btn-primary');
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ Création...'; }
+
+    try {
+        const ref = doc(db, 'expressgift_users', phone);
+        const snap = await getDoc(ref);
+        if (snap.exists()) {
+            await setDoc(ref, { firstName, lastName }, { merge: true });
+        } else {
+            await setDoc(ref, {
+                firstName, lastName, phone,
+                points: 0, totalOrders: 0, rewardsAvailable: 0,
+                createdAt: new Date().toISOString()
+            });
+        }
+        giftAccount = { id: phone, firstName, lastName, phone };
+        localStorage.setItem('ge_gift_account', JSON.stringify(giftAccount));
+
+        subscribeGiftAccount(phone);
+        subscribeGiftOrders(phone);
+        showGiftView('dashboard');
+        showToast(`🎁 Bienvenue ${firstName} ! Compte ExpressGift créé`);
+    } catch (e) {
+        console.error('Gift account error:', e);
+        showToast('❌ Erreur lors de la création du compte', 'error');
+    } finally {
+        if (btn) { btn.disabled = false; btn.textContent = '🎁 Créer mon compte'; }
+    }
+}
+
+function subscribeGiftAccount(phoneId) {
+    const ref = doc(db, 'expressgift_users', phoneId);
+    giftUnsubDoc = onSnapshot(ref, async (snap) => {
+        if (!snap.exists()) return;
+        const data = snap.data();
+
+        // Seuil de 15 points atteint -> on débloque le plat cadeau et on relance le compteur
+        if ((data.points || 0) >= GIFT_TARGET) {
+            await updateDoc(ref, {
+                points: (data.points || 0) - GIFT_TARGET,
+                rewardsAvailable: increment(1)
+            });
+            showToast('🎉 Bravo ! Vous avez débloqué un plat cadeau 🎁');
+            return; // le prochain snapshot rafraîchira l'affichage avec les valeurs corrigées
+        }
+
+        renderGiftDashboard(data);
+    });
+}
+
+function subscribeGiftOrders(phone) {
+    if (!phone) return;
+    const q = query(collection(db, 'orders'), where('whatsappNumber', '==', phone));
+    giftUnsubOrders = onSnapshot(q, (snap) => {
+        const orders = snap.docs.map(d => d.data());
+        renderWeeklyChart(orders);
+        const wEl = document.getElementById('gift-stat-week'); if (wEl) wEl.textContent = countThisWeek(orders);
+    }, () => {
+        // Hors-ligne : on retombe sur les commandes locales
+        renderWeeklyChart(customerOrders.filter(o => sanitizePhone(o.whatsappNumber) === phone));
+    });
+}
+
+function renderGiftDashboard(data) {
+    const initials = `${(data.firstName || '?')[0] || ''}${(data.lastName || '?')[0] || ''}`.toUpperCase();
+    const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+
+    setText('gift-avatar-initials', initials || '🎁');
+    setText('gift-fullname', `${data.firstName || ''} ${data.lastName || ''}`.trim());
+    setText('gift-phone', data.phone || '');
+    setText('gift-points-num', data.points || 0);
+    setText('gift-stat-rewards', data.rewardsAvailable || 0);
+    setText('gift-stat-total', data.totalOrders || 0);
+
+    const pts = data.points || 0;
+    const remaining = Math.max(0, GIFT_TARGET - pts);
+    setText('gift-points-title', `${pts} point${pts > 1 ? 's' : ''}`);
+    setText('gift-points-sub', remaining === 0
+        ? '🎁 Plat cadeau débloqué !'
+        : `Plus que ${remaining} commande${remaining > 1 ? 's' : ''} pour votre plat cadeau 🎁`);
+
+    const circumference = 169.6;
+    const offset = circumference * (1 - Math.min(1, pts / GIFT_TARGET));
+    const ring = document.getElementById('gift-ring-fg');
+    if (ring) ring.style.strokeDashoffset = offset;
+
+    const banner = document.getElementById('gift-reward-banner');
+    if (banner) {
+        if ((data.rewardsAvailable || 0) > 0) {
+            banner.style.display = 'flex';
+            setText('gift-reward-count', data.rewardsAvailable);
+        } else {
+            banner.style.display = 'none';
+        }
+    }
+
+    updateHeaderPointsBadge(pts);
+}
+
+function countThisWeek(orders) {
+    const now = new Date();
+    const todayIdx = (now.getDay() + 6) % 7; // 0 = lundi
+    const monday = new Date(now); monday.setDate(now.getDate() - todayIdx); monday.setHours(0, 0, 0, 0);
+    return orders.filter(o => new Date(o.createdAt || o.timestamp) >= monday).length;
+}
+
+// Graphique 3D "cinématographique" des commandes de la semaine (CSS 3D pur, sans librairie)
+function renderWeeklyChart(orders) {
+    const stage = document.getElementById('gift-chart-stage');
+    if (!stage) return;
+
+    const days = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+    const now = new Date();
+    const todayIdx = (now.getDay() + 6) % 7;
+    const monday = new Date(now); monday.setDate(now.getDate() - todayIdx); monday.setHours(0, 0, 0, 0);
+    const counts = new Array(7).fill(0);
+
+    orders.forEach(o => {
+        const d = new Date(o.createdAt || o.timestamp);
+        const diffDays = Math.floor((d - monday) / 86400000);
+        if (diffDays >= 0 && diffDays < 7) counts[diffDays]++;
+    });
+
+    const max = Math.max(1, ...counts);
+
+    stage.innerHTML = days.map((label, i) => `
+        <div class="chart3d-bar ${i === todayIdx ? 'today' : ''}">
+            <span class="chart3d-val">${counts[i]}</span>
+            <div class="chart3d-col" style="height:2px"></div>
+            <div class="chart3d-label">${label}</div>
+        </div>
+    `).join('');
+
+    // Révélation animée bar par bar (effet cinématographique)
+    requestAnimationFrame(() => {
+        stage.querySelectorAll('.chart3d-bar').forEach((bar, i) => {
+            const col = bar.querySelector('.chart3d-col');
+            const h = Math.max(6, (counts[i] / max) * 110);
+            setTimeout(() => {
+                col.style.height = h + 'px';
+                bar.classList.add('show');
+            }, i * 110);
+        });
+    });
+
+    const tEl = document.getElementById('gift-stat-total');
+    if (tEl && !giftAccount) tEl.textContent = orders.length;
+}
+
+function clearGiftAccount() {
+    if (!confirm('Se déconnecter de ce compte ExpressGift ?')) return;
+    if (giftUnsubDoc) { giftUnsubDoc(); giftUnsubDoc = null; }
+    if (giftUnsubOrders) { giftUnsubOrders(); giftUnsubOrders = null; }
+    giftAccount = null;
+    localStorage.removeItem('ge_gift_account');
+    updateHeaderPointsBadge(0);
+    showGiftView('register');
+    ['gift-inp-firstname', 'gift-inp-lastname', 'gift-inp-phone'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+}
+
+function updateHeaderPointsBadge(points) {
+    const el = document.getElementById('header-points-text');
+    if (el) el.textContent = `${points || 0} pts`;
 }
 
 // ===== NOTIFICATIONS — Vraie logique FCM =====
@@ -928,6 +1144,10 @@ window.requestNotificationPermission = requestNotificationPermission;
 window.triggerInstallPrompt = triggerInstallPrompt;
 window.openDishPreview = openDishPreview;
 
+window.toggleAccount = toggleAccount;
+window.submitGiftAccount = submitGiftAccount;
+window.clearGiftAccount = clearGiftAccount;
+
 // ===== INIT =====
 document.addEventListener('DOMContentLoaded', () => {
     checkHours();
@@ -935,6 +1155,13 @@ document.addEventListener('DOMContentLoaded', () => {
     loadNewDishes();
     startSlider();
     setInterval(checkHours, 60000);
+
+    // ExpressGift : si un compte est déjà enregistré sur cet appareil,
+    // on se reconnecte en silence pour que le badge de points soit à jour.
+    if (giftAccount && giftAccount.id) {
+        subscribeGiftAccount(giftAccount.id);
+        subscribeGiftOrders(giftAccount.phone);
+    }
 
     // Forcer la lecture EN BOUCLE de la vidéo de fond, y compris dans les
     // navigateurs intégrés (WhatsApp, Facebook, Messenger...) qui bloquent
