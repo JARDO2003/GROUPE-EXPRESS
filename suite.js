@@ -1022,7 +1022,7 @@ function showToast(msg, type = 'success') {
 // ===== EXPOSE GLOBALS =====
 // ===== DISH PREVIEW =====
 // ===== COMMANDE VIA WHATSAPP (inbox du fournisseur) =====
-const SUPPLIER_WHATSAPP = '2250564061004';   // numéro du fournisseur (format international, sans +)
+const SUPPLIER_WHATSAPP = '2290155177480';   // numéro du fournisseur (format international, sans +)
 const ORDER_VIA_WHATSAPP = true;             // mettre false pour revenir au panier + Firebase
 
 function openWhatsApp(message) {
