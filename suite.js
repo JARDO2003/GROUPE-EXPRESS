@@ -242,6 +242,12 @@ function confirmQty() {
 
 // ===== CHECKOUT =====
 function startCheckout() {
+    // Bouton "Commander" -> envoie le panier dans l'inbox WhatsApp du fournisseur
+    if (ORDER_VIA_WHATSAPP && cart.length > 0) {
+        closeModal('cart-modal');
+        sendCartToWhatsApp();
+        return;
+    }
     if (cart.length === 0) {
         showToast('🛒 Votre panier est vide', 'error');
         return;
@@ -1015,7 +1021,35 @@ function showToast(msg, type = 'success') {
 
 // ===== EXPOSE GLOBALS =====
 // ===== DISH PREVIEW =====
+// ===== COMMANDE VIA WHATSAPP (inbox du fournisseur) =====
+const SUPPLIER_WHATSAPP = '2250564061004';   // numéro du fournisseur (format international, sans +)
+const ORDER_VIA_WHATSAPP = true;             // mettre false pour revenir au panier + Firebase
+
+function openWhatsApp(message) {
+    const url = `https://wa.me/${SUPPLIER_WHATSAPP}?text=${encodeURIComponent(message)}`;
+    window.open(url, '_blank');
+}
+
+function orderDishOnWhatsApp(name, price) {
+    let msg = 'Coucou, je veux passer une commande 🍽️';
+    if (name) msg += `\n\nPlat : ${name}`;
+    if (price) msg += `\nPrix : ${price}`;
+    openWhatsApp(msg);
+}
+
+function sendCartToWhatsApp() {
+    let msg = 'Coucou, je veux passer une commande 🍽️\n';
+    cart.forEach(i => { msg += `\n• ${i.name} ×${i.qty} — ${i.price * i.qty} FCFA`; });
+    msg += `\n\nTotal : ${total} FCFA`;
+    openWhatsApp(msg);
+}
+
 function openDishPreview(el) {
+    // Clic sur l'image d'un plat -> direct dans l'inbox WhatsApp du fournisseur
+    if (ORDER_VIA_WHATSAPP) {
+        orderDishOnWhatsApp(el.dataset.name, el.dataset.price);
+        return;
+    }
     const d = el.dataset;
     const img = document.getElementById('preview-img');
     img.src = d.img;
