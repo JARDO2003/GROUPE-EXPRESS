@@ -13,7 +13,7 @@ body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 Outfit,system-
 header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;border-bottom:3px solid var(--ac2);background:var(--card)}
 h1{margin:0;font-size:20px;font-weight:700}
 h2{margin:0 0 10px;font-size:16px}
-main{max-width:900px;margin:0 auto;padding:16px}
+main{max-width:980px;margin:0 auto;padding:16px}
 nav{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px}
 nav button{flex:none;border:1px solid var(--bd);background:var(--card);color:var(--tx);padding:8px 14px;border-radius:8px;font:inherit;cursor:pointer}
 nav button[aria-selected=true]{background:var(--ac);color:var(--on);border-color:var(--ac)}
@@ -35,15 +35,59 @@ form.col{flex-direction:column;align-items:stretch}
 .btn{border:0;background:var(--ac);color:var(--on);padding:9px 14px;border-radius:8px;font:inherit;font-weight:500;cursor:pointer}
 .btn.alt{background:var(--ac2);color:#2b2100}
 .btn.ghost{background:transparent;color:var(--er);border:1px solid var(--bd)}
-.btn.sm{padding:6px 10px;font-size:13px}
+.btn.sm{padding:6px 10px;font-size:13px;white-space:nowrap}
 .cat{margin:16px 0 4px;font-weight:700;color:var(--ac)}
 .off{opacity:.5}
 .prix{width:90px}
-.tag{display:inline-block;font-size:12px;padding:1px 8px;border-radius:99px;background:var(--bg);border:1px solid var(--bd)}
+.tag{display:inline-block;font-size:12px;padding:1px 8px;border-radius:99px;background:var(--bg);border:1px solid var(--bd);white-space:nowrap}
 .empty{color:var(--mu);padding:14px 0}
 #cfg{display:none;background:var(--er);color:#fff;padding:12px 16px;text-align:center}
 #toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:10px 16px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%}
 #toast.show{opacity:1}#toast.err{background:var(--er);color:#fff}
+
+/* ----- Tableau des commandes ----- */
+.bar-outils{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.bar-outils input[type=search]{flex:1 1 220px}
+.tw{overflow-x:auto;border:1px solid var(--bd);border-radius:10px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:9px 10px;text-align:left;border-bottom:1px solid var(--bd);vertical-align:middle}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--mu);background:var(--bg);white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+td.r,th.r{text-align:right;white-space:nowrap}
+td.code{font-weight:700;white-space:nowrap}
+tr.livree{background:color-mix(in srgb,var(--ac) 9%,transparent)}
+tr.annulee{opacity:.5}
+.st{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12px;font-weight:500;white-space:nowrap;border:1px solid var(--bd)}
+.st.en_attente{background:color-mix(in srgb,var(--ac2) 25%,transparent)}
+.st.rappel_envoye{background:color-mix(in srgb,#3b82f6 20%,transparent)}
+.st.livree{background:color-mix(in srgb,var(--ac) 22%,transparent)}
+.st.annulee{background:color-mix(in srgb,var(--er) 18%,transparent)}
+.cell-act{display:flex;gap:6px;align-items:center}
+.cell-act select{padding:5px 6px;font-size:13px}
+.resume{margin:8px 2px 0}
+
+/* ----- Comptabilité ----- */
+.seg{display:inline-flex;border:1px solid var(--bd);border-radius:8px;overflow:hidden;margin-bottom:12px}
+.seg button{border:0;background:var(--card);color:var(--tx);padding:8px 14px;font:inherit;cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--ac);color:var(--on)}
+.scene{perspective:1000px;height:340px;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:grab;touch-action:pan-y;user-select:none;-webkit-user-select:none;border:1px solid var(--bd);border-radius:10px;background:var(--bg);margin-bottom:8px}
+.world{--H:170px;position:relative;height:var(--H);transform-style:preserve-3d;transform:rotateX(-20deg) rotateY(var(--ry,-25deg))}
+.floor{position:absolute;left:-16px;right:-16px;height:210px;top:calc(var(--H) - 105px);transform:rotateX(90deg);border:1px solid var(--bd);border-radius:6px;background:
+  repeating-linear-gradient(0deg,transparent 0 29px,var(--bd) 29px 30px),
+  repeating-linear-gradient(90deg,transparent 0 29px,var(--bd) 29px 30px),
+  color-mix(in srgb,var(--card) 70%,transparent)}
+.bar{position:absolute;bottom:0;height:var(--H);width:var(--w);transform-style:preserve-3d}
+.cub{position:absolute;inset:0;transform-origin:50% 100%;transform:scaleY(var(--s,.001));transform-style:preserve-3d;transition:transform .9s cubic-bezier(.34,1.3,.5,1)}
+.f{position:absolute;background:var(--c)}
+.f.front{inset:0;transform:translateZ(calc(var(--d)/2))}
+.f.back{inset:0;transform:rotateY(180deg) translateZ(calc(var(--d)/2));filter:brightness(.7)}
+.f.right,.f.left{top:0;bottom:0;width:var(--d);left:calc((var(--w) - var(--d))/2);filter:brightness(.82)}
+.f.right{transform:rotateY(90deg) translateZ(calc(var(--w)/2))}
+.f.left{transform:rotateY(-90deg) translateZ(calc(var(--w)/2));filter:brightness(.72)}
+.f.top{left:0;right:0;height:var(--d);top:calc((var(--H) - var(--d))/2);transform:rotateX(90deg) translateZ(calc(var(--H)/2));filter:brightness(1.22)}
+.lab{position:absolute;top:calc(var(--H) + 8px);width:var(--sl);text-align:center;font-size:11px;color:var(--mu);transform:translateZ(122px);white-space:nowrap}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;margin:0 0 12px}
+.grad{display:inline-block;width:70px;height:9px;border-radius:5px;vertical-align:middle;background:linear-gradient(90deg,hsl(40 70% 48%),hsl(150 70% 48%))}
 @media(max-width:560px){.row{flex-direction:column;align-items:stretch}.acts{justify-content:flex-end}}
 </style>
 </head>
@@ -56,6 +100,7 @@ form.col{flex-direction:column;align-items:stretch}
 <main>
 <nav role="tablist" id="tabs">
   <button role="tab" data-t="cmd" aria-selected="true">Commandes</button>
+  <button role="tab" data-t="compta" aria-selected="false">Comptabilité</button>
   <button role="tab" data-t="menu" aria-selected="false">Menu</button>
   <button role="tab" data-t="msg" aria-selected="false">Messages</button>
   <button role="tab" data-t="avis" aria-selected="false">Avis</button>
@@ -73,7 +118,48 @@ form.col{flex-direction:column;align-items:stretch}
       <button class="btn">Enregistrer</button>
     </form>
   </div>
-  <div class="card"><h2>Commandes d'aujourd'hui</h2><div id="cmds"></div></div>
+  <div class="card">
+    <h2>Commandes</h2>
+    <div class="bar-outils">
+      <input id="f-q" type="search" placeholder="Rechercher un nom ou un code" autocomplete="off" aria-label="Rechercher un nom ou un code">
+      <select id="f-portee" aria-label="Période">
+        <option value="jour">Aujourd'hui</option>
+        <option value="semaine">Cette semaine</option>
+        <option value="mois">Ce mois</option>
+        <option value="tout">Tout (≈ 6 mois)</option>
+      </select>
+      <select id="f-st" aria-label="Statut">
+        <option value="">Tous les statuts</option>
+        <option value="en_attente">En attente</option>
+        <option value="rappel_envoye">Prêt, client prévenu</option>
+        <option value="livree">Livrée</option>
+        <option value="annulee">Annulée</option>
+      </select>
+    </div>
+    <div id="cmds"></div>
+  </div>
+</section>
+
+<section id="t-compta">
+  <div class="card">
+    <h2>Comptabilité</h2>
+    <div class="seg" id="per" role="group" aria-label="Période de comptabilité">
+      <button data-p="jour" aria-pressed="true">Par jour</button>
+      <button data-p="semaine" aria-pressed="false">Par semaine</button>
+      <button data-p="mois" aria-pressed="false">Par mois</button>
+    </div>
+    <div class="stats" id="g-stats"></div>
+    <div class="scene" id="g-scene" role="img" aria-label="Graphique 3D du chiffre d'affaires par période"><div class="world" id="g-world"></div></div>
+    <div class="legend mu">
+      <span>↔ Période</span>
+      <span>↕ Hauteur : chiffre d'affaires</span>
+      <span>⬍ Profondeur : nombre de commandes</span>
+      <span>Couleur : % livrées <span class="grad"></span></span>
+      <button class="btn sm" id="g-auto" type="button">⟲ Rotation auto</button>
+    </div>
+    <p class="mu" style="margin:0 0 12px">Glissez sur le graphique pour le faire pivoter. Les commandes annulées ne sont pas comptées.</p>
+    <div class="tw"><table id="g-tab"></table></div>
+  </div>
 </section>
 
 <section id="t-menu">
@@ -140,14 +226,20 @@ const firebaseConfig = {
 const BOT_URL = "https://groupe-express-bot.vercel.app/api";
 
 const FUSEAU = "Africa/Abidjan";
+const HISTORIQUE_JOURS = 190; // commandes chargées pour la recherche et la comptabilité (≈ 6 mois)
 const STATUTS = { en_attente: "En attente", rappel_envoye: "Prêt, client prévenu", livree: "Livrée", annulee: "Annulée" };
 const ETAT_ENVOI = { en_attente: "En attente du bot", en_cours: "Envoi en cours", envoye: "Envoyé", erreur: "Erreur" };
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-const prix = n => Number(n || 0).toLocaleString("fr-FR").replace(/\u202f/g, " ") + " F";
+const prix = n => Number(n || 0).toLocaleString("fr-FR").replace(/[\u202f\u00a0]/g, " ") + " F";
 const quand = d => d ? new Date(d).toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", timeZone: FUSEAU }) : "";
 const jour = () => new Intl.DateTimeFormat("en-CA", { timeZone: FUSEAU }).format(new Date());
+
+// Dates "YYYY-MM-DD" manipulées en UTC (le fuseau d'Abidjan n'a pas d'heure d'été)
+const addDays = (s, n) => { const [y, m, d] = s.split("-").map(Number); return new Date(Date.UTC(y, m - 1, d + n)).toISOString().slice(0, 10); };
+const lundiDe = s => addDays(s, -((new Date(s + "T00:00:00Z").getUTCDay() + 6) % 7));
+const norm = s => String(s ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
 function toast(m, err) {
   const t = $("#toast");
@@ -165,6 +257,8 @@ if (firebaseConfig.apiKey.startsWith("COLLE")) {
 
 const db = getFirestore(initializeApp(firebaseConfig));
 let D = { plats: [], commandes: [], avis: [], demandes: [], envois: [] };
+let ongletActuel = "cmd";
+const filtres = { q: "", portee: "jour", st: "" };
 
 async function ok(fn, msg) {
   try { await fn(); if (msg) toast(msg); return true; }
@@ -189,15 +283,64 @@ function trierPlats(l) {
 }
 
 ecouter(collection(db, "plats"), "plats", trierPlats);
-ecouter(query(collection(db, "commandes"), where("jour", "==", jour())), "commandes",
+// Une seule requête sur un seul champ (pas d'index composite à créer) : tout l'historique récent
+ecouter(query(collection(db, "commandes"), where("jour", ">=", addDays(jour(), -HISTORIQUE_JOURS))), "commandes",
   l => l.sort((x, y) => (y.date || "").localeCompare(x.date || "")));
 ecouter(query(collection(db, "avis"), orderBy("date", "desc"), limit(100)), "avis");
 ecouter(query(collection(db, "demandes_clients"), orderBy("date", "desc"), limit(50)), "demandes");
 ecouter(query(collection(db, "file_envois"), orderBy("date", "desc"), limit(15)), "envois");
 
+// ---------- Commandes : filtre + tableau ----------
+function listeCommandes() {
+  const t = jour(), lundi = lundiDe(t), mois = t.slice(0, 7);
+  const q = norm(filtres.q.trim()).replace(/-/g, "");
+  let l = D.commandes;
+  if (q) {
+    // Une recherche porte sur tout l'historique chargé, quelle que soit la période choisie
+    l = l.filter(c => norm([c.code || c.id, c.nom, c.contact, c.plat].join(" ")).replace(/-/g, "").includes(q));
+  } else if (filtres.portee === "jour") l = l.filter(c => c.jour === t);
+  else if (filtres.portee === "semaine") l = l.filter(c => (c.jour || "") >= lundi);
+  else if (filtres.portee === "mois") l = l.filter(c => (c.jour || "").startsWith(mois));
+  if (filtres.st) l = l.filter(c => c.statut === filtres.st);
+  return l;
+}
+
+function rendreCommandes() {
+  const l = listeCommandes();
+  const total = l.filter(c => c.statut !== "annulee").reduce((s, c) => s + (Number(c.prix) || 0), 0);
+  const note = filtres.q.trim() ? " · recherche sur ≈ 6 mois" : "";
+  if (!l.length) {
+    $("#cmds").innerHTML = `<div class="empty">${filtres.q.trim() ? "Aucune commande ne correspond à cette recherche." : "Aucune commande pour ce filtre."}</div>`;
+    return;
+  }
+  $("#cmds").innerHTML = `<div class="tw"><table>
+    <thead><tr><th>Code</th><th>Plat</th><th>Client</th><th class="r">Prix</th><th>Date</th><th>Statut</th><th>Action</th></tr></thead>
+    <tbody>${l.map(c => {
+      const code = esc(c.code || c.id), st = c.statut || "en_attente";
+      const rapide = st === "livree"
+        ? `<button class="btn ghost sm" onclick="statut('${code}','en_attente')" title="Remettre en attente">↩ Annuler</button>`
+        : st === "annulee" ? ""
+        : `<button class="btn sm" onclick="statut('${code}','livree')">✓ Livrée</button>`;
+      return `<tr class="${esc(st)}">
+        <td class="code">${code}</td>
+        <td>${esc(c.plat)}${c.source === "admin" ? ' <span class="tag">admin</span>' : ""}</td>
+        <td>${esc(c.nom)}<div class="mu">${esc(c.contact)}</div></td>
+        <td class="r">${prix(c.prix)}</td>
+        <td class="mu" style="white-space:nowrap">${quand(c.date)}</td>
+        <td><span class="st ${esc(st)}">${STATUTS[st] || esc(st)}</span></td>
+        <td><div class="cell-act">${rapide}
+          <select aria-label="Changer le statut" onchange="statut('${code}',this.value)">
+            ${Object.entries(STATUTS).map(([k, v]) => `<option value="${k}"${st === k ? " selected" : ""}>${v}</option>`).join("")}
+          </select></div></td>
+      </tr>`;
+    }).join("")}</tbody></table></div>
+    <div class="mu resume">${l.length} commande${l.length > 1 ? "s" : ""} · ${prix(total)} (hors annulées)${note}</div>`;
+}
+
 // ---------- Affichage ----------
 function render() {
-  const cmds = D.commandes, plats = D.plats;
+  const plats = D.plats;
+  const cmds = D.commandes.filter(c => c.jour === jour());
   const valides = cmds.filter(c => c.statut !== "annulee");
 
   $("#stats").innerHTML =
@@ -206,14 +349,8 @@ function render() {
     `<div><b>${cmds.filter(c => c.statut === "livree").length}</b><span class="mu">livrées</span></div>` +
     `<div><b>${prix(valides.reduce((s, c) => s + (Number(c.prix) || 0), 0))}</b><span class="mu">montant du jour</span></div>`;
 
-  $("#cmds").innerHTML = cmds.length ? cmds.map(c => `
-    <div class="row">
-      <div><b>${esc(c.code)}</b> ${esc(c.plat)} <span class="mu">${prix(c.prix)}</span>
-        <div class="mu">${esc(c.nom)}, ${esc(c.contact)}, ${quand(c.date)}${c.source === "admin" ? ", ajoutée ici" : ""}</div></div>
-      <div class="acts"><select onchange="statut('${esc(c.code || c.id)}',this.value)">
-        ${Object.entries(STATUTS).map(([k, v]) => `<option value="${k}"${c.statut === k ? " selected" : ""}>${v}</option>`).join("")}
-      </select></div>
-    </div>`).join("") : `<div class="empty">Aucune commande aujourd'hui.</div>`;
+  rendreCommandes();
+  if (ongletActuel === "compta") rendreCompta();
 
   const sel = $("#c-plat"), garde = sel.value;
   sel.innerHTML = `<option value="">Choisir un plat</option>` +
@@ -254,7 +391,134 @@ function render() {
     : `<div class="empty">Aucune demande en attente.</div>`;
 }
 
-// ---------- Commandes ----------
+// ---------- Filtres du tableau ----------
+$("#f-q").addEventListener("input", e => { filtres.q = e.target.value; rendreCommandes(); });
+$("#f-portee").addEventListener("change", e => { filtres.portee = e.target.value; rendreCommandes(); });
+$("#f-st").addEventListener("change", e => { filtres.st = e.target.value; rendreCommandes(); });
+
+// ---------- Comptabilité + graphe 3D ----------
+let periode = "jour", sigCompta = "";
+let ry = -25, base = -25, phase = 0, auto = true, raf = 0, last = 0;
+const reduit = matchMedia("(prefers-reduced-motion: reduce)").matches;
+if (reduit) auto = false;
+
+function periodes(mode) {
+  const t = jour(), out = [];
+  const dm = s => s.slice(8) + "/" + s.slice(5, 7);
+  if (mode === "jour") {
+    for (let i = 13; i >= 0; i--) {
+      const k = addDays(t, -i);
+      out.push({ k, label: dm(k), full: new Date(k + "T00:00:00Z").toLocaleDateString("fr-FR", { weekday: "long", day: "2-digit", month: "long", timeZone: "UTC" }) });
+    }
+  } else if (mode === "semaine") {
+    const m0 = lundiDe(t);
+    for (let i = 7; i >= 0; i--) {
+      const k = addDays(m0, -7 * i);
+      out.push({ k, label: dm(k), full: "Semaine du " + dm(k) + " au " + dm(addDays(k, 6)) });
+    }
+  } else {
+    const y = +t.slice(0, 4), mo = +t.slice(5, 7) - 1;
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(Date.UTC(y, mo - i, 1));
+      out.push({
+        k: d.toISOString().slice(0, 7),
+        label: d.toLocaleDateString("fr-FR", { month: "short", year: "2-digit", timeZone: "UTC" }),
+        full: d.toLocaleDateString("fr-FR", { month: "long", year: "numeric", timeZone: "UTC" })
+      });
+    }
+  }
+  return out;
+}
+const cleDe = (j, mode) => mode === "jour" ? j : mode === "semaine" ? lundiDe(j) : j.slice(0, 7);
+
+function appliquerRy() { $("#g-world").style.setProperty("--ry", ry + "deg"); }
+function boucle(t) {
+  if (!auto || ongletActuel !== "compta") { raf = 0; return; }
+  const dt = last ? t - last : 0; last = t;
+  phase += dt * 0.0008;
+  ry = base + 25 * Math.sin(phase);
+  appliquerRy();
+  raf = requestAnimationFrame(boucle);
+}
+function lancerAuto() {
+  if (reduit || raf) return;
+  base = ry; phase = 0; last = 0;
+  raf = requestAnimationFrame(boucle);
+}
+
+function rendreCompta(force) {
+  const scene = $("#g-scene"), W = scene.clientWidth;
+  if (!W) return;
+  const bs = periodes(periode).map(b => ({ ...b, n: 0, ca: 0, liv: 0, annul: 0 }));
+  const index = Object.fromEntries(bs.map(b => [b.k, b]));
+  D.commandes.forEach(c => {
+    const b = index[cleDe(c.jour || "", periode)];
+    if (!b) return;
+    if (c.statut === "annulee") { b.annul++; return; }
+    b.n++; b.ca += Number(c.prix) || 0;
+    if (c.statut === "livree") b.liv++;
+  });
+
+  const sig = periode + "|" + W + "|" + JSON.stringify(bs.map(b => [b.n, b.ca, b.liv, b.annul]));
+  if (!force && sig === sigCompta) return;
+  sigCompta = sig;
+
+  const T = bs.reduce((a, b) => ({ n: a.n + b.n, ca: a.ca + b.ca, liv: a.liv + b.liv, annul: a.annul + b.annul }), { n: 0, ca: 0, liv: 0, annul: 0 });
+  $("#g-stats").innerHTML =
+    `<div><b>${prix(T.ca)}</b><span class="mu">chiffre d'affaires</span></div>` +
+    `<div><b>${T.n}</b><span class="mu">commandes</span></div>` +
+    `<div><b>${T.liv}</b><span class="mu">livrées</span></div>` +
+    `<div><b>${prix(T.n ? Math.round(T.ca / T.n) : 0)}</b><span class="mu">panier moyen</span></div>`;
+
+  // --- Graphe 3D : X = période, Y = CA, Z (profondeur) = nb commandes, couleur = % livrées ---
+  const maxCa = Math.max(1, ...bs.map(b => b.ca)), maxN = Math.max(1, ...bs.map(b => b.n));
+  const w = W - 24, slot = w / bs.length, bw = Math.max(8, Math.min(38, slot * 0.55));
+  const world = $("#g-world");
+  world.style.width = w + "px";
+  world.style.setProperty("--sl", slot + "px");
+  world.innerHTML = `<div class="floor"></div>` + bs.map((b, i) => {
+    const taux = b.n ? b.liv / b.n : 0;
+    const d = 22 + 62 * (b.n / maxN);
+    const col = `hsl(${Math.round(40 + 110 * taux)} 70% 48%)`;
+    const left = slot * i + slot / 2 - bw / 2;
+    const titre = `${b.full} : ${prix(b.ca)}, ${b.n} commande(s), ${b.liv} livrée(s)${b.annul ? ", " + b.annul + " annulée(s)" : ""}`;
+    return `<div class="bar" style="left:${left}px;--w:${bw}px;--d:${d}px;--c:${col}" data-s="${Math.max(0.012, b.ca / maxCa)}" title="${esc(titre)}">
+        <div class="cub"><i class="f front"></i><i class="f back"></i><i class="f left"></i><i class="f right"></i><i class="f top"></i></div></div>
+      <div class="lab" style="left:${slot * i}px">${esc(b.label)}</div>`;
+  }).join("");
+  appliquerRy();
+  // Déclenche l'animation de croissance des barres
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    world.querySelectorAll(".bar").forEach(el => el.firstElementChild.style.setProperty("--s", el.dataset.s));
+  }));
+
+  $("#g-tab").innerHTML = `<thead><tr><th>Période</th><th class="r">Commandes</th><th class="r">Livrées</th><th class="r">Annulées</th><th class="r">CA</th><th class="r">% livrées</th></tr></thead><tbody>` +
+    [...bs].reverse().map(b => `<tr><td>${esc(b.full)}</td><td class="r">${b.n}</td><td class="r">${b.liv}</td><td class="r">${b.annul}</td><td class="r">${prix(b.ca)}</td><td class="r">${b.n ? Math.round(100 * b.liv / b.n) + " %" : "–"}</td></tr>`).join("") + `</tbody>`;
+}
+
+$("#per").addEventListener("click", e => {
+  const p = e.target.dataset.p;
+  if (!p) return;
+  periode = p;
+  document.querySelectorAll("#per button").forEach(b => b.setAttribute("aria-pressed", b.dataset.p === p));
+  rendreCompta(true);
+});
+$("#g-auto").addEventListener("click", () => { auto = true; lancerAuto(); });
+{
+  const sc = $("#g-scene"); let drag = null;
+  sc.addEventListener("pointerdown", e => { drag = { x: e.clientX, r: ry }; auto = false; sc.setPointerCapture(e.pointerId); sc.style.cursor = "grabbing"; });
+  sc.addEventListener("pointermove", e => {
+    if (!drag) return;
+    ry = Math.max(-65, Math.min(65, drag.r + (e.clientX - drag.x) * 0.4));
+    appliquerRy();
+  });
+  const fin = () => { drag = null; sc.style.cursor = "grab"; };
+  sc.addEventListener("pointerup", fin);
+  sc.addEventListener("pointercancel", fin);
+}
+addEventListener("resize", () => { if (ongletActuel === "compta") rendreCompta(true); });
+
+// ---------- Commandes (actions) ----------
 const ALPHABET = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
 function etiquette(i) {
   let n = i, out = "";
@@ -276,7 +540,7 @@ async function nouveauCode() {
   throw new Error("Impossible de générer un code unique");
 }
 
-window.statut = (code, s) => ok(() => updateDoc(doc(db, "commandes", code), { statut: s }), "Statut mis à jour");
+window.statut = (code, s) => ok(() => updateDoc(doc(db, "commandes", code), { statut: s }), s === "livree" ? "Commande marquée livrée" : "Statut mis à jour");
 
 window.ajouterCommande = async e => {
   e.preventDefault();
@@ -347,8 +611,10 @@ window.repondre = chatId => { $("#m-to").value = chatId; montrer("msg"); $("#m-t
 
 // ---------- Onglets ----------
 function montrer(t) {
+  ongletActuel = t;
   document.querySelectorAll("#tabs button").forEach(b => b.setAttribute("aria-selected", b.dataset.t === t));
   document.querySelectorAll("section").forEach(s => s.classList.toggle("on", s.id === "t-" + t));
+  if (t === "compta") { rendreCompta(true); lancerAuto(); }
 }
 $("#tabs").addEventListener("click", e => { if (e.target.dataset.t) montrer(e.target.dataset.t); });
 </script>
