@@ -6,8 +6,8 @@
 <title>Admin Groupe Express</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700&display=swap">
 <style>
-:root{--bg:#eef2ee;--card:#fff;--tx:#14231b;--mu:#5d6d63;--bd:#d6ded8;--ac:#1b5e3f;--ac2:#f2b705;--ok:#2b8a3e;--er:#c92a2a;--on:#fff}
-@media(prefers-color-scheme:dark){:root{--bg:#0f1713;--card:#17221c;--tx:#e8f0ea;--mu:#93a69a;--bd:#2a3a31;--ac:#4fbf8a;--ac2:#f2b705;--on:#0f1713}}
+:root{--bg:#eef2ee;--card:#fff;--tx:#14231b;--mu:#5d6d63;--bd:#d6ded8;--ac:#1b5e3f;--ac2:#f2b705;--er:#c92a2a;--on:#fff}
+@media(prefers-color-scheme:dark){:root{--bg:#0f1713;--card:#17221c;--tx:#e8f0ea;--mu:#93a69a;--bd:#2a3a31;--ac:#4fbf8a;--on:#0f1713}}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 Outfit,system-ui,sans-serif}
 header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;border-bottom:3px solid var(--ac2);background:var(--card)}
@@ -26,7 +26,7 @@ section{display:none}section.on{display:block}
 .row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--bd)}
 .row:last-child{border-bottom:0}
 .row>div:first-child{min-width:0;flex:1}
-.row .acts{display:flex;align-items:center;gap:8px;flex:none}
+.acts{display:flex;align-items:center;gap:8px;flex:none}
 input,select,textarea{font:inherit;color:var(--tx);background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:8px 10px;min-width:0}
 textarea{width:100%;min-height:90px;resize:vertical}
 input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--ac);outline-offset:1px}
@@ -34,22 +34,24 @@ form{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 form.col{flex-direction:column;align-items:stretch}
 .btn{border:0;background:var(--ac);color:var(--on);padding:9px 14px;border-radius:8px;font:inherit;font-weight:500;cursor:pointer}
 .btn.alt{background:var(--ac2);color:#2b2100}
-.btn.ghost{background:transparent;color:var(--er);border:1px solid var(--bd);padding:6px 10px}
+.btn.ghost{background:transparent;color:var(--er);border:1px solid var(--bd)}
 .btn.sm{padding:6px 10px;font-size:13px}
 .cat{margin:16px 0 4px;font-weight:700;color:var(--ac)}
 .off{opacity:.5}
 .prix{width:90px}
 .tag{display:inline-block;font-size:12px;padding:1px 8px;border-radius:99px;background:var(--bg);border:1px solid var(--bd)}
 .empty{color:var(--mu);padding:14px 0}
+#cfg{display:none;background:var(--er);color:#fff;padding:12px 16px;text-align:center}
 #toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:10px 16px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%}
 #toast.show{opacity:1}#toast.err{background:var(--er);color:#fff}
-@media(max-width:560px){.row{flex-direction:column;align-items:stretch}.row .acts{justify-content:flex-end}}
+@media(max-width:560px){.row{flex-direction:column;align-items:stretch}.acts{justify-content:flex-end}}
 </style>
 </head>
 <body>
+<div id="cfg">Renseigne <b>firebaseConfig</b> au début du script de cette page pour la connecter à Firestore.</div>
 <header>
   <h1>Groupe Express : administration</h1>
-  <button class="btn sm" onclick="charger(true)">Actualiser</button>
+  <span class="mu" id="live">Connexion…</span>
 </header>
 <main>
 <nav role="tablist" id="tabs">
@@ -110,6 +112,7 @@ form.col{flex-direction:column;align-items:stretch}
     <p class="mu">Prévient tous les clients en attente que leur repas est prêt.</p>
     <button class="btn" onclick="rappel()">Envoyer le message de retrait</button>
   </div>
+  <div class="card"><h2>Derniers envois</h2><div id="envois"></div></div>
 </section>
 
 <section id="t-avis"><div class="card"><h2>Avis des clients</h2><div id="avis"></div></div></section>
@@ -117,22 +120,32 @@ form.col{flex-direction:column;align-items:stretch}
 </main>
 <div id="toast" role="status"></div>
 
-<script>
-// Adresse de ton API (le fichier webhook.js). Change-la si ton chemin est différent.
-const API = "/api/webhook?admin=1";
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, doc, addDoc, setDoc, getDoc, updateDoc, deleteDoc, onSnapshot, query, where, orderBy, limit }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-const STATUTS = {
-  en_attente: "En attente",
-  rappel_envoye: "Prêt, client prévenu",
-  livree: "Livrée",
-  annulee: "Annulée"
+// 1) Firebase console > Paramètres du projet > Vos applications > application Web : copie ces valeurs
+const firebaseConfig = {
+  apiKey: "COLLE_ICI",
+  authDomain: "TON-PROJET.firebaseapp.com",
+  projectId: "TON-PROJET",
+  appId: "COLLE_ICI"
 };
 
-let D = { plats: [], commandes: [], avis: [], demandes: [] };
+// 2) Facultatif : adresse du bot pour qu'il envoie tout de suite (sans attendre le planificateur)
+//    ex : "https://TON-BOT.vercel.app/api/webhook"
+const BOT_URL = "";
+
+const FUSEAU = "Africa/Abidjan";
+const STATUTS = { en_attente: "En attente", rappel_envoye: "Prêt, client prévenu", livree: "Livrée", annulee: "Annulée" };
+const ETAT_ENVOI = { en_attente: "En attente du bot", en_cours: "Envoi en cours", envoye: "Envoyé", erreur: "Erreur" };
+
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const prix = n => Number(n || 0).toLocaleString("fr-FR").replace(/\u202f/g, " ") + " F";
-const quand = d => d ? new Date(d).toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", timeZone: "Africa/Abidjan" }) : "";
+const quand = d => d ? new Date(d).toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", timeZone: FUSEAU }) : "";
+const jour = () => new Intl.DateTimeFormat("en-CA", { timeZone: FUSEAU }).format(new Date());
 
 function toast(m, err) {
   const t = $("#toast");
@@ -142,37 +155,47 @@ function toast(m, err) {
   t._t = setTimeout(() => t.className = "", 3200);
 }
 
-async function api(body) {
-  const r = await fetch(API, { method: "POST", body: JSON.stringify(body) });
-  let j = {};
-  try { j = await r.json(); } catch (e) {}
-  if (!r.ok || j.ok === false) throw new Error(j.message || "Erreur " + r.status);
-  return j;
+if (firebaseConfig.apiKey.startsWith("COLLE")) {
+  $("#cfg").style.display = "block";
+  $("#live").textContent = "Non connecté";
+  throw new Error("firebaseConfig non renseigné");
 }
 
-async function act(body, ok) {
-  try {
-    const j = await api(body);
-    if (ok) toast(typeof ok === "function" ? ok(j) : ok);
-    await charger();
-    return j;
-  } catch (e) {
-    toast(e.message, true);
-  }
+const db = getFirestore(initializeApp(firebaseConfig));
+let D = { plats: [], commandes: [], avis: [], demandes: [], envois: [] };
+
+async function ok(fn, msg) {
+  try { await fn(); if (msg) toast(msg); return true; }
+  catch (e) { toast(e.message, true); return false; }
 }
 
-async function charger(manuel) {
-  try {
-    D = await api({ action: "donnees" });
+// ---------- Lecture en direct ----------
+function ecouter(req, cle, traiter) {
+  onSnapshot(req, snap => {
+    const l = [];
+    snap.forEach(d => l.push({ id: d.id, ...d.data() }));
+    D[cle] = traiter ? traiter(l) : l;
+    $("#live").textContent = "En direct";
     render();
-    if (manuel) toast("Données actualisées");
-  } catch (e) {
-    toast("Chargement impossible : " + e.message, true);
-  }
+  }, e => toast("Lecture impossible (" + cle + ") : " + e.message, true));
 }
 
+function trierPlats(l) {
+  const min = {};
+  l.forEach(p => { if (!(p.categorie in min) || p.ordre < min[p.categorie]) min[p.categorie] = p.ordre; });
+  return l.sort((x, y) => min[x.categorie] - min[y.categorie] || x.ordre - y.ordre);
+}
+
+ecouter(collection(db, "plats"), "plats", trierPlats);
+ecouter(query(collection(db, "commandes"), where("jour", "==", jour())), "commandes",
+  l => l.sort((x, y) => (y.date || "").localeCompare(x.date || "")));
+ecouter(query(collection(db, "avis"), orderBy("date", "desc"), limit(100)), "avis");
+ecouter(query(collection(db, "demandes_clients"), orderBy("date", "desc"), limit(50)), "demandes");
+ecouter(query(collection(db, "file_envois"), orderBy("date", "desc"), limit(15)), "envois");
+
+// ---------- Affichage ----------
 function render() {
-  const cmds = D.commandes || [], plats = D.plats || [];
+  const cmds = D.commandes, plats = D.plats;
   const valides = cmds.filter(c => c.statut !== "annulee");
 
   $("#stats").innerHTML =
@@ -185,7 +208,7 @@ function render() {
     <div class="row">
       <div><b>${esc(c.code)}</b> ${esc(c.plat)} <span class="mu">${prix(c.prix)}</span>
         <div class="mu">${esc(c.nom)}, ${esc(c.contact)}, ${quand(c.date)}${c.source === "admin" ? ", ajoutée ici" : ""}</div></div>
-      <div class="acts"><select onchange="statut('${esc(c.code)}',this.value)">
+      <div class="acts"><select onchange="statut('${esc(c.code || c.id)}',this.value)">
         ${Object.entries(STATUTS).map(([k, v]) => `<option value="${k}"${c.statut === k ? " selected" : ""}>${v}</option>`).join("")}
       </select></div>
     </div>`).join("") : `<div class="empty">Aucune commande aujourd'hui.</div>`;
@@ -211,11 +234,17 @@ function render() {
   });
   $("#plats").innerHTML = h || `<div class="empty">Aucun plat. Ajoutez le premier ci-dessus.</div>`;
 
-  $("#avis").innerHTML = (D.avis || []).length ? D.avis.map(a => `
+  $("#envois").innerHTML = D.envois.length ? D.envois.map(e => `
+    <div class="row"><div>${e.type === "message" ? "Message à " + esc(e.to) : e.type === "diffusion" ? "Message à tous" : "Message de retrait"}
+      <div class="mu">${esc(e.text || "")}${e.statut === "erreur" ? " (" + esc(e.erreur) + ")" : ""}${e.envoyes !== undefined ? ` (${e.envoyes}/${e.clients})` : ""}</div></div>
+      <div class="acts"><span class="tag">${ETAT_ENVOI[e.statut] || esc(e.statut)}</span><span class="mu">${quand(e.date)}</span></div></div>`).join("")
+    : `<div class="empty">Aucun envoi pour le moment.</div>`;
+
+  $("#avis").innerHTML = D.avis.length ? D.avis.map(a => `
     <div class="row"><div>${esc(a.avis)}<div class="mu">${esc(a.nom || "Client")}, ${quand(a.date)}</div></div></div>`).join("")
     : `<div class="empty">Aucun avis pour le moment.</div>`;
 
-  $("#dem").innerHTML = (D.demandes || []).length ? D.demandes.map(d => `
+  $("#dem").innerHTML = D.demandes.length ? D.demandes.map(d => `
     <div class="row"><div><b>${esc(d.resume)}</b>
       <div class="mu">« ${esc(d.message)} »</div>
       <div class="mu">${esc(d.nom || "Client")}, ${esc(d.chatId)}, ${quand(d.date)}</div></div>
@@ -223,82 +252,103 @@ function render() {
     : `<div class="empty">Aucune demande en attente.</div>`;
 }
 
-// Commandes
-function statut(code, s) { act({ action: "commande_statut", code, statut: s }, "Statut mis à jour"); }
-
-async function ajouterCommande(e) {
-  e.preventDefault();
-  const j = await act({
-    action: "commande_ajouter",
-    platId: $("#c-plat").value,
-    nom: $("#c-nom").value,
-    contact: $("#c-contact").value
-  }, r => "Commande enregistrée : " + r.code);
-  if (j) { $("#c-nom").value = ""; $("#c-contact").value = ""; }
-  return false;
+// ---------- Commandes ----------
+const ALPHABET = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
+function etiquette(i) {
+  let n = i, out = "";
+  do { out = String.fromCharCode(65 + (n % 26)) + out; n = Math.floor(n / 26) - 1; } while (n >= 0);
+  return out;
+}
+function versChatId(contact) {
+  let c = String(contact || "").replace(/\D/g, "");
+  if (c.startsWith("00")) c = c.slice(2);
+  if (c.length === 10) c = "225" + c;
+  return c;
+}
+async function nouveauCode() {
+  for (let i = 0; i < 5; i++) {
+    const r = crypto.getRandomValues(new Uint32Array(4));
+    const code = "GE-" + [...r].map(x => ALPHABET[x % ALPHABET.length]).join("");
+    if (!(await getDoc(doc(db, "commandes", code))).exists()) return code;
+  }
+  throw new Error("Impossible de générer un code unique");
 }
 
-// Menu
-async function ajouterPlat(e) {
+window.statut = (code, s) => ok(() => updateDoc(doc(db, "commandes", code), { statut: s }), "Statut mis à jour");
+
+window.ajouterCommande = async e => {
   e.preventDefault();
-  const j = await act({
-    action: "plat_ajouter",
-    categorie: $("#p-cat").value,
-    nom: $("#p-nom").value,
-    prix: $("#p-prix").value,
-    des: $("#p-des").checked
-  }, "Plat ajouté");
-  if (j) { $("#p-nom").value = ""; $("#p-prix").value = ""; $("#p-des").checked = false; }
+  const actifs = D.plats.filter(p => p.actif !== false);
+  const i = actifs.findIndex(p => p.id === $("#c-plat").value);
+  const nom = $("#c-nom").value.trim(), contact = $("#c-contact").value.trim(), chatId = versChatId(contact);
+  if (i < 0 || !nom || chatId.length < 8) return toast("Plat, nom ou contact invalide", true), false;
+  const p = actifs[i];
+  if (await ok(async () => {
+    const code = await nouveauCode();
+    await setDoc(doc(db, "commandes", code), {
+      code, chatId, plat: p.nom, lettre: etiquette(i), prix: p.prix, source: "admin",
+      nom, contact, jour: jour(), date: new Date().toISOString(), statut: "en_attente"
+    });
+    toast("Commande enregistrée : " + code);
+  })) { $("#c-nom").value = ""; $("#c-contact").value = ""; }
   return false;
-}
-function changerPrix(id, v) { act({ action: "plat_modifier", id, prix: v }, "Prix mis à jour"); }
-function actif(id, v) { act({ action: "plat_modifier", id, actif: v }, v ? "Plat remis au menu" : "Plat retiré du menu"); }
-function renommer(id) {
+};
+
+// ---------- Menu ----------
+window.ajouterPlat = async e => {
+  e.preventDefault();
+  const nom = $("#p-nom").value.trim(), p = Number($("#p-prix").value);
+  if (!nom || !(p >= 0)) return toast("Nom ou prix invalide", true), false;
+  const ordre = D.plats.reduce((m, x) => Math.max(m, x.ordre || 0), 0) + 1;
+  if (await ok(() => addDoc(collection(db, "plats"), {
+    nom, prix: p, des: $("#p-des").checked, actif: true, ordre,
+    categorie: $("#p-cat").value.trim() || "Autres"
+  }), "Plat ajouté")) { $("#p-nom").value = ""; $("#p-prix").value = ""; $("#p-des").checked = false; }
+  return false;
+};
+window.changerPrix = (id, v) => Number(v) >= 0 && ok(() => updateDoc(doc(db, "plats", id), { prix: Number(v) }), "Prix mis à jour");
+window.actif = (id, v) => ok(() => updateDoc(doc(db, "plats", id), { actif: v }), v ? "Plat remis au menu" : "Plat retiré du menu");
+window.renommer = id => {
   const p = D.plats.find(x => x.id === id);
   const n = prompt("Nouveau nom du plat :", p ? p.nom : "");
-  if (n && n.trim()) act({ action: "plat_modifier", id, nom: n.trim() }, "Plat renommé");
-}
-function supprimer(id) {
+  if (n && n.trim()) ok(() => updateDoc(doc(db, "plats", id), { nom: n.trim() }), "Plat renommé");
+};
+window.supprimer = id => {
   const p = D.plats.find(x => x.id === id);
-  if (confirm("Supprimer définitivement « " + (p ? p.nom : "ce plat") + " » ?")) act({ action: "plat_supprimer", id }, "Plat supprimé");
+  if (confirm("Supprimer définitivement « " + (p ? p.nom : "ce plat") + " » ?")) ok(() => deleteDoc(doc(db, "plats", id)), "Plat supprimé");
+};
+
+// ---------- Messages : déposés dans Firestore, envoyés par le bot ----------
+async function deposer(e) {
+  await addDoc(collection(db, "file_envois"), { ...e, statut: "en_attente", date: new Date().toISOString() });
+  if (BOT_URL) fetch(BOT_URL + "?action=sortie", { mode: "no-cors" }).catch(() => {});
 }
 
-// Messages
-async function envoyer(e) {
+window.envoyer = async e => {
   e.preventDefault();
-  const j = await act({ action: "message", to: $("#m-to").value, text: $("#m-txt").value }, "Message envoyé");
-  if (j) $("#m-txt").value = "";
+  const to = versChatId($("#m-to").value);
+  if (to.length < 8) return toast("Numéro invalide", true), false;
+  if (await ok(() => deposer({ type: "message", to, text: $("#m-txt").value.trim() }), "Message transmis au bot")) $("#m-txt").value = "";
   return false;
-}
-async function diffuser(e) {
+};
+window.diffuser = async e => {
   e.preventDefault();
   if (!confirm("Envoyer ce message à tous les clients ?")) return false;
-  const j = await act({ action: "diffusion", text: $("#d-txt").value }, r => `Envoyé à ${r.envoyes} client(s) sur ${r.clients}`);
-  if (j) $("#d-txt").value = "";
+  if (await ok(() => deposer({ type: "diffusion", text: $("#d-txt").value.trim() }), "Diffusion transmise au bot")) $("#d-txt").value = "";
   return false;
-}
-function rappel() {
+};
+window.rappel = () => {
   if (confirm("Prévenir maintenant tous les clients en attente que leur repas est prêt ?"))
-    act({ action: "rappel" }, r => `${r.envoyes} client(s) prévenu(s) sur ${r.clients}`);
-}
-function repondre(chatId) {
-  $("#m-to").value = chatId;
-  montrer("msg");
-  $("#m-txt").focus();
-}
+    ok(() => deposer({ type: "rappel" }), "Message de retrait transmis au bot");
+};
+window.repondre = chatId => { $("#m-to").value = chatId; montrer("msg"); $("#m-txt").focus(); };
 
-// Onglets
+// ---------- Onglets ----------
 function montrer(t) {
   document.querySelectorAll("#tabs button").forEach(b => b.setAttribute("aria-selected", b.dataset.t === t));
   document.querySelectorAll("section").forEach(s => s.classList.toggle("on", s.id === "t-" + t));
 }
 $("#tabs").addEventListener("click", e => { if (e.target.dataset.t) montrer(e.target.dataset.t); });
-
-charger();
-setInterval(() => {
-  const a = document.activeElement;
-  if (!a || !/INPUT|SELECT|TEXTAREA/.test(a.tagName)) charger();
-}, 30000);
 </script>
 </body>
-</html>s
+</html>
