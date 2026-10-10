@@ -66,6 +66,18 @@ tr.annulee{opacity:.5}
 .cell-act select{padding:5px 6px;font-size:13px}
 .resume{margin:8px 2px 0}
 
+/* ----- ExpressSend ----- */
+.sw{display:flex;align-items:center;gap:10px;font-size:17px;font-weight:500;margin:6px 0 10px;cursor:pointer}
+.sw input,.chk input{accent-color:var(--ac)}
+.sw input{width:24px;height:24px}
+.opt{display:flex;align-items:center;gap:8px;cursor:pointer}
+.alerte{background:color-mix(in srgb,var(--ac2) 25%,transparent);border:1px solid var(--ac2);border-radius:8px;padding:10px 12px;margin-top:12px}
+.alerte:empty{display:none}
+.four{border:1px solid var(--bd);border-radius:10px;padding:4px 12px 12px;margin-bottom:10px}
+.four summary{cursor:pointer;color:var(--ac);font-weight:500;padding:4px 0}
+.chk{display:flex;align-items:center;gap:8px;padding:5px 0;cursor:pointer}
+.chk.autre{opacity:.6}
+
 /* ----- Comptabilité ----- */
 .seg{display:inline-flex;border:1px solid var(--bd);border-radius:8px;overflow:hidden;margin-bottom:12px}
 .seg button{border:0;background:var(--card);color:var(--tx);padding:8px 14px;font:inherit;cursor:pointer}
@@ -102,6 +114,7 @@ tr.annulee{opacity:.5}
   <button role="tab" data-t="cmd" aria-selected="true">Commandes</button>
   <button role="tab" data-t="compta" aria-selected="false">Comptabilité</button>
   <button role="tab" data-t="menu" aria-selected="false">Menu</button>
+  <button role="tab" data-t="express" aria-selected="false">ExpressSend</button>
   <button role="tab" data-t="msg" aria-selected="false">Messages</button>
   <button role="tab" data-t="avis" aria-selected="false">Avis</button>
   <button role="tab" data-t="dem" aria-selected="false">Demandes</button>
@@ -177,6 +190,26 @@ tr.annulee{opacity:.5}
   <div class="card"><h2>Plats</h2><div id="plats"></div></div>
 </section>
 
+<section id="t-express">
+  <div class="card">
+    <h2>ExpressSend</h2>
+    <p class="mu" style="margin-top:0">Dès qu'une commande arrive (WhatsApp ou ajoutée ici), elle est envoyée automatiquement sur le WhatsApp du fournisseur de son plat.</p>
+    <label class="sw"><input id="x-actif" type="checkbox"> <span id="x-etat">Désactivé</span></label>
+    <label class="opt mu"><input id="x-contact" type="checkbox"> Inclure le numéro du client dans le message du fournisseur</label>
+    <div class="alerte" id="x-alerte"></div>
+  </div>
+  <div class="card">
+    <h2>Ajouter un fournisseur</h2>
+    <form onsubmit="return ajouterFournisseur(event)">
+      <input id="fo-nom" placeholder="Nom du fournisseur" required>
+      <input id="fo-num" placeholder="Numéro WhatsApp (ex : 0102030405)" inputmode="tel" required>
+      <button class="btn">Ajouter</button>
+    </form>
+    <p class="mu" style="margin-bottom:0">Ensuite, ouvrez « Plats de ce fournisseur » et cochez les plats qu'il prépare. Un plat n'a qu'un seul fournisseur.</p>
+  </div>
+  <div class="card"><h2>Fournisseurs</h2><div id="fournisseurs"></div></div>
+</section>
+
 <section id="t-msg">
   <div class="card">
     <h2>Écrire à un client</h2>
@@ -208,7 +241,7 @@ tr.annulee{opacity:.5}
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, doc, addDoc, setDoc, getDoc, updateDoc, deleteDoc, onSnapshot, query, where, orderBy, limit }
+import { getFirestore, collection, doc, addDoc, setDoc, getDoc, updateDoc, deleteDoc, onSnapshot, query, where, orderBy, limit, writeBatch, arrayUnion, arrayRemove }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 // 1) Firebase console > Paramètres du projet > Vos applications > application Web : copie ces valeurs
@@ -222,8 +255,9 @@ const firebaseConfig = {
   appId: "1:276904640935:web:9cd805aeba6c34c767f682",
 };
 
-// 2) Facultatif : adresse du bot pour qu'il envoie tout de suite (sans attendre le planificateur)
-const BOT_URL = "https://groupe-express-bot.vercel.app/api";
+// 2) Le bot tourne maintenant sur Render et lit lui-même la file d'envois dans Firestore :
+//    on laisse cette adresse vide (l'ancienne API Vercel ne doit plus toucher à la file).
+const BOT_URL = "";
 
 const FUSEAU = "Africa/Abidjan";
 const HISTORIQUE_JOURS = 190; // commandes chargées pour la recherche et la comptabilité (≈ 6 mois)
@@ -256,7 +290,7 @@ if (firebaseConfig.apiKey.startsWith("COLLE")) {
 }
 
 const db = getFirestore(initializeApp(firebaseConfig));
-let D = { plats: [], commandes: [], avis: [], demandes: [], envois: [] };
+let D = { plats: [], commandes: [], avis: [], demandes: [], envois: [], fournisseurs: [], config: {} };
 let ongletActuel = "cmd";
 const filtres = { q: "", portee: "jour", st: "" };
 
@@ -289,6 +323,12 @@ ecouter(query(collection(db, "commandes"), where("jour", ">=", addDays(jour(), -
 ecouter(query(collection(db, "avis"), orderBy("date", "desc"), limit(100)), "avis");
 ecouter(query(collection(db, "demandes_clients"), orderBy("date", "desc"), limit(50)), "demandes");
 ecouter(query(collection(db, "file_envois"), orderBy("date", "desc"), limit(15)), "envois");
+// ExpressSend : fournisseurs et réglage (activé / désactivé)
+ecouter(collection(db, "fournisseurs"), "fournisseurs", l => l.sort((x, y) => (x.nom || "").localeCompare(y.nom || "")));
+onSnapshot(doc(db, "config", "expressSend"), s => {
+  D.config = s.exists() ? s.data() : {};
+  render();
+}, e => toast("Lecture impossible (config) : " + e.message, true));
 
 // ---------- Commandes : filtre + tableau ----------
 function listeCommandes() {
@@ -305,6 +345,25 @@ function listeCommandes() {
   return l;
 }
 
+// Colonne « Fournisseur » : où en est l'envoi ExpressSend de cette commande
+function celluleFournisseur(c, code) {
+  const fe = c.fournisseurEnvoi;
+  if (fe === "envoye") {
+    return `<span class="st livree" title="Envoyé le ${esc(quand(c.fournisseurEnvoyeLe))}">✓ ${esc(c.fournisseurNom || "Envoyé")}</span> ` +
+      `<button class="btn ghost sm" style="color:var(--tx)" title="Renvoyer au fournisseur" onclick="renvoyerFournisseur('${code}')">↻</button>`;
+  }
+  if (fe === "a_envoyer" || fe === "en_cours") return `<span class="st en_attente">Envoi…</span>`;
+  if (fe === "sans_fournisseur") {
+    return `<span class="st annulee" title="Aucun fournisseur n'est rattaché à ce plat">Sans fournisseur</span> ` +
+      `<button class="btn sm" onclick="renvoyerFournisseur('${code}')">Renvoyer</button>`;
+  }
+  if (fe === "erreur") {
+    return `<span class="st annulee" title="${esc(c.fournisseurErreur || "")}">⚠ Échec</span> ` +
+      `<button class="btn sm" onclick="renvoyerFournisseur('${code}')">Renvoyer</button>`;
+  }
+  return `<span class="mu">–</span>`;
+}
+
 function rendreCommandes() {
   const l = listeCommandes();
   const total = l.filter(c => c.statut !== "annulee").reduce((s, c) => s + (Number(c.prix) || 0), 0);
@@ -314,7 +373,7 @@ function rendreCommandes() {
     return;
   }
   $("#cmds").innerHTML = `<div class="tw"><table>
-    <thead><tr><th>Code</th><th>Plat</th><th>Client</th><th class="r">Prix</th><th>Date</th><th>Statut</th><th>Action</th></tr></thead>
+    <thead><tr><th>Code</th><th>Plat</th><th>Client</th><th class="r">Prix</th><th>Date</th><th>Statut</th><th>Fournisseur</th><th>Action</th></tr></thead>
     <tbody>${l.map(c => {
       const code = esc(c.code || c.id), st = c.statut || "en_attente";
       const rapide = st === "livree"
@@ -328,6 +387,7 @@ function rendreCommandes() {
         <td class="r">${prix(c.prix)}</td>
         <td class="mu" style="white-space:nowrap">${quand(c.date)}</td>
         <td><span class="st ${esc(st)}">${STATUTS[st] || esc(st)}</span></td>
+        <td style="white-space:nowrap">${celluleFournisseur(c, code)}</td>
         <td><div class="cell-act">${rapide}
           <select aria-label="Changer le statut" onchange="statut('${code}',this.value)">
             ${Object.entries(STATUTS).map(([k, v]) => `<option value="${k}"${st === k ? " selected" : ""}>${v}</option>`).join("")}
@@ -335,6 +395,52 @@ function rendreCommandes() {
       </tr>`;
     }).join("")}</tbody></table></div>
     <div class="mu resume">${l.length} commande${l.length > 1 ? "s" : ""} · ${prix(total)} (hors annulées)${note}</div>`;
+}
+
+// ---------- ExpressSend : fournisseurs ----------
+const ouverts = new Set(); // fournisseurs dont la liste de plats est dépliée (conservé entre deux affichages)
+
+function rendreExpress() {
+  const cfg = D.config || {};
+  const actif = cfg.actif === true;
+
+  $("#x-actif").checked = actif;
+  $("#x-etat").textContent = actif ? "ExpressSend activé" : "ExpressSend désactivé";
+  $("#x-contact").checked = cfg.inclureContact === true;
+
+  const affectes = new Set(D.fournisseurs.filter(f => f.actif !== false).flatMap(f => f.plats || []));
+  const sans = D.plats.filter(p => p.actif !== false && !affectes.has(p.id));
+  $("#x-alerte").innerHTML = actif && sans.length
+    ? `⚠ ${sans.length} plat${sans.length > 1 ? "s" : ""} du menu sans fournisseur actif : ${sans.map(p => esc(p.nom)).join(", ")}. Les commandes de ${sans.length > 1 ? "ces plats" : "ce plat"} ne seront envoyées à personne.`
+    : "";
+
+  $("#fournisseurs").innerHTML = D.fournisseurs.length ? D.fournisseurs.map(f => {
+    const mes = new Set(f.plats || []);
+    let cat = null, liste = "";
+    D.plats.forEach(p => {
+      if (p.categorie !== cat) { cat = p.categorie; liste += `<div class="cat">${esc(cat)}</div>`; }
+      const autre = D.fournisseurs.find(o => o.id !== f.id && (o.plats || []).includes(p.id));
+      liste += `<label class="chk${autre ? " autre" : ""}">
+        <input type="checkbox" ${mes.has(p.id) ? "checked" : ""} onchange="affecter('${esc(f.id)}','${esc(p.id)}',this.checked)">
+        <span>${esc(p.nom)}${p.actif === false ? " (retiré du menu)" : ""}${autre ? ` <span class="mu">(actuellement chez ${esc(autre.nom)})</span>` : ""}</span></label>`;
+    });
+    const n = [...mes].filter(id => D.plats.some(p => p.id === id)).length;
+    return `<div class="four${f.actif === false ? " off" : ""}">
+      <div class="row">
+        <div><b>${esc(f.nom)}</b><div class="mu">WhatsApp : ${esc(f.numero)}</div></div>
+        <div class="acts">
+          <label class="mu"><input type="checkbox" ${f.actif !== false ? "checked" : ""} onchange="actifFournisseur('${esc(f.id)}',this.checked)"> Actif</label>
+          <button class="btn sm" onclick="testerFournisseur('${esc(f.id)}')">Tester</button>
+          <button class="btn sm" onclick="modifierFournisseur('${esc(f.id)}')">Modifier</button>
+          <button class="btn ghost sm" onclick="supprimerFournisseur('${esc(f.id)}')">Supprimer</button>
+        </div>
+      </div>
+      <details ${ouverts.has(f.id) ? "open" : ""} ontoggle="basculerDetails('${esc(f.id)}',this.open)">
+        <summary>Plats de ce fournisseur (${n})</summary>
+        ${liste || '<div class="empty">Ajoutez d\'abord des plats dans l\'onglet Menu.</div>'}
+      </details>
+    </div>`;
+  }).join("") : `<div class="empty">Aucun fournisseur. Ajoutez le premier ci-dessus.</div>`;
 }
 
 // ---------- Affichage ----------
@@ -350,6 +456,7 @@ function render() {
     `<div><b>${prix(valides.reduce((s, c) => s + (Number(c.prix) || 0), 0))}</b><span class="mu">montant du jour</span></div>`;
 
   rendreCommandes();
+  rendreExpress();
   if (ongletActuel === "compta") rendreCompta();
 
   const sel = $("#c-plat"), garde = sel.value;
@@ -552,8 +659,10 @@ window.ajouterCommande = async e => {
   if (await ok(async () => {
     const code = await nouveauCode();
     await setDoc(doc(db, "commandes", code), {
-      code, chatId, plat: p.nom, lettre: etiquette(i), prix: p.prix, source: "admin",
-      nom, contact, jour: jour(), date: new Date().toISOString(), statut: "en_attente"
+      code, chatId, plat: p.nom, platId: p.id, lettre: etiquette(i), prix: p.prix, source: "admin",
+      nom, contact, jour: jour(), date: new Date().toISOString(), statut: "en_attente",
+      // ExpressSend actif : le bot envoie la commande au fournisseur du plat
+      ...(D.config.actif === true ? { fournisseurEnvoi: "a_envoyer" } : {})
     });
     toast("Commande enregistrée : " + code);
   })) { $("#c-nom").value = ""; $("#c-contact").value = ""; }
@@ -582,6 +691,80 @@ window.renommer = id => {
 window.supprimer = id => {
   const p = D.plats.find(x => x.id === id);
   if (confirm("Supprimer définitivement « " + (p ? p.nom : "ce plat") + " » ?")) ok(() => deleteDoc(doc(db, "plats", id)), "Plat supprimé");
+};
+
+// ---------- ExpressSend (actions) ----------
+$("#x-actif").addEventListener("change", e => {
+  const v = e.target.checked;
+  if (v && !D.fournisseurs.length) toast("Pensez à ajouter un fournisseur et ses plats", true);
+  ok(() => setDoc(doc(db, "config", "expressSend"), { actif: v }, { merge: true }), v ? "ExpressSend activé" : "ExpressSend désactivé");
+});
+$("#x-contact").addEventListener("change", e =>
+  ok(() => setDoc(doc(db, "config", "expressSend"), { inclureContact: e.target.checked }, { merge: true }), "Réglage enregistré"));
+
+window.basculerDetails = (id, ouvert) => { if (ouvert) ouverts.add(id); else ouverts.delete(id); };
+
+window.ajouterFournisseur = async e => {
+  e.preventDefault();
+  const nom = $("#fo-nom").value.trim(), numero = versChatId($("#fo-num").value);
+  if (!nom || numero.length < 8) return toast("Nom ou numéro WhatsApp invalide", true), false;
+  if (await ok(() => addDoc(collection(db, "fournisseurs"), {
+    nom, numero, plats: [], actif: true, date: new Date().toISOString()
+  }), "Fournisseur ajouté")) { $("#fo-nom").value = ""; $("#fo-num").value = ""; }
+  return false;
+};
+
+window.modifierFournisseur = id => {
+  const f = D.fournisseurs.find(x => x.id === id);
+  if (!f) return;
+  const nom = prompt("Nom du fournisseur :", f.nom);
+  if (nom === null) return;
+  const num = prompt("Numéro WhatsApp :", f.numero);
+  if (num === null) return;
+  const numero = versChatId(num);
+  if (!nom.trim() || numero.length < 8) return toast("Nom ou numéro invalide", true);
+  ok(() => updateDoc(doc(db, "fournisseurs", id), { nom: nom.trim(), numero }), "Fournisseur modifié");
+};
+
+window.actifFournisseur = (id, v) =>
+  ok(() => updateDoc(doc(db, "fournisseurs", id), { actif: v }), v ? "Fournisseur activé" : "Fournisseur désactivé");
+
+window.supprimerFournisseur = id => {
+  const f = D.fournisseurs.find(x => x.id === id);
+  if (confirm("Supprimer le fournisseur « " + (f ? f.nom : "") + " » ? Ses plats n'auront plus de fournisseur.")) {
+    ok(() => deleteDoc(doc(db, "fournisseurs", id)), "Fournisseur supprimé");
+  }
+};
+
+// Un plat n'a qu'un seul fournisseur : l'attribuer ici le retire des autres
+window.affecter = (fid, pid, coche) => ok(async () => {
+  const b = writeBatch(db);
+  if (coche) {
+    D.fournisseurs.forEach(o => {
+      if (o.id !== fid && (o.plats || []).includes(pid)) b.update(doc(db, "fournisseurs", o.id), { plats: arrayRemove(pid) });
+    });
+  }
+  b.update(doc(db, "fournisseurs", fid), { plats: coche ? arrayUnion(pid) : arrayRemove(pid) });
+  await b.commit();
+});
+
+// Message de test envoyé au fournisseur (passe par la file d'envois du bot)
+window.testerFournisseur = id => {
+  const f = D.fournisseurs.find(x => x.id === id);
+  if (!f) return;
+  if (!confirm("Envoyer un message de test à " + f.nom + " (" + f.numero + ") ?")) return;
+  ok(() => deposer({
+    type: "message", to: f.numero,
+    text: "✅ Test ExpressSend Groupe Express : les commandes de vos plats arriveront ici automatiquement."
+  }), "Message de test transmis au bot");
+};
+
+// Renvoie une commande au fournisseur (échec, plat sans fournisseur, ou nouvel envoi)
+window.renvoyerFournisseur = code => {
+  if (D.config.actif !== true) return toast("Activez d'abord ExpressSend", true);
+  const c = D.commandes.find(x => (x.code || x.id) === code);
+  if (c && c.fournisseurEnvoi === "envoye" && !confirm("Cette commande a déjà été envoyée au fournisseur. La renvoyer ?")) return;
+  ok(() => updateDoc(doc(db, "commandes", code), { fournisseurEnvoi: "a_envoyer" }), "Envoi au fournisseur demandé");
 };
 
 // ---------- Messages : déposés dans Firestore, envoyés par le bot ----------
