@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Express Market : administration</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700&display=swap">
+<style>
+:root{--bg:#eef2ee;--card:#fff;--tx:#14231b;--mu:#5d6d63;--bd:#d6ded8;--ac:#1b5e3f;--ac2:#f2b705;--er:#c92a2a;--on:#fff}
+@media(prefers-color-scheme:dark){:root{--bg:#0f1713;--card:#17221c;--tx:#e8f0ea;--mu:#93a69a;--bd:#2a3a31;--ac:#4fbf8a;--on:#0f1713}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 Outfit,system-ui,sans-serif}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;border-bottom:3px solid var(--ac2);background:var(--card)}
+h1{margin:0;font-size:20px;font-weight:700}
+h2{margin:0 0 10px;font-size:16px}
+main{max-width:980px;margin:0 auto;padding:16px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:14px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:14px}
+.stats div{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:10px 12px}
+.stats b{display:block;font-size:22px}
+.mu{color:var(--mu);font-size:13px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--bd)}
+.row:last-child{border-bottom:0}
+.row>div:first-child{min-width:0;flex:1}
+.acts{display:flex;align-items:center;gap:8px;flex:none}
+input{font:inherit;color:var(--tx);background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:8px 10px;min-width:0}
+input:focus,button:focus-visible{outline:2px solid var(--ac);outline-offset:1px}
+input[type=checkbox]{accent-color:var(--ac)}
+form{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end}
+.btn{border:0;background:var(--ac);color:var(--on);padding:9px 14px;border-radius:8px;font:inherit;font-weight:500;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--er);border:1px solid var(--bd)}
+.btn.sm{padding:6px 10px;font-size:13px;white-space:nowrap}
+.off{opacity:.5}
+.empty{color:var(--mu);padding:14px 0}
+#cfg{display:none;background:var(--er);color:#fff;padding:12px 16px;text-align:center}
+#toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:10px 16px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%}
+#toast.show{opacity:1}#toast.err{background:var(--er);color:#fff}
+.alerte{background:color-mix(in srgb,var(--ac2) 25%,transparent);border:1px solid var(--ac2);border-radius:8px;padding:10px 12px;margin-top:12px}
+.alerte:empty{display:none}
+
+/* ----- Express Market ----- */
+.st{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12px;font-weight:500;white-space:nowrap;border:1px solid var(--bd)}
+.st.en_attente{background:color-mix(in srgb,var(--ac2) 25%,transparent)}
+.st.actif{background:color-mix(in srgb,var(--ac) 22%,transparent)}
+.st.connexion{background:color-mix(in srgb,#3b82f6 20%,transparent)}
+.st.erreur{background:color-mix(in srgb,var(--er) 18%,transparent)}
+.st.pause{background:var(--bg)}
+.robot{border:1px solid var(--bd);border-radius:10px;padding:4px 12px 12px;margin-bottom:10px}
+.robot .alerte{margin-top:0}
+.cle{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px}
+.champ{display:flex;flex-direction:column;gap:3px;flex:1 1 200px}
+.champ span{font-size:13px;color:var(--mu)}
+.champ input{width:100%}
+@media(max-width:560px){.row{flex-direction:column;align-items:stretch}.acts{justify-content:flex-end}}
+</style>
+</head>
+<body>
+<div id="cfg">Renseigne <b>firebaseConfig</b> au début du script de cette page pour la connecter à Firestore.</div>
+<header>
+  <h1>Express Market : administration</h1>
+  <span class="mu" id="live">Connexion…</span>
+</header>
+<main>
+  <div class="stats" id="mk-stats"></div>
+  <div class="card">
+    <h2>Créer un robot client</h2>
+    <p class="mu" style="margin-top:0">Un client peut avoir son propre robot WhatsApp personnel. Renseignez son numéro WhatsApp, le nom de son robot et sa clé API Gemini : le bot ouvre alors une session dédiée à ce client.</p>
+    <form onsubmit="return ajouterRobotClient(event)" autocomplete="off">
+      <label class="champ"><span>Nom du robot</span>
+        <input id="mk-nom" placeholder="Ex : Boutique Awa Bot" maxlength="60" required></label>
+      <label class="champ"><span>Numéro WhatsApp du client</span>
+        <input id="mk-num" placeholder="Ex : 0102030405" inputmode="tel" required></label>
+      <label class="champ"><span>Clé API Gemini</span>
+        <input id="mk-cle" type="password" placeholder="AIza…" autocomplete="off" spellcheck="false" required></label>
+      <button class="btn">Créer la session</button>
+    </form>
+    <p class="mu" style="margin-bottom:0">La clé est enregistrée à part et n'est plus jamais réaffichée : seuls ses 4 premiers et 4 derniers caractères restent visibles ici.</p>
+  </div>
+  <div class="card"><h2>Robots des clients</h2><div id="robots"></div></div>
+</main>
+<div id="toast" role="status"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, doc, updateDoc, onSnapshot, writeBatch }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// Même projet Firebase que la page d'administration de Groupe Express
+const firebaseConfig = {
+  apiKey: "AIzaSyCPGgtXoDUycykLaTSee0S0yY0tkeJpqKI",
+  authDomain: "data-com-a94a8.firebaseapp.com",
+  databaseURL: "https://data-com-a94a8-default-rtdb.firebaseio.com",
+  projectId: "data-com-a94a8",
+  storageBucket: "data-com-a94a8.firebasestorage.app",
+  messagingSenderId: "276904640935",
+  appId: "1:276904640935:web:9cd805aeba6c34c767f682",
+};
+
+const FUSEAU = "Africa/Abidjan";
+const ETAT_ROBOT = { en_attente: "En attente du bot", connexion: "Liaison WhatsApp en cours", actif: "En service", erreur: "Erreur", pause: "En pause" };
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const quand = d => d ? new Date(d).toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", timeZone: FUSEAU }) : "";
+
+function toast(m, err) {
+  const t = $("#toast");
+  t.textContent = m;
+  t.className = "show" + (err ? " err" : "");
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.className = "", 3200);
+}
+
+if (firebaseConfig.apiKey.startsWith("COLLE")) {
+  $("#cfg").style.display = "block";
+  $("#live").textContent = "Non connecté";
+  throw new Error("firebaseConfig non renseigné");
+}
+
+const db = getFirestore(initializeApp(firebaseConfig));
+let market = [];
+
+async function ok(fn, msg) {
+  try { await fn(); if (msg) toast(msg); return true; }
+  catch (e) { toast(e.message, true); return false; }
+}
+
+// ---------- Lecture en direct ----------
+// Robots personnels des clients. La clé Gemini n'est PAS lue ici : elle est dans "express_market_cles"
+onSnapshot(collection(db, "express_market"), snap => {
+  const l = [];
+  snap.forEach(d => l.push({ id: d.id, ...d.data() }));
+  market = l.sort((x, y) => (y.date || "").localeCompare(x.date || ""));
+  $("#live").textContent = "En direct";
+  rendreMarket();
+}, e => toast("Lecture impossible (express_market) : " + e.message, true));
+
+// ---------- Affichage ----------
+function rendreMarket() {
+  const l = market;
+  const enService = l.filter(r => r.actif !== false && r.statut === "actif").length;
+
+  $("#mk-stats").innerHTML =
+    `<div><b>${l.length}</b><span class="mu">robots clients</span></div>` +
+    `<div><b>${enService}</b><span class="mu">en service</span></div>` +
+    `<div><b>${l.filter(r => r.actif === false).length}</b><span class="mu">en pause</span></div>` +
+    `<div><b>${l.filter(r => r.statut === "erreur" && r.actif !== false).length}</b><span class="mu">en erreur</span></div>`;
+
+  $("#robots").innerHTML = l.length ? l.map(r => {
+    const id = esc(r.id);
+    const pause = r.actif === false;
+    const st = pause ? "pause" : (r.statut || "en_attente");
+    const code = !pause && r.codeAppairage
+      ? `<div class="alerte">Code d'appairage : <b class="cle">${esc(r.codeAppairage)}</b><br>
+         <span class="mu">À saisir sur le téléphone du client : WhatsApp &gt; Appareils connectés &gt; Connecter un appareil &gt; Associer avec un numéro de téléphone.</span></div>`
+      : "";
+    const erreur = !pause && r.statut === "erreur" && r.erreur
+      ? `<div class="alerte">⚠ ${esc(r.erreur)}</div>` : "";
+    return `<div class="robot${pause ? " off" : ""}">
+      <div class="row">
+        <div>
+          <b>${esc(r.nom)}</b> <span class="st ${esc(st)}">${ETAT_ROBOT[st] || esc(st)}</span>
+          <div class="mu">WhatsApp : +${esc(r.numero)} · Clé Gemini : <span class="cle">${esc(r.cleApercu || "—")}</span></div>
+          <div class="mu">Créé le ${esc(quand(r.date))}</div>
+        </div>
+        <div class="acts">
+          <label class="mu"><input type="checkbox" ${pause ? "" : "checked"} onchange="actifRobot('${id}',this.checked)"> Actif</label>
+          <button class="btn sm" onclick="renommerRobot('${id}')">Renommer</button>
+          <button class="btn sm" onclick="changerCleRobot('${id}')">Changer la clé</button>
+          <button class="btn ghost sm" onclick="supprimerRobot('${id}')">Supprimer</button>
+        </div>
+      </div>
+      ${code}${erreur}
+    </div>`;
+  }).join("") : `<div class="empty">Aucun robot client pour le moment. Créez la première session ci-dessus.</div>`;
+}
+
+// ---------- Actions ----------
+function versChatId(contact) {
+  let c = String(contact || "").replace(/\D/g, "");
+  if (c.startsWith("00")) c = c.slice(2);
+  if (c.length === 10) c = "225" + c;
+  return c;
+}
+
+// Données publiques du robot : collection "express_market" (lue par cette page)
+// Clé Gemini : collection "express_market_cles", même identifiant (écrite par cette page, jamais relue ici)
+const cleValide = c => /^\S{20,}$/.test(c);
+const apercuCle = c => c.slice(0, 4) + "…" + c.slice(-4);
+
+window.ajouterRobotClient = async e => {
+  e.preventDefault();
+  const nom = $("#mk-nom").value.trim();
+  const numero = versChatId($("#mk-num").value);
+  const cle = $("#mk-cle").value.trim();
+  if (!nom) return toast("Donnez un nom au robot", true), false;
+  if (numero.length < 8 || numero.length > 15) return toast("Numéro WhatsApp invalide", true), false;
+  if (!cleValide(cle)) return toast("Clé API Gemini invalide (sans espace, 20 caractères minimum)", true), false;
+  if (market.some(r => r.numero === numero)) return toast("Ce numéro a déjà un robot", true), false;
+  if (await ok(async () => {
+    const ref = doc(collection(db, "express_market"));
+    const b = writeBatch(db);
+    b.set(ref, {
+      nom, numero, cleApercu: apercuCle(cle), actif: true, statut: "en_attente",
+      date: new Date().toISOString()
+    });
+    b.set(doc(db, "express_market_cles", ref.id), { cle, maj: new Date().toISOString() });
+    await b.commit();
+  }, "Session créée : le bot prépare le robot")) {
+    $("#mk-nom").value = ""; $("#mk-num").value = ""; $("#mk-cle").value = "";
+  }
+  return false;
+};
+
+window.actifRobot = (id, v) =>
+  ok(() => updateDoc(doc(db, "express_market", id), { actif: v }), v ? "Robot réactivé" : "Robot mis en pause");
+
+window.renommerRobot = id => {
+  const r = market.find(x => x.id === id);
+  const n = prompt("Nouveau nom du robot :", r ? r.nom : "");
+  if (n && n.trim()) ok(() => updateDoc(doc(db, "express_market", id), { nom: n.trim().slice(0, 60) }), "Robot renommé");
+};
+
+window.changerCleRobot = id => {
+  const r = market.find(x => x.id === id);
+  const c = prompt("Nouvelle clé API Gemini pour « " + (r ? r.nom : "ce robot") + " » :");
+  if (c === null) return;
+  const cle = c.trim();
+  if (!cleValide(cle)) return toast("Clé API Gemini invalide", true);
+  ok(async () => {
+    const b = writeBatch(db);
+    b.set(doc(db, "express_market_cles", id), { cle, maj: new Date().toISOString() });
+    b.update(doc(db, "express_market", id), { cleApercu: apercuCle(cle) });
+    await b.commit();
+  }, "Clé mise à jour");
+};
+
+window.supprimerRobot = id => {
+  const r = market.find(x => x.id === id);
+  if (!confirm("Supprimer le robot « " + (r ? r.nom : "") + " » et sa clé Gemini ? La session WhatsApp sera arrêtée.")) return;
+  ok(async () => {
+    const b = writeBatch(db);
+    b.delete(doc(db, "express_market", id));
+    b.delete(doc(db, "express_market_cles", id));
+    await b.commit();
+  }, "Robot supprimé");
+};
+</script>
+</body>
+</html>
