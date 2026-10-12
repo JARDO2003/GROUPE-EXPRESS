@@ -78,6 +78,18 @@ tr.annulee{opacity:.5}
 .chk{display:flex;align-items:center;gap:8px;padding:5px 0;cursor:pointer}
 .chk.autre{opacity:.6}
 
+/* ----- Express Market ----- */
+.robot{border:1px solid var(--bd);border-radius:10px;padding:4px 12px 12px;margin-bottom:10px}
+.robot .alerte{margin-top:0}
+.cle{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px}
+.champ{display:flex;flex-direction:column;gap:3px;flex:1 1 200px}
+.champ span{font-size:13px;color:var(--mu)}
+.champ input{width:100%}
+.st.actif{background:color-mix(in srgb,var(--ac) 22%,transparent)}
+.st.connexion{background:color-mix(in srgb,#3b82f6 20%,transparent)}
+.st.erreur{background:color-mix(in srgb,var(--er) 18%,transparent)}
+.st.pause{background:var(--bg)}
+
 /* ----- Comptabilité ----- */
 .seg{display:inline-flex;border:1px solid var(--bd);border-radius:8px;overflow:hidden;margin-bottom:12px}
 .seg button{border:0;background:var(--card);color:var(--tx);padding:8px 14px;font:inherit;cursor:pointer}
@@ -115,6 +127,7 @@ tr.annulee{opacity:.5}
   <button role="tab" data-t="compta" aria-selected="false">Comptabilité</button>
   <button role="tab" data-t="menu" aria-selected="false">Menu</button>
   <button role="tab" data-t="express" aria-selected="false">ExpressSend</button>
+  <button role="tab" data-t="market" aria-selected="false">Express Market</button>
   <button role="tab" data-t="msg" aria-selected="false">Messages</button>
   <button role="tab" data-t="avis" aria-selected="false">Avis</button>
   <button role="tab" data-t="dem" aria-selected="false">Demandes</button>
@@ -210,6 +223,25 @@ tr.annulee{opacity:.5}
   <div class="card"><h2>Fournisseurs</h2><div id="fournisseurs"></div></div>
 </section>
 
+<section id="t-market">
+  <div class="stats" id="mk-stats"></div>
+  <div class="card">
+    <h2>Express Market</h2>
+    <p class="mu" style="margin-top:0">Un client peut avoir son propre robot WhatsApp personnel. Renseignez son numéro WhatsApp, le nom de son robot et sa clé API Gemini : le bot ouvre alors une session dédiée à ce client.</p>
+    <form onsubmit="return ajouterRobotClient(event)" autocomplete="off">
+      <label class="champ"><span>Nom du robot</span>
+        <input id="mk-nom" placeholder="Ex : Boutique Awa Bot" maxlength="60" required></label>
+      <label class="champ"><span>Numéro WhatsApp du client</span>
+        <input id="mk-num" placeholder="Ex : 0102030405" inputmode="tel" required></label>
+      <label class="champ"><span>Clé API Gemini</span>
+        <input id="mk-cle" type="password" placeholder="AIza…" autocomplete="off" spellcheck="false" required></label>
+      <button class="btn">Créer la session</button>
+    </form>
+    <p class="mu" style="margin-bottom:0">La clé est enregistrée à part et n'est plus jamais réaffichée : seuls ses 4 premiers et 4 derniers caractères restent visibles ici.</p>
+  </div>
+  <div class="card"><h2>Robots des clients</h2><div id="robots"></div></div>
+</section>
+
 <section id="t-msg">
   <div class="card">
     <h2>Écrire à un client</h2>
@@ -263,6 +295,7 @@ const FUSEAU = "Africa/Abidjan";
 const HISTORIQUE_JOURS = 190; // commandes chargées pour la recherche et la comptabilité (≈ 6 mois)
 const STATUTS = { en_attente: "En attente", rappel_envoye: "Prêt, client prévenu", livree: "Livrée", annulee: "Annulée" };
 const ETAT_ENVOI = { en_attente: "En attente du bot", en_cours: "Envoi en cours", envoye: "Envoyé", erreur: "Erreur" };
+const ETAT_ROBOT = { en_attente: "En attente du bot", connexion: "Liaison WhatsApp en cours", actif: "En service", erreur: "Erreur", pause: "En pause" };
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -290,7 +323,7 @@ if (firebaseConfig.apiKey.startsWith("COLLE")) {
 }
 
 const db = getFirestore(initializeApp(firebaseConfig));
-let D = { plats: [], commandes: [], avis: [], demandes: [], envois: [], fournisseurs: [], config: {} };
+let D = { plats: [], commandes: [], avis: [], demandes: [], envois: [], fournisseurs: [], market: [], config: {} };
 let ongletActuel = "cmd";
 const filtres = { q: "", portee: "jour", st: "" };
 
@@ -325,6 +358,8 @@ ecouter(query(collection(db, "demandes_clients"), orderBy("date", "desc"), limit
 ecouter(query(collection(db, "file_envois"), orderBy("date", "desc"), limit(15)), "envois");
 // ExpressSend : fournisseurs et réglage (activé / désactivé)
 ecouter(collection(db, "fournisseurs"), "fournisseurs", l => l.sort((x, y) => (x.nom || "").localeCompare(y.nom || "")));
+// Express Market : robots personnels des clients (la clé Gemini n'est PAS lue ici, elle est dans "express_market_cles")
+ecouter(collection(db, "express_market"), "market", l => l.sort((x, y) => (y.date || "").localeCompare(x.date || "")));
 onSnapshot(doc(db, "config", "expressSend"), s => {
   D.config = s.exists() ? s.data() : {};
   render();
@@ -443,6 +478,46 @@ function rendreExpress() {
   }).join("") : `<div class="empty">Aucun fournisseur. Ajoutez le premier ci-dessus.</div>`;
 }
 
+// ---------- Express Market : robots personnels ----------
+function rendreMarket() {
+  const l = D.market;
+  const enService = l.filter(r => r.actif !== false && r.statut === "actif").length;
+
+  $("#mk-stats").innerHTML =
+    `<div><b>${l.length}</b><span class="mu">robots clients</span></div>` +
+    `<div><b>${enService}</b><span class="mu">en service</span></div>` +
+    `<div><b>${l.filter(r => r.actif === false).length}</b><span class="mu">en pause</span></div>` +
+    `<div><b>${l.filter(r => r.statut === "erreur" && r.actif !== false).length}</b><span class="mu">en erreur</span></div>`;
+
+  $("#robots").innerHTML = l.length ? l.map(r => {
+    const id = esc(r.id);
+    const pause = r.actif === false;
+    const st = pause ? "pause" : (r.statut || "en_attente");
+    const code = !pause && r.codeAppairage
+      ? `<div class="alerte">Code d'appairage : <b class="cle">${esc(r.codeAppairage)}</b><br>
+         <span class="mu">À saisir sur le téléphone du client : WhatsApp &gt; Appareils connectés &gt; Connecter un appareil &gt; Associer avec un numéro de téléphone.</span></div>`
+      : "";
+    const erreur = !pause && r.statut === "erreur" && r.erreur
+      ? `<div class="alerte">⚠ ${esc(r.erreur)}</div>` : "";
+    return `<div class="robot${pause ? " off" : ""}">
+      <div class="row">
+        <div>
+          <b>${esc(r.nom)}</b> <span class="st ${esc(st)}">${ETAT_ROBOT[st] || esc(st)}</span>
+          <div class="mu">WhatsApp : +${esc(r.numero)} · Clé Gemini : <span class="cle">${esc(r.cleApercu || "—")}</span></div>
+          <div class="mu">Créé le ${esc(quand(r.date))}</div>
+        </div>
+        <div class="acts">
+          <label class="mu"><input type="checkbox" ${pause ? "" : "checked"} onchange="actifRobot('${id}',this.checked)"> Actif</label>
+          <button class="btn sm" onclick="renommerRobot('${id}')">Renommer</button>
+          <button class="btn sm" onclick="changerCleRobot('${id}')">Changer la clé</button>
+          <button class="btn ghost sm" onclick="supprimerRobot('${id}')">Supprimer</button>
+        </div>
+      </div>
+      ${code}${erreur}
+    </div>`;
+  }).join("") : `<div class="empty">Aucun robot client pour le moment. Créez la première session ci-dessus.</div>`;
+}
+
 // ---------- Affichage ----------
 function render() {
   const plats = D.plats;
@@ -457,6 +532,7 @@ function render() {
 
   rendreCommandes();
   rendreExpress();
+  rendreMarket();
   if (ongletActuel === "compta") rendreCompta();
 
   const sel = $("#c-plat"), garde = sel.value;
@@ -765,6 +841,70 @@ window.renvoyerFournisseur = code => {
   const c = D.commandes.find(x => (x.code || x.id) === code);
   if (c && c.fournisseurEnvoi === "envoye" && !confirm("Cette commande a déjà été envoyée au fournisseur. La renvoyer ?")) return;
   ok(() => updateDoc(doc(db, "commandes", code), { fournisseurEnvoi: "a_envoyer" }), "Envoi au fournisseur demandé");
+};
+
+// ---------- Express Market (actions) ----------
+// Données publiques du robot : collection "express_market" (lue par cette page)
+// Clé Gemini : collection "express_market_cles", même identifiant (écrite par cette page, jamais relue ici)
+const cleValide = c => /^\S{20,}$/.test(c);
+const apercuCle = c => c.slice(0, 4) + "…" + c.slice(-4);
+
+window.ajouterRobotClient = async e => {
+  e.preventDefault();
+  const nom = $("#mk-nom").value.trim();
+  const numero = versChatId($("#mk-num").value);
+  const cle = $("#mk-cle").value.trim();
+  if (!nom) return toast("Donnez un nom au robot", true), false;
+  if (numero.length < 8 || numero.length > 15) return toast("Numéro WhatsApp invalide", true), false;
+  if (!cleValide(cle)) return toast("Clé API Gemini invalide (sans espace, 20 caractères minimum)", true), false;
+  if (D.market.some(r => r.numero === numero)) return toast("Ce numéro a déjà un robot", true), false;
+  if (await ok(async () => {
+    const ref = doc(collection(db, "express_market"));
+    const b = writeBatch(db);
+    b.set(ref, {
+      nom, numero, cleApercu: apercuCle(cle), actif: true, statut: "en_attente",
+      date: new Date().toISOString()
+    });
+    b.set(doc(db, "express_market_cles", ref.id), { cle, maj: new Date().toISOString() });
+    await b.commit();
+  }, "Session créée : le bot prépare le robot")) {
+    $("#mk-nom").value = ""; $("#mk-num").value = ""; $("#mk-cle").value = "";
+  }
+  return false;
+};
+
+window.actifRobot = (id, v) =>
+  ok(() => updateDoc(doc(db, "express_market", id), { actif: v }), v ? "Robot réactivé" : "Robot mis en pause");
+
+window.renommerRobot = id => {
+  const r = D.market.find(x => x.id === id);
+  const n = prompt("Nouveau nom du robot :", r ? r.nom : "");
+  if (n && n.trim()) ok(() => updateDoc(doc(db, "express_market", id), { nom: n.trim().slice(0, 60) }), "Robot renommé");
+};
+
+window.changerCleRobot = id => {
+  const r = D.market.find(x => x.id === id);
+  const c = prompt("Nouvelle clé API Gemini pour « " + (r ? r.nom : "ce robot") + " » :");
+  if (c === null) return;
+  const cle = c.trim();
+  if (!cleValide(cle)) return toast("Clé API Gemini invalide", true);
+  ok(async () => {
+    const b = writeBatch(db);
+    b.set(doc(db, "express_market_cles", id), { cle, maj: new Date().toISOString() });
+    b.update(doc(db, "express_market", id), { cleApercu: apercuCle(cle) });
+    await b.commit();
+  }, "Clé mise à jour");
+};
+
+window.supprimerRobot = id => {
+  const r = D.market.find(x => x.id === id);
+  if (!confirm("Supprimer le robot « " + (r ? r.nom : "") + " » et sa clé Gemini ? La session WhatsApp sera arrêtée.")) return;
+  ok(async () => {
+    const b = writeBatch(db);
+    b.delete(doc(db, "express_market", id));
+    b.delete(doc(db, "express_market_cles", id));
+    await b.commit();
+  }, "Robot supprimé");
 };
 
 // ---------- Messages : déposés dans Firestore, envoyés par le bot ----------
