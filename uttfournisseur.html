@@ -107,7 +107,8 @@ tr.annulee{opacity:.5}
 <div id="cfg">Renseigne <b>firebaseConfig</b> au début du script de cette page pour la connecter à Firestore.</div>
 <header>
   <h1>Groupe Express : administration</h1>
-  <span class="mu" id="live">Connexion…</span>
+  <span style="display:flex;align-items:center;gap:10px"><span class="mu" id="live">Connexion…</span>
+  <button class="btn ghost sm" onclick="reinitialiser()">↺ Réinitialiser</button></span>
 </header>
 <main>
 <nav role="tablist" id="tabs">
@@ -318,8 +319,25 @@ function trierPlats(l) {
 
 ecouter(collection(db, "plats"), "plats", trierPlats);
 // Une seule requête sur un seul champ (pas d'index composite à créer) : tout l'historique récent
+let TOUTES = [], RESET_LE = "";
+function appliquerReset() {
+  D.commandes = RESET_LE ? TOUTES.filter(c => (c.date || "") > RESET_LE) : TOUTES;
+}
 ecouter(query(collection(db, "commandes"), where("jour", ">=", addDays(jour(), -HISTORIQUE_JOURS))), "commandes",
-  l => l.sort((x, y) => (y.date || "").localeCompare(x.date || "")));
+  l => { TOUTES = l.sort((x, y) => (y.date || "").localeCompare(x.date || "")); appliquerReset(); return D.commandes; });
+// Remise à zéro : on garde les commandes dans la base, on ne les affiche plus (partagé entre appareils)
+onSnapshot(doc(db, "config", "admin"), d => {
+  RESET_LE = (d.exists() && d.data().resetLe) || "";
+  appliquerReset(); sigCompta = ""; render();
+}, () => {});
+const CODE_RESET = "express200@";
+window.reinitialiser = async () => {
+  const code = prompt("Code de réinitialisation :");
+  if (code === null) return;
+  if (code !== CODE_RESET) { toast("Code incorrect", true); return; }
+  if (!confirm("Remettre la page et la comptabilité à zéro ?")) return;
+  ok(() => setDoc(doc(db, "config", "admin"), { resetLe: new Date().toISOString() }, { merge: true }), "Page réinitialisée");
+};
 ecouter(query(collection(db, "avis"), orderBy("date", "desc"), limit(100)), "avis");
 ecouter(query(collection(db, "demandes_clients"), orderBy("date", "desc"), limit(50)), "demandes");
 ecouter(query(collection(db, "file_envois"), orderBy("date", "desc"), limit(15)), "envois");
@@ -562,8 +580,9 @@ function rendreCompta(force) {
     const b = index[cleDe(c.jour || "", periode)];
     if (!b) return;
     if (c.statut === "annulee") { b.annul++; return; }
-    b.n++; b.ca += Number(c.prix) || 0;
-    if (c.statut === "livree") b.liv++;
+    b.n++;
+    // Le chiffre d'affaires n'augmente que quand la commande est marquée « Livrée »
+    if (c.statut === "livree") { b.liv++; b.ca += Number(c.prix) || 0; }
   });
 
   const sig = periode + "|" + W + "|" + JSON.stringify(bs.map(b => [b.n, b.ca, b.liv, b.annul]));
