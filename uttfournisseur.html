@@ -46,7 +46,7 @@ form.col{flex-direction:column;align-items:stretch}
 #toast.show{opacity:1}#toast.err{background:var(--er);color:#fff}
 
 /* ----- Tableau des commandes ----- */
-.bar-outils{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.bar-outils{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;align-items:center}
 .bar-outils input[type=search]{flex:1 1 220px}
 .tw{overflow-x:auto;border:1px solid var(--bd);border-radius:10px}
 table{width:100%;border-collapse:collapse;font-size:14px}
@@ -137,7 +137,7 @@ tr.annulee{opacity:.5}
     <div class="bar-outils">
       <input id="f-q" type="search" placeholder="Rechercher un nom ou un code" autocomplete="off" aria-label="Rechercher un nom ou un code">
       <select id="f-portee" aria-label="Période">
-        <option value="jour">Aujourd'hui</option>
+        <option value="jour">Aujourd'hui (jusqu'à 11h demain)</option>
         <option value="semaine">Cette semaine</option>
         <option value="mois">Ce mois</option>
         <option value="tout">Tout (≈ 6 mois)</option>
@@ -149,6 +149,8 @@ tr.annulee{opacity:.5}
         <option value="livree">Livrée</option>
         <option value="annulee">Annulée</option>
       </select>
+      <input id="f-date" type="date" aria-label="Choisir une date">
+      <button id="f-date-x" class="btn ghost sm" type="button" title="Effacer la date" style="color:var(--tx)">✕</button>
     </div>
     <div id="cmds"></div>
   </div>
@@ -276,6 +278,16 @@ const addDays = (s, n) => { const [y, m, d] = s.split("-").map(Number); return n
 const lundiDe = s => addDays(s, -((new Date(s + "T00:00:00Z").getUTCDay() + 6) % 7));
 const norm = s => String(s ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
+// Jour de service : une journée va de HEURE_COUPURE (11h) à HEURE_COUPURE le lendemain.
+// Une commande passée hier à 16h ou ce matin à 10h59 compte donc pour la même journée.
+const HEURE_COUPURE = 11;
+function jourService(iso) {
+  const d = iso ? new Date(iso) : new Date();
+  const h = Number(new Intl.DateTimeFormat("en-GB", { timeZone: FUSEAU, hour: "2-digit", hourCycle: "h23" }).format(d));
+  const j = new Intl.DateTimeFormat("en-CA", { timeZone: FUSEAU }).format(d);
+  return h < HEURE_COUPURE ? addDays(j, -1) : j;
+}
+
 function toast(m, err) {
   const t = $("#toast");
   t.textContent = m;
@@ -293,7 +305,7 @@ if (firebaseConfig.apiKey.startsWith("COLLE")) {
 const db = getFirestore(initializeApp(firebaseConfig));
 let D = { plats: [], commandes: [], avis: [], demandes: [], envois: [], fournisseurs: [], config: {} };
 let ongletActuel = "cmd";
-const filtres = { q: "", portee: "jour", st: "" };
+const filtres = { q: "", portee: "jour", st: "", date: "" };
 
 async function ok(fn, msg) {
   try { await fn(); if (msg) toast(msg); return true; }
@@ -324,7 +336,9 @@ function appliquerReset() {
   D.commandes = RESET_LE ? TOUTES.filter(c => (c.date || "") > RESET_LE) : TOUTES;
 }
 ecouter(query(collection(db, "commandes"), where("jour", ">=", addDays(jour(), -HISTORIQUE_JOURS))), "commandes",
-  l => { TOUTES = l.sort((x, y) => (y.date || "").localeCompare(x.date || "")); appliquerReset(); return D.commandes; });
+  // Le champ « jour » est recalculé à l'affichage (jour de service 11h → 11h) ; la base n'est pas modifiée
+  l => { TOUTES = l.map(c => ({ ...c, jour: c.date ? jourService(c.date) : c.jour }))
+    .sort((x, y) => (y.date || "").localeCompare(x.date || "")); appliquerReset(); return D.commandes; });
 // Remise à zéro : on garde les commandes dans la base, on ne les affiche plus (partagé entre appareils)
 onSnapshot(doc(db, "config", "admin"), d => {
   RESET_LE = (d.exists() && d.data().resetLe) || "";
@@ -350,13 +364,14 @@ onSnapshot(doc(db, "config", "expressSend"), s => {
 
 // ---------- Commandes : filtre + tableau ----------
 function listeCommandes() {
-  const t = jour(), lundi = lundiDe(t), mois = t.slice(0, 7);
+  const t = jourService(), lundi = lundiDe(t), mois = t.slice(0, 7);
   const q = norm(filtres.q.trim()).replace(/-/g, "");
   let l = D.commandes;
   if (q) {
     // Une recherche porte sur tout l'historique chargé, quelle que soit la période choisie
     l = l.filter(c => norm([c.code || c.id, c.nom, c.contact, c.plat].join(" ")).replace(/-/g, "").includes(q));
-  } else if (filtres.portee === "jour") l = l.filter(c => c.jour === t);
+  } else if (filtres.date) l = l.filter(c => c.jour === filtres.date);
+  else if (filtres.portee === "jour") l = l.filter(c => c.jour === t);
   else if (filtres.portee === "semaine") l = l.filter(c => (c.jour || "") >= lundi);
   else if (filtres.portee === "mois") l = l.filter(c => (c.jour || "").startsWith(mois));
   if (filtres.st) l = l.filter(c => c.statut === filtres.st);
@@ -409,7 +424,8 @@ function rendreCommandes() {
         <td><div class="cell-act">${rapide}
           <select aria-label="Changer le statut" onchange="statut('${code}',this.value)">
             ${Object.entries(STATUTS).map(([k, v]) => `<option value="${k}"${st === k ? " selected" : ""}>${v}</option>`).join("")}
-          </select></div></td>
+          </select>
+          <button class="btn ghost sm" title="Supprimer cette commande" onclick="supprimerCommande('${code}')">🗑 Supprimer</button></div></td>
       </tr>`;
     }).join("")}</tbody></table></div>
     <div class="mu resume">${l.length} commande${l.length > 1 ? "s" : ""} · ${prix(total)} (hors annulées)${note}</div>`;
@@ -464,7 +480,7 @@ function rendreExpress() {
 // ---------- Affichage ----------
 function render() {
   const plats = D.plats;
-  const cmds = D.commandes.filter(c => c.jour === jour());
+  const cmds = D.commandes.filter(c => c.jour === jourService());
   const valides = cmds.filter(c => c.statut !== "annulee");
 
   $("#stats").innerHTML =
@@ -520,6 +536,9 @@ function render() {
 $("#f-q").addEventListener("input", e => { filtres.q = e.target.value; rendreCommandes(); });
 $("#f-portee").addEventListener("change", e => { filtres.portee = e.target.value; rendreCommandes(); });
 $("#f-st").addEventListener("change", e => { filtres.st = e.target.value; rendreCommandes(); });
+// Une date choisie (jour de service : de 11h ce jour-là à 11h le lendemain) prend le pas sur la période
+$("#f-date").addEventListener("change", e => { filtres.date = e.target.value; rendreCommandes(); });
+$("#f-date-x").addEventListener("click", () => { $("#f-date").value = ""; filtres.date = ""; rendreCommandes(); });
 
 // ---------- Comptabilité + graphe 3D ----------
 let periode = "jour", sigCompta = "";
@@ -528,7 +547,7 @@ const reduit = matchMedia("(prefers-reduced-motion: reduce)").matches;
 if (reduit) auto = false;
 
 function periodes(mode) {
-  const t = jour(), out = [];
+  const t = jourService(), out = [];
   const dm = s => s.slice(8) + "/" + s.slice(5, 7);
   if (mode === "jour") {
     for (let i = 13; i >= 0; i--) {
@@ -667,6 +686,12 @@ async function nouveauCode() {
 }
 
 window.statut = (code, s) => ok(() => updateDoc(doc(db, "commandes", code), { statut: s }), s === "livree" ? "Commande marquée livrée" : "Statut mis à jour");
+
+window.supprimerCommande = code => {
+  const c = D.commandes.find(x => (x.code || x.id) === code);
+  if (confirm("Supprimer définitivement la commande " + code + (c ? " (" + c.nom + ", " + c.plat + ")" : "") + " ?\nElle sera aussi retirée de la comptabilité."))
+    ok(() => deleteDoc(doc(db, "commandes", code)), "Commande supprimée");
+};
 
 window.ajouterCommande = async e => {
   e.preventDefault();
@@ -810,6 +835,13 @@ window.rappel = () => {
     ok(() => deposer({ type: "rappel" }), "Message de retrait transmis au bot");
 };
 window.repondre = chatId => { $("#m-to").value = chatId; montrer("msg"); $("#m-txt").focus(); };
+
+// ---------- Changement de jour de service (à 11h) ----------
+let jsActuel = jourService();
+setInterval(() => {
+  const j = jourService();
+  if (j !== jsActuel) { jsActuel = j; sigCompta = ""; render(); }
+}, 30000);
 
 // ---------- Onglets ----------
 function montrer(t) {
